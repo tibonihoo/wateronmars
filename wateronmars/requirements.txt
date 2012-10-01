@@ -1,0 +1,14 @@
+Django==1.4
+South==0.7.5
+amqplib==1.0.2
+anyjson==0.3.3
+argparse==1.2.1
+billiard==2.7.3.13
+celery==3.0.9
+distribute==0.6.24
+django-celery==3.0.9
+feedparser==5.1.2
+kombu==2.4.6
+python-dateutil==1.5
+pytz==2012d
+wsgiref==0.1.2
