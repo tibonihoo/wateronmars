@@ -1,0 +1,16 @@
+{% extends "wom_river/base.html_dt" %}
+
+{% block title %}
+{{ title_qualify }} Sources
+{% endblock %}
+
+{% block content %}
+<h1>{{ title_qualify }} sources</h1>
+{% if source_list %}
+    <ul>
+      {% for source in source_list %}
+      <li><a href="{{ source.url }}">{{ source.name }}</a> <span class="label" title="number of pebbles">{{ source.reference_set.count }}</span></li>
+      {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

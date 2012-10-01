@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+    <head>
+        <title>Abonnements de tibonihoo dans Google Reader</title>
+    </head>
+    <body>
+        <outline title="News" text="News">
+            <outline text="OWNI" title="OWNI" type="rss"
+                xmlUrl="http://feeds.feedburner.com/Owni" htmlUrl="http://owni.fr"/>
+            <outline text="ParisTech Review" title="ParisTech Review"
+                type="rss" xmlUrl="http://www.paristechreview.com/feed/" htmlUrl="http://www.paristechreview.com"/>
+            <outline text="Richard Stallman's Political Notes"
+                title="Richard Stallman's Political Notes" type="rss"
+                xmlUrl="http://stallman.org/rss/rss.xml" htmlUrl="http://stallman.org/archives/polnotes.html"/>
+            <outline text="Cory Doctorow's craphound.com"
+                title="Cory Doctorow's craphound.com" type="rss"
+                xmlUrl="http://craphound.com/?feed=rss2" htmlUrl="http://craphound.com"/>
+            <outline text="Dave's LifeLiner" title="Dave's LifeLiner"
+                type="rss" xmlUrl="http://www.scripting.com/rss.xml" htmlUrl="http://scripting.com/"/>
+        </outline>
+        <outline title="Culture" text="Culture">
+            <outline
+                text="kdbuzz.com : cinema, music &amp; misc. | Bandes annonces, clips, mixes, buzz cinéma et musique"
+                title="kdbuzz.com : cinema, music &amp; misc. | Bandes annonces, clips, mixes, buzz cinéma et musique"
+                type="rss"
+                xmlUrl="http://feeds.feedburner.com/KdbuzzcomCinemaMusicMisc" htmlUrl="http://www.kdbuzz.com/"/>
+            <outline text="Paris.fr : Culture"
+                title="Paris.fr : Culture" type="rss"
+                xmlUrl="http://www.paris.fr/portail/accueil/Portal.lut?page_id=1&amp;page=rssprovider&amp;service=portlet&amp;id=818&amp;image=1" 
+                htmlUrl="http://www.paris.fr/"/>
+            <outline text="Open Culture" title="Open Culture" type="rss"
+                xmlUrl="http://www.openculture.com/feed" htmlUrl="http://www.openculture.com"/>
+        </outline>
+        <outline title="Graphisme" text="Graphisme">
+            <outline text="CFSL news" title="CFSL news" type="rss"
+                xmlUrl="http://www.cfsl.net/portal/rss.php" htmlUrl="http://www.cfsl.net/"/>
+            <outline text="Drawn! The Illustration and Cartooning Blog"
+                title="Drawn! The Illustration and Cartooning Blog"
+                type="rss" xmlUrl="http://drawn.ca/feed/" htmlUrl="http://blog.drawn.ca/"/>
+            <outline text="The Big Picture" title="The Big Picture"
+                type="rss"
+                xmlUrl="http://www.boston.com/bigpicture/index.xml" htmlUrl="http://www.boston.com/bigpicture/"/>
+            <outline text="xkcd.com" title="xkcd.com" type="rss"
+                xmlUrl="http://xkcd.com/rss.xml" htmlUrl="http://xkcd.com/"/>
+        </outline>
+        <outline title="IT" text="IT">
+            <outline text="Joel on Software" title="Joel on Software"
+                type="rss"
+                xmlUrl="http://www.joelonsoftware.com/rss.xml" htmlUrl="http://www.joelonsoftware.com"/>
+            <outline text="M-x emacs-reddit" title="M-x emacs-reddit"
+                type="rss" xmlUrl="http://www.reddit.com/r/emacs/.rss" htmlUrl="http://www.reddit.com/r/emacs/"/>
+            <outline
+                text="O'Reilly Radar - Insight, analysis, and research about emerging "
+                title="O'Reilly Radar - Insight, analysis, and research about emerging "
+                type="rss"
+                xmlUrl="http://feeds.feedburner.com/oreilly/radar/atom" htmlUrl="http://radar.oreilly.com"/>
+            <outline text="Paul Graham: Essays"
+                title="Paul Graham: Essays" type="rss"
+                xmlUrl="http://www.aaronsw.com/2002/feeds/pgessays.rss" htmlUrl="http://www.paulgraham.com/"/>
+            <outline text="planet.freedesktop.org"
+                title="planet.freedesktop.org" type="rss"
+                xmlUrl="http://planet.freedesktop.org/rss20.xml" htmlUrl="http://planet.freedesktop.org"/>
+        </outline>
+        <outline title="Science" text="Science">
+            <outline text="C@fé des sciences &amp;#187; Racine"
+                title="C@fé des sciences &amp;#187; Racine" type="rss"
+                xmlUrl="http://cafe.enroweb.com/wp-rss2.php?cat=1" htmlUrl="http://www.cafe-sciences.org"/>
+            <outline text="IEEE Spectrum" title="IEEE Spectrum"
+                type="rss"
+                xmlUrl="http://feeds2.feedburner.com/IeeeSpectrum" htmlUrl="http://spectrum.ieee.org"/>
+            <outline text="The Endeavour" title="The Endeavour"
+                type="rss" xmlUrl="http://www.johndcook.com/blog/feed/" htmlUrl="http://www.johndcook.com/blog"/>
+        </outline>
+    </body>
+</opml>

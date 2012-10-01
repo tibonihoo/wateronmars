@@ -1,0 +1,31 @@
+virtualenv --no-site-packages venv
+source venv/bin/activate
+https://docs.djangoproject.com/en/dev/intro/tutorial01/
+venv/bin/django-admin.py startproject wateronmars
+./manage.py createsuperuser --username=joe --email=joe@example.com
+# South installation: http://south.readthedocs.org/en/latest/installation.html#installation-configure
+./manage.py syncdb
+django-admin.py startapp wom_tags
+./manage.py schemamigration wom_tags --initial
+./manage.py migrate wom_pebbles
+django-admin.py startapp wom_pebbles 
+./manage.py schemamigration wom_pebbles --initial
+./manage.py migrate wom_pebbles
+django-admin.py startapp wom_river
+./manage.py schemamigration wom_river --initial
+./manage.py migrate wom_river
+# Celery tips and tricks
+# https://justinvoss.wordpress.com/2010/06/22/django-task-queueing-with-celery/
+# http://chase-seibert.github.com/blog/2010/07/09/djangocelery-quickstart-or-how-i-learned-to-stop-using-cron-and-love-celery.html
+# http://chase-seibert.github.com/blog/2012/07/27/faster-django-view-unit-tests-with-mocks.html
+# https://devcenter.heroku.com/articles/django
+./manage.py syncdb
+./manage.py migrate
+#(optional) ./manage.py shell
+from wom_river.utils.read_opml import opml2db
+opml2db("../stuff/public.opml")
+#(/optional)
+./manage.py celeryd -v 2 -B -s celery -E -l INFO
+# Bootstrap: download v2
+# Keyboard shortcut: http://craig.is/killing/mice
+
