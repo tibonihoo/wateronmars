@@ -28,4 +28,5 @@ opml2db("../stuff/public.opml")
 ./manage.py celeryd -v 2 -B -s celery -E -l INFO
 # Bootstrap: download v2
 # Keyboard shortcut: http://craig.is/killing/mice
+# Heroku: https://devcenter.heroku.com/articles/django
 
