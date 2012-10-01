@@ -1,5 +1,7 @@
 # Django settings for wateronmars project.
 
+import os
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -76,7 +78,8 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-  "/home/thibauld/Development/wateronmars/wateronmars/static",
+    #"/home/thibauld/Development/wateronmars/wom-experiment/static",
+    os.path.join(os.path.dirname(__file__),os.pardir,"static"),
 )
 
 # List of finder classes that know how to find static files in
@@ -116,7 +119,8 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/thibauld/Development/wateronmars/wateronmars/templates"
+    #"/home/thibauld/Development/wateronmars/wom-experiment/templates"
+    os.path.join(os.path.dirname(__file__),os.pardir,"templates"),
 )
 
 INSTALLED_APPS = (
