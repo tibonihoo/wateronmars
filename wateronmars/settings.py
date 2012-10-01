@@ -2,7 +2,7 @@
 
 import os
 
-DEBUG = True
+DEBUG = Fale
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
