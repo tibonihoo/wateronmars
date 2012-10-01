@@ -106,7 +106,10 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       f.is_public = is_public
       f.save()
       for t in current_feed.tags:
-        f.tags.add(Tag.objects.get(name=t))
+        try:
+          f.tags.add(Tag.objects.get(name=t))
+        except:
+          continue
       db_new_feedsources.append(f)
     else:
       f = known_candidates[0]
