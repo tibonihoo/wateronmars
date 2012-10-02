@@ -95,6 +95,7 @@ def opml2db(opml_file,isPath=True,user_profile=None):
   user_tags.append(t)
   db_new_feedsources = []
   user_feedsources = []
+  feeds_and_tags = []
   for current_feed in collected_feeds:
     url_id = current_feed.htmlUrl or current_feed.xmlUrl
     known_candidates = FeedSource.objects.filter(url=url_id)
@@ -105,12 +106,7 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       f.url = url_id
       f.last_update = datetime.datetime.utcfromtimestamp(0).replace(tzinfo=timezone.utc)
       f.is_public = is_public
-      f.save()
-      for t in current_feed.tags:
-        try:
-          f.tags.add(Tag.objects.get(name=t))
-        except:
-          continue
+      feeds_and_tags.append((f,current_feed.tags))
       db_new_feedsources.append(f)
     else:
       f = known_candidates[0]
@@ -120,6 +116,13 @@ def opml2db(opml_file,isPath=True,user_profile=None):
   with transaction.commit_on_succes():
     for f in db_new_feedsources:
       f.save()
+  for f,tags in feeds_and_tags:
+    for t in tags:
+      try:
+        f.tags.add(Tag.objects.get(name=t))
+      except:
+        continue
+    f.save()
   if user_specific:
     for t in user_tags:
       user_profile.tags.add(t)
