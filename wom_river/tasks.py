@@ -82,6 +82,7 @@ def opml2db(opml_file,isPath=True,user_profile=None):
   user_specific = user_profile is not None
   is_public = not user_specific
   db_new_tags = []
+  user_tags = []
   for tag_as_text in collected_tags:
     known_candidates = Tag.objects.filter(name=tag_as_text)
     if not known_candidates:
@@ -91,9 +92,9 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       db_new_tags.append(t)
     else:
       t = known_candidates[0]
-    if user_specific:
-      user_profile.tags.add(t)
+  user_tags.append(t)
   db_new_feedsources = []
+  user_feedsources = []
   for current_feed in collected_feeds:
     url_id = current_feed.htmlUrl or current_feed.xmlUrl
     known_candidates = FeedSource.objects.filter(url=url_id)
@@ -113,13 +114,16 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       db_new_feedsources.append(f)
     else:
       f = known_candidates[0]
-    if user_specific:
-      user_profile.sources.add(f)
-      user_profile.feed_sources.add(f)
+    user_feedsources.append(f)
   Tag.objects.bulk_create(db_new_tags)
   Source.objects.bulk_create(db_new_feedsources)
   with transaction.commit_on_succes():
     for f in db_new_feedsources:
       f.save()
   if user_specific:
+    for t in user_tags:
+      user_profile.tags.add(t)
+    for f in user_feedsources:
+      user_profile.sources.add(f)
+      user_profile.feed_sources.add(f)
     user_profile.save()
