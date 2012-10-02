@@ -22,8 +22,8 @@ from wom_river.tasks import opml2db
 
 def handle_uploaded_opml(opmlUploadedFile,user):
   if opmlUploadedFile.name.endswith(".opml") or opmlUploadedFile.name.endswith(".xml"):
-    opml2db.delay(opmlUploadedFile.read(),isPath=False,
-                  user_profile=user.userprofile)
+    opml2db(opmlUploadedFile.read(),isPath=False,
+            user_profile=user.userprofile)
   else:
     raise ValueError("Uploaded file '%s' is not OPML !" % opmlUploadedFile.name)
   
