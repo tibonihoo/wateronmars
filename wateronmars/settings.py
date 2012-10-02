@@ -2,7 +2,7 @@
 
 import os
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -12,11 +12,13 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-try:
+# Test if we're on heroku environment
+if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
+  # use Herok's prostgres
   import dj_database_url
   DATABASES = {'default': dj_database_url.config(default='postgres://localhost')}
-except Exception,e:
-  print "WARNING: falling back on sqlite db because of exception: '%s'" % e
+else:
+  # use a local sqlite
   DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -143,9 +145,9 @@ INSTALLED_APPS = (
     'wom_user',
     )
 
-# Epandable
-BROKER_URL = "django://" # tell kombu to use the Django database as the message queue  
-  
+
+BROKER_BACKEND = "django"
+
 import djcelery  
 djcelery.setup_loader()  
 
