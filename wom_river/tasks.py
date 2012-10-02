@@ -113,7 +113,7 @@ def opml2db(opml_file,isPath=True,user_profile=None):
     user_feedsources.append(f)
   Tag.objects.bulk_create(db_new_tags)
   Source.objects.bulk_create(db_new_feedsources)
-  with transaction.commit_on_succes():
+  with transaction.commit_on_success():
     for f in db_new_feedsources:
       f.save()
   for f,tags in feeds_and_tags:
