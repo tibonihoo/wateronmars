@@ -14,6 +14,10 @@ from wom_pebbles.models import Reference
 from wom_river.models import FeedSource
 from wom_river.utils.read_opml import parse_opml
 
+from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
+from wom_pebbles.models import URL_MAX_LENGTH
+from wom_classification.models import TAG_NAME_MAX_LENGTH
+
 
 @task()
 def collect_new_pebbles_for_feed(feed):
@@ -29,7 +33,11 @@ def collect_new_pebbles_for_feed(feed):
   for entry in d.entries:
     try:
       current_pebble_title = entry.title
+      if len(current_pebble_title)>REFERENCE_TITLE_MAX_LENGTH:
+        raise ValueError("Title '%s' too long." % current_pebble_title)
       current_pebble_link = entry.link
+      if len(current_pebble_link)>URL_MAX_LENGTH:
+        raise ValueError("URL '%s' too long." % current_pebble_link)
     except Exception,e:
       print "WARNING: skipping item %s from feed at %s (%s)" % (entry.link,feed.url,e)
       continue
@@ -87,6 +95,9 @@ def opml2db(opml_file,isPath=True,user_profile=None):
   db_new_tags = []
   user_tags = []
   for tag_as_text in collected_tags:
+    # reject tags that are too long
+    if len(tag_as_text) > TAG_NAME_MAX_LENGTH:
+      continue
     known_candidates = Tag.objects.filter(name=tag_as_text)
     if not known_candidates:
       t = Tag()
@@ -121,6 +132,9 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       f.save()
   for f,tags in feeds_and_tags:
     for t in tags:
+      # reject tags that are too long
+      if len(t) > TAG_NAME_MAX_LENGTH:
+        continue
       try:
         f.tags.add(Tag.objects.get(name=t))
       except:
