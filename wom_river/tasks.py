@@ -73,6 +73,9 @@ def collect_all_new_pebbles():
   for feed in FeedSource.objects.iterator():
     collect_new_pebbles_for_feed.delay(feed)
 
+def collect_all_new_pebbles_sync():
+  for feed in FeedSource.objects.iterator():
+    collect_new_pebbles_for_feed(feed)
 
 @task()
 def opml2db(opml_file,isPath=True,user_profile=None):
