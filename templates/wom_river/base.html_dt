@@ -69,4 +69,7 @@
     {% endblock %}
     </div> <!-- /container -->
   </body>
+    {% block extrascript %}
+    {% endblock %}
+
 </html>

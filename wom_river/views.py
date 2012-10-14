@@ -27,6 +27,25 @@ def public_river_view(request):
       })
   return HttpResponse(t.render(c))
 
+def public_river_sieve(request):
+  latest_unread_pebbles = Reference.objects.filter(is_public=True).order_by('-pub_date')[:MAX_ITEMS_PER_PAGE]
+  t = loader.get_template('wom_river/sieve.html_dt')
+  if not latest_unread_pebbles:
+    messages = ["No pebble yet !"]
+  else:
+    messages = []
+  if request.user.is_authenticated():
+    username = request.user.username
+  else:
+    username = None
+  c = Context({
+      'latest_unread_pebbles': latest_unread_pebbles,
+      'messages' : messages,
+      'username' : username,
+      'title_qualify': "The public",
+      'num_unread_pebbles': len(latest_unread_pebbles),
+      })
+  return HttpResponse(t.render(c))
 
 def public_river_sources(request):
   t = loader.get_template('wom_river/river_sources.html_dt')
