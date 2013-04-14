@@ -74,17 +74,24 @@ def collect_new_pebbles_for_feed(feed):
   feed.save()
   
 
-  
-# this will run regularly, see http://celeryproject.org/docs/reference/celery.task.schedules.html#celery.task.schedules.crontab  
-@periodic_task(run_every=crontab(hour="*", minute="*/20", day_of_week="*"))
-def collect_all_new_pebbles():
-  for feed in FeedSource.objects.iterator():
-    collect_new_pebbles_for_feed.delay(feed)
-
 def collect_all_new_pebbles_sync():
   for feed in FeedSource.objects.iterator():
     collect_new_pebbles_for_feed(feed)
 
+def delete_old_pebbles_sync():
+  time_threshold = datetime.datetime.now(timezone.utc)-datetime.timedelta(weeks=12)
+  Reference.objects.filter(save_count=0,pub_date__lt=time_threshold).delete()
+
+# these will run regularly, see http://celeryproject.org/docs/reference/celery.task.schedules.html#celery.task.schedules.crontab  
+@periodic_task(run_every=crontab(hour="*", minute="*/20", day_of_week="*"))
+def collect_all_new_pebbles():
+  collect_all_new_pebbles_sync()
+  
+@periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
+def delete_old_pebbles():
+  delete_old_pebbles_sync()
+
+  
 @task()
 def opml2db(opml_file,isPath=True,user_profile=None):
   collected_feeds,collected_tags = parse_opml(opml_file,isPath)

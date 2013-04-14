@@ -59,6 +59,8 @@ class Reference(models.Model): # A pebble !
   source = models.ForeignKey(Source)
   # Tags used (at least) for user-explicit classification  
   tags  = models.ManyToManyField(Tag)
+  # Count the number of users that saved this reference
+  save_count = models.IntegerField(default=0)
   
   def __unicode__(self):
     return "%s (%s)" % (self.title,self.url)
