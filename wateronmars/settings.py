@@ -13,7 +13,12 @@ ADMINS = (
 MANAGERS = ADMINS
 
 # Test if we're on heroku environment
+DEPLOYMENT_PLATFORM = None
 if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
+  DEPLOYMENT_PLATFORM = "heroku"
+
+
+if DEPLOYMENT_PLATFORM == "heroku":
   # use Herok's prostgres
   import dj_database_url
   DATABASES = {'default': dj_database_url.config(default='postgres://localhost')}
@@ -73,7 +78,7 @@ MEDIA_URL = ''
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
-
+  
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
@@ -84,9 +89,15 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #"/home/thibauld/Development/wateronmars/wom-experiment/static",
-    os.path.join(os.path.dirname(__file__),os.pardir,"static"),
-)
+  )
 
+if DEPLOYMENT_PLATFORM=="heroku":
+  STATIC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static")
+else:
+  STATICFILES_DIRS = (
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static"),
+    )
+  
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
