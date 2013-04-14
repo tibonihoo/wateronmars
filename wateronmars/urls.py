@@ -23,3 +23,8 @@ urlpatterns = patterns('',
                        url(r'^houston/we_ve_got_an_update_request/$',
                            'wateronmars.views.request_for_update'),
                        )
+
+
+urlpatterns += patterns('',
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': "../static"})
+)
