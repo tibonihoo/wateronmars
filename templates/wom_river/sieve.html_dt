@@ -11,8 +11,8 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ title_qualify }} sieve</h1>
-<small>Press 'n' (next) or 'p' (previous) to browse through the news.</small>
+<p><i class="icon-filter"></i><strong>{{ title_qualify }} sieve</strong>
+<small>Press 'n' (next) or 'p' (previous) to browse through the news.</small></p>
 {% if latest_unread_pebbles %}
 <div class="accordion" id="accordion2">
 {% for reference in latest_unread_pebbles %}
@@ -48,12 +48,33 @@
 
 {% block extrascript %}
 <script>
+// Make sure that an element is visible by scrolling the page if necessary to make it appears in the first 3 quarters of the page.
+// adapted from http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling 
+function ensureVisibilityInFirstThreeQuarters(elem)
+{
+  var windowHeight = $(window).height();
+  var windowTop = $(window).scrollTop();
+  var docView4thTop = windowTop + windowHeight/4;
+  var docView4thBottom = windowTop + ((3*windowHeight)/4);
+  var elemTop = $(elem).offset().top;
+  
+  if (elemTop <= docView4thTop)
+  {
+    $('body,html').animate({scrollTop: elemTop-windowHeight/4}, 400); 
+  }
+  else if (elemTop >= docView4thBottom)
+  {
+    $('body,html').animate({scrollTop: elemTop-windowHeight/3}, 400); 
+  }
+}
+
+// keybindings globals
 currentlyExpandedItem = -1;
 trapInProgress = false;
 
 // adapted from http://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example
 function createHiddenCallbackFunc(i) {
-  return function() { if (!trapInProgress) {currentlyExpandedItem = -1;} };
+  return function() { if (!trapInProgress) {currentlyExpandedItem = -1;}  };
 }
 
 function createShownCallbackFunc(i) {
@@ -65,6 +86,7 @@ function createShownCallbackFunc(i) {
     {
       trapInProgress = false;
     }
+    ensureVisibilityInFirstThreeQuarters("#collapse"+i.toString());
   }
 }
 
