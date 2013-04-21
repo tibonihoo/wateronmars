@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ title_qualify }} sources</h1>
+<p><i class="icon-book"></i><strong>{{ title_qualify }} sources</strong></p>
 {% if source_list %}
     <ul>
       {% for source in source_list %}

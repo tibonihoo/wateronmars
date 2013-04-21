@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ title_qualify }} river</h1>
+<p><i class="icon-align-justify"></i><strong>{{ title_qualify }} river</strong></p>
 {% if latest_unread_pebbles %}
 <div class="accordion" id="accordion2">
 {% for reference in latest_unread_pebbles %}
