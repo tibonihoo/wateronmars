@@ -29,7 +29,7 @@ def public_river_view(request):
   return HttpResponse(t.render(c))
 
 def public_river_sieve(request):
-  latest_unread_pebbles = Reference.objects.filter(is_public=True).order_by('-pub_date')[:MAX_ITEMS_PER_PAGE]
+  latest_unread_pebbles = Reference.objects.filter(is_public=True).order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
   t = loader.get_template('wom_river/sieve.html_dt')
   if not latest_unread_pebbles:
     messages = ["No pebble yet !"]
@@ -96,7 +96,7 @@ def user_river_sieve(request):
   user_profile = request.user.userprofile
   latest_unread_pebbles = []
   for source in user_profile.feed_sources.all():
-    latest_unread_pebbles.extend(source.reference_set.order_by('-pub_date')[:MAX_ITEMS_PER_PAGE])
+    latest_unread_pebbles.extend(source.reference_set.order_by('pub_date')[:MAX_ITEMS_PER_PAGE])
   latest_unread_pebbles.sort(key=lambda x:x.pub_date)
   t = loader.get_template('wom_river/sieve.html_dt')
   if not latest_unread_pebbles:

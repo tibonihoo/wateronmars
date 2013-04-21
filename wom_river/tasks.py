@@ -43,7 +43,7 @@ def collect_new_pebbles_for_feed(feed):
       continue
     candidates = Reference.objects.filter(url=current_pebble_link)
     if candidates:
-      print "WARNING: found duplicate: %s" % candidates
+#      print "WARNING: found duplicate: %s" % candidates
       continue
     current_pebble_desc = entry.get("description","")
     if entry.has_key("updated_parsed"):
