@@ -9,8 +9,8 @@
 {% block extrahead %}
 <script src="/static/js/mousetrap.min.js"></script>
 <style type="text/css">
-   .read {color: gray; border: none}
-   .read a {color: gray; border: none}
+   .read .accordion-heading {color: gray; border: none}
+   .read .accordion-heading a {color: gray; border: none}
  </style>
 {% endblock %}
 
@@ -21,17 +21,17 @@
 <div class="accordion" id="accordion2">
 {% for reference in latest_unread_pebbles %}
   <div class="accordion-group" id="reference{{forloop.counter0}}">
-    <div class="accordion-heading"  style="background-color:#eeeeec;">
-      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{forloop.counter0}}">
+    <div class="accordion-heading accordion-toggle"  style="background-color:#eeeeec;padding:3px;">
+      <a data-toggle="collapse" data-parent="#accordion2" href="#collapse{{forloop.counter0}}">
         {{ reference.title }}
-      </a> <small style="padding:5px">{{ reference.pub_date }} <i class="icon-book"></i> {{ reference.source.name}}</small>
+      </a> <small> - {{ reference.pub_date }} <em>@ {{ reference.source.name}}</em></small>
     </div>
     <div id="collapse{{forloop.counter0}}" class="accordion-body collapse">
       <div class="accordion-inner">
         <div>
         {{ reference.description|safe }}
         </div>
-        <p><a href="{{ reference.url }}"><i class="icon-zoom-in"></i>view on site</a>   
+        <p style="padding-top:0.5em;"><a id="referenceUrl{{forloop.counter0}}" href="{{ reference.url }}" style="padding-right:0.5em;"><i class="icon-zoom-in"></i>view on site (v)</a>   
           {% for tag in reference.tags.all %}
           {% if forloop.first %}
           <i class="icon-tags"></i>
@@ -107,7 +107,7 @@ for(idx=0;idx<{{num_unread_pebbles}};idx+=1)
   $("#"+currentId).on('shown', createShownCallbackFunc(idx));
 }
 
-// single keys
+// Expand previous item
 Mousetrap.bind('p', function() { 
   if(trapInProgress) {return false;}
   trapInProgress = true;
@@ -129,6 +129,7 @@ Mousetrap.bind('p', function() {
   }
 });
 
+// Expand next item
 Mousetrap.bind('n', function() { 
   if(trapInProgress) {return false;}
   trapInProgress = true;
@@ -149,5 +150,13 @@ Mousetrap.bind('n', function() {
     currentlyExpandedItem = currentIdx + 1;
   }
 });
+
+// open the currently expanded items' linked page in the browser
+Mousetrap.bind('v', function() { 
+  var currentIdx = currentlyExpandedItem;
+  var itemToShow = '#referenceUrl'+currentIdx.toString();
+  window.open($(itemToShow).prop("href"));
+});
+
 </script>
 {% endblock %}
