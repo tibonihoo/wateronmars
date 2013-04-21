@@ -8,6 +8,10 @@
 
 {% block extrahead %}
 <script src="/static/js/mousetrap.min.js"></script>
+<style type="text/css">
+   .read {color: gray; border: none}
+   .read a {color: gray; border: none}
+ </style>
 {% endblock %}
 
 {% block content %}
@@ -16,7 +20,7 @@
 {% if latest_unread_pebbles %}
 <div class="accordion" id="accordion2">
 {% for reference in latest_unread_pebbles %}
-  <div class="accordion-group">
+  <div class="accordion-group" id="reference{{forloop.counter0}}">
     <div class="accordion-heading"  style="background-color:#eeeeec;">
       <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{forloop.counter0}}">
         {{ reference.title }}
@@ -74,12 +78,18 @@ trapInProgress = false;
 
 // adapted from http://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example
 function createHiddenCallbackFunc(i) {
-  return function() { if (!trapInProgress) {currentlyExpandedItem = -1;}  };
+  return function() { 
+    if (!trapInProgress) 
+    {
+      currentlyExpandedItem = -1;
+    }  
+  };
 }
 
 function createShownCallbackFunc(i) {
   return function() { 
-    if (!trapInProgress) {
+    if (!trapInProgress) 
+    {
       currentlyExpandedItem = i;
     }
     else
@@ -104,6 +114,8 @@ Mousetrap.bind('p', function() {
   var currentIdx = currentlyExpandedItem;
   var itemToCollapse = 'collapse'+currentIdx.toString();
   $('#'+itemToCollapse).collapse('hide');
+  var referenceId = '#reference'+currentIdx.toString()
+  if ( !$(referenceId).hasClass('read') ) { $(referenceId).addClass("read") }; 
   if (currentlyExpandedItem <= 0)
   {
     if (currentlyExpandedItem == 0) { currentlyExpandedItem = -1;}
@@ -123,6 +135,8 @@ Mousetrap.bind('n', function() {
   var currentIdx = currentlyExpandedItem;
   var itemToCollapse = 'collapse'+currentIdx.toString();
   $('#'+itemToCollapse).collapse('hide');
+  var referenceId = '#reference'+currentIdx.toString()
+  if ( !$(referenceId).hasClass('read') ) { $(referenceId).addClass("read") }; 
   if (currentlyExpandedItem >= {{num_unread_pebbles}} - 1)
   {
     if (currentlyExpandedItem == {{num_unread_pebbles}} - 1) { currentlyExpandedItem = {{num_unread_pebbles}} }
