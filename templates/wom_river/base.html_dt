@@ -30,20 +30,26 @@
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
           <a class="brand" href="/">WOM Experiment</a>
-          <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="/public/river">Public River</a></li>
-              <li><a href="/public/sources">Public Sources</a></li>
+              <li class="divider-vertical"></li>
+              <li><a href="/{{ realm }}/river" title="River"><i class="icon-align-justify icon-white"></i></a></li>
+              <li><a href="/{{ realm }}/sieve" title="Sieve"><i class="icon-filter icon-white"></i></a></li>
+              <li><a href="/{{ realm }}/sources" title="Sources"><i class="icon-book icon-white"></i></a></li>
+              <li class="divider-vertical"></li>
               {% if username %}
-              <li><a href="/accounts/profile">User: {{ username }}</a></li>
-              <li><a href="/u/{{ username }}/river">your River</a></li>
-              <li><a href="/u/{{ username }}/sources">your Sources</a></li>
+              <li><a href="/accounts/profile" title="Check your profile.">Welcome {{ username }} !</a></li>
+              {% if realm == "public" %}
+              <li class="active"><a href="/public/river" title="Contemplate the public river."><i class="icon-globe icon-white"></i></a></li>
+              <li><a href="/u/{{ username }}/river" title="Contemplate your personal river."><i class="icon-home icon-white"></i></a></li>
+              {% else %}
+              <li><a href="/public/river" title="Contemplate the public river."><i class="icon-globe icon-white"></i></a></li>
+              <li class="active"><a href="/u/{{ username }}/river" title="Contemplate your personal river."><i class="icon-home icon-white"></i></a></li>
+              {% endif %}
+              {% else %}
+              <li><a href="/accounts/login"><i class="icon-user icon-white"></i>Login</a></li>
               {% endif %}
             </ul>
-          </div><!--/.nav-collapse -->
-        </div>
       </div>
     </div>
     
