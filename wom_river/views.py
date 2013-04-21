@@ -23,7 +23,8 @@ def public_river_view(request):
       'latest_unread_pebbles': latest_unread_pebbles,
       'messages' : messages,
       'username' : username,
-      'title_qualify': "The public",
+      'title_qualify': "Public",
+      'realm': "public",
       })
   return HttpResponse(t.render(c))
 
@@ -42,8 +43,9 @@ def public_river_sieve(request):
       'latest_unread_pebbles': latest_unread_pebbles,
       'messages' : messages,
       'username' : username,
-      'title_qualify': "The public",
+      'title_qualify': "Public",
       'num_unread_pebbles': len(latest_unread_pebbles),
+      'realm': "public",
       })
   return HttpResponse(t.render(c))
 
@@ -62,7 +64,8 @@ def public_river_sources(request):
       'source_list': sList,
       'messages' : messages,
       'username' : username,
-      'title_qualify': "The public",
+      'title_qualify': "Public",
+      'realm': "public",
       })
   return HttpResponse(t.render(c))
 
@@ -83,10 +86,32 @@ def user_river_view(request):
       'latest_unread_pebbles': latest_items[:MAX_ITEMS_PER_PAGE],
       'messages' : messages,
       'username' : request.user.username,
-      'title_qualify': request.user.username+"'s",
+      'title_qualify': "Your",
+      'realm': "u/%s" % request.user.username,
       })
   return HttpResponse(t.render(c))
 
+@login_required(login_url='/accounts/login/')
+def user_river_sieve(request):
+  user_profile = request.user.userprofile
+  latest_unread_pebbles = []
+  for source in user_profile.feed_sources.all():
+    latest_unread_pebbles.extend(source.reference_set.order_by('-pub_date')[:MAX_ITEMS_PER_PAGE])
+  latest_unread_pebbles.sort(key=lambda x:x.pub_date)
+  t = loader.get_template('wom_river/sieve.html_dt')
+  if not latest_unread_pebbles:
+    messages = ["No pebble yet !"]
+  else:
+    messages = []
+  c = Context({
+      'latest_unread_pebbles': latest_unread_pebbles,
+      'messages' : messages,
+      'username' : request.user.username,
+      'num_unread_pebbles': len(latest_unread_pebbles),
+      'title_qualify': "Your",
+      'realm': "u/%s" % request.user.username,
+      })
+  return HttpResponse(t.render(c))
 
 @login_required(login_url='/accounts/login/')
 def user_river_sources(request):
@@ -101,6 +126,7 @@ def user_river_sources(request):
       'source_list': sList,
       'messages' : messages,
       'username' : request.user.username,
-      'title_qualify': request.user.username+"'s",
+      'title_qualify': "Your",
+      'realm': "u/%s" % request.user.username,
       })
   return HttpResponse(t.render(c))
