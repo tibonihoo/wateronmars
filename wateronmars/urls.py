@@ -23,6 +23,8 @@ urlpatterns = patterns('',
                        # celery for background tasks
                        url(r'^houston/we_ve_got_an_update_request/$',
                            'wateronmars.views.request_for_update'),
+                       url(r'^houston/we_ve_got_a_cleanup_request/$',
+                           'wateronmars.views.request_for_cleanup'),
                        )
 
 
