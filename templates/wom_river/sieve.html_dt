@@ -8,10 +8,20 @@
 
 {% block extrahead %}
 <script src="/static/js/mousetrap.min.js"></script>
+<script src="/static/js/sieve_ux.js"></script>
 <style type="text/css">
    .read .accordion-heading {color: gray; border: none}
    .read .accordion-heading a {color: gray; border: none}
+   .collapse {
+     -webkit-transition: height 0.15s ease;
+        -moz-transition: height 0.15s ease;
+          -o-transition: height 0.15s ease;
+             transition: height 0.15s ease;
+   }
  </style>
+<script>
+prepareKeyBindings();
+</script>
 {% endblock %}
 
 {% block content %}
@@ -20,13 +30,13 @@
 {% if latest_unread_pebbles %}
 <div class="accordion" id="accordion2">
 {% for reference in latest_unread_pebbles %}
-  <div class="accordion-group" id="reference{{forloop.counter0}}">
-    <div class="accordion-heading accordion-toggle"  style="background-color:#eeeeec;padding:3px;">
+  <div class="accordion-group reference" id="reference{{forloop.counter0}}">
+    <div class="accordion-heading accordion-toggle reference-short-description"  style="background-color:#eeeeec;padding:3px;">
       <a data-toggle="collapse" data-parent="#accordion2" href="#collapse{{forloop.counter0}}">
         {{ reference.title }}
       </a> <small> - {{ reference.pub_date }} <em>@ {{ reference.source.name}}</em></small>
     </div>
-    <div id="collapse{{forloop.counter0}}" class="accordion-body collapse">
+    <div id="collapse{{forloop.counter0}}" class="accordion-body collapse reference-details">
       <div class="accordion-inner">
         <div>
         {{ reference.description|safe }}
@@ -52,111 +62,6 @@
 
 {% block extrascript %}
 <script>
-// Make sure that an element is visible by scrolling the page if necessary to make it appears in the first 3 quarters of the page.
-// adapted from http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling 
-function ensureVisibilityInFirstThreeQuarters(elem)
-{
-  var windowHeight = $(window).height();
-  var windowTop = $(window).scrollTop();
-  var docView4thTop = windowTop + windowHeight/4;
-  var docView4thBottom = windowTop + ((3*windowHeight)/4);
-  var elemTop = $(elem).offset().top;
-  
-  if (elemTop <= docView4thTop)
-  {
-    $('body,html').animate({scrollTop: elemTop-windowHeight/4}, 400); 
-  }
-  else if (elemTop >= docView4thBottom)
-  {
-    $('body,html').animate({scrollTop: elemTop-windowHeight/3}, 400); 
-  }
-}
-
-// keybindings globals
-currentlyExpandedItem = -1;
-trapInProgress = false;
-
-// adapted from http://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example
-function createHiddenCallbackFunc(i) {
-  return function() { 
-    if (!trapInProgress) 
-    {
-      currentlyExpandedItem = -1;
-    }  
-  };
-}
-
-function createShownCallbackFunc(i) {
-  return function() { 
-    if (!trapInProgress) 
-    {
-      currentlyExpandedItem = i;
-    }
-    else
-    {
-      trapInProgress = false;
-    }
-    ensureVisibilityInFirstThreeQuarters("#collapse"+i.toString());
-  }
-}
-
-for(idx=0;idx<{{num_unread_pebbles}};idx+=1)
-{
-  currentId = 'collapse'+idx.toString()
-  $("#"+currentId).on('hiden', createHiddenCallbackFunc(idx));
-  $("#"+currentId).on('shown', createShownCallbackFunc(idx));
-}
-
-// Expand previous item
-Mousetrap.bind('p', function() { 
-  if(trapInProgress) {return false;}
-  trapInProgress = true;
-  var currentIdx = currentlyExpandedItem;
-  var itemToCollapse = 'collapse'+currentIdx.toString();
-  $('#'+itemToCollapse).collapse('hide');
-  var referenceId = '#reference'+currentIdx.toString()
-  if ( !$(referenceId).hasClass('read') ) { $(referenceId).addClass("read") }; 
-  if (currentlyExpandedItem <= 0)
-  {
-    if (currentlyExpandedItem == 0) { currentlyExpandedItem = -1;}
-    trapInProgress = false;
-  }
-  else
-  {
-    var itemToExpand = 'collapse'+(currentIdx-1).toString();
-    $('#'+itemToExpand).collapse('show');
-    currentlyExpandedItem = currentIdx - 1;
-  }
-});
-
-// Expand next item
-Mousetrap.bind('n', function() { 
-  if(trapInProgress) {return false;}
-  trapInProgress = true;
-  var currentIdx = currentlyExpandedItem;
-  var itemToCollapse = 'collapse'+currentIdx.toString();
-  $('#'+itemToCollapse).collapse('hide');
-  var referenceId = '#reference'+currentIdx.toString()
-  if ( !$(referenceId).hasClass('read') ) { $(referenceId).addClass("read") }; 
-  if (currentlyExpandedItem >= {{num_unread_pebbles}} - 1)
-  {
-    if (currentlyExpandedItem == {{num_unread_pebbles}} - 1) { currentlyExpandedItem = {{num_unread_pebbles}} }
-    trapInProgress = false;
-  }
-  else
-  {
-    var itemToExpand = 'collapse'+(currentIdx+1).toString();
-    $('#'+itemToExpand).collapse('show');
-    currentlyExpandedItem = currentIdx + 1;
-  }
-});
-
-// open the currently expanded items' linked page in the browser
-Mousetrap.bind('v', function() { 
-  var currentIdx = currentlyExpandedItem;
-  var itemToShow = '#referenceUrl'+currentIdx.toString();
-  window.open($(itemToShow).prop("href"));
-});
-
+activateKeyBindings();
 </script>
 {% endblock %}
