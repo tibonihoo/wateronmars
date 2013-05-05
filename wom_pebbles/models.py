@@ -44,7 +44,9 @@ class Reference(models.Model): # A pebble !
   The most basic item representing a piece of information on the
   internet (aka a bookmark or a newsitem).
   """
-  # The URL identifies a source (and URLs will be used as URIs), must be unique and used as a db_index
+  # The URL identifies a source (and URLs will be used as URIs), must
+  # be unique and used as a db_index
+  # TODO: add the unique constraint !
   url   = models.CharField(max_length=URL_MAX_LENGTH)
   # Title of the reference (compulsory)
   title = models.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH)
