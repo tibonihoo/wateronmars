@@ -46,9 +46,9 @@
               {% if username %}
               <li><a href="/accounts/profile" title="Check your profile.">Welcome {{ username }} !</a></li>
               {% if realm == "public" %}
-              <li><a href="/u/{{ username }}/river" title="Contemplate your personal river.">Check also your personal river.</a></li>
+              <li><a href="/u/{{ username }}/river" title="Contemplate your personal river.">&raquo; Check also your personal river.</a></li>
               {% else %}
-              <li><a href="/public/river" title="Contemplate the public river.">Check also the public river.</a></li>
+              <li><a href="/public/river" title="Contemplate the public river.">&raquo; Check also the public river.</a></li>
               {% endif %}
               {% else %}
               <li><a href="/accounts/login"><i class="icon-user icon-white"></i>Login</a></li>
