@@ -18,6 +18,9 @@
           -o-transition: height 0.15s ease;
              transition: height 0.15s ease;
    }
+   #server-sync-problem {
+   display : none;
+   }
  </style>
 <script>
 prepareKeyBindings();
@@ -25,8 +28,16 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block content %}
+{% if realm == "public" %}
+<div class="alert fade in">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>Warning, demo only !</strong> 
+  <p>This shows how a logged user can browse his private feed items with the sieve. The 'read status' of items of this public sieve won't be recorded!</p> 
+</div>
+{% endif %}
 <p><i class="icon-filter"></i><strong>{{ title_qualify }} sieve</strong>
 <small>Press 'n' (next) or 'p' (previous) to browse through the news.</small></p>
+<a id="server-sync-problem" class="btn btn-warning" data-content="A problem occured while synchronizing with the server, the bookmarked or read status may not be taken into account !" title="" data-toggle="popover" data-placement="right" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-whi te"></i></a>
 {% if latest_unread_pebbles %}
 <div class="accordion" id="accordion2">
 {% for reference in latest_unread_pebbles %}
@@ -62,6 +73,10 @@ prepareKeyBindings();
 
 {% block extrascript %}
 <script>
-activateKeyBindings();
+{% if realm == "public" %}
+activateKeyBindings(false);
+{% else %}
+activateKeyBindings(true);
+{% endif %}
 </script>
 {% endblock %}
