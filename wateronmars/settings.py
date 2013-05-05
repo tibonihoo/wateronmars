@@ -2,13 +2,10 @@
 
 import os
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Thibauld Nion', 'thibauld@tibonihoo.net'),
 )
-
 
 MANAGERS = ADMINS
 
@@ -18,6 +15,16 @@ if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
   DEPLOYMENT_PLATFORM = "heroku"
 
 
+# DEBUG or not DEBUG
+if DEPLOYMENT_PLATFORM == "heroku":
+  DEBUG = False
+else:
+  DEBUG = True
+
+TEMPLATE_DEBUG = DEBUG
+
+  
+# Database setup
 if DEPLOYMENT_PLATFORM == "heroku":
   # use Herok's prostgres
   import dj_database_url
