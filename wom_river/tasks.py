@@ -12,6 +12,7 @@ from celery import task
 from wom_pebbles.models import Source
 from wom_pebbles.models import Reference
 from wom_river.models import FeedSource
+from wom_river.models import ReferenceUserStatus
 from wom_river.utils.read_opml import parse_opml
 
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
@@ -30,6 +31,7 @@ def collect_new_pebbles_for_feed(feed):
   # check feed info with d.feed.title
   feed_last_update = feed.last_update
   latest_item_date = feed_last_update
+  all_references = []
   for entry in d.entries:
     try:
       current_pebble_title = entry.title
@@ -64,15 +66,21 @@ def collect_new_pebbles_for_feed(feed):
     r.pub_date = current_pebble_date
     r.source = feed
     r.is_public = is_public
-    r.save()
-    for tag in feed.tags.all():
-      r.tags.add(tag)
-    r.save()
+    all_references.append(r)
     if current_pebble_date > latest_item_date:
       latest_item_date = current_pebble_date
   feed.last_update = latest_item_date
-  feed.save()
-  
+  with transaction.commit_on_success():
+    for r in all_references:
+      r.save()
+  feed_tags = feed.tags.all()[:]
+  with transaction.commit_on_success():
+    for r in all_references:
+      for tag in feed_tags:
+        r.tags.add(tag)
+      r.save()
+    feed.save()
+
 
 def collect_all_new_pebbles_sync():
   for feed in FeedSource.objects.iterator():
@@ -91,7 +99,26 @@ def collect_all_new_pebbles():
 def delete_old_pebbles():
   delete_old_pebbles_sync()
 
-  
+
+@task()  
+def check_user_unread_feed_items(user):
+  """
+  Browse all feed sources registered by a given user and create as
+  many UnreadReferenceByUser instances as there are unread items.
+  """
+  new_ref_status = []
+  for source in user.userprofile.feed_sources.all():
+    for ref in source.reference_set.all():
+      if not ref.referenceuserstatus_set.filter(user=user).exists():
+        rust = ReferenceUserStatus()
+        rust.user = user
+        rust.ref = ref
+        rust.ref_pub_date = ref.pub_date
+        new_ref_status.append(rust)
+  with transaction.commit_on_success():
+    for r in new_ref_status:
+      r.save()
+
 @task()
 def opml2db(opml_file,isPath=True,user_profile=None):
   collected_feeds,collected_tags = parse_opml(opml_file,isPath)
