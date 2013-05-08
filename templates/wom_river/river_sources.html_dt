@@ -1,4 +1,4 @@
-{% extends "wom_river/base.html_dt" %}
+{% extends "wateronmars/base.html_dt" %}
 
 {% block title %}
 {{ title_qualify }} Sources
