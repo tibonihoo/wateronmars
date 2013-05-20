@@ -12,14 +12,14 @@
 **** DONE inbox view of lastest news
 ** post 
 *** json
-**** TODO {"urls"=[list of urls]} : mark as un-read references corresponding to listed urls 
+**** TODO {a="unread", "urls"=[list of urls]} : mark as un-read references corresponding to listed urls 
 * u/me/sieve/passed
 ** get
 *** html
 **** TODO inbox view of passed (ie read) news
 ** post
 *** json
-**** TODO {"urls"=[list of urls] } : mark as read all references corresponding to listed urls 
+**** TODO {a="read", "urls"=[list of urls] } : mark as read all references corresponding to listed urls 
 * u/me/sources
 ** get
 *** html
