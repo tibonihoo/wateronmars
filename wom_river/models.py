@@ -33,3 +33,5 @@ class ReferenceUserStatus(models.Model):
   ref_pub_date = models.DateTimeField('reference publication date')
   # Read flag
   has_been_read = models.BooleanField(default=False)
+  # Saved flag
+  has_been_saved = models.BooleanField(default=False)

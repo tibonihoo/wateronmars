@@ -98,8 +98,6 @@ def user_river_view(request):
       })
   return HttpResponse(t.render(c))
 
-  
-
 
 def generate_user_sieve(request):
   """
@@ -107,14 +105,14 @@ def generate_user_sieve(request):
   use it's sieve to read and sort out the latests news.
   """
   check_user_unread_feed_items(request.user)
-  latest_unread_pebbles = ReferenceUserStatus.objects.filter(has_been_read=False).order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
+  latest_unread_pebbles = ReferenceUserStatus.objects.filter(has_been_read=False).select_related("ref","source").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
   t = loader.get_template('wom_river/sieve.html_dt')
   if not latest_unread_pebbles:
     messages = ["No pebble yet !"]
   else:
     messages = []
   c = Context({
-      'latest_unread_pebbles': [ rust.ref for rust in latest_unread_pebbles],
+      'latest_unread_pebbles': latest_unread_pebbles,
       'messages' : messages,
       'username' : request.user.username,
       'num_unread_pebbles': len(latest_unread_pebbles),
@@ -130,21 +128,21 @@ def apply_to_user_sieve(request):
   The only accepted action for now is to mark items as read, with the
   following JSON payload::
   
-    { action = "read",
-      references = [ "<url1>", "<url2>", ...],
+    { "action" = "read",
+      "references" = [ "<url1>", "<url2>", ...],
     }
   """
   check_user_unread_feed_items(request.user)
-  print request.body
-  action_dict = simplejson.loads(request.body)
-  print action_dict
+  try:
+    action_dict = simplejson.loads(request.body)
+  except:
+    action_dict = {}
   if action_dict.get(u"action") != u"read":
     return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
   modified_rust = []
   for read_url in action_dict.get(u"references",[]):
     for rust in ReferenceUserStatus.objects.filter(has_been_read=False).select_related("ref").all():
       if rust.ref.url == read_url:
-        print "found url: " + read_url
         rust.has_been_read = True
         modified_rust.append(rust)
         break  
@@ -160,7 +158,6 @@ def user_river_sieve(request):
   if request.method == 'GET':
     return generate_user_sieve(request)
   elif request.method == 'POST':
-    print "received: %s" % request
     return apply_to_user_sieve(request)
   else:
     return HttpResponseNotAllowed(['GET','POST'])

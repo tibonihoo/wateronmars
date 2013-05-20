@@ -107,14 +107,16 @@ def check_user_unread_feed_items(user):
   many UnreadReferenceByUser instances as there are unread items.
   """
   new_ref_status = []
-  for source in user.userprofile.feed_sources.all():
-    for ref in source.reference_set.all():
+  for source in user.userprofile.feed_sources.select_related("reference_set").all():
+    for ref in source.reference_set.select_related("referenceuserstatus_set").all():
       if not ref.referenceuserstatus_set.filter(user=user).exists():
         rust = ReferenceUserStatus()
         rust.user = user
         rust.ref = ref
         rust.ref_pub_date = ref.pub_date
         new_ref_status.append(rust)
+        # TODO: check here that the corresponding reference has not
+        # been saved already !
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()
