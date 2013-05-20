@@ -80,7 +80,6 @@ def post_to_user_collection(request):
   """
   try:
     action_dict = simplejson.loads(request.body)
-    print action_dict
   except:
     action_dict = {}
   if action_dict.get(u"a") != u"add":
@@ -88,11 +87,7 @@ def post_to_user_collection(request):
   if not u"url" in action_dict:
     return HttpResponseBadRequest("Impossible to 'save' a bookmark: the 'url' parameter is missing.")
   url_to_save = action_dict[u"url"]
-  print url_to_save
-  print len(request.user.userbookmark_set.all())
-  print "mouf"
   if not request.user.userbookmark_set.filter(reference__url=url_to_save).exists():
-    print "no existing request already saved"
     # lookup a matching Reference
     same_url_refs = Reference.objects.filter(url=url_to_save)
     if u"source_url" in action_dict:
@@ -100,7 +95,13 @@ def post_to_user_collection(request):
     else:
       url_cpt = urlparse(url_to_save)
       bookmark_source_url = url_cpt.netloc or url_to_save
-    same_sources = Source.objects.filter(url=bookmark_source_url).all()
+    same_sources = request.user.userprofile.sources.filter(url=bookmark_source_url).all()
+    if same_sources:
+      user_has_same_source = True
+    else:
+      user_has_same_source = False
+      # try a bigger look-up anyway
+      same_sources = Source.objects.filter(url=bookmark_source_url).all()
     # url are unique for sources
     if same_sources:
       bookmark_source = same_sources[0]
@@ -108,7 +109,6 @@ def post_to_user_collection(request):
     else:
       bookmark_source = None
       refs_with_same_source = None
-    print str(same_url_refs) + "  " + str(bookmark_source)
     if refs_with_same_source:
       # take the first that comes...
       bookmarked_ref = refs_with_same_source[0]
@@ -129,7 +129,6 @@ def post_to_user_collection(request):
         bookmark_source.url = bookmark_source_url
         bookmark_source.name = bookmark_source_name
         bookmark_source.save()
-      print "creating a new reference"
       bookmarked_ref = Reference()
       bookmarked_ref.source = bookmark_source
       bookmarked_ref.url = action_dict[u"url"]
@@ -147,10 +146,14 @@ def post_to_user_collection(request):
       bookmarked_ref.save_count += 1
       b.save()
       bookmarked_ref.save()
-    b.tags = bookmarked_ref.tags.all()
-    b.save()
+    with transaction.commit_on_success():
+      if not user_has_same_source:
+        request.user.userprofile.sources.add(bookmarked_ref.source)
+        request.user.userprofile.save()
+      b.tags = bookmarked_ref.tags.all()
+      b.save()
+      
   with transaction.commit_on_success():
-    print "looking for reference user status to update"
     for rust in ReferenceUserStatus.objects.filter(ref__url=url_to_save).all():
       rust.has_been_saved = True
       rust.save()
