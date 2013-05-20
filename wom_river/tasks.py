@@ -134,7 +134,7 @@ def check_user_unread_feed_items(user):
   """
   new_ref_status = []
   for source in user.userprofile.feed_sources.select_related("reference_set").all():
-    new_ref_status += generate_reference_user_status(source.reference_set.select_related("referenceuserstatus_set").all())
+    new_ref_status += generate_reference_user_status(user,source.reference_set.select_related("referenceuserstatus_set").all())
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()
