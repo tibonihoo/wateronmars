@@ -40,6 +40,7 @@
               {% else %}
               <li><a href="/{{ realm }}/river" title="Your River"><i class="icon-align-justify icon-white"></i></a></li>
               <li><a href="/{{ realm }}/sieve" title="Your Sieve"><i class="icon-filter icon-white"></i></a></li>
+              <li><a href="/{{ realm }}/collection" title="Your Collection"><i class="icon-bookmark icon-white"></i></a></li>
               <li><a href="/{{ realm }}/sources" title="Your Sources"><i class="icon-book icon-white"></i></a></li>
               {% endif %}
               <li class="divider-vertical"></li>
