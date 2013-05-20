@@ -45,7 +45,7 @@ prepareKeyBindings();
 {% else %}
 <div class="alert alert-block">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <p>You haven't picked any link for your collection.<p>
+  <p>You haven't picked any link for your collection.</p>
   <p>You can add a link to you connection either by bookmarking or sharing an item found in your <a href="../river">river of news</a> or <a href="../sieve">sieve</a> or by sending a link to the following url:
     <pre>{{ collection_url }}/?a='add'&url='the url'&title='the title'</pre></p>
 </div>
