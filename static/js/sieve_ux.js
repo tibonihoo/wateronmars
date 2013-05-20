@@ -15,19 +15,21 @@ function prepareKeyBindings()
   gNumReferences = 0;
   gSyncWithServer = false;
   gReadURLs = [];
+  gUserCollectionURL = "";
 }
 
 
 // Activation that needs to be called once the page is fully generated
 // @param syncWithServer a boolean telling whether the read status
 // should be synced with the server.
-function activateKeyBindings(syncWithServer)
+function activateKeyBindings(syncWithServer,userCollectionURL)
 {
   // keybindings globals
   gCurrentlyExpandedItem = -1;
   gMouseTrapDisabled = false;   
   gNumReferences = $(".reference").length;
   gSyncWithServer = syncWithServer;
+  gUserCollectionURL = userCollectionURL;
   // hook the hide/show calbacks in the feed items
   for(idx=0;idx<gNumReferences;idx+=1)
   {
@@ -76,14 +78,12 @@ function ensureVisibilityInFirstThreeQuarters(elem)
 }
 
 // Collapse the currently expanded item if any.
-// Note: Take care of the global index tracking mechanics too.
 function collapseCurrentlyExpandedItem() {
   var currentIdx = gCurrentlyExpandedItem;
   if (currentIdx >= 0) {
     var currentIdxStr = currentIdx.toString();
     var itemToCollapse = 'collapse'+currentIdxStr;
     $('#'+itemToCollapse).collapse('hide');
-    gCurrentlyExpandedItem = -1;
   }
   return currentIdx;
 }
@@ -93,7 +93,7 @@ function collapseCurrentlyExpandedItem() {
 function expandItem(idx) {
   var itemToExpand = 'collapse'+idx.toString();
   $('#'+itemToExpand).collapse('show');
-//  gCurrentlyExpandedItem = idx;
+  gCurrentlyExpandedItem = idx;
 }
 
 // Generate the callback that will be called when the content of
@@ -182,11 +182,11 @@ function updateReadStatusOnServer(read_items_urls, callback) {
 // @param sourceTitle name of the reference's source
 // @param callback function to be called when the server's answer is received
 function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
+  if (gUserCollectionURL=="") return;
   var jsonStr = JSON.stringify({"a" : "add", "url": url, "title" : title, "source_url" : sourceURL, "source_name" : sourceTitle });
   var csrftoken = getCookie('csrftoken');
   // TODO: find something more generic (like saving the url for
   // collection in the page and/or passing it as arg to this function)
-  var targetURL = window.location.href.split("/sieve/")[0] + "/collection/";
   $.ajax({
     crossDomain: false, // obviates need for sameOrigin test
     beforeSend: function(xhr, settings) {
@@ -195,7 +195,7 @@ function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
       }
     },
     type: "POST",
-    url: targetURL,
+    url: gUserCollectionURL,
     data: jsonStr,
     dataType: "json",
   }).done(callback).fail(function () {showWarning("server-save-failed");});
@@ -292,7 +292,6 @@ Mousetrap.bind('r', function() {
 
 // save the ref corresponding to the currently expanded items
 function saveCurrentItem() {
-  var window_location = window.location;
   markAsSaved(gCurrentlyExpandedItem);
 }
 Mousetrap.bind('b', saveCurrentItem);

@@ -77,9 +77,9 @@ prepareKeyBindings();
 {% block extrascript %}
 <script>
 {% if realm == "public" %}
-activateKeyBindings(false);
+activateKeyBindings(false, "{{ user_collection_url }}");
 {% else %}
-activateKeyBindings(true);
+activateKeyBindings(true, "{{ user_collection_url }}");
 {% endif %}
 </script>
 {% endblock %}

@@ -99,6 +99,32 @@ def collect_all_new_pebbles():
 def delete_old_pebbles():
   delete_old_pebbles_sync()
 
+class FakeReferenceUserStatus:
+
+  def __init__(self):
+    self.user = None 
+    
+def generate_reference_user_status(user,references):
+  """Generate reference user status instances for a given list of references.
+  WARNING: the new instances are not saved in the database!
+  If user is None, then the created instances are not saveable at all.
+  """
+  new_ref_status = []
+  for ref in references.select_related("referenceuserstatus_set").all():
+    if user and not ref.referenceuserstatus_set.filter(user=user).exists():
+      rust = ReferenceUserStatus()
+      rust.user = user
+      rust.ref = ref
+      rust.ref_pub_date = ref.pub_date
+      new_ref_status.append(rust)
+      # TODO: check here that the corresponding reference has not
+      # been saved already !
+    elif user is None:
+      rust = FakeReferenceUserStatus()
+      rust.ref = ref
+      rust.ref_pub_date = ref.pub_date
+      new_ref_status.append(rust)      
+  return new_ref_status
 
 @task()  
 def check_user_unread_feed_items(user):
@@ -108,18 +134,12 @@ def check_user_unread_feed_items(user):
   """
   new_ref_status = []
   for source in user.userprofile.feed_sources.select_related("reference_set").all():
-    for ref in source.reference_set.select_related("referenceuserstatus_set").all():
-      if not ref.referenceuserstatus_set.filter(user=user).exists():
-        rust = ReferenceUserStatus()
-        rust.user = user
-        rust.ref = ref
-        rust.ref_pub_date = ref.pub_date
-        new_ref_status.append(rust)
-        # TODO: check here that the corresponding reference has not
-        # been saved already !
+    new_ref_status += generate_reference_user_status(source.reference_set.select_related("referenceuserstatus_set").all())
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()
+
+
 
 @task()
 def opml2db(opml_file,isPath=True,user_profile=None):

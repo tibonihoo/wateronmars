@@ -11,6 +11,7 @@ from wom_pebbles.models import Reference
 from wom_river.models import FeedSource
 from wom_river.models import ReferenceUserStatus
 from wom_river.tasks import check_user_unread_feed_items
+from wom_river.tasks import generate_reference_user_status
 
 
 MAX_ITEMS_PER_PAGE = 100
@@ -35,6 +36,7 @@ def public_river_view(request):
       })
   return HttpResponse(t.render(c))
 
+
 def public_river_sieve(request):
   latest_unread_pebbles = Reference.objects.filter(is_public=True).order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
   t = loader.get_template('wom_river/sieve.html_dt')
@@ -43,16 +45,21 @@ def public_river_sieve(request):
   else:
     messages = []
   if request.user.is_authenticated():
+    user = request.user
     username = request.user.username
+    user_collection_url = "/u/%s/collection/" % username
   else:
+    user = None
     username = None
+    user_collection_url = ""
   c = Context({
-      'latest_unread_pebbles': latest_unread_pebbles,
+      'latest_unread_pebbles': generate_reference_user_status(user,latest_unread_pebbles),
       'messages' : messages,
       'username' : username,
-      'title_qualify': "Public",
       'num_unread_pebbles': len(latest_unread_pebbles),
+      'title_qualify': "Public",
       'realm': "public",
+      'user_collection_url': user_collection_url,
       })
   return HttpResponse(t.render(c))
 
@@ -118,6 +125,7 @@ def generate_user_sieve(request):
       'num_unread_pebbles': len(latest_unread_pebbles),
       'title_qualify': "Your",
       'realm': "u/%s" % request.user.username,
+      'user_collection_url': "/u/%s/collection/" % request.user.username,
       })
   return HttpResponse(t.render(c))
   
