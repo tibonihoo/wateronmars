@@ -6,11 +6,23 @@
 
 {% block content %}
 <p><i class="icon-book"></i><strong>{{ title_qualify }} sources</strong></p>
-{% if source_list %}
-    <ul>
-      {% for source in source_list %}
-      <li><a href="{{ source.url }}">{{ source.name }}</a> <span class="label" title="number of pebbles">{{ source.reference_set.count }}</span></li>
+<ul>
+{% if syndicated_sources %}
+  <li>Syndicated sources
+    <ul class="unstyled">
+      {% for source in syndicated_sources %}
+      <li><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/><a href="{{ source.xmlURL}}"><img src="/static/img/feed-icon-14x14.png" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.name }}</a></li>
       {% endfor %}
     </ul>
+  </li>
 {% endif %}
+{% if referenced_sources %}
+  <li>Bookmarked sources
+  <ul class="unstyled">
+   {% for source in referenced_sources %}
+   <li><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.name }}</a></li>
+   {% endfor %}
+  </li>
+{% endif %}
+</ul>
 {% endblock %}
