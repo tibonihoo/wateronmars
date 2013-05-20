@@ -5,37 +5,37 @@
 {{ title_qualify }} River
 {% endblock %}
 
+
+{% block extrahead %}
+<style type="text/css">
+   .source_group { border-left: 3px solid #d3d7cf;padding-left:3px; margin-bottom:-.7em; }
+   .source_group:hover { border-width: 6px; margin-left: -3px; background-color: #eeeeec; }
+   .source_name a { decoration: none; color: #babdb6; }
+   .source_group:hover .source_name a { color: #888a85 }
+   .source_ref_list { padding-left: 1em; }
+   .source_ref_list li { padding-bottom: 1em; }
+ </style>
+{% endblock %}
+
 {% block content %}
 <p><i class="icon-align-justify"></i><strong>{{ title_qualify }} river</strong></p>
-{% if latest_unread_pebbles %}
-<div class="accordion" id="accordion2">
-{% for reference in latest_unread_pebbles %}
-  <div class="accordion-group">
-    <div class="accordion-heading"  style="background-color:#eeeeec;">
-      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{forloop.counter0}}">
-        {{ reference.title }}
-      </a> <small style="padding:5px">{{ reference.pub_date }} <i class="icon-book"></i> {{ reference.source.name}}</small>
-    </div>
-    <div id="collapse{{forloop.counter0}}" class="accordion-body collapse">
-      <div class="accordion-inner">
-        <div>
-        {{ reference.description|safe }}
-        </div>
-        <p><a href="{{ reference.url }}"><i class="icon-zoom-in"></i>view on site</a>   
-          {% for tag in reference.tags.all %}
-          {% if forloop.first %}
-          <i class="icon-tags"></i>
-          {% endif %}          
-          {{ tag }}
-          {% if not forloop.last %}
-          ,
-          {% endif %}
-          {% endfor %}
-        </p>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
+<div>
+{% regroup latest_unread_pebbles by source.name as source_groups %}
+{% for source_refs in source_groups %}
+<div class="source_group" style="border-color: {% cycle '#d3d7cf' '#babdb6' %};">
+    {% for reference in source_refs.list %}
+    {% if forloop.first %}
+    <small class="source_name"><a href="{{ reference.source.url }}">{{ reference.source.name }}</a></small>
+    <ul class="unstyled source_ref_list"> 
+    {% endif %}
+    <li id="ref{{forloop.counter0}}-title" ><strong><a id="ref{{forloop.counter0}}-title" class="reference-title" href="{{reference.url}}" data-toggle="tooltip" data-html="true" title="{{ reference.pub_date }} -- {{ reference.description|striptags|truncatewords:30 }}">{{ reference.title }}</a></strong></li>
+    {% endfor %}
+  </ul>
 </div>
-{% endif %}
+{% empty %}
+<div class="alert alert-block">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <p>No news so far, strange isn't it ?</p>
+</div>
+{% endfor %}
 {% endblock %}
