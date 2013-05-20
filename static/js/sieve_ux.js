@@ -16,13 +16,16 @@ function prepareKeyBindings()
   gSyncWithServer = false;
   gReadURLs = [];
   gUserCollectionURL = "";
+  gNumUnread = 0;
 }
 
 
 // Activation that needs to be called once the page is fully generated
 // @param syncWithServer a boolean telling whether the read status
+// @param userCollectionURL the url to which new bookmarks should be posted
+// @param numUnread the total number of unread items
 // should be synced with the server.
-function activateKeyBindings(syncWithServer,userCollectionURL)
+function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 {
   // keybindings globals
   gCurrentlyExpandedItem = -1;
@@ -30,6 +33,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL)
   gNumReferences = $(".reference").length;
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
+  gNumUnread = numUnread
   // hook the hide/show calbacks in the feed items
   for(idx=0;idx<gNumReferences;idx+=1)
   {
@@ -172,7 +176,6 @@ function updateReadStatusOnServer(read_items_urls, callback) {
     data: jsonStr,
     dataType: "json",
   }).done(callback).fail(function () {showWarning("server-sync-problem");});
-  // }).done(callback).fail(function(j,t) {alert(t);} );
 }
 
 // Send a reference's info to add it to the user's collection
@@ -217,7 +220,11 @@ function markAsRead(refElement,refIdx) {
     // we still upload the full *current* list of read items (if
     // there's more than one it probably means that something went
     // wrong with the latest update)
-    updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; hideWarning("server-sync-problem");});
+    updateReadStatusOnServer(gReadURLs,function (data) {
+      gReadURLs = []; 
+      gNumUnread -= 1; 
+      document.getElementById("num_unread").textContent = gNumUnread.toString();
+      hideWarning("server-sync-problem");});
   };
 }
 

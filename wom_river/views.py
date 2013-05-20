@@ -8,6 +8,7 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
 from wom_pebbles.models import Reference
+from wom_pebbles.models import Source
 from wom_river.models import FeedSource
 from wom_river.models import ReferenceUserStatus
 from wom_river.tasks import check_user_unread_feed_items
@@ -19,17 +20,13 @@ MAX_ITEMS_PER_PAGE = 100
 def public_river_view(request):
   latest_unread_pebbles = Reference.objects.filter(is_public=True).order_by('-pub_date')[:MAX_ITEMS_PER_PAGE]
   t = loader.get_template('wom_river/river.html_dt')
-  if not latest_unread_pebbles:
-    messages = ["No pebble yet !"]
-  else:
-    messages = []
   if request.user.is_authenticated():
     username = request.user.username
   else:
     username = None
   c = Context({
       'latest_unread_pebbles': latest_unread_pebbles,
-      'messages' : messages,
+      'messages' : [],
       'username' : username,
       'title_qualify': "Public",
       'realm': "public",
@@ -38,12 +35,10 @@ def public_river_view(request):
 
 
 def public_river_sieve(request):
-  latest_unread_pebbles = Reference.objects.filter(is_public=True).order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
+  unread_pebbles = Reference.objects.filter(is_public=True)
+  num_unread_pebbles = unread_pebbles.count()
+  oldest_unread_pebbles = unread_pebbles.order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
   t = loader.get_template('wom_river/sieve.html_dt')
-  if not latest_unread_pebbles:
-    messages = ["No pebble yet !"]
-  else:
-    messages = []
   if request.user.is_authenticated():
     user = request.user
     username = request.user.username
@@ -53,10 +48,10 @@ def public_river_sieve(request):
     username = None
     user_collection_url = ""
   c = Context({
-      'latest_unread_pebbles': generate_reference_user_status(user,latest_unread_pebbles),
-      'messages' : messages,
+      'oldest_unread_pebbles': generate_reference_user_status(user,oldest_unread_pebbles),
+      'messages' : [],
       'username' : username,
-      'num_unread_pebbles': len(latest_unread_pebbles),
+      'num_unread_pebbles': num_unread_pebbles,
       'title_qualify': "Public",
       'realm': "public",
       'user_collection_url': user_collection_url,
@@ -65,18 +60,16 @@ def public_river_sieve(request):
 
 def public_river_sources(request):
   t = loader.get_template('wom_river/river_sources.html_dt')
-  sList = FeedSource.objects.filter(is_public=True).order_by('name')
-  if not sList:
-    messages = ["No source registered !"]
-  else:
-    messages = []
+  syndicated_sources = FeedSource.objects.filter(is_public=True).order_by('name')
+  other_sources = Source.objects.filter(is_public=True).exclude(url__in=[s.url for s in syndicated_sources]).order_by('name')
   if request.user.is_authenticated():
     username = request.user.username
   else:
     username = None
   c = Context({
-      'source_list': sList,
-      'messages' : messages,
+      'syndicated_sources': syndicated_sources,
+      'referenced_sources': other_sources,
+      'messages' : [],
       'username' : username,
       'title_qualify': "Public",
       'realm': "public",
@@ -92,13 +85,9 @@ def user_river_view(request):
   latest_items.sort(key=lambda x:x.pub_date)
   latest_items.reverse()
   t = loader.get_template('wom_river/river.html_dt')
-  if not latest_items:
-    messages = ["No pebble yet !"]
-  else:
-    messages = []
   c = Context({
       'latest_unread_pebbles': latest_items[:MAX_ITEMS_PER_PAGE],
-      'messages' : messages,
+      'messages' : [],
       'username' : request.user.username,
       'title_qualify': "Your",
       'realm': "u/%s" % request.user.username,
@@ -112,17 +101,15 @@ def generate_user_sieve(request):
   use it's sieve to read and sort out the latests news.
   """
   check_user_unread_feed_items(request.user)
-  latest_unread_pebbles = ReferenceUserStatus.objects.filter(has_been_read=False).select_related("ref","source").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
+  unread_pebbles = ReferenceUserStatus.objects.filter(has_been_read=False)
+  num_unread = unread_pebbles.count()
+  oldest_unread_pebbles = unread_pebbles.select_related("ref","source").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
   t = loader.get_template('wom_river/sieve.html_dt')
-  if not latest_unread_pebbles:
-    messages = ["No pebble yet !"]
-  else:
-    messages = []
   c = Context({
-      'latest_unread_pebbles': latest_unread_pebbles,
-      'messages' : messages,
+      'oldest_unread_pebbles': oldest_unread_pebbles,
+      'messages' : [],
       'username' : request.user.username,
-      'num_unread_pebbles': len(latest_unread_pebbles),
+      'num_unread_pebbles': num_unread,
       'title_qualify': "Your",
       'realm': "u/%s" % request.user.username,
       'user_collection_url': "/u/%s/collection/" % request.user.username,
@@ -174,14 +161,12 @@ def user_river_sieve(request):
 def user_river_sources(request):
   user_profile = request.user.userprofile
   t = loader.get_template('wom_river/river_sources.html_dt')
-  sList = user_profile.feed_sources.all().order_by('name')
-  if not sList:
-    messages = ["No source registered !"]
-  else:
-    messages = []
+  syndicated_sources = user_profile.feed_sources.all().order_by('name')
+  other_sources = request.user.userprofile.sources.exclude(url__in=[s.url for s in syndicated_sources]).order_by("name")
   c = Context({
-      'source_list': sList,
-      'messages' : messages,
+      'syndicated_sources': syndicated_sources,
+      'referenced_sources': other_sources,
+      'messages' : [],
       'username' : request.user.username,
       'title_qualify': "Your",
       'realm': "u/%s" % request.user.username,
