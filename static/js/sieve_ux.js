@@ -153,6 +153,32 @@ function updateReadStatusOnServer(read_items_urls, callback) {
   // }).done(callback).fail(function(j,t) {alert(t);} );
 }
 
+// Send a reference's info to add it to the user's collection
+// @param url reference's URL
+// @param title reference's title
+// @param sourceURL URL of the reference's source
+// @param sourceTitle name of the reference's source
+// @param callback function to be called when the server's answer is received
+function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
+  var jsonStr = JSON.stringify({"a" : "add", "url": url, "title" : title, "source_url" : sourceURL, "source_name" : sourceTitle });
+  var csrftoken = getCookie('csrftoken');
+  // TODO: find something more generic (like saving the url for
+  // collection in the page and/or passing it as arg to this function)
+  var targetURL = window.location.href.split("/sieve/")[0] + "/collection/";
+  $.ajax({
+    crossDomain: false, // obviates need for sameOrigin test
+    beforeSend: function(xhr, settings) {
+      if (!csrfSafeMethod(settings.type)) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    },
+    type: "POST",
+    url: targetURL,
+    data: jsonStr,
+    dataType: "json",
+  }).done(callback).fail(function () {showWarning("server-save-failed");});
+}
+
 
 
 // Perform all necessary stuff to indicate that a reference should be
@@ -161,15 +187,31 @@ function updateReadStatusOnServer(read_items_urls, callback) {
 // @param refElement the element representing the reference that must
 // be marked as read
 // @param refIdx the index of this reference (typically as indicated
-// in #reference{refIdx)
+// in #ref{refIdx}
 function markAsRead(refElement,refIdx) {
   if ( !refElement.hasClass('read') ) { 
     refElement.addClass("read") 
-    gReadURLs.push($('#referenceUrl'+refIdx.toString()).prop("href"));
+    gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
     // we still upload the full *current* list of read items (if
     // there's more than one it probably means that something went
     // wrong with the latest update)
     updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; hideWarning("server-sync-problem");});
+  };
+}
+
+// Make sure that the user gets a visual feedback indicating that the
+// reference has been saved.
+// @param refIdx the index of this reference (typically as indicated
+// in #ref{refIdx}
+function markAsSaved(refIdx) {
+  var refIdxStr = refIdx.toString();
+  var refElement = $('#ref'+refIdxStr);
+  if ( !refElement.hasClass('saved') ) { 
+    var url = document.getElementById('ref'+refIdxStr+'-URL').href;
+    var title = document.getElementById('ref'+refIdxStr+'-URL').title;
+    var sourceURL = document.getElementById('ref'+refIdxStr+'-sourceURL').href;
+    var sourceTitle = document.getElementById('ref'+refIdxStr+'-sourceURL').title;
+    saveBookmarkOnServer(url,title,sourceURL,sourceTitle,function(data) {refElement.addClass("saved");});
   };
 }
 
@@ -181,9 +223,10 @@ Mousetrap.bind('p', function() {
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var currentIdx = gCurrentlyExpandedItem;
-  var itemToCollapse = 'collapse'+currentIdx.toString();
+  var currentIdxStr = currentIdx.toString();
+  var itemToCollapse = 'collapse'+currentIdxStr;
   $('#'+itemToCollapse).collapse('hide');
-  var referenceId = '#reference'+currentIdx.toString()
+  var referenceId = '#ref'+currentIdxStr;
   markAsRead($(referenceId),currentIdx);
   if (gCurrentlyExpandedItem <= 0)
   {
@@ -203,9 +246,10 @@ Mousetrap.bind('n', function() {
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var currentIdx = gCurrentlyExpandedItem;
-  var itemToCollapse = 'collapse'+currentIdx.toString();
+  var currentIdxStr = currentIdx.toString();
+  var itemToCollapse = 'collapse'+currentIdxStr;
   $('#'+itemToCollapse).collapse('hide');
-  var referenceId = '#reference'+currentIdx.toString()
+  var referenceId = '#ref'+currentIdxStr;
   if ( currentIdx>-1 ) 
   { 
     markAsRead($(referenceId),currentIdx);
@@ -226,14 +270,20 @@ Mousetrap.bind('n', function() {
 // open the currently expanded items' linked page in the browser
 Mousetrap.bind('v', function() { 
   var currentIdx = gCurrentlyExpandedItem;
-  var itemToShow = '#referenceUrl'+currentIdx.toString();
-  window.open($(itemToShow).prop("href"));
+  var itemToShow = 'ref'+currentIdx.toString()+"-URL";
+  window.open(document.getElementById(itemToShow).href);
 });
 
 // open the currently expanded items' linked page in the browser
 Mousetrap.bind('r', function() { 
   var window_location = window.location;
   updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; window_location.reload();});
-  // TODO apparently there is a need for a little timeout to get a
-  // coherent refresh of the page !
 });
+
+// save the ref corresponding to the currently expanded items
+function saveCurrentItem() {
+  var window_location = window.location;
+  var currentIdx = gCurrentlyExpandedItem;
+  markAsSaved(currentIdx);
+}
+Mousetrap.bind('b', saveCurrentItem);
