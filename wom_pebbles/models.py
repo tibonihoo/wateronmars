@@ -59,13 +59,13 @@ class Reference(models.Model): # A pebble !
   is_public = models.BooleanField(default=False)
   # The source from which this reference item comes from
   source = models.ForeignKey(Source)
-  # Tags used (at least) for user-explicit classification  
+  # Tags used for classification (these tags usually come from the
+  # content producer)  
   tags  = models.ManyToManyField(Tag)
   # Count the number of users that saved this reference
   save_count = models.IntegerField(default=0)
   
   def __unicode__(self):
     return "%s (%s)" % (self.title,self.url)
-
 
 
