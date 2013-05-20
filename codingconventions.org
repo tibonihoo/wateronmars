@@ -1,0 +1,10 @@
+* Variable
+** local
+lowercase_separated_by_underscores
+** global
+CAPITALIZED_WITH_UNDERSCORES
+* Function
+lowercase_separated_by_underscores 
+* Class
+UpperCamelCase
+
