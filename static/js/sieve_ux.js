@@ -32,8 +32,8 @@ function activateKeyBindings(syncWithServer)
   for(idx=0;idx<gNumReferences;idx+=1)
   {
     currentId = 'collapse'+idx.toString()
-    $("#"+currentId).on('hiden', createHiddenCallbackFunc(idx));
-    $("#"+currentId).on('shown', createShownCallbackFunc(idx));
+    $("#"+currentId).on('hidden', createHiddenCallback(idx) );
+    $("#"+currentId).on('shown', createShownCallback(idx) );
   }
 }
 
@@ -75,10 +75,31 @@ function ensureVisibilityInFirstThreeQuarters(elem)
   }
 }
 
+// Collapse the currently expanded item if any.
+// Note: Take care of the global index tracking mechanics too.
+function collapseCurrentlyExpandedItem() {
+  var currentIdx = gCurrentlyExpandedItem;
+  if (currentIdx >= 0) {
+    var currentIdxStr = currentIdx.toString();
+    var itemToCollapse = 'collapse'+currentIdxStr;
+    $('#'+itemToCollapse).collapse('hide');
+    gCurrentlyExpandedItem = -1;
+  }
+  return currentIdx;
+}
+
+// Expand the item corresponding to the given index
+// Note: Take care of the global index tracking mechanics too.
+function expandItem(idx) {
+  var itemToExpand = 'collapse'+idx.toString();
+  $('#'+itemToExpand).collapse('show');
+//  gCurrentlyExpandedItem = idx;
+}
+
 // Generate the callback that will be called when the content of
 // reference#i will be collapsed.
-function createShownCallbackFunc(i) {
-  return function() { 
+function createShownCallback(i) {
+  return function () {
     if (!gMouseTrapDisabled) 
     {
       gCurrentlyExpandedItem = i;
@@ -95,14 +116,15 @@ function createShownCallbackFunc(i) {
 // Generate the callback that will be called when the content of
 // reference#i will be collapsed.
 // Note: adapted from http://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example
-function createHiddenCallbackFunc(i) {
-  return function() { 
-    if (!gMouseTrapDisabled) 
-    {
-      gCurrentlyExpandedItem = -1;
-    }  
-  };
+// WARNING: doesn't reset gCurrentlyExpandedItem (to allow restarting
+// to browse item from where it stopped)
+function createHiddenCallback(i) {
+  return function () {
+    var referenceId = '#ref'+i;
+    markAsRead($(referenceId),i);
+  }
 }
+
 
 // using jQuery to get a cookie 
 // (from https://docs.djangoproject.com/en/dev/ref/contrib/csrf/)
@@ -218,26 +240,22 @@ function markAsSaved(refIdx) {
 
 // Keybinding activation
 
+
 // Expand previous item
 Mousetrap.bind('p', function() { 
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
-  var currentIdx = gCurrentlyExpandedItem;
-  var currentIdxStr = currentIdx.toString();
-  var itemToCollapse = 'collapse'+currentIdxStr;
-  $('#'+itemToCollapse).collapse('hide');
-  var referenceId = '#ref'+currentIdxStr;
-  markAsRead($(referenceId),currentIdx);
-  if (gCurrentlyExpandedItem <= 0)
+  var collapsedItemIdx = collapseCurrentlyExpandedItem();
+  if (collapsedItemIdx <= 0)
   {
-    if (gCurrentlyExpandedItem == 0) { gCurrentlyExpandedItem = -1;}
+    // special case: we're at the begining of the list, and we want to
+    // make sure that the browsing will restart with the first item.
+    gCurrentlyExpandedItem = -1;
     gMouseTrapDisabled = false;
   }
   else
   {
-    var itemToExpand = 'collapse'+(currentIdx-1).toString();
-    $('#'+itemToExpand).collapse('show');
-    gCurrentlyExpandedItem = currentIdx - 1;
+    expandItem(collapsedItemIdx-1);
   }
 });
 
@@ -245,32 +263,24 @@ Mousetrap.bind('p', function() {
 Mousetrap.bind('n', function() { 
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
-  var currentIdx = gCurrentlyExpandedItem;
-  var currentIdxStr = currentIdx.toString();
-  var itemToCollapse = 'collapse'+currentIdxStr;
-  $('#'+itemToCollapse).collapse('hide');
-  var referenceId = '#ref'+currentIdxStr;
-  if ( currentIdx>-1 ) 
-  { 
-    markAsRead($(referenceId),currentIdx);
-  }
-  if (gCurrentlyExpandedItem >= gNumReferences - 1)
+  var collapsedItemIdx = collapseCurrentlyExpandedItem();
+  if (collapsedItemIdx >= gNumReferences - 1)
   {
-    if (gCurrentlyExpandedItem == gNumReferences - 1) { gCurrentlyExpandedItem = gNumReferences }
+    // special case: we're at the end of the list, and we have to set
+    // gCurrentlyExpandedItem in such a way that looking at the
+    // "previous" item will start by expanding the last one.
+    gCurrentlyExpandedItem = gNumReferences;
     gMouseTrapDisabled = false;
   }
   else
   {
-    var itemToExpand = 'collapse'+(currentIdx+1).toString();
-    $('#'+itemToExpand).collapse('show');
-    gCurrentlyExpandedItem = currentIdx + 1;
+    expandItem(collapsedItemIdx+1);
   }
 });
 
 // open the currently expanded items' linked page in the browser
 Mousetrap.bind('v', function() { 
-  var currentIdx = gCurrentlyExpandedItem;
-  var itemToShow = 'ref'+currentIdx.toString()+"-URL";
+  var itemToShow = 'ref'+gCurrentlyExpandedItem.toString()+"-URL";
   window.open(document.getElementById(itemToShow).href);
 });
 
@@ -283,7 +293,6 @@ Mousetrap.bind('r', function() {
 // save the ref corresponding to the currently expanded items
 function saveCurrentItem() {
   var window_location = window.location;
-  var currentIdx = gCurrentlyExpandedItem;
-  markAsSaved(currentIdx);
+  markAsSaved(gCurrentlyExpandedItem);
 }
 Mousetrap.bind('b', saveCurrentItem);
