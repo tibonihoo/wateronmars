@@ -10,6 +10,7 @@ urlpatterns = patterns('',
                        # url(r'^wateronmars/', include('wateronmars.foo.urls')),
                        url(r'^public/', include('wom_river.urls')),
                        url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
+                       url(r'^accounts/new/$', 'wom_user.views.user_creation'),
                        url(r'^accounts/profile/$', 'wom_user.views.user_profile'),
                        url(r'^u/', include('wom_user.urls')),
                        
