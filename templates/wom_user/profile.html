@@ -30,17 +30,11 @@ Profile
 <p>Import several sources at once by uploading an <a href="http://opml.org">OPML</a> file with the following form:</p>
 
 <form class="form-inline" 
-      method="post" action="/u/{{ user.username }}/sources/opml/">
+      method="post" action="{% url wom_user.views.user_upload_opml username %}">
   {% csrf_token %}
   <span class="input-small">Select your OPML File: </span>
   <span class="input-small">{{ opml_form.opml_file }}</span>
   <input type="submit" value="Import sources" class="btn" />
 </form>
 
-<!-- <h2>Add bookmarks</h2> -->
-
-<!-- <ul> -->
-<!--   <li><a href="{% url wom_user.views.user_upload_opml %}">Import several sources at once</a> by uploading an <a href="http://opml.org">OPML</a> file.</li> -->
-<!--   <\!-- <li>Use the following bookmarklet:</li> -\-> -->
-<!-- </ul> -->
 {% endblock %}
