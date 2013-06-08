@@ -26,7 +26,7 @@ class UserProfile(models.Model):
   # sources and used to ease the feeds update procedure )
   feed_sources = models.ManyToManyField(FeedSource,related_name="+")
   # TODO: add registration date or look if Django's user model as one already
-  
+  # OK there is one already in User !
   def __unicode__(self):
     return "%s's profile" % self.user
 

@@ -1,24 +1,46 @@
-<html>
+{% extends "wateronmars/base.html_dt" %}
 
-<head>
-<title>Profile</title>
-</head>
+{% block title %}
+Profile
+{% endblock %}
 
-<body>
-
+{% block content %}
 <h1>Welcome {{username}} !</h1>
 
-<p>Please feel free to browse through the following pages:</p>
+<p>Feel free to browse through the following pages:</p>
 
-<ul>
-<li><a href="/u/{{username}}/river">your own river</a></li>
-<li><a href="/u/{{username}}/sources">your sources</a></li>
-<li><a href="/public/river">the public river</a></li>
-<li><a href="/public/sources">public sources</a></li>
-</ul>
+<dl>
+<dt><a href="/{{ realm }}/river" title="Your River"><i class="icon-align-left"></i>Your river</a></dt>
+<dd>A streamlined view of the most recent news comming from your own selection of sources.</dd>
+<dt><a href="/{{ realm }}/sieve" title="Your Sieve"><i class="icon-filter"></i>Your sieve</a></dt>
+<dd>An inbox-like view to help you filter the news and make sure you don't miss anything.</dd>
+<dt><a href="/{{ realm }}/collection" title="Your Collection"><i class="icon-bookmark"></i>Your collection</a></dt>
+<dd>All the links you've picked up from your river and from the web, in a word: your bookmarks :)</dd>
+<dt><a href="/{{ realm }}/sources" title="Your Sources"><i class="icon-book"></i>Your sources</a></dt>
+<dd>A list of where you take your information from: the news sources to which you've suscribed as well as the sites referenced by your bookmarks.</dd>
+</dl>
 
-<p>Add more sources by <a href="/u/{{username}}/opml">uploading an opml file</a>.</p>
+<p>And if you're looking for fresh water, have a look at the community's selection:</p>
+<p><a href="/public/river" title="News from the community's selection of news sources."><i class="icon-align-left"></i>Public river</a>  <a href="/public/sources" title="Community's sources."><i class="icon-book"></i>Public sources</a></p>
 
-</body>
 
-</html>
+<h2>Add more feeds</h2>
+
+  <!-- <li>Use the following bookmarklet:</li> -->
+<p>Import several sources at once by uploading an <a href="http://opml.org">OPML</a> file with the following form:</p>
+
+<form class="form-inline" 
+      method="post" action="/u/{{ user.username }}/sources/opml/">
+  {% csrf_token %}
+  <span class="input-small">Select your OPML File: </span>
+  <span class="input-small">{{ opml_form.opml_file }}</span>
+  <input type="submit" value="Import sources" class="btn" />
+</form>
+
+<!-- <h2>Add bookmarks</h2> -->
+
+<!-- <ul> -->
+<!--   <li><a href="{% url wom_user.views.user_upload_opml %}">Import several sources at once</a> by uploading an <a href="http://opml.org">OPML</a> file.</li> -->
+<!--   <\!-- <li>Use the following bookmarklet:</li> -\-> -->
+<!-- </ul> -->
+{% endblock %}

@@ -7,33 +7,52 @@ from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
+from django.http import HttpResponseForbidden
 
 import datetime
 from django.utils import timezone
 from django.shortcuts import render_to_response
 from django.utils import simplejson
 from django.db import transaction
+from django.forms.util import ErrorList
 
 
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+
+from wateronmars.views import fill_base_data
+
+from wom_user.forms import OPMLFileUploadForm
+from wom_user.forms import UserProfileCreationForm
 
 from wom_pebbles.models import Reference
 from wom_pebbles.models import Source
 from wom_user.models import UserBookmark
 from wom_river.models import ReferenceUserStatus
 
-from django import forms
 from wom_river.tasks import opml2db
 
 
+class CustomErrorList(ErrorList):
+  """Customize errors display in froms to use Bootstrap classes."""
+  def __unicode__(self):
+    return self.as_span()
+  def as_span(self):
+    if not self: return u''
+    return u'<span class="help-inline">%s</span>' % ''.join([ unicode(e) for e in self])
+
+
 @login_required(login_url='/accounts/login/')
+@csrf_protect
 def user_profile(request):
-  t = loader.get_template('wom_user/profile.html')
-  c = Context({
+  d =  fill_base_data(
+    request.user.username,"Your",
+    {
       'username': request.user.username,
+      'opml_form': OPMLFileUploadForm(error_class=CustomErrorList),
       })
-  return HttpResponse(t.render(c))
+  return render_to_response('wom_user/profile.html', d,
+                            context_instance=RequestContext(request))
 
 
 def handle_uploaded_opml(opmlUploadedFile,user):
@@ -43,22 +62,23 @@ def handle_uploaded_opml(opmlUploadedFile,user):
   else:
     raise ValueError("Uploaded file '%s' is not OPML !" % opmlUploadedFile.name)
   
-class OPMLFileUploadForm(forms.Form):
-    opml_file  = forms.FileField()
 
 
 @login_required(login_url='/accounts/login/')
 @csrf_protect
-def user_upload_opml(request):
+def user_upload_opml(request,ownername):
+  if ownername != request.user.username:
+    return HttpResponseForbidden()
   if request.method == 'POST':
-    form = OPMLFileUploadForm(request.POST, request.FILES)
+    form = OPMLFileUploadForm(request.POST, request.FILES, error_class=CustomErrorList)
     if form.is_valid():
       handle_uploaded_opml(request.FILES['opml_file'],user=request.user)
       return HttpResponseRedirect('/u/%s/sources' % request.user.username)
   else:
-    form = OPMLFileUploadForm()
-  return render_to_response('wom_user/opml_upload.html',
-                            {'username':request.user.username,'form': form},
+    form = OPMLFileUploadForm(error_class=CustomErrorList)
+  d = fill_base_data(request.user.username,"Your",
+                     {'form': form})
+  return render_to_response('wom_user/opml_upload.html',d,
                             context_instance=RequestContext(request))
 
 
@@ -162,19 +182,20 @@ def post_to_user_collection(request):
 
     
 @login_required(login_url='/accounts/login/')
-def get_user_collection(request):
+def get_user_collection(request,ownername):
+  if ownername != request.user.username:
+    return HttpResponseForbidden()
   bookmarks = UserBookmark.objects.filter(owner=request.user).select_related("reference").all()
   # TODO preload sources !
-  t = loader.get_template('wom_user/collection.html_dt')
-  c = Context({
+  d = fill_base_data(
+    request.user.username,"Your",
+    {
       'user_bookmarks': bookmarks,
-      'username' : request.user.username,
       'num_bookmarks': len(bookmarks),
-      'title_qualify': "Your",
-      'realm': "u/%s" % request.user.username,
       'collection_url' : request.build_absolute_uri(request.path).rstrip("/")
       })
-  return HttpResponse(t.render(c))
+  return render_to_response('wom_user/collection.html_dt',d,
+                            context_instance=RequestContext(request))
 
 
 @login_required(login_url='/accounts/login/')
@@ -182,12 +203,31 @@ def user_collection(request):
   if request.method == 'GET':
     return get_user_collection(request)
   elif request.method == 'POST':
-    print "received: %s" % request
     try:
       return post_to_user_collection(request)
     except Exception,e:
-      print e
       raise e
   else:
     return HttpResponseNotAllowed(['GET','POST'])
+
+
+
+@login_required(login_url='/accounts/login/')
+@csrf_protect
+def user_creation(request):
+  if not request.user.is_staff:
+    return HttpResponseForbidden()
+  if request.method == 'POST':
+    form = UserProfileCreationForm(request.POST, error_class=CustomErrorList)
+    if form.is_valid():
+      form.save()
+      return HttpResponseRedirect('/accounts/profile')
+  elif request.method == 'GET':
+    form = UserProfileCreationForm(error_class=CustomErrorList)
+  else:
+    return HttpResponseNotAllowed(['GET','POST'])
+  return render_to_response('registration/user_creation.html',
+                            {'form': form},
+                            context_instance=RequestContext(request))
+
 

@@ -1,30 +1,50 @@
-<html>
+{% extends "wateronmars/base_nojs.html_dt" %}
 
-<head>
-<title>Registration</title>
-</head>
 
-<body>
+{% block title %}
+User authentication
+{% endblock %}
+
+{% block head_after_css %}
+  <style>
+    input[type="password"],
+    input[type="text"]
+    {
+      height: 2em;
+    }
+  </style>
+{% endblock %}
+
+{% block nav_items %}
+<li><a href="#"><strong>User authentication</strong></a></li>
+{% endblock %}
+
+{% block body_below_nav %}  
 {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
+<div class="alert alert-error">
+  <p>Your username and password didn't match. Please try again.</p>
+</div>
 {% endif %}
-
-<form method="post" action="{% url django.contrib.auth.views.login %}">
-{% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
+<form class="form-horizontal" 
+      method="post" action="{% url django.contrib.auth.views.login %}">
+  {% csrf_token %}
+  <div class="control-group">
+    <span class="control-label">{{ form.username.label_tag }}</span>
+    <div class="controls">
+      {{ form.username }}
+    </div>
+  </div>
+  <div class="control-group">
+    <span class="control-label">{{ form.password.label_tag }}</span>
+    <div class="controls">
+      {{ form.password }}
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      <input type="submit" value="login" class="btn" />
+      <input type="hidden" name="next" value="{{ next }}" class="btn" />
+    </div>
+  </div>
 </form>
-</body>
-
-</html>
+{% endblock %}
