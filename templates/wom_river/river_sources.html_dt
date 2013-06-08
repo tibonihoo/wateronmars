@@ -6,7 +6,7 @@
 
 {% block content %}
 <p><i class="icon-book"></i><strong>{{ title_qualify }} sources</strong></p>
-<ul>
+<ul class="unstyled">
 {% if syndicated_sources %}
   <li>Syndicated sources
     <ul class="unstyled">
@@ -23,6 +23,24 @@
    <li><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.name }}</a></li>
    {% endfor %}
   </li>
+{% else %}
 {% endif %}
 </ul>
+{% if syndicated_sources %}
+{% if not referenced_sources %}
+<div class="alert alert-block">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <p>You don't have any source apart from the feed you've suscribed to).</p>
+</div>
+{% endif %}
+{% else %}
+<div class="alert alert-block">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+{% if referenced_sources %}
+  <p>You haven't yet suscribed to any news source.</p>
+{% else %}
+  <p>You don't have any source yet.</p>   
+{% endif %}
+</div>
+{% endif %}
 {% endblock %}

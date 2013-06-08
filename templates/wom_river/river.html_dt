@@ -18,7 +18,7 @@
 {% endblock %}
 
 {% block content %}
-<p><i class="icon-align-justify"></i><strong>{{ title_qualify }} river</strong></p>
+<p><i class="icon-align-left"></i><strong>{{ title_qualify }} river</strong></p>
 <div>
 {% regroup latest_unread_pebbles by source.name as source_groups %}
 {% for source_refs in source_groups %}

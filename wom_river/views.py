@@ -2,6 +2,7 @@ from django.template import Context, loader
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
+from django.http import HttpResponseForbidden
 from django.utils import simplejson
 from django.db import transaction
 
@@ -34,7 +35,9 @@ def public_river_view(request):
   return HttpResponse(t.render(c))
 
 
-def public_river_sieve(request):
+def public_river_sieve(request,ownername):
+  if ownername != request.user.username:
+    return HttpResponseForbidden()
   unread_pebbles = Reference.objects.filter(is_public=True)
   num_unread_pebbles = unread_pebbles.count()
   oldest_unread_pebbles = unread_pebbles.order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
@@ -77,7 +80,9 @@ def public_river_sources(request):
   return HttpResponse(t.render(c))
 
 @login_required(login_url='/accounts/login/')
-def user_river_view(request):
+def user_river_view(request,ownername):
+  if ownername != request.user.username:
+    return HttpResponseForbidden()
   user_profile = request.user.userprofile
   latest_items = []
   for source in user_profile.feed_sources.all():
@@ -158,7 +163,9 @@ def user_river_sieve(request):
     return HttpResponseNotAllowed(['GET','POST'])
   
 @login_required(login_url='/accounts/login/')
-def user_river_sources(request):
+def user_river_sources(request,ownername):
+  if ownername != request.user.username:
+    return HttpResponseForbidden()
   user_profile = request.user.userprofile
   t = loader.get_template('wom_river/river_sources.html_dt')
   syndicated_sources = user_profile.feed_sources.all().order_by('name')
