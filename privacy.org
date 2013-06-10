@@ -1,0 +1,52 @@
+#+TITLE: Privacy model
+#+OPTIONS: toc:nil
+* roles
+** everyone
+*** anonymous and others
+** owner
+*** user whose content is under /u/{user's name}
+** staff
+*** maintainers of the site/application
+* actions
+** read
+*** typically corresponds to a GET request
+** write
+*** typically corresponds to verbs like POST, PATCH etc
+*** also corresponds to bookmarklet-based actions
+* resources
+** public
+*** river
+**** read: everyone
+**** write: staff
+*** sieve (demo)
+**** read: everyone
+**** write: no-one
+**** note: the demo sieve doesn't take 'read' status into account
+*** sources
+**** read: everyone
+**** write: staff
+** user-owner's
+*** river
+**** read: everyone 
+**** write: owner
+*** sieve
+**** read: owner
+**** write: owner
+*** private bookmarks
+**** read: owner
+**** write: owner
+*** public bookmarks
+**** read: everyone
+**** write: owner
+**** note: bookmarks are made public by an explicit choice of the owner
+*** public sources
+**** read: owner
+**** write: owner
+**** note: syndication sources are public (so long as they don't require authentication)
+*** private sources
+**** read: owner
+**** write: owner
+**** note: private sources are typically created when a bookmark is added that is not related to an existing public source.
+*** profile
+**** read: owner
+**** write: owner
