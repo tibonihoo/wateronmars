@@ -1,11 +1,11 @@
 {% extends "wateronmars/base.html_dt" %}
 
 {% block title %}
-Profile
+{{ realm }} Profile
 {% endblock %}
 
 {% block content %}
-<h1>Welcome {{username}} !</h1>
+<h1>Welcome {{visitor_name}} !</h1>
 
 <p>Feel free to browse through the following pages:</p>
 
@@ -30,7 +30,7 @@ Profile
 <p>Import several sources at once by uploading an <a href="http://opml.org">OPML</a> file with the following form:</p>
 
 <form class="form-inline" 
-      method="post" action="{% url wom_user.views.user_upload_opml username %}">
+      method="post" action="{% url wom_user.views.user_upload_opml visitor_name %}">
   {% csrf_token %}
   <span class="input-small">Select your OPML File: </span>
   <span class="input-small">{{ opml_form.opml_file }}</span>

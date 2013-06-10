@@ -1,4 +1,3 @@
-from django.template import Context, loader
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
@@ -6,8 +5,15 @@ from django.http import HttpResponseForbidden
 from django.utils import simplejson
 from django.db import transaction
 
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render_to_response
 
+from wateronmars.views import wom_add_base_context_data
+from wateronmars.views import WOMPublic
+
+from wom_user.views import check_and_set_owner
+from wom_user.views import loggedin_and_owner_required
+
+from wom_user.models import UserBookmark
 from wom_pebbles.models import Reference
 from wom_pebbles.models import Source
 from wom_river.models import FeedSource
@@ -20,87 +26,55 @@ MAX_ITEMS_PER_PAGE = 100
 
 def public_river_view(request):
   latest_unread_pebbles = Reference.objects.filter(is_public=True).order_by('-pub_date')[:MAX_ITEMS_PER_PAGE]
-  t = loader.get_template('wom_river/river.html_dt')
-  if request.user.is_authenticated():
-    username = request.user.username
-  else:
-    username = None
-  c = Context({
+  d = wom_add_base_context_data({
       'latest_unread_pebbles': latest_unread_pebbles,
-      'messages' : [],
-      'username' : username,
-      'title_qualify': "Public",
-      'realm': "public",
-      })
-  return HttpResponse(t.render(c))
+      }, request.user.username, WOMPublic)
+  return render_to_response('wom_river/river.html_dt', d)
 
 
-def public_river_sieve(request,ownername):
-  if ownername != request.user.username:
-    return HttpResponseForbidden()
+def public_river_sieve(request):
   unread_pebbles = Reference.objects.filter(is_public=True)
   num_unread_pebbles = unread_pebbles.count()
   oldest_unread_pebbles = unread_pebbles.order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
-  t = loader.get_template('wom_river/sieve.html_dt')
   if request.user.is_authenticated():
     user = request.user
-    username = request.user.username
-    user_collection_url = "/u/%s/collection/" % username
+    user_collection_url = "/u/%s/collection/" % user.username
   else:
     user = None
-    username = None
     user_collection_url = ""
-  c = Context({
+  d = wom_add_base_context_data(
+    {
       'oldest_unread_pebbles': generate_reference_user_status(user,oldest_unread_pebbles),
-      'messages' : [],
-      'username' : username,
       'num_unread_pebbles': num_unread_pebbles,
-      'title_qualify': "Public",
-      'realm': "public",
       'user_collection_url': user_collection_url,
-      })
-  return HttpResponse(t.render(c))
+      }, request.user.username, WOMPublic)
+  return render_to_response('wom_river/sieve.html_dt',d)
 
 def public_river_sources(request):
-  t = loader.get_template('wom_river/river_sources.html_dt')
   syndicated_sources = FeedSource.objects.filter(is_public=True).order_by('name')
   other_sources = Source.objects.filter(is_public=True).exclude(url__in=[s.url for s in syndicated_sources]).order_by('name')
-  if request.user.is_authenticated():
-    username = request.user.username
-  else:
-    username = None
-  c = Context({
+  d = wom_add_base_context_data(
+    {
       'syndicated_sources': syndicated_sources,
       'referenced_sources': other_sources,
-      'messages' : [],
-      'username' : username,
-      'title_qualify': "Public",
-      'realm': "public",
-      })
-  return HttpResponse(t.render(c))
+      }, request.user.username, WOMPublic)
+  return render_to_response('wom_river/river_sources.html_dt', d)
 
-@login_required(login_url='/accounts/login/')
-def user_river_view(request,ownername):
-  if ownername != request.user.username:
-    return HttpResponseForbidden()
-  user_profile = request.user.userprofile
+@check_and_set_owner
+def user_river_view(request,owner_name):
+  user_profile = request.owner_user.userprofile
   latest_items = []
   for source in user_profile.feed_sources.all():
     latest_items.extend(source.reference_set.order_by('-pub_date')[:MAX_ITEMS_PER_PAGE])
   latest_items.sort(key=lambda x:x.pub_date)
   latest_items.reverse()
-  t = loader.get_template('wom_river/river.html_dt')
-  c = Context({
+  d = wom_add_base_context_data({
       'latest_unread_pebbles': latest_items[:MAX_ITEMS_PER_PAGE],
-      'messages' : [],
-      'username' : request.user.username,
-      'title_qualify': "Your",
-      'realm': "u/%s" % request.user.username,
-      })
-  return HttpResponse(t.render(c))
+      }, request.user.username, owner_name)
+  return render_to_response('wom_river/river.html_dt',d)
 
 
-def generate_user_sieve(request):
+def generate_user_sieve(request,owner_name):
   """
   Generate the HTML page on which a given user will be able to see and
   use it's sieve to read and sort out the latests news.
@@ -109,19 +83,15 @@ def generate_user_sieve(request):
   unread_pebbles = ReferenceUserStatus.objects.filter(has_been_read=False)
   num_unread = unread_pebbles.count()
   oldest_unread_pebbles = unread_pebbles.select_related("ref","source").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
-  t = loader.get_template('wom_river/sieve.html_dt')
-  c = Context({
+  d = wom_add_base_context_data({
       'oldest_unread_pebbles': oldest_unread_pebbles,
-      'messages' : [],
-      'username' : request.user.username,
       'num_unread_pebbles': num_unread,
-      'title_qualify': "Your",
-      'realm': "u/%s" % request.user.username,
       'user_collection_url': "/u/%s/collection/" % request.user.username,
-      })
-  return HttpResponse(t.render(c))
-  
-def apply_to_user_sieve(request):
+      }, request.user.username, request.user.username)
+  return render_to_response('wom_river/sieve.html_dt',d)
+
+
+def apply_to_user_sieve(request,owner_name):
   """
   Act on the items passing through the sieve.
   
@@ -153,29 +123,30 @@ def apply_to_user_sieve(request):
   response_dict = {u"action": u"read", u"status": u"success", u"count": count}
   return HttpResponse(simplejson.dumps(response_dict), mimetype='application/json')
 
-@login_required(login_url='/accounts/login/')
-def user_river_sieve(request):
+@loggedin_and_owner_required
+def user_river_sieve(request,owner_name):
+  if owner_name != request.user.username:
+    return HttpResponseForbidden()
   if request.method == 'GET':
-    return generate_user_sieve(request)
+    return generate_user_sieve(request,owner_name)
   elif request.method == 'POST':
-    return apply_to_user_sieve(request)
+    return apply_to_user_sieve(request, owner_name)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
   
-@login_required(login_url='/accounts/login/')
-def user_river_sources(request,ownername):
-  if ownername != request.user.username:
-    return HttpResponseForbidden()
-  user_profile = request.user.userprofile
-  t = loader.get_template('wom_river/river_sources.html_dt')
-  syndicated_sources = user_profile.feed_sources.all().order_by('name')
-  other_sources = request.user.userprofile.sources.exclude(url__in=[s.url for s in syndicated_sources]).order_by("name")
-  c = Context({
+@check_and_set_owner
+def user_river_sources(request,owner_name):
+  owner_profile = request.own_user.userprofile
+  syndicated_sources = owner_profile.feed_sources.all().order_by('name')
+  if not request.user.is_authenticated() or owner_name!=request.user.username:
+    user_bmks = UserBookmark.objects.filter(owner=request.owner_user,is_public=True).select_related("Reference")
+    user_refs_source_ids = set([b.reference.source.id for b in user_bmks])
+    visible_sources = request.user.userprofile.sources.filter(id__in=user_refs_source_ids)
+  else:
+    visible_sources = request.user.userprofile.sources
+  other_sources = visible_sources.exclude(id__in=[s.id for s in syndicated_sources]).order_by("name")
+  d = wom_add_base_context_data({
       'syndicated_sources': syndicated_sources,
       'referenced_sources': other_sources,
-      'messages' : [],
-      'username' : request.user.username,
-      'title_qualify': "Your",
-      'realm': "u/%s" % request.user.username,
-      })
-  return HttpResponse(t.render(c))
+      }, request.user.username, owner_name)
+  return render_to_response('wom_river/river_sources.html_dt',d)

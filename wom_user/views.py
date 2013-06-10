@@ -1,13 +1,11 @@
 from urlparse import urlparse
 
-from django.template import Context, loader
-from django.template import RequestContext
-
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseForbidden
+from django.http import HttpResponseNotFound
 
 import datetime
 from django.utils import timezone
@@ -19,8 +17,9 @@ from django.forms.util import ErrorList
 
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
-from wateronmars.views import fill_base_data
+from wateronmars.views import wom_add_base_context_data
 
 from wom_user.forms import OPMLFileUploadForm
 from wom_user.forms import UserProfileCreationForm
@@ -31,6 +30,40 @@ from wom_user.models import UserBookmark
 from wom_river.models import ReferenceUserStatus
 
 from wom_river.tasks import opml2db
+
+def check_and_set_owner(func):
+  """Decorator that applies to functions expecting the "owner" name as a second argument.
+
+  It will check if a user exists with this name and if so add to the
+  request instance a member variable called owner_user pointing to the
+  User instance corresponding to the owner.
+
+  If the owner doesn't exists, the visitor is redirected to 404.
+  """
+  def _check_and_set_owner(request, owner_name, *args, **kwargs):
+     try:
+       owner_user = User.objects.get(username=owner_name)
+     except User.DoesNotExist:
+       return HttpResponseNotFound()
+     else:
+       request.owner_user = owner_user
+       return func(request, owner_name, *args, **kwargs)
+  return _check_and_set_owner
+
+def loggedin_and_owner_required(func):
+  """Decorator that applies to functions expecting the "owner" name as a second argument.
+
+  It will check that the visitor is also considered as the owner of the resource it is accessing.
+
+  Note: automatically calls login_required and check_and_set_owner decorators.
+  """
+  @login_required(login_url='/accounts/login/')
+  @check_and_set_owner
+  def _loggedin_and_owner_required(request, owner_name, *args, **kwargs):
+    if request.user != request.owner_user:
+      return HttpResponseForbidden()
+    else:
+      return func(request, owner_name, *args, **kwargs)
 
 
 class CustomErrorList(ErrorList):
@@ -45,14 +78,12 @@ class CustomErrorList(ErrorList):
 @login_required(login_url='/accounts/login/')
 @csrf_protect
 def user_profile(request):
-  d =  fill_base_data(
-    request.user.username,"Your",
+  d =  wom_add_base_context_data(
     {
       'username': request.user.username,
       'opml_form': OPMLFileUploadForm(error_class=CustomErrorList),
-      })
-  return render_to_response('wom_user/profile.html', d,
-                            context_instance=RequestContext(request))
+      },request.user.username,request.user.username)
+  return render_to_response('wom_user/profile.html', d)
 
 
 def handle_uploaded_opml(opmlUploadedFile,user):
@@ -64,10 +95,10 @@ def handle_uploaded_opml(opmlUploadedFile,user):
   
 
 
-@login_required(login_url='/accounts/login/')
+@loggedin_and_owner_required
 @csrf_protect
-def user_upload_opml(request,ownername):
-  if ownername != request.user.username:
+def user_upload_opml(request,owner_name):
+  if owner_name != request.user.username:
     return HttpResponseForbidden()
   if request.method == 'POST':
     form = OPMLFileUploadForm(request.POST, request.FILES, error_class=CustomErrorList)
@@ -76,16 +107,14 @@ def user_upload_opml(request,ownername):
       return HttpResponseRedirect('/u/%s/sources' % request.user.username)
   else:
     form = OPMLFileUploadForm(error_class=CustomErrorList)
-  d = fill_base_data(request.user.username,"Your",
-                     {'form': form})
-  return render_to_response('wom_user/opml_upload.html',d,
-                            context_instance=RequestContext(request))
+  d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
+  return render_to_response('wom_user/opml_upload.html',d)
 
 
-@login_required(login_url='/accounts/login/')
-def post_to_user_collection(request):
-  """
-  Act on the items passing through the sieve.
+@loggedin_and_owner_required
+@csrf_protect
+def post_to_user_collection(request,owner_name):
+  """Act on the items passing through the sieve.
   
   The only accepted action for now is to bookmark an items, with the
   following JSON payload::
@@ -181,34 +210,31 @@ def post_to_user_collection(request):
   return HttpResponse(simplejson.dumps(response_dict), mimetype='application/json')
 
     
-@login_required(login_url='/accounts/login/')
-def get_user_collection(request,ownername):
-  if ownername != request.user.username:
-    return HttpResponseForbidden()
-  bookmarks = UserBookmark.objects.filter(owner=request.user).select_related("reference").all()
+@check_and_set_owner
+def get_user_collection(request,owner_name):
+  bookmarks = UserBookmark.objects.filter(owner=request.owner_user).select_related("reference").all()
+  if request.user != request.owner_user:
+    bookmarks = bookmarks.filter(is_public=True)
   # TODO preload sources !
-  d = fill_base_data(
-    request.user.username,"Your",
+  d = wom_add_base_context_data(
     {
       'user_bookmarks': bookmarks,
       'num_bookmarks': len(bookmarks),
       'collection_url' : request.build_absolute_uri(request.path).rstrip("/")
-      })
-  return render_to_response('wom_user/collection.html_dt',d,
-                            context_instance=RequestContext(request))
+      }, request.user.username, owner_name)
+  return render_to_response('wom_user/collection.html_dt',d)
 
 
-@login_required(login_url='/accounts/login/')
-def user_collection(request):
+def user_collection(request,owner_name):
   if request.method == 'GET':
-    return get_user_collection(request)
+    return get_user_collection(request,owner_name)
   elif request.method == 'POST':
-    try:
-      return post_to_user_collection(request)
-    except Exception,e:
-      raise e
+    if request.user.username != owner_name:
+      return HttpResponseForbidden()
+    return post_to_user_collection(request)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
+
 
 
 
@@ -227,7 +253,5 @@ def user_creation(request):
   else:
     return HttpResponseNotAllowed(['GET','POST'])
   return render_to_response('registration/user_creation.html',
-                            {'form': form},
-                            context_instance=RequestContext(request))
-
+                            {'form': form})
 

@@ -7,7 +7,7 @@ OPML Import
 
 {% block content %}
 
-<h2>Share your sources {{username}} !</h2>
+<h2>Share your sources {{visitor_name}} !</h2>
 
 <p class="lead">This page will help you import several feeds at once by uploading an <a href="http://opml.org">OPML</a> file.</p>
 
@@ -16,7 +16,7 @@ OPML Import
   <p>There was an error uploading your file. Please try again.</p>
 </div>
 {% endif %}
-<form action="/u/{{username}}/sources/opml/" method="post" enctype="multipart/form-data">
+<form action="/u/{{visitor_name}}/sources/opml/" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}

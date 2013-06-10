@@ -30,16 +30,16 @@
 {% if not referenced_sources %}
 <div class="alert alert-block">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <p>You don't have any source apart from the feed you've suscribed to).</p>
+  <p>No source apart from the feed subscriptions.</p>
 </div>
 {% endif %}
 {% else %}
 <div class="alert alert-block">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
 {% if referenced_sources %}
-  <p>You haven't yet suscribed to any news source.</p>
+  <p>No subscription.</p>
 {% else %}
-  <p>You don't have any source yet.</p>   
+  <p>No source yet.</p>   
 {% endif %}
 </div>
 {% endif %}

@@ -2,18 +2,37 @@ from django.http import HttpResponseRedirect
 from wom_river.tasks import collect_all_new_pebbles_sync
 from wom_river.tasks import delete_old_pebbles_sync
 
-def fill_base_data(username,title_qualify,d):
-  """Generate the context data needed for template that inherit from the base template.
-  'username': the user name of the  visitor's !
-  'title_qualify': the qualification of the page wrt the visitor (Your
-  or Public for now).
+class WOMPublic(object):
+  
+  def __init__(self):
+    self.username = ''
+
+WOMPublic = WOMPublic()
+
+def wom_add_base_context_data(d,visitor_name, owner_name):
+  """Generate the context data needed for templates that inherit from
+  the base template.
+  
+  'd': the dictionary of custom data for the context.
+  'visitor_name': the username of the visitor ("None" if anonymous).
+  'owner_name': the username of the owner (WOMPublic if public).
   """
-  # TODO distinguish usernames as page_owner and visitor
+  if visitor_name == owner_name:
+    tq = "Your"
+  elif owner_name is WOMPublic:
+    tq = "Public"
+  else:
+    tq = "%s's" % owner_name
+  if owner_name is WOMPublic:
+    r = "public"
+  else:
+    r = "u/%s" % owner_name
   d.update({
-    'username' : username,
-    'title_qualify': title_qualify,
-    'realm': "u/%s" % username
-    })
+      'visitor_name' : visitor_name,
+      'owner_name' : owner_name,
+      'title_qualify': tq,
+      'realm': r
+      })
   return d
 
 
