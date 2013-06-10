@@ -45,4 +45,7 @@ class UserBookmark(models.Model):
   tags  = models.ManyToManyField(Tag)  
   # Date at which the bookmark was created
   saved_date = models.DateTimeField('saved date')
-  
+  # Indicate wether this bookmark may be shared and displayed publicly
+  is_public = models.BooleanField(default=False)
+
+
