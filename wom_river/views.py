@@ -136,7 +136,7 @@ def user_river_sieve(request,owner_name):
   
 @check_and_set_owner
 def user_river_sources(request,owner_name):
-  owner_profile = request.own_user.userprofile
+  owner_profile = request.owner_user.userprofile
   syndicated_sources = owner_profile.feed_sources.all().order_by('name')
   if not request.user.is_authenticated() or owner_name!=request.user.username:
     user_bmks = UserBookmark.objects.filter(owner=request.owner_user,is_public=True).select_related("Reference")
