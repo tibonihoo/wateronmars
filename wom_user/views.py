@@ -1,5 +1,6 @@
 import urllib
 
+from django.template import RequestContext
 from django.core.urlresolvers import reverse
 
 from django.http import HttpResponse
@@ -87,7 +88,7 @@ def user_profile(request):
       'opml_form': OPMLFileUploadForm(error_class=CustomErrorList),
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username)
       },request.user.username,request.user.username)
-  return render_to_response('wom_user/profile.html', d)
+  return render_to_response('wom_user/profile.html', d, context_instance=RequestContext(request))
 
 
 def handle_uploaded_opml(opmlUploadedFile,user):
@@ -110,7 +111,7 @@ def user_upload_opml(request,owner_name):
   else:
     form = OPMLFileUploadForm(error_class=CustomErrorList)
   d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
-  return render_to_response('wom_user/opml_upload.html',d)
+  return render_to_response('wom_user/opml_upload.html',d, context_instance=RequestContext(request))
 
 
 @loggedin_and_owner_required
@@ -130,7 +131,7 @@ def user_collection_add(request,owner_name):
     form.save()
     return HttpResponseRedirect('/u/%s/collection' % request.user.username)
   d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
-  return render_to_response('wom_user/bookmark_addition.html',d)
+  return render_to_response('wom_user/bookmark_addition.html',d, context_instance=RequestContext(request))
   
   
 @loggedin_and_owner_required
@@ -177,7 +178,7 @@ def get_user_collection(request,owner_name):
       'collection_url' : request.build_absolute_uri(request.path).rstrip("/"),
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
-  return render_to_response('wom_user/collection.html_dt',d)
+  return render_to_response('wom_user/collection.html_dt',d, context_instance=RequestContext(request))
 
 
 def user_collection(request,owner_name):
@@ -186,7 +187,7 @@ def user_collection(request,owner_name):
   elif request.method == 'POST':
     if request.user.username != owner_name:
       return HttpResponseForbidden()
-    return post_to_user_collection(request)
+    return post_to_user_collection(request,owner_name)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
 
@@ -208,5 +209,5 @@ def user_creation(request):
   else:
     return HttpResponseNotAllowed(['GET','POST'])
   return render_to_response('registration/user_creation.html',
-                            {'form': form})
+                            {'form': form}, context_instance=RequestContext(request))
 
