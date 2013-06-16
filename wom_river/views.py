@@ -5,6 +5,7 @@ from django.http import HttpResponseForbidden
 from django.utils import simplejson
 from django.db import transaction
 
+from django.template import RequestContext
 from django.shortcuts import render_to_response
 
 from wateronmars.views import wom_add_base_context_data
@@ -71,7 +72,7 @@ def user_river_view(request,owner_name):
   d = wom_add_base_context_data({
       'latest_unread_pebbles': latest_items[:MAX_ITEMS_PER_PAGE],
       }, request.user.username, owner_name)
-  return render_to_response('wom_river/river.html_dt',d)
+  return render_to_response('wom_river/river.html_dt',d, context_instance=RequestContext(request))
 
 
 def generate_user_sieve(request,owner_name):
@@ -88,7 +89,7 @@ def generate_user_sieve(request,owner_name):
       'num_unread_pebbles': num_unread,
       'user_collection_url': "/u/%s/collection/" % request.user.username,
       }, request.user.username, request.user.username)
-  return render_to_response('wom_river/sieve.html_dt',d)
+  return render_to_response('wom_river/sieve.html_dt',d, context_instance=RequestContext(request))
 
 
 def apply_to_user_sieve(request,owner_name):
@@ -149,4 +150,4 @@ def user_river_sources(request,owner_name):
       'syndicated_sources': syndicated_sources,
       'referenced_sources': other_sources,
       }, request.user.username, owner_name)
-  return render_to_response('wom_river/river_sources.html_dt',d)
+  return render_to_response('wom_river/river_sources.html_dt',d, context_instance=RequestContext(request))
