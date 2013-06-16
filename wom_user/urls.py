@@ -8,4 +8,5 @@ urlpatterns = patterns('',
                        url(r'^(?P<owner_name>[^/]*)/sources/$', 'wom_river.views.user_river_sources'),
                        url(r'^(?P<owner_name>[^/]*)/river/$', 'wom_river.views.user_river_view'),
                        url(r'^(?P<owner_name>[^/]*)/sieve/$', 'wom_river.views.user_river_sieve'),
+                       url(r'^(?P<owner_name>[^/]*)/collection/add/$','wom_user.views.user_collection_add')
                        )

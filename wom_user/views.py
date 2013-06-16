@@ -1,4 +1,6 @@
-from urlparse import urlparse
+import urllib
+
+from django.core.urlresolvers import reverse
 
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
@@ -7,14 +9,12 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponseForbidden
 from django.http import HttpResponseNotFound
 
-import datetime
-from django.utils import timezone
 from django.shortcuts import render_to_response
 from django.utils import simplejson
-from django.db import transaction
 from django.forms.util import ErrorList
 
 
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -23,11 +23,9 @@ from wateronmars.views import wom_add_base_context_data
 
 from wom_user.forms import OPMLFileUploadForm
 from wom_user.forms import UserProfileCreationForm
+from wom_user.forms import UserBookmarkAdditionForm
 
-from wom_pebbles.models import Reference
-from wom_pebbles.models import Source
 from wom_user.models import UserBookmark
-from wom_river.models import ReferenceUserStatus
 
 from wom_river.tasks import opml2db
 
@@ -64,6 +62,11 @@ def loggedin_and_owner_required(func):
       return HttpResponseForbidden()
     else:
       return func(request, owner_name, *args, **kwargs)
+  return _loggedin_and_owner_required
+
+
+def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):
+  return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&description='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_collection_add',args=(owner_name,)))
 
 
 class CustomErrorList(ErrorList):
@@ -82,6 +85,7 @@ def user_profile(request):
     {
       'username': request.user.username,
       'opml_form': OPMLFileUploadForm(error_class=CustomErrorList),
+      'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username)
       },request.user.username,request.user.username)
   return render_to_response('wom_user/profile.html', d)
 
@@ -94,12 +98,10 @@ def handle_uploaded_opml(opmlUploadedFile,user):
     raise ValueError("Uploaded file '%s' is not OPML !" % opmlUploadedFile.name)
   
 
-
 @loggedin_and_owner_required
 @csrf_protect
+@require_http_methods(["GET","POST"])
 def user_upload_opml(request,owner_name):
-  if owner_name != request.user.username:
-    return HttpResponseForbidden()
   if request.method == 'POST':
     form = OPMLFileUploadForm(request.POST, request.FILES, error_class=CustomErrorList)
     if form.is_valid():
@@ -113,14 +115,30 @@ def user_upload_opml(request,owner_name):
 
 @loggedin_and_owner_required
 @csrf_protect
+@require_http_methods(["GET","POST"])
+def user_collection_add(request,owner_name):
+  """Handle bookmarlet and form-based addition of a bookmark.
+  The bookmarlet is formatted in the following way:
+  .../collection/add/?url="..."&title="..."&description="..."&source_url="..."&source_name="..."&pub_date="..."
+  """
+  if request.method == 'POST':
+    bmk_info = request.POST
+  else: # GET
+    bmk_info = dict( (k,urllib.unquote_plus(v)) for k,v in request.GET.items())
+  form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
+  if form.is_valid():
+    form.save()
+    return HttpResponseRedirect('/u/%s/collection' % request.user.username)
+  d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
+  return render_to_response('wom_user/bookmark_addition.html',d)
+  
+  
+@loggedin_and_owner_required
+@csrf_protect
 def post_to_user_collection(request,owner_name):
-  """Act on the items passing through the sieve.
-  
-  The only accepted action for now is to bookmark an items, with the
-  following JSON payload::
-  
-    { "a": "add",
-      "url": "<url>",
+  """Add an item with the payload from a form's POST or with the
+  following JSON payload::  
+    { "url": "<url>",
       "title": "the title", // optional but recommended
       "description": "", // optional
       "source_url": "<url>", // optional
@@ -128,99 +146,36 @@ def post_to_user_collection(request,owner_name):
     }
   """
   try:
-    action_dict = simplejson.loads(request.body)
+    bmk_info = simplejson.loads(request.body)
   except:
-    action_dict = {}
-  if action_dict.get(u"a") != u"add":
-    return HttpResponseBadRequest("Only a JSON formatted 'save' action is supported.")
-  if not u"url" in action_dict:
-    return HttpResponseBadRequest("Impossible to 'save' a bookmark: the 'url' parameter is missing.")
-  url_to_save = action_dict[u"url"]
-  if not request.user.userbookmark_set.filter(reference__url=url_to_save).exists():
-    # lookup a matching Reference
-    same_url_refs = Reference.objects.filter(url=url_to_save)
-    if u"source_url" in action_dict:
-      bookmark_source_url = action_dict[u"source_url"]
-    else:
-      url_cpt = urlparse(url_to_save)
-      bookmark_source_url = url_cpt.netloc or url_to_save
-    same_sources = request.user.userprofile.sources.filter(url=bookmark_source_url).all()
-    if same_sources:
-      user_has_same_source = True
-    else:
-      user_has_same_source = False
-      # try a bigger look-up anyway
-      same_sources = Source.objects.filter(url=bookmark_source_url).all()
-    # url are unique for sources
-    if same_sources:
-      bookmark_source = same_sources[0]
-      refs_with_same_source = same_url_refs.filter(source=bookmark_source)
-    else:
-      bookmark_source = None
-      refs_with_same_source = None
-    if refs_with_same_source:
-      # take the first that comes...
-      bookmarked_ref = refs_with_same_source[0]
-    elif same_url_refs.exists():
-      # take the first that comes...
-      bookmarked_ref = same_url_refs[0]
-    else:
-      if bookmark_source is None:
-        # find the source name or generate a reasonable one
-        if u"source_name" in action_dict:
-          bookmark_source_name = action_dict[u"source_name"]
-        else:
-          url_cpt = urlparse(url_to_save)
-          bookmark_source_name = url_cpt.hostname or ""
-          if url_cpt.path:
-            bookmark_source_name +=  "/" + url_cpt.path
-        bookmark_source = Source()
-        bookmark_source.url = bookmark_source_url
-        bookmark_source.name = bookmark_source_name
-        bookmark_source.save()
-      bookmarked_ref = Reference()
-      bookmarked_ref.source = bookmark_source
-      bookmarked_ref.url = action_dict[u"url"]
-      bookmarked_ref.title = action_dict.get(u"title",bookmarked_ref.url)
-      # for lack of a better source of info
-      bookmarked_ref.pub_date = action_dict.get(u"pub_date",datetime.datetime.now(timezone.utc)-datetime.timedelta(weeks=12))
-      bookmarked_ref.description = action_dict.get(u"description","")
-      bookmarked_ref.tags = bookmark_source.tags
-      bookmarked_ref.save()
-    with transaction.commit_on_success():
-      b = UserBookmark()
-      b.owner = request.user
-      b.saved_date = datetime.datetime.now(timezone.utc)-datetime.timedelta(weeks=12)
-      b.reference = bookmarked_ref
-      bookmarked_ref.save_count += 1
-      b.save()
-      bookmarked_ref.save()
-    with transaction.commit_on_success():
-      if not user_has_same_source:
-        request.user.userprofile.sources.add(bookmarked_ref.source)
-        request.user.userprofile.save()
-      b.tags = bookmarked_ref.tags.all()
-      b.save()
-      
-  with transaction.commit_on_success():
-    for rust in ReferenceUserStatus.objects.filter(ref__url=url_to_save).all():
-      rust.has_been_saved = True
-      rust.save()
-  response_dict = {u"a": u"save", u"status": u"success"}
+    bmk_info = {}
+    if not u"url" in bmk_info:
+      return HttpResponseBadRequest("Impossible to 'save' a bookmark: the 'url' parameter is missing.")
+  form = UserBookmarkAdditionForm(request.user, bmk_info)
+  response_dict = {}
+  if form.is_valid():
+    form.save()
+    response_dict["status"] = u"success"
+    # TODO: also add the url to the new bookmark in the answer
+  else:
+    response_dict["status"] = u"error"
+    response_dict["form_fields_ul"] = form.as_url()
   return HttpResponse(simplejson.dumps(response_dict), mimetype='application/json')
 
     
 @check_and_set_owner
 def get_user_collection(request,owner_name):
+  """Display the collection of bookmarks"""
   bookmarks = UserBookmark.objects.filter(owner=request.owner_user).select_related("reference").all()
   if request.user != request.owner_user:
     bookmarks = bookmarks.filter(is_public=True)
-  # TODO preload sources !
+  # TODO preload sources ?
   d = wom_add_base_context_data(
     {
       'user_bookmarks': bookmarks,
       'num_bookmarks': len(bookmarks),
-      'collection_url' : request.build_absolute_uri(request.path).rstrip("/")
+      'collection_url' : request.build_absolute_uri(request.path).rstrip("/"),
+      'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
   return render_to_response('wom_user/collection.html_dt',d)
 
