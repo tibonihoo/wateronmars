@@ -186,7 +186,7 @@ function updateReadStatusOnServer(read_items_urls, callback) {
 // @param callback function to be called when the server's answer is received
 function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
   if (gUserCollectionURL=="") return;
-  var jsonStr = JSON.stringify({"a" : "add", "url": url, "title" : title, "source_url" : sourceURL, "source_name" : sourceTitle });
+  var jsonStr = JSON.stringify({"url": url, "title" : title, "source_url" : sourceURL, "source_name" : sourceTitle });
   var csrftoken = getCookie('csrftoken');
   // TODO: find something more generic (like saving the url for
   // collection in the page and/or passing it as arg to this function)
