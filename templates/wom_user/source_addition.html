@@ -1,0 +1,41 @@
+{% extends "wateronmars/base.html_dt" %}
+
+
+{% block title %}
+New subscription
+{% endblock %}
+
+{% block content %}
+
+<h2>Subsribe to a new source, {{visitor_name}} !</h2>
+
+<p class="lead">Enter below the information about a new source of news.</p>
+
+{% if form.errors %}
+<div class="alert alert-error">
+  <p>Please check the information below.</p>
+  {{ form.non_field_errors|safe }}
+</div>
+{% endif %}
+<form action="/u/{{visitor_name}}/sources/add/" method="post">
+  {% csrf_token %}
+  {% for field in form %}
+  {% if field.errors %}
+  <div class="control-group error">
+  {%  else %}
+  <div class="control-group">
+  {% endif %}
+    <span class="control-label">{{ field.label_tag }}</span>
+    <div class="controls">
+      {{ field }} {{ field.errors|safe }}
+    </div>
+  </div>
+  {% endfor %}
+  <div class="control-groups">
+    <div class="controls">
+    <input type="submit" value="Subscribe to this source" class="btn" />
+    <input type="hidden" name="next" value="{{ next }}" class="btn" />
+    </div>
+  </div>
+</form>
+{% endblock %}

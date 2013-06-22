@@ -25,6 +25,7 @@ from wateronmars.views import wom_add_base_context_data
 from wom_user.forms import OPMLFileUploadForm
 from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
+from wom_user.forms import UserSourceAdditionForm
 
 from wom_user.models import UserBookmark
 
@@ -112,6 +113,27 @@ def user_upload_opml(request,owner_name):
     form = OPMLFileUploadForm(error_class=CustomErrorList)
   d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
   return render_to_response('wom_user/opml_upload.html',d, context_instance=RequestContext(request))
+
+
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET","POST"])
+def user_river_source_add(request,owner_name):
+  """Handle bookmarlet and form-based addition of a syndication of source.
+  The bookmarlet is formatted in the following way:
+  .../source/add/?url="..."&name="..."&feed_url="..."
+  """
+  if request.method == 'POST':
+    bmk_info = request.POST
+  else: # GET
+    bmk_info = dict( (k,urllib.unquote_plus(v)) for k,v in request.GET.items())
+  form = UserSourceAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
+  if bmk_info and form.is_valid():
+    form.save()
+    return HttpResponseRedirect('/u/%s/sources/add' % request.user.username)
+  d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
+  return render_to_response('wom_user/source_addition.html',d, context_instance=RequestContext(request))
+
 
 
 @loggedin_and_owner_required

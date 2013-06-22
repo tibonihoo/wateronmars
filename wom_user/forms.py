@@ -5,8 +5,10 @@ from django.utils import timezone
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-
+from django.core.validators import URLValidator
 from django.db import transaction
+
+from wateronmars import settings
 
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import SOURCE_NAME_MAX_LENGTH
@@ -14,10 +16,14 @@ from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import Reference
 from wom_pebbles.models import Source
 
+from wom_river.models import FeedSource
 from wom_river.models import ReferenceUserStatus
 
 from wom_user.models import UserProfile
 from wom_user.models import UserBookmark
+
+from wom_river.utils import feedfinder
+feedfinder.setUserAgent(settings.USER_AGENT)
 
 
 class OPMLFileUploadForm(forms.Form):
@@ -143,4 +149,109 @@ class UserBookmarkAdditionForm(forms.Form):
         rust.has_been_saved = True
         rust.save()
     return b
+
+
+class UserSourceAdditionForm(forms.Form):
+  """Collect all necessary data to subscribe to a new source."""
+
+  # TODO: use feedfinder for validation
   
+  url = forms.URLField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}),
+                       validators = [URLValidator(verify_exists=True)])
+  name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"input-large"}))
+  feed_url = forms.URLField(max_length=URL_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}),
+                            validators = [URLValidator(verify_exists=True)])
+  
+  def __init__(self,user, *args, **kwargs):
+    forms.Form.__init__(self,*args,**kwargs)
+    self.user = user
+
+  def clean(self):
+    """Used to set the right feed_url if it hasn't been given."""
+    cleaned_data = super(UserSourceAdditionForm, self).clean()
+    url = cleaned_data.get("url")
+    feed_url = cleaned_data.get("feed_url")
+    if feed_url and feedfinder.isFeed(feed_url.encode("utf-8")):
+      return cleaned_data
+    if feedfinder.isFeed(url.encode("utf-8")):
+      cleaned_data["feed_url"] = url
+      return cleaned_data
+    # the feed is not here or invalid: let's see if we can find some
+    # valid feed urls by ourselves.
+    feed_error_msg = u"Please give the URL of an existing valid feed."
+    candidates = set(unicode(f) for f in feedfinder.feeds(url.encode("utf-8")))
+    if not candidates:
+      self._errors["feed_url"] = self.error_class([feed_error_msg])
+      raise forms.ValidationError(u"Impossible to find feeds at the given URL or even to discover one related to the source's URL")
+    # A little sorting will help making a good guess when several
+    # candidates are available.
+    # For Wordpress blogs at least there is usually several feeds
+    # one of which is the comment feed and is "probably not" the one
+    # the user wants to subscribe when giving only the url to the
+    # said blog.
+    second_candidates = set(f for f in candidates if u"comment" in f)
+    candidates = list(candidates - second_candidates) + list(second_candidates)
+    if feed_url:
+      print feed_url
+      # The user has given a URL, and we cannot exchange it without
+      # asking a confirmation
+      # TODO: try to see if one of the candidates is close enough that
+      # the first URL could be a typo
+      self._errors["feed_url"] = self.error_class([feed_error_msg])
+      raise forms.ValidationError(u"There is no valid field at the given URL (maybe you meant one of %s)" % candidates)
+    # try to guess the right feed for the URL
+    best_guess_url = unicode(candidates[0])
+    if len(candidates)>1:
+      # too much sources, we should ask the user to select one of
+      # these. TODO: do this with a better UX that raw display of URLs
+      self._errors["feed_url"] = self.error_class([feed_error_msg])
+      # get a mutable copy of the querydict and change it to add a
+      # default value for the feed_url
+      data = self.data.copy()
+      data["feed_url"] = best_guess_url
+      self.data = data
+      raise forms.ValidationError(u"There are several feeds related to the source at '%s', please select one of them (candidate URLs: %s)" % (url,candidates))
+    # only one candidate and no feed proposed by the user, let's
+    # select it arbitrarily
+    cleaned_data["feed_url"] = best_guess_url
+    return cleaned_data
+
+  
+  def save(self):
+    """Warning: the source will be saved as well as the related objects
+    (no commit options).
+    Returns the source.
+    """
+    form_url = self.cleaned_data["url"]
+    form_name = self.cleaned_data["name"]
+    form_feed_url = self.cleaned_data["feed_url"]
+    if self.user.userprofile.feed_sources.filter(url=form_url).exists():
+      # nothing to do
+      return
+    # try a bigger look-up anyway
+    same_sources = FeedSource.objects.filter(url=form_url).all()
+    # url are unique for sources
+    if same_sources:
+      new_source = same_sources[0]
+    else:
+      if form_name:
+        source_name = form_name
+      else:
+        url_cpt = urlparse(form_url)
+        source_name = url_cpt.hostname or ""
+        if url_cpt.path.split("/") and url_cpt.path != "/":
+          source_name +=  url_cpt.path
+      new_source = FeedSource()
+      new_source.url = form_url
+      new_source.name = source_name
+      # assume that either form_feed_url or form_url have been
+      # validated as a valid feed url
+      new_source.xmlURL = form_feed_url or form_url
+      new_source.last_update = datetime.datetime.utcfromtimestamp(0).replace(tzinfo=timezone.utc)
+      new_source.is_public = True
+      new_source.save()      
+    if not self.user.userprofile.sources.filter(url=form_url).exists():
+      self.user.userprofile.sources.add(new_source)
+    self.user.userprofile.feed_sources.add(new_source)
+    self.user.save()
+    return new_source
