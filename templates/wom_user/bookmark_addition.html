@@ -14,6 +14,7 @@ Add a bookmark
 {% if form.errors %}
 <div class="alert alert-error">
   <p>Please check the information below.</p>
+  {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
 <form action="/u/{{visitor_name}}/collection/add/" method="post">

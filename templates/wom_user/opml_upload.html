@@ -14,6 +14,7 @@ OPML Import
 {% if form.errors %}
 <div class="alert alert-error">
   <p>There was an error uploading your file. Please try again.</p>
+  {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
 <form action="/u/{{visitor_name}}/sources/opml/" method="post" enctype="multipart/form-data">

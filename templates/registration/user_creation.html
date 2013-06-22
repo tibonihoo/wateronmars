@@ -23,6 +23,7 @@ User authentication
 {% if form.errors %}
 <div class="alert alert-error">
   <p>Errors were detected. Please try again to fill in the form.</p>
+  {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
 <form class="form-horizontal" 
