@@ -17,7 +17,7 @@ if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
 # User-Agent (important for websites that protect against DDOS by
 # blacklisting some user-agents)
 USER_AGENT = "WOM"
-URL_VALIDATOR_USER_AGENT = USER_AGENT
+
 
 # DEBUG or not DEBUG
 if DEPLOYMENT_PLATFORM == "heroku":

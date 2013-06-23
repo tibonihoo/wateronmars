@@ -154,13 +154,9 @@ class UserBookmarkAdditionForm(forms.Form):
 class UserSourceAdditionForm(forms.Form):
   """Collect all necessary data to subscribe to a new source."""
 
-  # TODO: use feedfinder for validation
-  
-  url = forms.URLField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}),
-                       validators = [URLValidator(verify_exists=True)])
+  url = forms.URLField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
   name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"input-large"}))
-  feed_url = forms.URLField(max_length=URL_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}),
-                            validators = [URLValidator(verify_exists=True)])
+  feed_url = forms.URLField(max_length=URL_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
   
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
