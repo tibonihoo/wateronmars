@@ -26,6 +26,7 @@ from wom_user.forms import OPMLFileUploadForm
 from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
+from wom_user.forms import CreateUserSourceRemovalForm
 
 from wom_user.models import UserBookmark
 
@@ -127,16 +128,36 @@ def user_river_source_add(request,owner_name):
   .../source/add/?url="..."&name="..."&feed_url="..."
   """
   if request.method == 'POST':
-    bmk_info = request.POST
-  else: # GET
-    bmk_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
-  form = UserSourceAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
-  if bmk_info and form.is_valid():
+    src_info = request.POST
+  elif request.GET: # GET
+    src_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+  else:
+    src_info = None
+  form = UserSourceAdditionForm(request.user, src_info, error_class=CustomErrorList)
+  if src_info and form.is_valid():
     form.save()
     return HttpResponseRedirect('/u/%s/sources/' % request.user.username)
   d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
   return render_to_response('wom_user/source_addition.html',d, context_instance=RequestContext(request))
 
+
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET","POST"])
+def user_river_source_remove(request,owner_name):
+  """Stop subscriptions to sources."""
+  if request.method == 'POST':
+    src_info = request.POST
+  elif request.GET: # GET
+    src_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+  else:
+    src_info = None
+  form = CreateUserSourceRemovalForm(request.user, src_info, error_class=CustomErrorList)
+  if src_info and form.is_valid():
+    form.save()
+    return HttpResponseRedirect('/u/%s/sources/' % request.user.username)
+  d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
+  return render_to_response('wom_user/source_removal.html',d, context_instance=RequestContext(request))
 
 
 @loggedin_and_owner_required
@@ -149,8 +170,10 @@ def user_collection_add(request,owner_name):
   """
   if request.method == 'POST':
     bmk_info = request.POST
-  else: # GET
+  elif request.GET: # GET
     bmk_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+  else:
+    bmk_info = None
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
   if form.is_valid():
     form.save()

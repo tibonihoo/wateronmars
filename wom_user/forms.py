@@ -166,6 +166,8 @@ class UserSourceAdditionForm(forms.Form):
     """Used to set the right feed_url if it hasn't been given."""
     cleaned_data = super(UserSourceAdditionForm, self).clean()
     url = cleaned_data.get("url")
+    if not url:
+      raise forms.ValidationError("The source URL is required.")
     feed_url = cleaned_data.get("feed_url")
     if feed_url and feedfinder.isFeed(feed_url.encode("utf-8"),checkRobotAllowed=False):
       return cleaned_data
@@ -250,3 +252,30 @@ class UserSourceAdditionForm(forms.Form):
     self.user.userprofile.feed_sources.add(new_source)
     self.user.save()
     return new_source
+
+def CreateUserSourceRemovalForm(user,*args, **kwargs):
+      
+  class UserSourceRemovalForm(forms.Form):
+    """Gather a selection of syndication sources from which the user wants to un-subsribe."""   
+    sources_to_remove = forms.ModelMultipleChoiceField(user.userprofile.feed_sources,
+                                                       widget=forms.SelectMultiple(attrs={"class":"input-xxlarge","size":"13"}))
+    
+    def __init__(self):
+      forms.Form.__init__(self,*args,**kwargs)
+      self.user = user
+   
+    def save(self,commit=True):
+      """Unsubscribe the user from the selected sources and returns
+      the list of un-subscribed sources.
+
+      If commit is set to False, the changes to the UserProfile object
+      are not commited.
+      """
+      sources_to_remove = self.cleaned_data["sources_to_remove"] 
+      for feed_source in sources_to_remove:
+        self.user.userprofile.feed_sources.remove(feed_source)
+      if commit:
+        self.user.userprofile.save()
+      return sources_to_remove
+  
+  return UserSourceRemovalForm()
