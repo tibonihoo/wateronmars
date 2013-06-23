@@ -19,7 +19,7 @@
 **** TODO inbox view of passed (ie read) news
 ** post
 *** json
-**** TODO {a="read", "urls"=[list of urls] } : mark as read all references corresponding to listed urls 
+**** TODO {"urls"=[list of urls] } : mark as read all references corresponding to listed urls 
 * u/me/sources
 ** get
 *** html
@@ -29,6 +29,13 @@
 ** post
 *** json
 **** TODO {"url"="the url", "name"="the name", "feed_url"="the url of the Atom/RSS feed"}
+* u/me/sources/add/?url='the url'&name='the name'&feed_url='the url of the Atom/RSS feed'
+** get
+*** html
+**** DONE form to add a source (prefiled with URL parameters)
+** post
+*** html-form
+**** DONE add a source
 * u/me/collection
 ** get
 *** html
@@ -37,13 +44,16 @@
 **** TODO the list of saved items
 ** post
 *** json
-**** DONE {"a" = "add", "url"= "the url", "title" = "the name" } : add bookmark to the given url
-**** DONE {"a" = "add", "url"= "the url", "title" = "the name", desc = "a description", source_url="the source URL", source_name="the source title" } : same with more details
-* u/me/collection/?a="add"&url='the url'&title='the reference title'
+**** DONE {"url"= "the url", "title" = "the name" } : add bookmark to the given url
+**** DONE {"url"= "the url", "title" = "the name", description = "a description", source_url="the source URL", source_name="the source title" } : same with more details
+* u/me/collection/add/?url='the url'&title='the reference title'
 ** get
 *** html
-**** TODO save the reference
-* u/me/collection/{pebble_id}
+**** DONE form to add a bookmark (prefiled with URL parameters)
+** post
+*** html-form
+**** DONE add a bookmark
+* u/me/collection/b/{pebble_id}
 ** get
 *** html
 **** TODO display the corresponding reference
