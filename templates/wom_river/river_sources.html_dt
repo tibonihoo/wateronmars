@@ -41,6 +41,9 @@
 {% else %}
   <p>No source yet.</p>   
 {% endif %}
+{% if source_add_bookmarklet %}
+  <p>You can subscribe to news sources with the following bookmarklet: <a href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
+{% endif %}
 </div>
 {% endif %}
 {% endblock %}

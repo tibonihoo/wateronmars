@@ -70,6 +70,8 @@ def loggedin_and_owner_required(func):
 def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):
   return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&description='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_collection_add',args=(owner_name,)))
 
+def generate_source_add_bookmarklet(base_url_with_domain,owner_name):
+  return r"javascript:ref=location.href;t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&name='+encodeURIComponent(t);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_river_source_add',args=(owner_name,)))
 
 class CustomErrorList(ErrorList):
   """Customize errors display in froms to use Bootstrap classes."""
@@ -87,7 +89,8 @@ def user_profile(request):
     {
       'username': request.user.username,
       'opml_form': OPMLFileUploadForm(error_class=CustomErrorList),
-      'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username)
+      'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+      'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       },request.user.username,request.user.username)
   return render_to_response('wom_user/profile.html', d, context_instance=RequestContext(request))
 
@@ -130,7 +133,7 @@ def user_river_source_add(request,owner_name):
   form = UserSourceAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
   if bmk_info and form.is_valid():
     form.save()
-    return HttpResponseRedirect('/u/%s/sources/add' % request.user.username)
+    return HttpResponseRedirect('/u/%s/sources/' % request.user.username)
   d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
   return render_to_response('wom_user/source_addition.html',d, context_instance=RequestContext(request))
 
