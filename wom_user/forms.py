@@ -167,9 +167,9 @@ class UserSourceAdditionForm(forms.Form):
     cleaned_data = super(UserSourceAdditionForm, self).clean()
     url = cleaned_data.get("url")
     feed_url = cleaned_data.get("feed_url")
-    if feed_url and feedfinder.isFeed(feed_url.encode("utf-8")):
+    if feed_url and feedfinder.isFeed(feed_url.encode("utf-8"),checkRobotAllowed=False):
       return cleaned_data
-    if feedfinder.isFeed(url.encode("utf-8")):
+    if feedfinder.isFeed(url.encode("utf-8"),checkRobotAllowed=False):
       cleaned_data["feed_url"] = url
       return cleaned_data
     # the feed is not here or invalid: let's see if we can find some
