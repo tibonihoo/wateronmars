@@ -301,9 +301,7 @@ def feeds(uri, all=False, querySyndic8=False, _recurs=None):
             links = getALinks(data, fulluri)
         except:
             links = []
-        print links
         locallinks = getLocalLinks(links, fulluri)
-        print locallinks
         # look for obvious feed links on the same server
         outfeeds.extend(filter(isFeed, filter(isFeedLink, locallinks)))
         if all or not outfeeds:
