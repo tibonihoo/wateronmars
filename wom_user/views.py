@@ -129,7 +129,7 @@ def user_river_source_add(request,owner_name):
   if request.method == 'POST':
     bmk_info = request.POST
   else: # GET
-    bmk_info = dict( (k,urllib.unquote_plus(v)) for k,v in request.GET.items())
+    bmk_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
   form = UserSourceAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
   if bmk_info and form.is_valid():
     form.save()
@@ -150,7 +150,7 @@ def user_collection_add(request,owner_name):
   if request.method == 'POST':
     bmk_info = request.POST
   else: # GET
-    bmk_info = dict( (k,urllib.unquote_plus(v)) for k,v in request.GET.items())
+    bmk_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
   if form.is_valid():
     form.save()
