@@ -192,7 +192,6 @@ class UserSourceAdditionForm(forms.Form):
     second_candidates = set(f for f in candidates if u"comment" in f)
     candidates = list(candidates - second_candidates) + list(second_candidates)
     if feed_url:
-      print feed_url
       # The user has given a URL, and we cannot exchange it without
       # asking a confirmation
       # TODO: try to see if one of the candidates is close enough that
