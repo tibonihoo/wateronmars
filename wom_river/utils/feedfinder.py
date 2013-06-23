@@ -249,11 +249,11 @@ def couldBeFeedData(data):
     if data.count('<html'): return 0
     return data.count('<rss') + data.count('<rdf') + data.count('<feed')
 
-def isFeed(uri):
+def isFeed(uri,checkRobotAllowed=True):
     _debuglog('seeing if %s is a feed' % uri)
     protocol = urlparse.urlparse(uri)
     if protocol[0] not in ('http', 'https'): return 0
-    data = _gatekeeper.get(uri)
+    data = _gatekeeper.get(uri,check=checkRobotAllowed)
     return couldBeFeedData(data)
 
 def sortFeeds(feed1Info, feed2Info):
