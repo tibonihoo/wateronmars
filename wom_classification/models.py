@@ -3,7 +3,7 @@ from django.db import models
 # Limit for tag names, read-only and provided for convenience in
 # sanity checks.
 # NOTE: from http://www.fun-with-words.com/word_longest.html
-# I get that the longest word in the world (chemical aparts) seems
+# I get that the longest word in the world (chemicals aparts) seems
 # to be a 85 character one, not sure all languages are covered but
 # let's make the limit 100 to be on the safe side.
 # WARNING: READ ONLY !

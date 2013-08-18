@@ -24,7 +24,8 @@ class Source(models.Model):
   """
   Describe the origin of one or many references.
   """
-  # The URL identifies a source (and URLs will be used as URIs), must be unique and used as a db_index
+  # The URL identifies a source (and URLs will be used as URIs), must
+  # be unique and used as a db_index
   url = models.CharField(max_length=URL_MAX_LENGTH, unique=True)
   # A human friendly "identification" of the source
   name = models.CharField(max_length=SOURCE_NAME_MAX_LENGTH)

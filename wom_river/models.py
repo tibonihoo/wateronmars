@@ -15,6 +15,7 @@ class FeedSource(Source):
   # The URL where to get updated list of References from
   xmlURL = models.CharField(max_length=URL_MAX_LENGTH)
   # Date marking the last time the source was checked for an update
+  # TODO:rename in last[_update]_check, last_probing or something like that
   last_update = models.DateTimeField('last update')
 
 
