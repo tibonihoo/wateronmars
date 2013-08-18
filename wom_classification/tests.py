@@ -1,16 +1,37 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
+# -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 4 -*-
 
 from django.test import TestCase
+from django.db import IntegrityError
 
+from wom_classification.models import Tag
+from wom_classification.models import TAG_NAME_MAX_LENGTH
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
+class TagModelTest(TestCase):
+    
+    def test_construction_defaults(self):
         """
-        Tests that 1 + 1 always equals 2.
+        Test the defaults values guaranteed at construction time.
         """
-        self.assertEqual(1 + 1, 2)
+        t = Tag.objects.create(name="mouf")
+        self.assertEqual("mouf",t.name)
+        self.assertFalse(t.is_public)
+        
+    def test_construction_with_max_name(self):
+        """
+        Test that the max length constant guarantees that a string of
+        the corresponding length will be accepted.
+        """
+        max_length_name = "m"*TAG_NAME_MAX_LENGTH
+        t = Tag.objects.create(name=max_length_name)
+        # Check also that the name wasn't truncated
+        self.assertEqual(max_length_name,t.name)
+        
+    def test_unicity_of_names(self):
+        """
+        Test the unicity guaranty on names.
+        """
+        t = Tag.objects.create(name="mouf")
+        self.assertRaises(IntegrityError,Tag.objects.create,name=t.name)
+        
+                          
+        
