@@ -14,7 +14,6 @@ from wateronmars.views import WOMPublic
 from wom_user.views import check_and_set_owner
 from wom_user.views import loggedin_and_owner_required
 
-from wom_user.models import UserBookmark
 from wom_pebbles.models import Reference
 from wom_pebbles.models import Source
 from wom_river.models import FeedSource
@@ -70,6 +69,7 @@ def user_river_view(request,owner_name):
   latest_items.sort(key=lambda x:x.pub_date)
   latest_items.reverse()
   d = wom_add_base_context_data({
+      # TODO rename to latest_pebbles
       'latest_unread_pebbles': latest_items[:MAX_ITEMS_PER_PAGE],
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
@@ -114,11 +114,10 @@ def apply_to_user_sieve(request,owner_name):
     return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
   modified_rust = []
   for read_url in action_dict.get(u"references",[]):
-    for rust in ReferenceUserStatus.objects.filter(has_been_read=False).select_related("ref").all():
+    for rust in ReferenceUserStatus.objects.filter(has_been_read=False,user=request.user).select_related("ref").all():
       if rust.ref.url == read_url:
         rust.has_been_read = True
         modified_rust.append(rust)
-        break  
   with transaction.commit_on_success():
     for r in modified_rust:
       r.save()
@@ -141,12 +140,7 @@ def user_river_sieve(request,owner_name):
 def user_river_sources(request,owner_name):
   owner_profile = request.owner_user.userprofile
   syndicated_sources = owner_profile.feed_sources.all().order_by('name')
-  if not request.user.is_authenticated() or owner_name!=request.user.username:
-    user_bmks = UserBookmark.objects.filter(owner=request.owner_user,is_public=True).select_related("Reference")
-    user_refs_source_ids = set([b.reference.source.id for b in user_bmks])
-    visible_sources = request.user.userprofile.sources.filter(id__in=user_refs_source_ids)
-  else:
-    visible_sources = request.user.userprofile.sources
+  visible_sources = owner_profile.sources
   other_sources = visible_sources.exclude(id__in=[s.id for s in syndicated_sources]).order_by("name")
   d = wom_add_base_context_data({
       'syndicated_sources': syndicated_sources,
