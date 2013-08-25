@@ -36,3 +36,6 @@ class ReferenceUserStatus(models.Model):
   has_been_read = models.BooleanField(default=False)
   # Saved flag
   has_been_saved = models.BooleanField(default=False)
+
+  def __unicode__(self):
+    return "'%s' (read: %s, saved: %s by '%s')" % (self.ref.title,self.has_been_read,self.has_been_saved,self.user.username)
