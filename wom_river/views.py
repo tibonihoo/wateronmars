@@ -21,6 +21,8 @@ from wom_river.models import ReferenceUserStatus
 from wom_river.tasks import check_user_unread_feed_items
 from wom_river.tasks import generate_reference_user_status
 from wom_user.views import generate_source_add_bookmarklet
+from wom_user.views import user_river_source_add
+from wom_user.views import user_river_source_remove
 
 MAX_ITEMS_PER_PAGE = 100
 
@@ -138,13 +140,25 @@ def user_river_sieve(request,owner_name):
   
 @check_and_set_owner
 def user_river_sources(request,owner_name):
-  owner_profile = request.owner_user.userprofile
-  syndicated_sources = owner_profile.feed_sources.all().order_by('name')
-  visible_sources = owner_profile.sources
-  other_sources = visible_sources.exclude(id__in=[s.id for s in syndicated_sources]).order_by("name")
-  d = wom_add_base_context_data({
-      'syndicated_sources': syndicated_sources,
-      'referenced_sources': other_sources,
-      'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
-      }, request.user.username, owner_name)
-  return render_to_response('wom_river/river_sources.html_dt',d, context_instance=RequestContext(request))
+  if request.method == 'GET':
+    owner_profile = request.owner_user.userprofile
+    syndicated_sources = owner_profile.feed_sources.all().order_by('name')
+    visible_sources = owner_profile.sources
+    other_sources = visible_sources.exclude(id__in=[s.id for s in syndicated_sources]).order_by("name")
+    d = wom_add_base_context_data({
+        'syndicated_sources': syndicated_sources,
+        'referenced_sources': other_sources,
+        'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+        }, request.user.username, owner_name)
+    return render_to_response('wom_river/river_sources.html_dt',d, context_instance=RequestContext(request))
+  elif owner_name != request.user.username:
+      return HttpResponseForbidden()
+  elif request.method == 'POST':
+    return user_river_source_add(request, owner_name)
+  # TODO
+  # elif request.method == 'DELETE':
+  #   request.method = "POST"
+  #   return user_river_source_remove(request, owner_name)
+  else:
+    return HttpResponseNotAllowed(['GET','POST'])
+  

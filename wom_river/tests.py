@@ -1,5 +1,6 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 4 -*-
 
+
 import datetime
 from django.utils import timezone
 from django.utils import simplejson
@@ -15,6 +16,12 @@ from wom_river.models import ReferenceUserStatus
 from wom_river.views import MAX_ITEMS_PER_PAGE
 
 from wom_user.models import UserProfile
+from wom_user.models import UserBookmark
+
+from wom_classification.models import Tag
+
+from wom_river.tasks import opml2db
+from wom_river.tasks import nsbmk2db
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -262,7 +269,7 @@ class UserSieveViewTest(TestCase):
 
     def test_post_json_pick_several_items_out_of_sieve(self):
         """
-        Make sure posting a list of items as read will remove it from the sieve.
+        Make sure posting a list of items as read will remove them from the sieve.
         """
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
@@ -290,39 +297,7 @@ class UserSieveViewTest(TestCase):
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_pebbles"]
         self.assertEqual(0,[r.ref.url for r in items].count("http://r1"))
-        self.assertEqual(0,[r.ref.url for r in items].count("http://r3"))
-        
-    def test_post_json_pick_several_items_out_of_sieve(self):
-        """
-        Make sure posting a list of items as read will remove it from the sieve.
-        """
-        # login as uA and make sure it succeeds
-        self.assertTrue(self.client.login(username="uA",password="pA"))
-        # check presence of r1 reference
-        resp = self.client.get(reverse("wom_river.views.user_river_sieve",
-                                       kwargs={"owner_name":"uA"}))
-        items = resp.context["oldest_unread_pebbles"]
-        num_ref_r1 = [r.ref.url for r in items].count("http://r1")
-        self.assertLessEqual(1,num_ref_r1)
-        num_ref_r3 = [r.ref.url for r in items].count("http://r3")
-        self.assertLessEqual(1,num_ref_r3)
-        # mark the first reference as read.
-        resp = self.client.post(reverse("wom_river.views.user_river_sieve",
-                                        kwargs={"owner_name":"uA"}),
-                                simplejson.dumps({"action":"read",
-                                                  "references":["http://r1","http://r3"]}),
-                                content_type="application/json")
-        self.assertEqual(200,resp.status_code)
-        resp_dic = simplejson.loads(resp.content)
-        self.assertEqual("read",resp_dic["action"])
-        self.assertEqual("success",resp_dic["status"])
-        self.assertLessEqual(num_ref_r1+num_ref_r3,resp_dic["count"])
-        # check absence of r1 reference
-        resp = self.client.get(reverse("wom_river.views.user_river_sieve",
-                                       kwargs={"owner_name":"uA"}))
-        items = resp.context["oldest_unread_pebbles"]
-        self.assertEqual(0,[r.ref.url for r in items].count("http://r1"))
-        self.assertEqual(0,[r.ref.url for r in items].count("http://r3"))
+        self.assertEqual(0,[r.ref.url for r in items].count("http://r3"))        
 
     def test_post_malformed_json_returns_error(self):
         """
@@ -364,8 +339,8 @@ class UserSieveViewTest(TestCase):
 class UserSourcesViewTest(TestCase):
 
     def setUp(self):
-        # Create 2 users and 3 sources (1 exclusive to each and a
-        # shared one) with more references than MAX_ITEM_PER_PAGE
+        # Create 2 users and 3 feed sources (1 exclusive to each and a
+        # shared one) and 3 non-feed sources.
         self.test_user1 = User.objects.create_user(username="uA",password="pA")
         test_user1_profile = UserProfile.objects.create(user=self.test_user1)
         self.test_user2 = User.objects.create_user(username="uB",password="pB")
@@ -463,3 +438,146 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(feedNames,set((1,3)))
         feedTypes = set([s.name[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
+
+        
+class OPML2DBTest(TestCase):
+
+    def setUp(self):
+        # Create 2 users but only create sources for one of them.
+        self.test_user1 = User.objects.create_user(username="uA",password="pA")
+        self.test_user1_profile = UserProfile.objects.create(user=self.test_user1)
+        self.test_user2 = User.objects.create_user(username="uB",password="pB")
+        self.test_user2_profile = UserProfile.objects.create(user=self.test_user2)
+        test_date = datetime.datetime.now(timezone.utc)
+        fs1 = FeedSource.objects.create(xmlURL="http://mouf/rss.xml",last_update=test_date,url="http://mouf",name="f1")
+        fs3 = FeedSource.objects.create(xmlURL="http://greuh/rss.xml",last_update=test_date,url="http://greuh",name="f3")
+        self.test_user1_profile.feed_sources.add(fs1)
+        self.test_user1_profile.feed_sources.add(fs3)
+        self.test_user1_profile.sources.add(fs1)
+        self.test_user1_profile.sources.add(fs3)
+        # also add plain sources
+        s1 = Source.objects.create(url="http://s1",name="s1")
+        s3 = Source.objects.create(url="http://s3",name="s3")
+        self.test_user1_profile.sources.add(s1)
+        self.test_user1_profile.sources.add(s3)
+        # create an opml snippet
+        test_opml_txt = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+  <head>
+    <title>My Subcriptions</title>
+  </head>
+  <body>
+    <outline title="News" text="News">
+      <outline text="Richard Stallman's Political Notes"
+               title="Richard Stallman's Political Notes" type="rss"
+               xmlUrl="http://stallman.org/rss/rss.xml" htmlUrl="http://stallman.org/archives/polnotes.html"/>
+      <outline text="Mouf"
+               title="Mouf" type="rss"
+               xmlUrl="http://mouf/rss.xml" htmlUrl="http://mouf"/>
+      <outline text="Dave's LifeLiner" title="Dave's LifeLiner"
+               type="rss" xmlUrl="http://www.scripting.com/rss.xml" htmlUrl="http://scripting.com/"/>
+    </outline>
+    <outline title="Culture" text="Culture">
+      <outline text="Open Culture" title="Open Culture" type="rss"
+               xmlUrl="http://www.openculture.com/feed" htmlUrl="http://www.openculture.com"/>
+    </outline>
+  </body>
+</opml>
+"""
+        opml2db(test_opml_txt,isPath=False,user_profile=self.test_user1_profile)
+        
+    def test_check_sources_correctly_added(self):
+        self.assertEqual(7,self.test_user1_profile.sources.count())
+        self.assertEqual(5,self.test_user1_profile.feed_sources.count())
+        self.assertIn("http://stallman.org/rss/rss.xml",
+                      [s.xmlURL for s in self.test_user1_profile.feed_sources.all()])
+        self.assertIn("http://www.scripting.com/rss.xml",
+                      [s.xmlURL for s in self.test_user1_profile.feed_sources.all()])
+        self.assertIn("http://www.openculture.com/feed",
+                      [s.xmlURL for s in self.test_user1_profile.feed_sources.all()])
+        
+    def test_check_sources_not_added_to_other_user(self):
+        self.assertEqual(0,self.test_user2_profile.sources.count())
+        self.assertEqual(0,self.test_user2_profile.feed_sources.count())
+        
+    def test_check_tags_correctly_added(self):
+        # Check that tags were added too
+        self.assertTrue(Tag.objects.filter(name="News").exists())
+        self.assertTrue(Tag.objects.filter(name="Culture").exists())
+        
+    def test_check_tags_correctly_associated_to_sources(self):
+        # Check that tags were correctly associated with the sources
+        self.assertIn("News",[t.name for t in Source.objects.get(url="http://scripting.com/").tags.all()])
+        self.assertIn("News",[t.name for t in Source.objects.get(url="http://stallman.org/archives/polnotes.html").tags.all()])
+        self.assertIn("News",[t.name for t in Source.objects.get(url="http://mouf").tags.all()])
+        self.assertIn("Culture",[t.name for t in Source.objects.get(url="http://www.openculture.com").tags.all()])
+
+class NSBMK2DB(TestCase):
+
+    def setUp(self):
+        test_date = datetime.datetime.now(timezone.utc)
+        self.test_source = Source.objects.create(
+            url=u"http://mouf",
+            name=u"mouf")
+        test_reference = Reference.objects.create(
+            url=u"http://mouf/a",
+            title=u"glop",
+            pub_date=test_date,
+            source=self.test_source)
+        self.test_user = User.objects.create_user(username="uA",
+                                                  password="pA")
+        self.test_user_profile = UserProfile.objects.create(user=self.test_user)
+        self.test_user_profile.sources.add(self.test_source)
+        self.test_bkm = UserBookmark.objects.create(
+            owner=self.test_user,
+            reference=test_reference,
+            saved_date=test_date)
+        self.test_other_user = User.objects.create_user(username="uB",
+                                                        password="pB")
+        test_nsbmk_txt = """\
+<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<!-- This is an automatically generated file.
+It will be read and overwritten.
+Do Not Edit! -->
+<TITLE>Bookmarks</TITLE>
+<H1>Bookmarks</H1>
+<DL><p>
+<DT><A HREF="http://www.example.com" ADD_DATE="1367951483" PRIVATE="0" TAGS="example,html">The example</A>
+<DD>An example bookmark.
+<DT><A HREF="http://mouf/a" ADD_DATE="1366828226" PRIVATE="0" TAGS="test">The mouf</A>
+<DD>This is just a test.
+</DL><p>
+"""
+        nsbmk2db(test_nsbmk_txt,self.test_user)
+    
+    def test_bookmarks_are_added(self):
+        self.assertEqual(2,self.test_user.userbookmark_set.count())
+        self.assertIn("http://www.example.com",
+                      [b.reference.url for b in self.test_user.userbookmark_set.all()])
+        self.assertIn("http://mouf/a",
+                      [b.reference.url for b in self.test_user.userbookmark_set.all()])
+        self.assertEqual("The example",UserBookmark.objects.get(reference__url="http://www.example.com").reference.title)
+        self.assertEqual("The mouf",UserBookmark.objects.get(reference__url="http://mouf/a").reference.title)
+        
+    def test_check_bookmarks_not_added_to_other_user(self):
+        self.assertEqual(0,self.test_other_user.userbookmark_set.count())
+    
+    def test_check_tags_correctly_added(self):
+        # Check that tags were added too
+        self.assertTrue(Tag.objects.filter(name="example").exists())
+        self.assertTrue(Tag.objects.filter(name="html").exists())
+        self.assertTrue(Tag.objects.filter(name="test").exists())
+        
+    def test_check_tags_correctly_associated_to_bmks(self):
+        # Check that tags were correctly associated with the bookmarks
+        self.assertIn("example",
+                      [t.name for t in self.test_user.userbookmark_set.get(reference__url="http://www.example.com").tags.all()])    
+        self.assertIn("html",
+                      [t.name for t in self.test_user.userbookmark_set.get(reference__url="http://www.example.com").tags.all()])    
+        self.assertEqual(2,self.test_user.userbookmark_set.get(reference__url="http://www.example.com").tags.count())
+        self.assertIn("test",
+                      [t.name for t in self.test_user.userbookmark_set.get(reference__url="http://mouf/a").tags.all()])    
+        self.assertEqual(1,self.test_user.userbookmark_set.get(reference__url="http://mouf/a").tags.count())
+        

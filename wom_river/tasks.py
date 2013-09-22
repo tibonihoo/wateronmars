@@ -4,6 +4,7 @@ import feedparser
 import datetime
 from django.utils import timezone
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
 
 from celery.task.schedules import crontab  
 from celery.decorators import periodic_task  
@@ -14,11 +15,13 @@ from wom_pebbles.models import Reference
 from wom_river.models import FeedSource
 from wom_river.models import ReferenceUserStatus
 from wom_river.utils.read_opml import parse_opml
+from wom_river.utils.netscape_bookmarks import parse_netscape_bookmarks
 
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_classification.models import TAG_NAME_MAX_LENGTH
 
+from wom_user.forms import UserBookmarkAdditionForm
 
 @task()
 def collect_new_pebbles_for_feed(feed):
@@ -180,22 +183,25 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       db_new_feedsources.append(f)
     else:
       f = known_candidates[0]
+      feeds_and_tags.append((f,current_feed.tags))
     user_feedsources.append(f)
-  Tag.objects.bulk_create(db_new_tags)
-  Source.objects.bulk_create(db_new_feedsources)
   with transaction.commit_on_success():
     for f in db_new_feedsources:
       f.save()
-  for f,tags in feeds_and_tags:
-    for t in tags:
-      # reject tags that are too long
-      if len(t) > TAG_NAME_MAX_LENGTH:
-        continue
-      try:
-        f.tags.add(Tag.objects.get(name=t))
-      except:
-        continue
-    f.save()
+    for t in db_new_tags:
+      t.save()
+  with transaction.commit_on_success():
+    for f,tags in feeds_and_tags:
+      for t in tags:
+        # reject tags that are too long
+        if len(t) > TAG_NAME_MAX_LENGTH:
+          continue
+        try:
+          f.tags.add(Tag.objects.get(name=t))
+        except Exception,e:
+          print e
+          continue
+      f.save()
   if user_specific:
     for t in user_tags:
       user_profile.tags.add(t)
@@ -203,3 +209,45 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       user_profile.sources.add(f)
       user_profile.feed_sources.add(f)
     user_profile.save()
+
+@task()
+def nsbmk2db(nsbmk_file,user):
+  from wom_classification.models import Tag
+  collected_bmks = parse_netscape_bookmarks(nsbmk_file)
+  bookmarks_to_save  = []
+  for bmk_info in collected_bmks:
+    bmk_dict = {
+      "url": bmk_info["url"],
+      }
+    if "title" in bmk_info:
+      bmk_dict["title"] = bmk_info["title"]
+    if "note" in bmk_info:
+      bmk_dict["description"] = bmk_info["note"]
+    addition_form = UserBookmarkAdditionForm(user,bmk_dict)
+    print "trying to import bmk %s" % bmk_dict
+    if addition_form.is_valid():
+      b = addition_form.save()
+      for tag_name in bmk_info.get("tags","").split(","):
+        tag_name = tag_name[:TAG_NAME_MAX_LENGTH]
+        try:
+          t = Tag.objects.get(name=tag_name)
+        except ObjectDoesNotExist:
+          t = Tag()
+          t.name = tag_name
+          t.is_public = True
+          t.save()
+        b.tags.add(t)
+      bookmarks_to_save.append(b)
+      if bmk_info.get("private","1")=="0":
+        b.is_public = True
+      if "posix_timestamp" in bmk_info:
+        b.pub_date = datetime.datetime.utcfromtimestamp(float(bmk_info["posix_timestamp"]))
+    else:
+      print "form invalid"
+      print addition_form.non_field_errors()
+      print addition_form.errors
+  with transaction.commit_on_success():
+    for b in bookmarks_to_save:
+      b.save()
+      print "Saved %s" % b
+      
