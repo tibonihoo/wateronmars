@@ -23,8 +23,7 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block content %}
-<p><i class="icon-bookmark"></i><strong>{{ title_qualify }} collection</strong>
-<small>Press 'n' (next) or 'p' (previous) to browse through the bookmarks.</small></p>
+<p><i class="icon-bookmark"></i><strong>{{ title_qualify }} collection of {{ num_bookmarks }} bookmarks.</strong>
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
