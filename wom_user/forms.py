@@ -5,7 +5,6 @@ from django.utils import timezone
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.core.validators import URLValidator
 from django.db import transaction
 
 from wateronmars import settings
@@ -29,7 +28,12 @@ feedfinder.setUserAgent(settings.USER_AGENT)
 class OPMLFileUploadForm(forms.Form):
   """From used to upload an OPML file."""
   opml_file  = forms.FileField("OPML file")
+  
+class NSBookmarkFileUploadForm(forms.Form):
+  """From used to upload an Netscape-style bookmarks file."""
+  bookmarks_file  = forms.FileField("Bookmarks file")
 
+  
 class UserProfileCreationForm(UserCreationForm):
   """Customized form to require an email and create a profile at the same time as creating a user."""
 
@@ -51,13 +55,13 @@ class UserProfileCreationForm(UserCreationForm):
 
 class UserBookmarkAdditionForm(forms.Form):
   """Collect all necessary data to add a new bookmark to a user's collection."""
-  
-  url = forms.URLField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  # TODO: distinguish reference description from user-specific note !
+  url = forms.CharField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
   title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
   description = forms.CharField(required=False,widget=forms.Textarea(attrs={"class":"input-xxlarge"}))
   pub_date = forms.DateField(required=False)
   source_name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
-  source_url = forms.URLField(max_length=URL_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  source_url = forms.CharField(max_length=URL_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
   
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
@@ -74,7 +78,39 @@ class UserBookmarkAdditionForm(forms.Form):
     form_pub_date = self.cleaned_data["pub_date"]
     form_source_url = self.cleaned_data["source_url"]
     form_source_name = self.cleaned_data["source_name"]
-    if not self.user.userbookmark_set.filter(reference__url=form_url).exists():
+    if self.user.userbookmark_set.filter(reference__url=form_url).exists():
+      b = self.user.userbookmark_set.filter(reference__url=form_url)[0]
+      if form_title and b.reference.title != form_title:
+        b.reference.title = form_title
+      if form_description and b.reference.description != form_description:
+        b.reference.description = form_description
+      if form_source_url:
+        if b.reference.source.url == form_source_url:
+          if form_source_name and b.reference.source.name != form_source_name:
+            b.reference.source.name = form_source_name
+          b.reference.source.save()
+        else:
+          same_sources = Source.objects.filter(url=form_source_url).all()
+          # impose the new source
+          if same_sources:
+            # url are unique for sources
+            b.reference.source = same_sources[0]
+          else:
+            bookmark_source = Source()
+            bookmark_source.url = form_source_url
+            # find the source name or generate a reasonable one
+            if form_source_name:
+              bookmark_source_name = form_source_name
+            else:
+              url_cpt = urlparse(form_source_url)
+              bookmark_source_name = url_cpt.hostname or ""
+              if url_cpt.path.split("/") and url_cpt.path != "/":
+                bookmark_source_name +=  url_cpt.path
+            bookmark_source.name = bookmark_source_name
+            bookmark_source.save()
+            b.reference.source = bookmark_source
+      b.reference.save()
+    else:
       # lookup a matching Reference
       same_url_refs = Reference.objects.filter(url=form_url)
       if form_source_url:
@@ -145,7 +181,7 @@ class UserBookmarkAdditionForm(forms.Form):
         b.tags = bookmarked_ref.tags.all()
         b.save()
     with transaction.commit_on_success():
-      for rust in ReferenceUserStatus.objects.filter(ref__url=form_url).all():
+      for rust in ReferenceUserStatus.objects.filter(user=self.user,ref__url=form_url).all():
         rust.has_been_saved = True
         rust.save()
     return b
@@ -154,9 +190,9 @@ class UserBookmarkAdditionForm(forms.Form):
 class UserSourceAdditionForm(forms.Form):
   """Collect all necessary data to subscribe to a new source."""
 
-  url = forms.URLField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  url = forms.CharField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
   name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"input-large"}))
-  feed_url = forms.URLField(max_length=URL_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
   
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
@@ -257,8 +293,9 @@ def CreateUserSourceRemovalForm(user,*args, **kwargs):
       
   class UserSourceRemovalForm(forms.Form):
     """Gather a selection of syndication sources from which the user wants to un-subsribe."""   
-    sources_to_remove = forms.ModelMultipleChoiceField(user.userprofile.feed_sources,
-                                                       widget=forms.SelectMultiple(attrs={"class":"input-xxlarge","size":"13"}))
+    sources_to_remove = forms.ModelMultipleChoiceField(\
+      user.userprofile.feed_sources,
+      widget=forms.SelectMultiple(attrs={"class":"input-xxlarge","size":"13"}))
     
     def __init__(self):
       forms.Form.__init__(self,*args,**kwargs)

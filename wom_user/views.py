@@ -23,6 +23,7 @@ from django.contrib.auth.models import User
 from wateronmars.views import wom_add_base_context_data
 
 from wom_user.forms import OPMLFileUploadForm
+from wom_user.forms import NSBookmarkFileUploadForm
 from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
@@ -31,6 +32,7 @@ from wom_user.forms import CreateUserSourceRemovalForm
 from wom_user.models import UserBookmark
 
 from wom_river.tasks import opml2db
+from wom_river.tasks import nsbmk2db
 
 def check_and_set_owner(func):
   """Decorator that applies to functions expecting the "owner" name as a second argument.
@@ -58,6 +60,9 @@ def loggedin_and_owner_required(func):
 
   Note: automatically calls login_required and check_and_set_owner decorators.
   """
+  # TODO when not logged in send a 401 authentication requested and
+  # implement corresponding template (at least send a 401 for non-GET
+  # requests !)
   @login_required(login_url='/accounts/login/')
   @check_and_set_owner
   def _loggedin_and_owner_required(request, owner_name, *args, **kwargs):
@@ -75,7 +80,7 @@ def generate_source_add_bookmarklet(base_url_with_domain,owner_name):
   return r"javascript:ref=location.href;t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&name='+encodeURIComponent(t);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_river_source_add',args=(owner_name,)))
 
 class CustomErrorList(ErrorList):
-  """Customize errors display in froms to use Bootstrap classes."""
+  """Customize errors display in forms to use Bootstrap classes."""
   def __unicode__(self):
     return self.as_span()
   def as_span(self):
@@ -90,6 +95,7 @@ def user_profile(request):
     {
       'username': request.user.username,
       'opml_form': OPMLFileUploadForm(error_class=CustomErrorList),
+      'nsbmk_form': NSBookmarkFileUploadForm(error_class=CustomErrorList),
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       },request.user.username,request.user.username)
@@ -119,6 +125,31 @@ def user_upload_opml(request,owner_name):
   return render_to_response('wom_user/opml_upload.html',d, context_instance=RequestContext(request))
 
 
+
+
+
+def handle_uploaded_nsbmk(nsbmkUploadedFile,user):
+  if nsbmkUploadedFile.name.endswith(".html") or nsbmkUploadedFile.name.endswith(".htm"):
+    nsbmk2db(nsbmkUploadedFile.read(),user=user)
+  else:
+    raise ValueError("Uploaded file '%s' is not a Netscape-style bookmarks file !" % nsbmkUploadedFile.name)
+  
+
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET","POST"])
+def user_upload_nsbmk(request,owner_name):
+  if request.method == 'POST':
+    form = NSBookmarkFileUploadForm(request.POST, request.FILES, error_class=CustomErrorList)
+    if form.is_valid():
+      handle_uploaded_nsbmk(request.FILES['bookmarks_file'],user=request.user)
+      return HttpResponseRedirect('/u/%s/collection' % request.user.username)
+  else:
+    form = NSBookmarkFileUploadForm(error_class=CustomErrorList)
+  d = wom_add_base_context_data({'form': form},request.user.username,request.user.username)
+  return render_to_response('wom_user/nsbmk_upload.html',d, context_instance=RequestContext(request))
+
+
 @loggedin_and_owner_required
 @csrf_protect
 @require_http_methods(["GET","POST"])
@@ -128,12 +159,19 @@ def user_river_source_add(request,owner_name):
   .../source/add/?url="..."&name="..."&feed_url="..."
   """
   if request.method == 'POST':
-    src_info = request.POST
+    try:
+      src_info = simplejson.loads(request.body)
+    except Exception,e:
+      src_info = {}
+      print e
+    if not u"url" in src_info:
+      return HttpResponseBadRequest("Only a JSON formatted request with a 'url' parameter is accepted.")
   elif request.GET: # GET
     src_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
   else:
     src_info = None
-  form = UserSourceAdditionForm(request.user, src_info, error_class=CustomErrorList)
+  form = UserSourceAdditionForm(request.user, src_info,
+                                error_class=CustomErrorList)
   if src_info and form.is_valid():
     form.save()
     return HttpResponseRedirect('/u/%s/sources/' % request.user.username)
@@ -145,7 +183,7 @@ def user_river_source_add(request,owner_name):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_river_source_remove(request,owner_name):
-  """Stop subscriptions to sources."""
+  """Stop subscriptions to sources via a form only !"""
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
@@ -196,10 +234,11 @@ def post_to_user_collection(request,owner_name):
   """
   try:
     bmk_info = simplejson.loads(request.body)
-  except:
+  except Exception,e:
     bmk_info = {}
-    if not u"url" in bmk_info:
-      return HttpResponseBadRequest("Impossible to 'save' a bookmark: the 'url' parameter is missing.")
+    print e
+  if not u"url" in bmk_info:
+    return HttpResponseBadRequest("Only a JSON formatted request with a 'url' parameter is accepted.")
   form = UserBookmarkAdditionForm(request.user, bmk_info)
   response_dict = {}
   if form.is_valid():
@@ -208,7 +247,7 @@ def post_to_user_collection(request,owner_name):
     # TODO: also add the url to the new bookmark in the answer
   else:
     response_dict["status"] = u"error"
-    response_dict["form_fields_ul"] = form.as_url()
+    response_dict["form_fields_ul"] = form.as_ul()
   return HttpResponse(simplejson.dumps(response_dict), mimetype='application/json')
 
     
@@ -216,8 +255,6 @@ def post_to_user_collection(request,owner_name):
 def get_user_collection(request,owner_name):
   """Display the collection of bookmarks"""
   bookmarks = UserBookmark.objects.filter(owner=request.owner_user).select_related("reference").all()
-  if request.user != request.owner_user:
-    bookmarks = bookmarks.filter(is_public=True)
   # TODO preload sources ?
   d = wom_add_base_context_data(
     {
