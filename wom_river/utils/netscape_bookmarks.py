@@ -1,16 +1,20 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 
 
-#   Read bookmarks saved in a "Netscape bookmark" format
-#   as exported by Microsoft Internet Explorer or Delicious.com.
-#
-# Assumptions:
-# - The file is a Netscape bookmark file (see a doc at http://msdn.microsoft.com/en-us/library/aa753582%28v=VS.85%29.aspx)
-# - There is only one record by line
-# - If a decription/comment/note is attached to the bookmark, it is on
-#   a line prefixed with <DD> (and nothing else but the note should be
-#   on the same line)
+"""
+Read bookmarks saved in a "Netscape bookmark" format
+as exported by Microsoft Internet Explorer or Delicious.com (and
+initially of course by Netscape).
+
+Assumptions:
+- The file is a Netscape bookmark file.
+  See a doc at http://msdn.microsoft.com/en-us/library/aa753582%28v=VS.85%29.aspx
+- There is only one record by line.
+- If a decription/comment/note is attached to the bookmark, it is on
+  a line prefixed with <DD> (and nothing else but the note should be
+  on the same line).
+"""
 
 import urllib2
 import sys

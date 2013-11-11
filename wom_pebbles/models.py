@@ -1,13 +1,13 @@
-from django.db import models
+# -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 
-from wom_classification.models import Tag
+from django.db import models
 
 
 # Max number of characters in a URL.
 # Let's make it long enough to get twice the (not so) good old Windows
 # path limit.
 # WARNING: READ ONLY !
-URL_MAX_LENGTH = 512
+URL_MAX_LENGTH = 255
 
 # Max number of characters for a source name.
 # Let's make it long enough to get a 140 char tweet plus a little extra.
@@ -31,13 +31,9 @@ class Source(models.Model):
   name = models.CharField(max_length=SOURCE_NAME_MAX_LENGTH)
   # A short and optional descriptive text 
   description = models.TextField(default="")
-  # Indicate wether this source may be shared and displayed publicly
-  is_public = models.BooleanField(default=False)
-  # Tags used (at least) for user-explicit classification
-  tags  = models.ManyToManyField(Tag)
   
   def __unicode__(self):
-    return "%s (%s)" % (self.name,self.url)
+    return "%s[%s]" % (self.name,self.url)
 
 
 class Reference(models.Model): # A pebble !
@@ -45,28 +41,24 @@ class Reference(models.Model): # A pebble !
   The most basic item representing a piece of information on the
   internet (aka a bookmark or a newsitem).
   """
-  # The URL identifies a source (and URLs will be used as URIs), must
-  # be unique and used as a db_index
-  # TODO: add the unique constraint !
-  url   = models.CharField(max_length=URL_MAX_LENGTH)
+  # The URL identifies a reference (and URLs will be used as URIs),
+  # but several references may share the same URL especially if they
+  # have been published by different sources.
+  url = models.CharField(max_length=URL_MAX_LENGTH)
   # Title of the reference (compulsory)
   title = models.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH)
-  # A short summary about the reference's content
+  # A short summary about the reference's content.
+  # WARNING: this is for a description provided by the author of the
+  # reference, visible to everybody. User-specific description should
+  # better be stored in another "model".
   description = models.TextField(default="")
   # Tells when the reference was first published, as a timezone-aware
   # datetime object.
   pub_date = models.DateTimeField('date published')
-  # Indicate wether this source may be shared and displayed publicly
-  is_public = models.BooleanField(default=False)
   # The source from which this reference item comes from
   source = models.ForeignKey(Source)
-  # Tags used for classification (these tags usually come from the
-  # content producer)  
-  tags  = models.ManyToManyField(Tag)
   # Count the number of users that saved this reference
   save_count = models.IntegerField(default=0)
   
   def __unicode__(self):
-    return "%s (%s)" % (self.title,self.url)
-
-
+    return "%s[%s]" % (self.title,self.url)

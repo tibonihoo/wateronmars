@@ -1,39 +1,34 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
+
+from celery import task
 
 import feedparser
 import datetime
 from django.utils import timezone
 from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
 
-from celery.task.schedules import crontab  
-from celery.decorators import periodic_task  
-from celery import task
-
-from wom_pebbles.models import Source
 from wom_pebbles.models import Reference
 from wom_river.models import FeedSource
 from wom_river.models import ReferenceUserStatus
 from wom_river.utils.read_opml import parse_opml
-from wom_river.utils.netscape_bookmarks import parse_netscape_bookmarks
 
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import URL_MAX_LENGTH
-from wom_classification.models import TAG_NAME_MAX_LENGTH
 
-from wom_user.forms import UserBookmarkAdditionForm
 
 @task()
-def collect_new_pebbles_for_feed(feed):
+def collect_new_references_for_feed(feed):
+  """Get the feed data from its URL and collect the new references into the db."""
   try:
     d = feedparser.parse(feed.xmlURL)
   except Exception,e:
-    print "WARNING: skipping feed at %s because of a parse problem (%s))." % (feed.url,e)
+    print "WARNING: skipping feed at %s because of a parse problem (%s))."\
+      % (feed.url,e)
     return
   is_public = feed.is_public
   # check feed info with d.feed.title
-  feed_last_update = feed.last_update
-  latest_item_date = feed_last_update
+  feed_last_update_check = feed.last_update_check
+  latest_item_date = feed_last_update_check
   all_references = []
   for entry in d.entries:
     try:
@@ -60,7 +55,7 @@ def collect_new_pebbles_for_feed(feed):
       updated_date_utc = timezone.now().utctimetuple()[:6]
     current_pebble_date = datetime.datetime(*(updated_date_utc),
                                              tzinfo=timezone.utc)
-    if current_pebble_date < feed_last_update:
+    if current_pebble_date < feed_last_update_check:
       continue
     r = Reference()
     r.title = current_pebble_title
@@ -72,7 +67,7 @@ def collect_new_pebbles_for_feed(feed):
     all_references.append(r)
     if current_pebble_date > latest_item_date:
       latest_item_date = current_pebble_date
-  feed.last_update = latest_item_date
+  feed.last_update_check = latest_item_date
   with transaction.commit_on_success():
     for r in all_references:
       r.save()
@@ -85,22 +80,14 @@ def collect_new_pebbles_for_feed(feed):
     feed.save()
 
 
-def collect_all_new_pebbles_sync():
+def collect_all_new_references_sync():
   for feed in FeedSource.objects.iterator():
-    collect_new_pebbles_for_feed(feed)
+    collect_new_references_for_feed(feed)
 
-def delete_old_pebbles_sync():
+def delete_old_references_sync():
   time_threshold = datetime.datetime.now(timezone.utc)-datetime.timedelta(weeks=12)
   Reference.objects.filter(save_count=0,pub_date__lt=time_threshold).delete()
 
-# these will run regularly, see http://celeryproject.org/docs/reference/celery.task.schedules.html#celery.task.schedules.crontab  
-@periodic_task(run_every=crontab(hour="*", minute="*/20", day_of_week="*"))
-def collect_all_new_pebbles():
-  collect_all_new_pebbles_sync()
-  
-@periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
-def delete_old_pebbles():
-  delete_old_pebbles_sync()
 
 class FakeReferenceUserStatus:
 
@@ -143,31 +130,15 @@ def check_user_unread_feed_items(user):
       r.save()
 
 
-
 @task()
-def opml2db(opml_file,isPath=True,user_profile=None):
-  collected_feeds,collected_tags = parse_opml(opml_file,isPath)
-  from wom_classification.models import Tag
-  from wom_river.models import FeedSource
-  user_specific = user_profile is not None
-  is_public = not user_specific
-  db_new_tags = []
-  user_tags = []
-  for tag_as_text in collected_tags:
-    # reject tags that are too long
-    if len(tag_as_text) > TAG_NAME_MAX_LENGTH:
-      continue
-    known_candidates = Tag.objects.filter(name=tag_as_text)
-    if not known_candidates:
-      t = Tag()
-      t.name = tag_as_text
-      t.is_public = is_public
-      db_new_tags.append(t)
-    else:
-      t = known_candidates[0]
-  user_tags.append(t)
+def import_feedsources_from_opml(opml_txt):
+  """
+  Save in the db the FeedSources found in the OPML-formated text.
+  opml_txt: a unicode string representing the content of a full OPML file.
+  Return a dictionary assiociating each feed with a set of tags {feed:tagSet,...).
+  """
+  collected_feeds,collected_tags = parse_opml(opml_txt,False)
   db_new_feedsources = []
-  user_feedsources = []
   feeds_and_tags = []
   for current_feed in collected_feeds:
     url_id = current_feed.htmlUrl or current_feed.xmlUrl
@@ -177,77 +148,23 @@ def opml2db(opml_file,isPath=True,user_profile=None):
       f.name = current_feed.title
       f.xmlURL = current_feed.xmlUrl
       f.url = url_id
-      f.last_update = datetime.datetime.utcfromtimestamp(0).replace(tzinfo=timezone.utc)
-      f.is_public = is_public
+      f.last_update_check = datetime.datetime.utcfromtimestamp(0)\
+                                             .replace(tzinfo=timezone.utc)
       feeds_and_tags.append((f,current_feed.tags))
       db_new_feedsources.append(f)
     else:
       f = known_candidates[0]
       feeds_and_tags.append((f,current_feed.tags))
-    user_feedsources.append(f)
   with transaction.commit_on_success():
     for f in db_new_feedsources:
       f.save()
-    for t in db_new_tags:
-      t.save()
-  with transaction.commit_on_success():
-    for f,tags in feeds_and_tags:
-      for t in tags:
-        # reject tags that are too long
-        if len(t) > TAG_NAME_MAX_LENGTH:
-          continue
-        try:
-          f.tags.add(Tag.objects.get(name=t))
-        except Exception,e:
-          print e
-          continue
-      f.save()
-  if user_specific:
-    for t in user_tags:
-      user_profile.tags.add(t)
-    for f in user_feedsources:
-      user_profile.sources.add(f)
-      user_profile.feed_sources.add(f)
-    user_profile.save()
+  return dict(feeds_and_tags)
+  
+# TODO put this in a function of wom_user with the appropriate tests.
+  # with transaction.commit_on_success():
+  #   for f,tags in feeds_and_tags:
+  #     source_tag_setter(user,f,tags)
+  #     f.save()
+  #   userprofile.feed_source.add(f)
+  #   userprofile.source.add(f)
 
-@task()
-def nsbmk2db(nsbmk_file,user):
-  from wom_classification.models import Tag
-  collected_bmks = parse_netscape_bookmarks(nsbmk_file)
-  bookmarks_to_save  = []
-  for bmk_info in collected_bmks:
-    bmk_dict = {
-      "url": bmk_info["url"],
-      }
-    if "title" in bmk_info:
-      bmk_dict["title"] = bmk_info["title"]
-    if "note" in bmk_info:
-      bmk_dict["description"] = bmk_info["note"]
-    addition_form = UserBookmarkAdditionForm(user,bmk_dict)
-    print "trying to import bmk %s" % bmk_dict
-    if addition_form.is_valid():
-      b = addition_form.save()
-      for tag_name in bmk_info.get("tags","").split(","):
-        tag_name = tag_name[:TAG_NAME_MAX_LENGTH]
-        try:
-          t = Tag.objects.get(name=tag_name)
-        except ObjectDoesNotExist:
-          t = Tag()
-          t.name = tag_name
-          t.is_public = True
-          t.save()
-        b.tags.add(t)
-      bookmarks_to_save.append(b)
-      if bmk_info.get("private","1")=="0":
-        b.is_public = True
-      if "posix_timestamp" in bmk_info:
-        b.pub_date = datetime.datetime.utcfromtimestamp(float(bmk_info["posix_timestamp"]))
-    else:
-      print "form invalid"
-      print addition_form.non_field_errors()
-      print addition_form.errors
-  with transaction.commit_on_success():
-    for b in bookmarks_to_save:
-      b.save()
-      print "Saved %s" % b
-      

@@ -1,11 +1,12 @@
 from urlparse import urlparse
 
-import datetime
+from datetime import datetime
 from django.utils import timezone
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
 
 from wateronmars import settings
 
@@ -14,6 +15,9 @@ from wom_pebbles.models import SOURCE_NAME_MAX_LENGTH
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import Reference
 from wom_pebbles.models import Source
+from wom_pebbles.tasks import truncate_reference_title
+from wom_pebbles.tasks import build_reference_title_from_url
+from wom_pebbles.tasks import build_source_url_from_reference_url
 
 from wom_river.models import FeedSource
 from wom_river.models import ReferenceUserStatus
@@ -55,13 +59,21 @@ class UserProfileCreationForm(UserCreationForm):
 
 class UserBookmarkAdditionForm(forms.Form):
   """Collect all necessary data to add a new bookmark to a user's collection."""
-  # TODO: distinguish reference description from user-specific note !
-  url = forms.CharField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
-  title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
-  description = forms.CharField(required=False,widget=forms.Textarea(attrs={"class":"input-xxlarge"}))
-  pub_date = forms.DateField(required=False)
-  source_name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
-  source_url = forms.CharField(max_length=URL_MAX_LENGTH,required=False, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  
+  url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
+                        widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH, required=False,
+                          widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  comment = forms.CharField(required=False,
+                            widget=forms.Textarea(
+                              attrs={"class":"input-xxlarge"}))
+  pub_date = forms.DateTimeField(required=False)
+  source_name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH,required=False,
+                                widget=forms.TextInput(
+                                  attrs={"class":"input-xxlarge"}))
+  source_url = forms.CharField(max_length=URL_MAX_LENGTH,required=False,
+                               widget=forms.TextInput(
+                                 attrs={"class":"input-xxlarge"}))
   
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
@@ -72,127 +84,75 @@ class UserBookmarkAdditionForm(forms.Form):
     (no commit options).
     Returns the bookmark.
     """
-    form_url = self.cleaned_data["url"]
-    form_title = self.cleaned_data["title"]
-    form_description = self.cleaned_data["description"]
-    form_pub_date = self.cleaned_data["pub_date"]
-    form_source_url = self.cleaned_data["source_url"]
-    form_source_name = self.cleaned_data["source_name"]
-    if self.user.userbookmark_set.filter(reference__url=form_url).exists():
-      b = self.user.userbookmark_set.filter(reference__url=form_url)[0]
-      if form_title and b.reference.title != form_title:
-        b.reference.title = form_title
-      if form_description and b.reference.description != form_description:
-        b.reference.description = form_description
-      if form_source_url:
-        if b.reference.source.url == form_source_url:
-          if form_source_name and b.reference.source.name != form_source_name:
-            b.reference.source.name = form_source_name
-          b.reference.source.save()
-        else:
-          same_sources = Source.objects.filter(url=form_source_url).all()
-          # impose the new source
-          if same_sources:
-            # url are unique for sources
-            b.reference.source = same_sources[0]
-          else:
-            bookmark_source = Source()
-            bookmark_source.url = form_source_url
-            # find the source name or generate a reasonable one
-            if form_source_name:
-              bookmark_source_name = form_source_name
-            else:
-              url_cpt = urlparse(form_source_url)
-              bookmark_source_name = url_cpt.hostname or ""
-              if url_cpt.path.split("/") and url_cpt.path != "/":
-                bookmark_source_name +=  url_cpt.path
-            bookmark_source.name = bookmark_source_name
-            bookmark_source.save()
-            b.reference.source = bookmark_source
-      b.reference.save()
-    else:
-      # lookup a matching Reference
-      same_url_refs = Reference.objects.filter(url=form_url)
-      if form_source_url:
-        bookmark_source_url = form_source_url
-      else:
-        url_cpt = urlparse(form_url)
-        if url_cpt.scheme:
-          prefix = url_cpt.scheme+"://"
-        else:
-          prefix = ""
-        bookmark_source_url = (prefix+url_cpt.netloc) or form_url
-      same_sources = self.user.userprofile.sources.filter(url=bookmark_source_url).all()
-      if same_sources:
-        user_has_same_source = True
-      else:
-        user_has_same_source = False
-        # try a bigger look-up anyway
-        same_sources = Source.objects.filter(url=bookmark_source_url).all()
-      # url are unique for sources
-      if same_sources:
-        bookmark_source = same_sources[0]
-        refs_with_same_source = same_url_refs.filter(source=bookmark_source)
-      else:
-        bookmark_source = None
-        refs_with_same_source = None
-      if refs_with_same_source:
-        # take the first that comes...
-        bookmarked_ref = refs_with_same_source[0]
-      elif same_url_refs.exists():
-        # take the first that comes...
-        bookmarked_ref = same_url_refs[0]
-      else:
-        if bookmark_source is None:
-          # find the source name or generate a reasonable one
-          if form_source_name:
-            bookmark_source_name = form_source_name
-          else:
-            url_cpt = urlparse(bookmark_source_url)
-            bookmark_source_name = url_cpt.hostname or ""
-            if url_cpt.path.split("/") and url_cpt.path != "/":
-              bookmark_source_name +=  url_cpt.path
-          bookmark_source = Source()
-          bookmark_source.url = bookmark_source_url
-          bookmark_source.name = bookmark_source_name
-          bookmark_source.save()
-        bookmarked_ref = Reference()
-        bookmarked_ref.source = bookmark_source
-        bookmarked_ref.url = form_url
-        bookmarked_ref.title = form_title
-        # for lack of a better source of info
-        bookmarked_ref.pub_date = form_pub_date or datetime.datetime.now(timezone.utc)-datetime.timedelta(weeks=12)
-        bookmarked_ref.description = form_description
-        bookmarked_ref.save()
-        bookmarked_ref.tags = bookmark_source.tags.all()
-        bookmarked_ref.save()
-      with transaction.commit_on_success():
-        b = UserBookmark()
-        b.owner = self.user
-        b.saved_date = datetime.datetime.now(timezone.utc)-datetime.timedelta(weeks=12)
-        b.reference = bookmarked_ref
-        bookmarked_ref.save_count += 1
-        b.save()
-        bookmarked_ref.save()
-      with transaction.commit_on_success():
-        if not user_has_same_source:
-          self.user.userprofile.sources.add(bookmarked_ref.source)
-          self.user.userprofile.save()
-        b.tags = bookmarked_ref.tags.all()
-        b.save()
+    url = self.cleaned_data["url"]
+    title = self.cleaned_data["title"] \
+            or build_reference_title_from_url(url)
+    comment = self.cleaned_data["comment"]
+    pub_date = self.cleaned_data["pub_date"] \
+               or datetime.now(timezone.utc)
+    src_url = self.cleaned_data["source_url"] \
+              or build_source_url_from_reference_url(url)
+    src_name = self.cleaned_data["source_name"] \
+               or build_reference_title_from_url(src_url)
+    # Find or create a matching reference
+    try:
+      bookmarked_ref = Reference.objects.get(url=url)
+      ref_src = bookmarked_ref.source
+    except ObjectDoesNotExist:
+      try:
+        ref_src = Source.objects.get(url=src_url)
+      except ObjectDoesNotExist:
+        ref_src = Source(url=src_url,name=src_name)
+        ref_src.save()
+      bookmarked_ref = Reference(url=url, title=title,
+                                 pub_date=pub_date,
+                                 source=ref_src)
+      bookmarked_ref.save()
     with transaction.commit_on_success():
-      for rust in ReferenceUserStatus.objects.filter(user=self.user,ref__url=form_url).all():
+      try:
+        bmk = UserBookmark.objects.get(owner=self.user,reference=bookmarked_ref)
+      except ObjectDoesNotExist:
+        bmk = UserBookmark(owner=self.user,reference=bookmarked_ref,
+                           saved_date=datetime.now(timezone.utc))
+        bookmarked_ref.save_count += 1
+        bookmarked_ref.save()
+      # allow the user-specific comment to be changed and also prefix
+      # it with the user specified title if it differs from the
+      # existing reference title.
+      if comment:
+        new_comment = comment
+      else:
+        new_comment = bmk.comment
+      if self.cleaned_data["title"] and title!=bookmarked_ref.title \
+         and not new_comment.startswith(title):
+        new_comment = "%s: %s" % (title,new_comment)
+      if new_comment!=bmk.comment:
+        bmk.comment = new_comment
+        bmk.save()
+    with transaction.commit_on_success():
+      if ref_src not in self.user.userprofile.sources.all():
+        self.user.userprofile.sources.add(ref_src)
+        self.user.userprofile.save()
+    with transaction.commit_on_success():
+      for rust in ReferenceUserStatus.objects.filter(user=self.user,
+                                                     ref=bookmarked_ref).all():
         rust.has_been_saved = True
         rust.save()
-    return b
+    return bmk
 
 
 class UserSourceAdditionForm(forms.Form):
   """Collect all necessary data to subscribe to a new source."""
 
-  url = forms.CharField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
-  name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"input-large"}))
-  feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=True, widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+  url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
+                        widget=forms.TextInput(
+                          attrs={"class":"input-xxlarge"}))
+  name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH, required=False,
+                         widget=forms.TextInput(
+                           attrs={"class":"input-large"}))
+  feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
+                             widget=forms.TextInput(
+                               attrs={"class":"input-xxlarge"}))
   
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
@@ -280,7 +240,8 @@ class UserSourceAdditionForm(forms.Form):
       # assume that either form_feed_url or form_url have been
       # validated as a valid feed url
       new_source.xmlURL = form_feed_url or form_url
-      new_source.last_update = datetime.datetime.utcfromtimestamp(0).replace(tzinfo=timezone.utc)
+      new_source.last_update_check = datetime.utcfromtimestamp(0)\
+                                             .replace(tzinfo=timezone.utc)
       new_source.is_public = True
       new_source.save()      
     if not self.user.userprofile.sources.filter(url=form_url).exists():

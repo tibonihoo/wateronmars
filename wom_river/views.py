@@ -35,9 +35,9 @@ def public_river_view(request):
 
 
 def public_river_sieve(request):
-  unread_pebbles = Reference.objects.filter(is_public=True)
-  num_unread_pebbles = unread_pebbles.count()
-  oldest_unread_pebbles = unread_pebbles.order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
+  unread_references = Reference.objects.filter(is_public=True)
+  num_unread_references = unread_references.count()
+  oldest_unread_references = unread_references.order_by('pub_date')[:MAX_ITEMS_PER_PAGE]
   if request.user.is_authenticated():
     user = request.user
     user_collection_url = "/u/%s/collection/" % user.username
@@ -46,8 +46,8 @@ def public_river_sieve(request):
     user_collection_url = ""
   d = wom_add_base_context_data(
     {
-      'oldest_unread_pebbles': generate_reference_user_status(user,oldest_unread_pebbles),
-      'num_unread_pebbles': num_unread_pebbles,
+      'oldest_unread_references': generate_reference_user_status(user,oldest_unread_references),
+      'num_unread_references': num_unread_references,
       'user_collection_url': user_collection_url,
       }, request.user.username, WOMPublic)
   return render_to_response('wom_river/sieve.html_dt',d)
@@ -71,8 +71,8 @@ def user_river_view(request,owner_name):
   latest_items.sort(key=lambda x:x.pub_date)
   latest_items.reverse()
   d = wom_add_base_context_data({
-      # TODO rename to latest_pebbles
-      'latest_unread_pebbles': latest_items[:MAX_ITEMS_PER_PAGE],
+      # TODO rename to latest_references
+      'latest_unread_references': latest_items[:MAX_ITEMS_PER_PAGE],
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
   return render_to_response('wom_river/river.html_dt',d, context_instance=RequestContext(request))
@@ -84,12 +84,12 @@ def generate_user_sieve(request,owner_name):
   use it's sieve to read and sort out the latests news.
   """
   check_user_unread_feed_items(request.user)
-  unread_pebbles = ReferenceUserStatus.objects.filter(has_been_read=False)
-  num_unread = unread_pebbles.count()
-  oldest_unread_pebbles = unread_pebbles.select_related("ref","source").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
+  unread_references = ReferenceUserStatus.objects.filter(has_been_read=False)
+  num_unread = unread_references.count()
+  oldest_unread_references = unread_references.select_related("ref","source").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
   d = wom_add_base_context_data({
-      'oldest_unread_pebbles': oldest_unread_pebbles,
-      'num_unread_pebbles': num_unread,
+      'oldest_unread_references': oldest_unread_references,
+      'num_unread_references': num_unread,
       'user_collection_url': "/u/%s/collection/" % request.user.username,
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, request.user.username)

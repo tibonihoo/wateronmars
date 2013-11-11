@@ -164,9 +164,9 @@ INSTALLED_APPS = (
     'south',
     'kombu.transport.django',  
     'djcelery',  
-    'wom_classification',
     'wom_pebbles',
     'wom_river',
+    'wom_classification',
     'wom_user',
     )
 
@@ -190,15 +190,29 @@ LOGGING = {
         }
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+      'console':{
+        'level': 'DEBUG',
+        'class': 'logging.StreamHandler',
+      },
+      'mail_admins': {
+        'level': 'ERROR',
+        'filters': ['require_debug_false'],
+      'class': 'django.utils.log.AdminEmailHandler'
+      }
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'wom_pebbles.tasks': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'wom_user.tasks': {
+            'handlers': ['console', 'mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },

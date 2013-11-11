@@ -8,15 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'ReferenceUserStatus.has_been_saved'
-        db.add_column('wom_river_referenceuserstatus', 'has_been_saved',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
+        # Adding field 'UserBookmark.comment'
+        db.add_column('wom_user_userbookmark', 'comment',
+                      self.gf('django.db.models.fields.TextField')(default=''),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'ReferenceUserStatus.has_been_saved'
-        db.delete_column('wom_river_referenceuserstatus', 'has_been_saved')
+        # Deleting field 'UserBookmark.comment'
+        db.delete_column('wom_user_userbookmark', 'comment')
 
 
     models = {
@@ -56,48 +56,45 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'wom_classification.tag': {
-            'Meta': {'object_name': 'Tag'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100', 'db_index': 'True'})
-        },
         'wom_pebbles.reference': {
             'Meta': {'object_name': 'Reference'},
             'description': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'pub_date': ('django.db.models.fields.DateTimeField', [], {}),
             'save_count': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'source': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wom_pebbles.Source']"}),
-            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['wom_classification.Tag']", 'symmetrical': 'False'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '150'}),
-            'url': ('django.db.models.fields.CharField', [], {'max_length': '512'})
+            'url': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'wom_pebbles.source': {
             'Meta': {'object_name': 'Source'},
             'description': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '150'}),
-            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['wom_classification.Tag']", 'symmetrical': 'False'}),
-            'url': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'})
+            'url': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
         },
         'wom_river.feedsource': {
             'Meta': {'object_name': 'FeedSource', '_ormbases': ['wom_pebbles.Source']},
-            'last_update': ('django.db.models.fields.DateTimeField', [], {}),
+            'last_update_check': ('django.db.models.fields.DateTimeField', [], {}),
             'source_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wom_pebbles.Source']", 'unique': 'True', 'primary_key': 'True'}),
-            'xmlURL': ('django.db.models.fields.CharField', [], {'max_length': '512'})
+            'xmlURL': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        'wom_river.referenceuserstatus': {
-            'Meta': {'object_name': 'ReferenceUserStatus'},
-            'has_been_read': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'has_been_saved': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+        'wom_user.userbookmark': {
+            'Meta': {'object_name': 'UserBookmark'},
+            'comment': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ref': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wom_pebbles.Reference']"}),
-            'ref_pub_date': ('django.db.models.fields.DateTimeField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
+            'reference': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wom_pebbles.Reference']"}),
+            'saved_date': ('django.db.models.fields.DateTimeField', [], {})
+        },
+        'wom_user.userprofile': {
+            'Meta': {'object_name': 'UserProfile'},
+            'feed_sources': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'+'", 'symmetrical': 'False', 'to': "orm['wom_river.FeedSource']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'sources': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['wom_pebbles.Source']", 'symmetrical': 'False'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
         }
     }
 
-    complete_apps = ['wom_river']
+    complete_apps = ['wom_user']

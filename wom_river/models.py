@@ -15,8 +15,7 @@ class FeedSource(Source):
   # The URL where to get updated list of References from
   xmlURL = models.CharField(max_length=URL_MAX_LENGTH)
   # Date marking the last time the source was checked for an update
-  # TODO:rename in last[_update]_check, last_probing or something like that
-  last_update = models.DateTimeField('last update')
+  last_update_check = models.DateTimeField('last update')
 
 
 class ReferenceUserStatus(models.Model):
@@ -38,4 +37,5 @@ class ReferenceUserStatus(models.Model):
   has_been_saved = models.BooleanField(default=False)
 
   def __unicode__(self):
-    return "'%s' (read: %s, saved: %s by '%s')" % (self.ref.title,self.has_been_read,self.has_been_saved,self.user.username)
+    return "'%s' (read: %s, saved: %s by '%s')" \
+      % (self.ref.title,self.has_been_read,self.has_been_saved,self.user.username)

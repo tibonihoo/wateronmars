@@ -42,7 +42,7 @@ prepareKeyBindings();
 {% endif %}
 
 <p><i class="icon-filter"></i><strong>{{ title_qualify }} sieve</strong>
-  <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_pebbles }}</span> unread items.</small>
+  <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_references }}</span> unread items.</small>
 </p>
 {# Error messages #}
 <a id="server-sync-problem" class="btn btn-warning" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="right" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-white"></i></a>
@@ -50,7 +50,7 @@ prepareKeyBindings();
 
 {# List the references #}
 <div class="accordion" id="sieve-accordion">
-{% for rust in oldest_unread_pebbles %}
+{% for rust in oldest_unread_references %}
   <div class="accordion-group reference{% if rust.has_been_saved %} saved{% endif %}" id="ref{{forloop.counter0}}">
     <div class="accordion-heading accordion-toggle reference-short-description"  style="background-color:#eeeeec;padding:3px;">
       <a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-accordion" href="#collapse{{forloop.counter0}}">{{ rust.ref.title }}</a> <small> - {{ rust.ref.pub_date }} <em><a class="sourceFeedURL" id="ref{{forloop.counter0}}-sourceFeedURL" href="{{ rust.ref.source.xmlURL }}">@</a> <a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.ref.source.url }}" title="{{ rust.ref.source.name }}">{{ rust.ref.source.name }}</a></em></small>
@@ -90,9 +90,9 @@ prepareKeyBindings();
 {% block extrascript %}
 <script>
 {% if realm == "public" %}
-activateKeyBindings(false, "{{ user_collection_url }}", {{ num_unread_pebbles }});
+activateKeyBindings(false, "{{ user_collection_url }}", {{ num_unread_references }});
 {% else %}
-activateKeyBindings(true, "{{ user_collection_url }}", {{ num_unread_pebbles }});
+activateKeyBindings(true, "{{ user_collection_url }}", {{ num_unread_references }});
 {% endif %}
 </script>
 {% endblock %}

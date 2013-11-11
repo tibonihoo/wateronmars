@@ -31,18 +31,25 @@ from wom_user.forms import CreateUserSourceRemovalForm
 
 from wom_user.models import UserBookmark
 
-from wom_river.tasks import opml2db
-from wom_river.tasks import nsbmk2db
+from wom_river.tasks import import_feedsources_from_opml
+from wom_pebbles.tasks import import_references_from_ns_bookmark_list
+
+from wom_classification.models import get_item_tag_names
+
+
 
 def check_and_set_owner(func):
-  """Decorator that applies to functions expecting the "owner" name as a second argument.
-
+  """
+  Decorator that applies to functions expecting the "owner" name as a
+  second argument.
+  
   It will check if a user exists with this name and if so add to the
   request instance a member variable called owner_user pointing to the
   User instance corresponding to the owner.
 
   If the owner doesn't exists, the visitor is redirected to 404.
   """
+  
   def _check_and_set_owner(request, owner_name, *args, **kwargs):
      try:
        owner_user = User.objects.get(username=owner_name)
@@ -54,9 +61,12 @@ def check_and_set_owner(func):
   return _check_and_set_owner
 
 def loggedin_and_owner_required(func):
-  """Decorator that applies to functions expecting the "owner" name as a second argument.
+  """
+  Decorator that applies to functions expecting the "owner" name as
+  a second argument.
 
-  It will check that the visitor is also considered as the owner of the resource it is accessing.
+  It will check that the visitor is also considered as the owner of
+  the resource it is accessing.
 
   Note: automatically calls login_required and check_and_set_owner decorators.
   """
@@ -74,7 +84,7 @@ def loggedin_and_owner_required(func):
 
 
 def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):
-  return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&description='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_collection_add',args=(owner_name,)))
+  return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&comment='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_collection_add',args=(owner_name,)))
 
 def generate_source_add_bookmarklet(base_url_with_domain,owner_name):
   return r"javascript:ref=location.href;t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&name='+encodeURIComponent(t);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_river_source_add',args=(owner_name,)))
@@ -104,8 +114,8 @@ def user_profile(request):
 
 def handle_uploaded_opml(opmlUploadedFile,user):
   if opmlUploadedFile.name.endswith(".opml") or opmlUploadedFile.name.endswith(".xml"):
-    opml2db(opmlUploadedFile.read(),isPath=False,
-            user_profile=user.userprofile)
+    import_feedsources_from_opml(opmlUploadedFile.read(),isPath=False,
+                                 user_profile=user.userprofile)
   else:
     raise ValueError("Uploaded file '%s' is not OPML !" % opmlUploadedFile.name)
   
@@ -129,11 +139,13 @@ def user_upload_opml(request,owner_name):
 
 
 def handle_uploaded_nsbmk(nsbmkUploadedFile,user):
-  if nsbmkUploadedFile.name.endswith(".html") or nsbmkUploadedFile.name.endswith(".htm"):
-    nsbmk2db(nsbmkUploadedFile.read(),user=user)
+  if nsbmkUploadedFile.name.endswith(".html") \
+     or nsbmkUploadedFile.name.endswith(".htm"):
+    import_references_from_ns_bookmark_list(nsbmkUploadedFile.read(),user=user)
   else:
-    raise ValueError("Uploaded file '%s' is not a Netscape-style bookmarks file !" % nsbmkUploadedFile.name)
-  
+    raise ValueError("Uploaded file '%s' is not a Netscape-style bookmarks file !"\
+                     % nsbmkUploadedFile.name)
+
 
 @loggedin_and_owner_required
 @csrf_protect
@@ -204,7 +216,7 @@ def user_river_source_remove(request,owner_name):
 def user_collection_add(request,owner_name):
   """Handle bookmarlet and form-based addition of a bookmark.
   The bookmarlet is formatted in the following way:
-  .../collection/add/?url="..."&title="..."&description="..."&source_url="..."&source_name="..."&pub_date="..."
+  .../collection/add/?url="..."&title="..."&comment="..."&source_url="..."&source_name="..."&pub_date="..."
   """
   if request.method == 'POST':
     bmk_info = request.POST
@@ -227,7 +239,7 @@ def post_to_user_collection(request,owner_name):
   following JSON payload::  
     { "url": "<url>",
       "title": "the title", // optional but recommended
-      "description": "", // optional
+      "comment": "", // optional
       "source_url": "<url>", // optional
       "source_name": "the name", // optional
     }
@@ -248,13 +260,20 @@ def post_to_user_collection(request,owner_name):
   else:
     response_dict["status"] = u"error"
     response_dict["form_fields_ul"] = form.as_ul()
-  return HttpResponse(simplejson.dumps(response_dict), mimetype='application/json')
+  return HttpResponse(simplejson.dumps(response_dict),
+                      mimetype='application/json')
 
-    
+
 @check_and_set_owner
 def get_user_collection(request,owner_name):
   """Display the collection of bookmarks"""
-  bookmarks = UserBookmark.objects.filter(owner=request.owner_user).select_related("reference").all()
+  bookmarks = UserBookmark.objects.filter(owner=request.owner_user)\
+                                  .select_related("reference").all()
+  if request.user!=request.owner_user:
+    bookmarks = bookmarks.filter(is_public=True)
+  # 'artifically' add the tag names to the bookmark instances
+  for b in bookmarks:
+    b.tag_names = get_item_tag_names(request.owner_user,b.reference)
   # TODO preload sources ?
   d = wom_add_base_context_data(
     {
@@ -263,7 +282,8 @@ def get_user_collection(request,owner_name):
       'collection_url' : request.build_absolute_uri(request.path).rstrip("/"),
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
-  return render_to_response('wom_user/collection.html_dt',d, context_instance=RequestContext(request))
+  return render_to_response('wom_user/collection.html_dt',d,
+                            context_instance=RequestContext(request))
 
 
 def user_collection(request,owner_name):
@@ -294,5 +314,5 @@ def user_creation(request):
   else:
     return HttpResponseNotAllowed(['GET','POST'])
   return render_to_response('registration/user_creation.html',
-                            {'form': form}, context_instance=RequestContext(request))
-
+                            {'form': form},
+                            context_instance=RequestContext(request))

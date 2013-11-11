@@ -8,32 +8,23 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'FeedSource'
-        db.create_table('wom_river_feedsource', (
-            ('source_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['wom_pebbles.Source'], unique=True, primary_key=True)),
-            ('xmlURL', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('last_update_check', self.gf('django.db.models.fields.DateTimeField')()),
-        ))
-        db.send_create_signal('wom_river', ['FeedSource'])
+        # Deleting field 'UserProfile.is_public'
+        db.delete_column('wom_user_userprofile', 'is_public')
 
-        # Adding model 'ReferenceUserStatus'
-        db.create_table('wom_river_referenceuserstatus', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('ref', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wom_pebbles.Reference'])),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('ref_pub_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('has_been_read', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('has_been_saved', self.gf('django.db.models.fields.BooleanField')(default=False)),
-        ))
-        db.send_create_signal('wom_river', ['ReferenceUserStatus'])
+        # Adding field 'UserBookmark.is_public'
+        db.add_column('wom_user_userbookmark', 'is_public',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting model 'FeedSource'
-        db.delete_table('wom_river_feedsource')
+        # Adding field 'UserProfile.is_public'
+        db.add_column('wom_user_userprofile', 'is_public',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
 
-        # Deleting model 'ReferenceUserStatus'
-        db.delete_table('wom_river_referenceuserstatus')
+        # Deleting field 'UserBookmark.is_public'
+        db.delete_column('wom_user_userbookmark', 'is_public')
 
 
     models = {
@@ -96,15 +87,21 @@ class Migration(SchemaMigration):
             'source_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wom_pebbles.Source']", 'unique': 'True', 'primary_key': 'True'}),
             'xmlURL': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        'wom_river.referenceuserstatus': {
-            'Meta': {'object_name': 'ReferenceUserStatus'},
-            'has_been_read': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'has_been_saved': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+        'wom_user.userbookmark': {
+            'Meta': {'object_name': 'UserBookmark'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ref': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wom_pebbles.Reference']"}),
-            'ref_pub_date': ('django.db.models.fields.DateTimeField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
+            'reference': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wom_pebbles.Reference']"}),
+            'saved_date': ('django.db.models.fields.DateTimeField', [], {})
+        },
+        'wom_user.userprofile': {
+            'Meta': {'object_name': 'UserProfile'},
+            'feed_sources': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'+'", 'symmetrical': 'False', 'to': "orm['wom_river.FeedSource']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'sources': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['wom_pebbles.Source']", 'symmetrical': 'False'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
         }
     }
 
-    complete_apps = ['wom_river']
+    complete_apps = ['wom_user']

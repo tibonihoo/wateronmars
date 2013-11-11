@@ -27,9 +27,9 @@ prepareKeyBindings();
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
-  <dt><a id="bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a></dt>
+  <dt><a id="bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a></dt>
   <dd><small><em>@<a class="sourceURL" id="bmk{{forloop.counter0}}-sourceURL" style="padding-right:0.5em;" href="{{ bookmark.reference.source.url }}" title="{{ bookmark.reference.source.name }}">{{ bookmark.reference.source.name }}</a></em></small>
-    {% for tag in bookmark.reference.tags.all %}
+    {% for tag in bookmark.tag_names %}
     {% if forloop.first %}
     <i class="icon-tags" title="Tags"></i>
     {% endif %}          
