@@ -7,17 +7,9 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
                        url(r'^$', 'wateronmars.views.home', name='home'),
-                       # url(r'^wateronmars/', include('wateronmars.foo.urls')),
                        url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
-                       url(r'^accounts/new/$', 'wom_user.views.user_creation'),
                        url(r'^accounts/profile/$', 'wom_user.views.user_profile'),
                        url(r'^u/', include('wom_user.urls')),
-                       
-                       # Uncomment the admin/doc line below to enable admin documentation
-                       # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-                       
-                       # Uncomment the next line to enable the admin
-                       url(r'^admin/', include(admin.site.urls)),
                        
                        # temporary hack to avoid depending too much on
                        # celery for background tasks
@@ -25,9 +17,18 @@ urlpatterns = patterns('',
                            'wom_user.views.request_for_update'),
                        url(r'^houston/we_ve_got_a_cleanup_request/$',
                            'wom_user.views.request_for_cleanup'),
+                       url(r'^static/(?P<path>.*)$',
+                           'django.views.static.serve', {'document_root': settings.STATIC_ROOT})
                        )
 
+if not settings.DEMO:
+  urlpatterns += patterns('',
+                          url(r'^accounts/new/$',
+                              'wom_user.views.user_creation'),
+                          url(r'^admin/',
+                              include(admin.site.urls)),
+                          # Uncomment the admin/doc line below to enable admin documentation
+                          url(r'^admin/doc/',
+                              include('django.contrib.admindocs.urls')),
+  )
 
-urlpatterns += patterns('',
-                        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT})
-)

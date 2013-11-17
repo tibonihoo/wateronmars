@@ -93,13 +93,6 @@ def loggedin_and_owner_required(func):
   return _loggedin_and_owner_required
 
 
-class WOMPublic(object):
-  """DEPRECATED"""
-  def __init__(self):
-    self.username = ''
-
-WOMPublic = WOMPublic()
-
 def request_for_update(request):
   collect_all_new_references_sync()
   delete_old_references_sync()
@@ -251,6 +244,8 @@ def user_river_source_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../source/add/?url="..."&name="..."&feed_url="..."
   """
+  if settings.DEMO:
+    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
   if request.method == 'POST':
     try:
       src_info = simplejson.loads(request.body)
@@ -302,6 +297,8 @@ def user_collection_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../collection/add/?url="..."&title="..."&comment="..."&source_url="..."&source_name="..."&pub_date="..."
   """
+  if settings.DEMO:
+    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
   if request.method == 'POST':
     bmk_info = request.POST
   elif request.GET: # GET
@@ -426,6 +423,8 @@ def apply_to_user_sieve(request,owner_name):
       "references" = [ "<url1>", "<url2>", ...],
     }
   """
+  if settings.DEMO:
+    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
   check_user_unread_feed_items(request.user)
   try:
     action_dict = simplejson.loads(request.body)
