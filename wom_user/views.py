@@ -39,6 +39,7 @@ from wom_river.models import ReferenceUserStatus
 from wom_river.tasks import import_feedsources_from_opml
 from wom_river.tasks import check_user_unread_feed_items
 
+from wom_pebbles.models import SourceProductionsMapper
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
 from wom_classification.models import get_item_tag_names
@@ -275,6 +276,8 @@ def user_river_source_add(request,owner_name):
 @require_http_methods(["GET","POST"])
 def user_river_source_remove(request,owner_name):
   """Stop subscriptions to sources via a form only !"""
+  if settings.DEMO:
+    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
@@ -382,8 +385,9 @@ def user_collection(request,owner_name):
 def user_river_view(request,owner_name):
   user_profile = request.owner_user.userprofile
   latest_items = []
-  for source in user_profile.feed_sources.all():
-    latest_items.extend(source.reference_set.order_by('-pub_date')[:MAX_ITEMS_PER_PAGE])
+  for feed in user_profile.web_feeds.all():
+    latest_items.extend(SourceProductionsMapper.get_productions(feed.source)\
+                        .order_by('-pub_date')[:MAX_ITEMS_PER_PAGE])
   latest_items.sort(key=lambda x:x.pub_date)
   latest_items.reverse()
   d = add_base_template_context_data({
@@ -424,7 +428,7 @@ def apply_to_user_sieve(request,owner_name):
     }
   """
   if settings.DEMO:
-    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
+    return HttpResponseForbidden("Changing the sieve's state is not possible in DEMO mode.")
   check_user_unread_feed_items(request.user)
   try:
     action_dict = simplejson.loads(request.body)
@@ -462,9 +466,8 @@ def user_river_sieve(request,owner_name):
 def user_river_sources(request,owner_name):
   if request.method == 'GET':
     owner_profile = request.owner_user.userprofile
-    syndicated_sources = owner_profile.feed_sources.all().order_by('name')
-    visible_sources = owner_profile.sources
-    other_sources = visible_sources.exclude(id__in=[s.id for s in syndicated_sources]).order_by("name")
+    syndicated_sources = [f.source for f in owner_profile.web_feeds.all().order_by('source__title')]
+    other_sources = owner_profile.sources.exclude(id__in=[s.id for s in syndicated_sources]).order_by("title")
     d = add_base_template_context_data({
         'syndicated_sources': syndicated_sources,
         'referenced_sources': other_sources,

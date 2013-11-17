@@ -12,8 +12,8 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 
 from wom_pebbles.models import Reference
-from wom_pebbles.models import Source
-from wom_river.models import FeedSource
+from wom_pebbles.models import SourceProductionsMapper
+from wom_river.models import WebFeed
 
 from wom_user.models import UserProfile
 from wom_user.models import UserBookmark
@@ -33,7 +33,7 @@ from django.contrib.auth.models import AnonymousUser
 class UserProfileModelTest(TestCase):
 
   def setUp(self):
-    self.test_user = User.objects.create(username="name")
+    self.user = User.objects.create(username="name")
     
   def test_accessible_info(self):
     """
@@ -41,10 +41,10 @@ class UserProfileModelTest(TestCase):
     se but useful anyway to make sure the model given enough
     information and list the info we rely on)
     """
-    p = UserProfile.objects.create(user=self.test_user)
-    self.assertEqual(p.user,self.test_user)
+    p = UserProfile.objects.create(user=self.user)
+    self.assertEqual(p.user,self.user)
     self.assertEqual(0,len(p.sources.all()))
-    self.assertEqual(0,len(p.feed_sources.all()))
+    self.assertEqual(0,len(p.web_feeds.all()))
     # just to be sure it is still provided by django
     self.assertNotEqual(p.user.date_joined,None)
 
@@ -52,30 +52,28 @@ class UserProfileModelTest(TestCase):
 class UserBookmarkModelTest(TestCase):
 
   def setUp(self):
-    self.test_date = datetime.datetime.now(timezone.utc)
-    test_source = Source.objects.create(url="http://mouf",name="glop")
-    self.test_reference = Reference.objects.create(url="http://mouf",
-                             title="glop",
-                             pub_date=self.test_date,
-                             source=test_source)
-    self.test_user = User.objects.create(username="name")
+    self.date = datetime.datetime.now(timezone.utc)
+    self.reference = Reference.objects.create(url="http://mouf",
+                                              title="glop",
+                                              pub_date=self.date)
+    self.user = User.objects.create(username="name")
     
   def test_construction_defaults(self):
     """
     This tests just makes it possible to double check that a
     change in the default is voluntary.
     """
-    b = UserBookmark.objects.create(owner=self.test_user,
-                    reference=self.test_reference,
-                    saved_date=self.test_date)
+    b = UserBookmark.objects.create(owner=self.user,
+                    reference=self.reference,
+                    saved_date=self.date)
     self.assertFalse(b.is_public)
 
 
 class CheckAndSetOwnerDecoratorTest(TestCase):
 
   def setUp(self):
-    self.test_user_a = User.objects.create(username="A")
-    self.test_user_b = User.objects.create(username="B")
+    self.user_a = User.objects.create(username="A")
+    self.user_b = User.objects.create(username="B")
     self.request_factory = RequestFactory()
     def pass_through(request,owner_name):
       resp = HttpResponse()
@@ -85,7 +83,7 @@ class CheckAndSetOwnerDecoratorTest(TestCase):
     
   def test_call_with_user_owner(self):
     req = self.request_factory.get("/mouf")
-    req.user = self.test_user_a
+    req.user = self.user_a
     res = check_and_set_owner(self.pass_through_func)(req,"A")
     self.assertEqual(200,res.status_code)
     self.assertTrue(hasattr(res.request,"owner_user"))
@@ -93,7 +91,7 @@ class CheckAndSetOwnerDecoratorTest(TestCase):
     
   def test_call_with_non_owner_user(self):
     req = self.request_factory.get("/mouf")
-    req.user = self.test_user_b
+    req.user = self.user_b
     res = check_and_set_owner(self.pass_through_func)(req,"A")
     self.assertEqual(200,res.status_code)
     self.assertTrue(hasattr(res.request,"owner_user"))
@@ -101,7 +99,7 @@ class CheckAndSetOwnerDecoratorTest(TestCase):
     
   def test_call_for_invalid_owner(self):
     req = self.request_factory.get("/mouf")
-    req.user = self.test_user_b
+    req.user = self.user_b
     res = check_and_set_owner(self.pass_through_func)(req,"C")
     self.assertEqual(404,res.status_code)
 
@@ -109,8 +107,8 @@ class CheckAndSetOwnerDecoratorTest(TestCase):
 class LoggedInAndOwnerRequiredDecoratorTest(TestCase):
 
   def setUp(self):
-    self.test_user_a = User.objects.create(username="A")
-    self.test_user_b = User.objects.create(username="B")
+    self.user_a = User.objects.create(username="A")
+    self.user_b = User.objects.create(username="B")
     self.request_factory = RequestFactory()
     def pass_through(request,owner_name):
       resp = HttpResponse()
@@ -120,7 +118,7 @@ class LoggedInAndOwnerRequiredDecoratorTest(TestCase):
     
   def test_call_with_user_owner(self):
     req = self.request_factory.get("/mouf")
-    req.user = self.test_user_a
+    req.user = self.user_a
     res = loggedin_and_owner_required(self.pass_through_func)(req,
                                   "A")
     self.assertEqual(200,res.status_code)
@@ -129,7 +127,7 @@ class LoggedInAndOwnerRequiredDecoratorTest(TestCase):
     
   def test_call_with_non_owner_user(self):
     req = self.request_factory.get("/mouf")
-    req.user = self.test_user_b
+    req.user = self.user_b
     res = loggedin_and_owner_required(self.pass_through_func)(req,"A")
     self.assertEqual(403,res.status_code)
     
@@ -142,7 +140,7 @@ class LoggedInAndOwnerRequiredDecoratorTest(TestCase):
 class UserProfileViewTest(TestCase):
 
   def setUp(self):
-    self.test_user_a = User.objects.create_user(username="A",
+    self.user_a = User.objects.create_user(username="A",
                           password="pA")
     
   def test_get_html_user_profile(self):
@@ -176,44 +174,46 @@ class UserBookmarkAddTestMixin:
     raise NotImplementedError("This method should be reimplemented")
   
   def setUp(self):
-    test_date = datetime.datetime.now(timezone.utc)
-    self.test_source = Source.objects.create(
+    date = datetime.datetime.now(timezone.utc)
+    self.source = Reference.objects.create(
       url=u"http://mouf",
-      name=u"mouf")
-    test_reference = Reference.objects.create(
+      title=u"mouf",
+      pub_date=date)
+    source_productions = SourceProductionsMapper.objects.create(source=self.source)
+    reference = Reference.objects.create(
       url=u"http://mouf/a",
       title=u"glop",
-      pub_date=test_date,
-      source=self.test_source)
-    test_reference_private = Reference.objects.create(
-      url=u"http://mouf/b",
+      pub_date=date)
+    source_productions.productions.add(reference)
+    reference_private = Reference.objects.create(
+      url=u"http://mouf/p",
       title=u"nop",
-      pub_date=test_date,
-      source=self.test_source)
-    test_reference_b = Reference.objects.create(
+      pub_date=date)
+    source_productions.productions.add(reference_private)
+    reference_b = Reference.objects.create(
       url=u"http://mouf/b",
       title=u"paglop",
-      pub_date=test_date,
-      source=self.test_source)
-    self.test_user = User.objects.create_user(username="uA",
+      pub_date=date)
+    source_productions.productions.add(reference_b)
+    self.user = User.objects.create_user(username="uA",
                                               password="pA")
-    p = UserProfile.objects.create(user=self.test_user)
-    p.sources.add(self.test_source)
-    self.test_bkm = UserBookmark.objects.create(
-      owner=self.test_user,
-      reference=test_reference,
-      saved_date=test_date,
+    p = UserProfile.objects.create(user=self.user)
+    p.sources.add(self.source)
+    self.bkm = UserBookmark.objects.create(
+      owner=self.user,
+      reference=reference,
+      saved_date=date,
       is_public=True)
-    self.test_bkm_private = UserBookmark.objects.create(
-      owner=self.test_user,
-      reference=test_reference_private,
-      saved_date=test_date)
-    self.test_other_user = User.objects.create_user(username="uB",
-                                                    password="pB")
-    self.test_bkm_b = UserBookmark.objects.create(
-      owner=self.test_other_user,
-      reference=test_reference_b,
-      saved_date=test_date,
+    self.bkm_private = UserBookmark.objects.create(
+      owner=self.user,
+      reference=reference_private,
+      saved_date=date)
+    self.other_user = User.objects.create_user(username="uB",
+                                               password="pB")
+    self.bkm_b = UserBookmark.objects.create(
+      owner=self.other_user,
+      reference=reference_b,
+      saved_date=date,
       is_public=True)
   
   def test_post_json_new_item_is_added(self):
@@ -270,11 +270,14 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(3,resp.context["num_bookmarks"])
     items = resp.context["user_bookmarks"]
     self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
-    self.assertIn(u"http://new", [b.reference.source.url for b in items],
-            "Unexpexted guess for the source URL !")
+    
+    self.assertIn(u"http://new",
+                  [SourceProductionsMapper.get_sources(b.reference).get().url\
+                   for b in items],
+                  "Unexpexted guess for the source URL !")
     self.assertIn(u"mouf",[b.comment for b in items \
                            if b.reference.url==u"http://new/mouf"])
-
+    
   def test_post_json_new_item_is_added_with_existing_source_url(self):
     """
     Posting a bookmark with a source url that matches an
@@ -292,7 +295,7 @@ class UserBookmarkAddTestMixin:
                 { "url": u"http://new/mouf",
                   "title": u"new title",
                   "comment": u"mouf",
-                  "source_url": self.test_source.url,
+                  "source_url": self.source.url,
                   })
     # resp_dic = simplejson.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -304,9 +307,12 @@ class UserBookmarkAddTestMixin:
     self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
     self.assertIn(u"mouf",[b.comment for b in items \
                            if b.reference.url==u"http://new/mouf"])
-    self.assertEqual(self.test_source,
-             Reference.objects.get(url=u"http://new/mouf").source)
-    self.assertEqual(1,Source.objects.filter(url=self.test_source.url).count())
+    self.assertEqual(self.source,
+                     SourceProductionsMapper\
+                     .get_sources(Reference\
+                                  .objects.get(url=u"http://new/mouf")).get())
+    self.assertEqual(1,SourceProductionsMapper.objects\
+                     .filter(source__url=self.source.url).count())
 
   def test_post_json_new_item_is_added_with_existing_url(self):
     """
@@ -321,7 +327,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(2,resp.context["num_bookmarks"])
     # mark the first reference as read.
     resp = self.add_request("uA",
-                { "url": self.test_bkm.reference.url,
+                { "url": self.bkm.reference.url,
                   "title": u"new title",
                   "comment": u"mouf",
                   })
@@ -331,13 +337,14 @@ class UserBookmarkAddTestMixin:
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["num_bookmarks"])
-    self.assertIn(self.test_bkm.reference.url,
+    self.assertIn(self.bkm.reference.url,
             [b.reference.url for b  in resp.context["user_bookmarks"]])
     self.assertEqual(1,
              Reference.objects\
-               .filter(url=self.test_bkm.reference.url).count())
-    r = Reference.objects.get(url=self.test_bkm.reference.url)
-    self.assertEqual(self.test_source.url,r.source.url)
+               .filter(url=self.bkm.reference.url).count())
+    r = Reference.objects.get(url=self.bkm.reference.url)
+    self.assertEqual(self.source.url,
+                     SourceProductionsMapper.get_sources(r).get().url)
     # The ref info hasn't changed
     self.assertEqual(u"glop",r.title)
     self.assertEqual(u"",r.description)
@@ -357,7 +364,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(2,resp.context["num_bookmarks"])
     # mark the first reference as read.
     resp = self.add_request("uA",
-                { "url": self.test_bkm.reference.url,
+                { "url": self.bkm.reference.url,
                   "title": u"new title",
                   "comment": u"mouf",
                   "source_url": u"http://barf",
@@ -368,14 +375,14 @@ class UserBookmarkAddTestMixin:
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["num_bookmarks"])
-    self.assertIn(self.test_bkm.reference.url,
+    self.assertIn(self.bkm.reference.url,
             [b.reference.url for b  in resp.context["user_bookmarks"]])
     self.assertEqual(1,
              Reference.objects\
-               .filter(url=self.test_bkm.reference.url).count())
-    r = Reference.objects.get(url=self.test_bkm.reference.url)
+               .filter(url=self.bkm.reference.url).count())
+    r = Reference.objects.get(url=self.bkm.reference.url)
     # The source has not changed
-    self.assertEqual(u"http://mouf",r.source.url)
+    self.assertEqual(u"http://mouf",SourceProductionsMapper.get_sources(r).get().url)
     # The ref info has not changed
     self.assertEqual(u"glop",r.title)
     self.assertEqual(u"",r.description)
@@ -396,10 +403,10 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(2,resp.context["num_bookmarks"])
     # mark the first reference as read.
     resp = self.add_request("uA",
-                { "url": self.test_bkm.reference.url,
+                { "url": self.bkm.reference.url,
                   "title": u"new title",
                   "comment": u"mouf",
-                  "source_url": self.test_source.url,
+                  "source_url": self.source.url,
                   "source_name": u"new name",
                   })
     # resp_dic = simplejson.loads(resp.content)
@@ -408,15 +415,15 @@ class UserBookmarkAddTestMixin:
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["num_bookmarks"])
-    self.assertIn(self.test_bkm.reference.url,
+    self.assertIn(self.bkm.reference.url,
             [b.reference.url for b  in resp.context["user_bookmarks"]])
     self.assertEqual(1,
              Reference.objects\
-               .filter(url=self.test_bkm.reference.url).count())
-    r = Reference.objects.get(url=self.test_bkm.reference.url)
-    self.assertEqual(self.test_source.url,r.source.url)
+               .filter(url=self.bkm.reference.url).count())
+    r = Reference.objects.get(url=self.bkm.reference.url)
+    self.assertEqual(self.source.url,SourceProductionsMapper.get_sources(r).get().url)
     # The source name has not changed
-    self.assertEqual(u"mouf",r.source.name)
+    self.assertEqual(u"mouf",SourceProductionsMapper.get_sources(r).get().title)
     # The ref info has not changed
     self.assertEqual(u"glop",r.title)
     self.assertEqual(u"",r.description)
@@ -473,7 +480,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertIn(u"collection_add_bookmarklet", resp.context)
     self.assertEqual(2,resp.context["num_bookmarks"])
     self.assertEqual(2,len(resp.context["user_bookmarks"]))
-    self.assertEqual(set([self.test_bkm,self.test_bkm_private]),
+    self.assertEqual(set([self.bkm,self.bkm_private]),
                      set(resp.context["user_bookmarks"]))
     # test additional attribute
     self.assertNotIn(False,[hasattr(b,"tag_names") \
@@ -495,7 +502,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertIn(u"collection_url", resp.context)
     self.assertIn(u"collection_add_bookmarklet", resp.context)
     self.assertEqual(1,resp.context["num_bookmarks"])
-    self.assertEqual([self.test_bkm_b],
+    self.assertEqual([self.bkm_b],
              list(resp.context["user_bookmarks"]))
  
   def test_get_html_anonymous_returns_all(self):
@@ -511,7 +518,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertIn(u"collection_url", resp.context)
     self.assertIn(u"collection_add_bookmarklet", resp.context)
     self.assertEqual(1,resp.context["num_bookmarks"])
-    self.assertEqual([self.test_bkm],
+    self.assertEqual([self.bkm],
              list(resp.context["user_bookmarks"]))
 
 
@@ -552,28 +559,32 @@ class UserSourceAddTestMixin:
     raise NotImplementedError("This method should be reimplemented")
   
   def setUp(self):
-    self.test_date = datetime.datetime.now(timezone.utc)
-    self.test_source = Source.objects.create(
+    self.date = datetime.datetime.now(timezone.utc)
+    self.source = Reference.objects.create(
       url=u"http://mouf",
-      name=u"a mouf")
-    self.test_user = User.objects.create_user(username="uA",
+      title=u"a mouf",
+      pub_date=self.date)
+    self.user = User.objects.create_user(username="uA",
                           password="pA")
-    self.test_feed_source = FeedSource.objects.create(
+    self.feed_source = Reference.objects.create(url="http://barf",
+                                                title="a barf",
+                                                pub_date=self.date)
+    self.web_feed = WebFeed.objects.create(
       xmlURL="http://barf/bla.xml",
-      last_update_check=self.test_date,
-      url="http://barf",name="a barf")
-    self.test_user_profile = UserProfile.objects.create(user=self.test_user)
-    self.test_user_profile.sources.add(self.test_source)
-    self.test_user_profile.sources.add(self.test_feed_source)
-    self.test_user_profile.feed_sources.add(self.test_feed_source)
-    self.test_other_user = User.objects.create_user(username="uB",
-                            password="pB")
-    self.test_other_profile = UserProfile.objects.create(\
-      user=self.test_other_user)
-    self.test_source_b = Source.objects.create(
+      last_update_check=self.date,
+      source=self.feed_source)
+    self.user_profile = UserProfile.objects.create(user=self.user)
+    self.user_profile.sources.add(self.source)
+    self.user_profile.sources.add(self.feed_source)
+    self.user_profile.web_feeds.add(self.web_feed)
+    self.other_user = User.objects.create_user(username="uB",
+                                               password="pB")
+    self.other_profile = UserProfile.objects.create(user=self.other_user)
+    self.source_b = Reference.objects.create(
       url=u"http://glop",
-      name=u"a glop")
-    self.test_other_profile.sources.add(self.test_source_b)
+      title=u"a glop",
+      pub_date=self.date)
+    self.other_profile.sources.add(self.source_b)
 
   def test_add_new_feed_source_to_owner(self):
     """
@@ -582,16 +593,16 @@ class UserSourceAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
-    self.assertEqual(2,self.test_user_profile.sources.count())
-    self.assertEqual(1,self.test_user_profile.feed_sources.count())
+    self.assertEqual(2,self.user_profile.sources.count())
+    self.assertEqual(1,self.user_profile.web_feeds.count())
     self.add_request("uA",
              {"url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
               "feed_url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
               "name": u"a new"})
-    self.assertEqual(3,self.test_user_profile.sources.count())
-    self.assertEqual(2,self.test_user_profile.feed_sources.count())
+    self.assertEqual(3,self.user_profile.sources.count())
+    self.assertEqual(2,self.user_profile.web_feeds.count())
     self.assertIn("http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
-            [s.url for s in self.test_user_profile.sources.all()])
+            [s.url for s in self.user_profile.sources.all()])
     
   def test_add_new_feed_source_to_other_user_fails(self):
     """
@@ -600,8 +611,8 @@ class UserSourceAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
-    self.assertEqual(2,self.test_user_profile.sources.count())
-    self.assertEqual(1,self.test_user_profile.feed_sources.count())
+    self.assertEqual(2,self.user_profile.sources.count())
+    self.assertEqual(1,self.user_profile.web_feeds.count())
     self.add_request("uB",
              {"url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
               "feed_url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
@@ -612,16 +623,16 @@ class UserSourceAddTestMixin:
   #   # login as uA and make sure it succeeds
   #   self.assertTrue(self.client.login(username="uA",
   #                     password="pA"))
-  #   self.assertEqual(2,self.test_user_profile.sources.count())
-  #   self.assertEqual(1,self.test_user_profile.feed_sources.count())
+  #   self.assertEqual(2,self.user_profile.sources.count())
+  #   self.assertEqual(1,self.user_profile.feed_sources.count())
   #   self.remove_request("uA",
   #             {"url": u"http://barf",
   #              "feed_url": u"http://barf/bla.xml",
   #              "name": u"a new"})
-  #   self.assertEqual(1,self.test_user_profile.sources.count())
-  #   self.assertEqual(0,self.test_user_profile.feed_sources.count())
+  #   self.assertEqual(1,self.user_profile.sources.count())
+  #   self.assertEqual(0,self.user_profile.feed_sources.count())
   #   self.assertNotIn("http://barf",
-  #            [s.url for s in self.test_user_profile.sources.all()])
+  #            [s.url for s in self.user_profile.sources.all()])
   
 class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
 
@@ -666,14 +677,16 @@ class ImportUserBookmarksFromNSList(TestCase):
     # single bookmark on this reference. Create also another user to
     # check for user data isolation.
     date = datetime.datetime.now(timezone.utc)
-    self.source = Source.objects.create(
-        url=u"http://mouf",
-        name=u"mouf")
+    self.source = Reference.objects.create(
+      url=u"http://mouf",
+      title=u"mouf",
+      pub_date=date)
+    source_productions = SourceProductionsMapper.objects.create(source=self.source)
     reference = Reference.objects.create(
         url=u"http://mouf/a",
         title=u"glop",
-        pub_date=date,
-      source=self.source)
+        pub_date=date)
+    source_productions.productions.add(reference)
     self.user = User.objects.create_user(username="uA",
                                          password="pA")
     self.user_profile = UserProfile.objects.create(user=self.user)
@@ -743,19 +756,21 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
     self.other_user = User.objects.create_user(username="uB",password="pB")
     self.other_user_profile = UserProfile.objects.create(user=self.other_user)
     date = datetime.datetime.now(timezone.utc)
-    fs1 = FeedSource.objects.create(xmlURL="http://mouf/rss.xml",
-                                    last_update_check=date,
-                                    url="http://mouf",name="f1")
-    fs3 = FeedSource.objects.create(xmlURL="http://greuh/rss.xml",
-                                    last_update_check=date,
-                                    url="http://greuh",name="f3")
-    self.user_profile.feed_sources.add(fs1)
-    self.user_profile.feed_sources.add(fs3)
-    self.user_profile.sources.add(fs1)
-    self.user_profile.sources.add(fs3)
+    r1 = Reference.objects.create(url="http://mouf",title="f1",pub_date=date)
+    fs1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
+                                 last_update_check=date,
+                                 source=r1)
+    r3 = Reference.objects.create(url="http://greuh",title="f3",pub_date=date)
+    fs3 = WebFeed.objects.create(xmlURL="http://greuh/rss.xml",
+                                 last_update_check=date,
+                                 source=r3)
+    self.user_profile.web_feeds.add(fs1)
+    self.user_profile.web_feeds.add(fs3)
+    self.user_profile.sources.add(r1)
+    self.user_profile.sources.add(r3)
     # also add plain sources
-    s1 = Source.objects.create(url="http://s1",name="s1")
-    s3 = Source.objects.create(url="http://s3",name="s3")
+    s1 = Reference.objects.create(url="http://s1",title="s1",pub_date=date)
+    s3 = Reference.objects.create(url="http://s3",title="s3",pub_date=date)
     self.user_profile.sources.add(s1)
     self.user_profile.sources.add(s3)
     # create an opml snippet
@@ -787,15 +802,15 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
     
   def test_check_sources_correctly_added(self):
     self.assertEqual(7,self.user_profile.sources.count())
-    self.assertEqual(5,self.user_profile.feed_sources.count())
-    feed_urls = [s.xmlURL for s in self.user_profile.feed_sources.all()]
+    self.assertEqual(5,self.user_profile.web_feeds.count())
+    feed_urls = [s.xmlURL for s in self.user_profile.web_feeds.all()]
     self.assertIn("http://stallman.org/rss/rss.xml",feed_urls)
     self.assertIn("http://www.scripting.com/rss.xml",feed_urls)
     self.assertIn("http://www.openculture.com/feed",feed_urls)
     
   def test_check_sources_not_added_to_other_user(self):
     self.assertEqual(0,self.other_user_profile.sources.count())
-    self.assertEqual(0,self.other_user_profile.feed_sources.count())
+    self.assertEqual(0,self.other_user_profile.web_feeds.count())
     
   def test_check_tags_correctly_added(self):
     # Check that tags were added too
@@ -805,16 +820,20 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
   def test_check_tags_correctly_associated_to_sources(self):
     # Check that tags were correctly associated with the sources
     src_tags = get_item_tag_names(self.user,
-      FeedSource.objects.get(url="http://scripting.com/"))
+      WebFeed.objects.get(source__url="http://scripting.com/"))
     self.assertEqual(["News"],src_tags)
-    src_tags = get_item_tag_names(self.user,
-      FeedSource.objects.get(url="http://stallman.org/archives/polnotes.html"))
+    src_tags = get_item_tag_names(
+      self.user,
+      WebFeed.objects.get(
+        source__url="http://stallman.org/archives/polnotes.html"))
     self.assertEqual(["News"],src_tags)
-    src_tags = get_item_tag_names(self.user,
-      FeedSource.objects.get(url="http://mouf"))
+    src_tags = get_item_tag_names(
+      self.user,
+      WebFeed.objects.get(source__url="http://mouf"))
     self.assertEqual(["News"],src_tags)
-    src_tags = get_item_tag_names(self.user,
-      FeedSource.objects.get(url="http://www.openculture.com"))
+    src_tags = get_item_tag_names(
+      self.user,
+      WebFeed.objects.get(source__url="http://www.openculture.com"))
     self.assertEqual(["Culture"],src_tags)
 
 class UserRiverViewTest(TestCase):
@@ -823,26 +842,41 @@ class UserRiverViewTest(TestCase):
         # Create 2 users and 3 sources (1 exclusive to each and a
         # shared one) with more references than MAX_ITEM_PER_PAGE
         self.user1 = User.objects.create_user(username="uA",password="pA")
-        test_user1_profile = UserProfile.objects.create(user=self.user1)
+        user1_profile = UserProfile.objects.create(user=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
-        test_user2_profile = UserProfile.objects.create(user=self.user2)
-        test_date = datetime.datetime.now(timezone.utc)
-        s1 = FeedSource.objects.create(xmlURL="http://mouf/rss.xml",last_update_check=test_date,url="http://mouf",name="glop")
-        s2 = FeedSource.objects.create(xmlURL="http://bla/rss.xml",last_update_check=test_date,url="http://bla",name="bla")
-        s3 = FeedSource.objects.create(xmlURL="http://greuh/rss.xml",last_update_check=test_date,url="http://greuh",name="greuh")
-        test_user1_profile.feed_sources.add(s1)
-        test_user1_profile.feed_sources.add(s3)
-        test_user2_profile.feed_sources.add(s2)
-        test_user2_profile.feed_sources.add(s3)
+        user2_profile = UserProfile.objects.create(user=self.user2)
+        date = datetime.datetime.now(timezone.utc)
+        r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
+        spm1 = SourceProductionsMapper.objects.create(source=r1)
+        f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
+                                    last_update_check=date,
+                                    source=r1)
+        r2 = Reference.objects.create(url="http://bla",title="bla",pub_date=date)
+        spm2 = SourceProductionsMapper.objects.create(source=r2)
+        f2 = WebFeed.objects.create(xmlURL="http://bla/rss.xml",
+                                    last_update_check=date,
+                                    source=r2)
+        r3 = Reference.objects.create(url="http://greuh",title="greuh",pub_date=date)
+        spm3 = SourceProductionsMapper.objects.create(source=r3)
+        f3 = WebFeed.objects.create(xmlURL="http://greuh/rss.xml",
+                                    last_update_check=date,
+                                    source=r3)
+        user1_profile.web_feeds.add(f1)
+        user1_profile.web_feeds.add(f3)
+        user2_profile.web_feeds.add(f2)
+        user2_profile.web_feeds.add(f3)
         num_items = MAX_ITEMS_PER_PAGE+1
         for i in range(num_items):
-            test_date += datetime.timedelta(hours=1)
-            Reference.objects.create(url="http://mouf",title="s1r%d" % i,
-                                     pub_date=test_date,source=s1)
-            Reference.objects.create(url="http://mouf",title="s2r%d" % i,
-                                     pub_date=test_date,source=s2)
-            Reference.objects.create(url="http://mouf",title="s3r%d" % i,
-                                     pub_date=test_date,source=s3)
+            date += datetime.timedelta(hours=1)
+            r = Reference.objects.create(url="http://moufa%d"%i,title="s1r%d" % i,
+                                         pub_date=date)#,source=s1
+            spm1.productions.add(r)
+            r = Reference.objects.create(url="http://moufb%d"%i,title="s2r%d" % i,
+                                         pub_date=date)#,source=s2
+            spm2.productions.add(r)
+            r = Reference.objects.create(url="http://moufc%d"%i,title="s3r%d" % i,
+                                         pub_date=date)#,source=s3
+            spm3.productions.add(r)
 
     def test_get_html_for_owner_returns_max_items_ordered_newest_first(self):
         """
@@ -909,26 +943,52 @@ class UserSieveViewTest(TestCase):
         # Create 2 users and 3 sources (1 exclusive to each and a
         # shared one) with more references than MAX_ITEM_PER_PAGE
         self.user1 = User.objects.create_user(username="uA",password="pA")
-        test_user1_profile = UserProfile.objects.create(user=self.user1)
+        user1_profile = UserProfile.objects.create(user=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
-        test_user2_profile = UserProfile.objects.create(user=self.user2)
-        test_date = datetime.datetime.now(timezone.utc)
-        s1 = FeedSource.objects.create(xmlURL="http://mouf/rss.xml",last_update_check=test_date,url="http://s1",name="glop")
-        s2 = FeedSource.objects.create(xmlURL="http://bla/rss.xml",last_update_check=test_date,url="http://s2",name="bla")
-        s3 = FeedSource.objects.create(xmlURL="http://greuh/rss.xml",last_update_check=test_date,url="http://s3",name="greuh")
-        test_user1_profile.feed_sources.add(s1)
-        test_user1_profile.feed_sources.add(s3)
-        test_user2_profile.feed_sources.add(s2)
-        test_user2_profile.feed_sources.add(s3)
+        user2_profile = UserProfile.objects.create(user=self.user2)
+        date = datetime.datetime.now(timezone.utc)
+        r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
+        spm1 = SourceProductionsMapper.objects.create(source=r1)
+        f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
+                                    last_update_check=date,
+                                    source=r1)
+        r2 = Reference.objects.create(url="http://bla",title="bla",pub_date=date)
+        spm2 = SourceProductionsMapper.objects.create(source=r2)
+        f2 = WebFeed.objects.create(xmlURL="http://bla/rss.xml",
+                                    last_update_check=date,
+                                    source=r2)
+        r3 = Reference.objects.create(url="http://greuh",title="greuh",pub_date=date)
+        spm3 = SourceProductionsMapper.objects.create(source=r3)
+        f3 = WebFeed.objects.create(xmlURL="http://greuh/rss.xml",
+                                    last_update_check=date,
+                                    source=r3)
+        user1_profile.web_feeds.add(f1)
+        user1_profile.web_feeds.add(f3)
+        user2_profile.web_feeds.add(f2)
+        user2_profile.web_feeds.add(f3)
         num_items = MAX_ITEMS_PER_PAGE+1
         for i in range(num_items):
-            test_date += datetime.timedelta(hours=1)
-            Reference.objects.create(url="http://r1",title="s1r%d" % i,
-                                     pub_date=test_date,source=s1)
-            Reference.objects.create(url="http://r2",title="s2r%d" % i,
-                                     pub_date=test_date,source=s2)
-            Reference.objects.create(url="http://r3",title="s3r%d" % i,
-                                     pub_date=test_date,source=s3)
+            date += datetime.timedelta(hours=1)
+            if i==0:
+              r = Reference.objects.create(url="http://r1",title="s1r%d" % i,
+                                           pub_date=date)#,source=s1
+              spm1.productions.add(r)
+              r = Reference.objects.create(url="http://r2",title="s2r%d" % i,
+                                           pub_date=date)#,source=s2
+              spm2.productions.add(r)
+              r = Reference.objects.create(url="http://r3",title="s3r%d" % i,
+                                           pub_date=date)#,source=s3
+              spm3.productions.add(r)
+            else:
+              r = Reference.objects.create(url="http://r1%d" % i,title="s1r%d" % i,
+                                           pub_date=date)#,source=s1
+              spm1.productions.add(r)
+              r = Reference.objects.create(url="http://r2%d" % i,title="s2r%d" % i,
+                                           pub_date=date)#,source=s2
+              spm2.productions.add(r)
+              r = Reference.objects.create(url="http://r3%d" % i,title="s3r%d" % i,
+                                           pub_date=date)#,source=s3
+              spm3.productions.add(r)
 
     def test_get_html_for_owner_returns_max_items_ordered_oldest_first(self):
         """
@@ -1081,29 +1141,38 @@ class UserSourcesViewTest(TestCase):
         # Create 2 users and 3 feed sources (1 exclusive to each and a
         # shared one) and 3 non-feed sources.
         self.user1 = User.objects.create_user(username="uA",password="pA")
-        test_user1_profile = UserProfile.objects.create(user=self.user1)
+        user1_profile = UserProfile.objects.create(user=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
-        test_user2_profile = UserProfile.objects.create(user=self.user2)
-        test_date = datetime.datetime.now(timezone.utc)
-        fs1 = FeedSource.objects.create(xmlURL="http://mouf/rss.xml",last_update_check=test_date,url="http://mouf",name="f1")
-        fs2 = FeedSource.objects.create(xmlURL="http://bla/rss.xml",last_update_check=test_date,url="http://bla",name="f2")
-        fs3 = FeedSource.objects.create(xmlURL="http://greuh/rss.xml",last_update_check=test_date,url="http://greuh",name="f3")
-        test_user1_profile.feed_sources.add(fs1)
-        test_user1_profile.feed_sources.add(fs3)
-        test_user2_profile.feed_sources.add(fs2)
-        test_user2_profile.feed_sources.add(fs3)
-        test_user1_profile.sources.add(fs1)
-        test_user1_profile.sources.add(fs3)
-        test_user2_profile.sources.add(fs2)
-        test_user2_profile.sources.add(fs3)
+        user2_profile = UserProfile.objects.create(user=self.user2)
+        date = datetime.datetime.now(timezone.utc)
+        r1 = Reference.objects.create(url="http://mouf",title="f1",pub_date=date)
+        f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
+                                    last_update_check=date,
+                                    source=r1)
+        r2 = Reference.objects.create(url="http://bla",title="f2",pub_date=date)
+        f2 = WebFeed.objects.create(xmlURL="http://bla/rss.xml",
+                                    last_update_check=date,
+                                    source=r2)
+        r3 = Reference.objects.create(url="http://greuh",title="f3",pub_date=date)
+        f3 = WebFeed.objects.create(xmlURL="http://greuh/rss.xml",
+                                    last_update_check=date,
+                                    source=r3)
+        user1_profile.web_feeds.add(f1)
+        user1_profile.web_feeds.add(f3)
+        user2_profile.web_feeds.add(f2)
+        user2_profile.web_feeds.add(f3)
+        user1_profile.sources.add(r1)
+        user1_profile.sources.add(r3)
+        user2_profile.sources.add(r2)
+        user2_profile.sources.add(r3)
         # also add plain sources
-        s1 = Source.objects.create(url="http://s1",name="s1")
-        s2 = Source.objects.create(url="http://s2",name="s2")
-        s3 = Source.objects.create(url="http://s3",name="s3")
-        test_user1_profile.sources.add(s1)
-        test_user1_profile.sources.add(s3)
-        test_user2_profile.sources.add(s2)
-        test_user2_profile.sources.add(s3)
+        s1 = Reference.objects.create(url="http://s1",title="s1",pub_date=date)
+        s2 = Reference.objects.create(url="http://s2",title="s2",pub_date=date)
+        s3 = Reference.objects.create(url="http://s3",title="s3",pub_date=date)
+        user1_profile.sources.add(s1)
+        user1_profile.sources.add(s3)
+        user2_profile.sources.add(s2)
+        user2_profile.sources.add(s3)
 
     def test_get_html_for_owner_returns_separate_source_and_feed(self):
         """
@@ -1120,14 +1189,14 @@ class UserSourcesViewTest(TestCase):
         self.assertIn("syndicated_sources", resp.context)
         self.assertIn("referenced_sources", resp.context)
         items = resp.context["referenced_sources"]
-        sourceNames = set([int(s.name[1]) for s in items])
+        sourceNames = set([int(s.title[1]) for s in items])
         self.assertEqual(sourceNames,set((1,3)))
-        sourceTypes = set([s.name[0] for s in items])
+        sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
         feed_items = resp.context["syndicated_sources"]
-        feedNames = set([int(s.name[1]) for s in feed_items])
+        feedNames = set([int(s.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((1,3)))
-        feedTypes = set([s.name[0] for s in feed_items])
+        feedTypes = set([s.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
         
     def test_get_html_for_non_owner_logged_user_returns_all_sources(self):
@@ -1145,14 +1214,14 @@ class UserSourcesViewTest(TestCase):
         self.assertIn("syndicated_sources", resp.context)
         self.assertIn("referenced_sources", resp.context)
         items = resp.context["referenced_sources"]
-        sourceNames = set([int(s.name[1]) for s in items])
+        sourceNames = set([int(s.title[1]) for s in items])
         self.assertEqual(sourceNames,set((2,3)))
-        sourceTypes = set([s.name[0] for s in items])
+        sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
         feed_items = resp.context["syndicated_sources"]
-        feedNames = set([int(s.name[1]) for s in feed_items])
+        feedNames = set([int(s.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((2,3)))
-        feedTypes = set([s.name[0] for s in feed_items])
+        feedTypes = set([s.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
         
     def test_get_html_for_anonymous_returns_all_sources(self):
@@ -1168,12 +1237,12 @@ class UserSourcesViewTest(TestCase):
         self.assertIn("syndicated_sources", resp.context)
         self.assertIn("referenced_sources", resp.context)
         items = resp.context["referenced_sources"]
-        sourceNames = set([int(s.name[1]) for s in items])
+        sourceNames = set([int(s.title[1]) for s in items])
         self.assertEqual(sourceNames,set((1,3)))
-        sourceTypes = set([s.name[0] for s in items])
+        sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
         feed_items = resp.context["syndicated_sources"]
-        feedNames = set([int(s.name[1]) for s in feed_items])
+        feedNames = set([int(s.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((1,3)))
-        feedTypes = set([s.name[0] for s in feed_items])
+        feedTypes = set([s.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)

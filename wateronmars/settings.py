@@ -19,7 +19,7 @@ if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
 USER_AGENT = "WOM"
 
 # Set to True to activate the DEMO mode
-DEMO = True
+DEMO = False
 
 
 # DEBUG or not DEBUG
@@ -215,6 +215,11 @@ LOGGING = {
             'propagate': True,
         },
         'wom_user.tasks': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'wom_river.tasks': {
             'handlers': ['console', 'mail_admins'],
             'level': 'ERROR',
             'propagate': True,

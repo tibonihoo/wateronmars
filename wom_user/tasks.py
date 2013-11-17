@@ -75,8 +75,8 @@ def import_user_feedsources_from_opml(user,opml_txt):
   profile = UserProfile.objects.get(user=user)
   classif_data_to_save = []
   for feed,tags in feeds_and_tags.items():
-    profile.sources.add(feed)
-    profile.feed_sources.add(feed)
+    profile.web_feeds.add(feed)
+    profile.sources.add(feed.source)
     valid_tags = [t for t in tags if len(t)<=TAG_NAME_MAX_LENGTH]
     if len(valid_tags)!=len(tags):
       invalid_tags = [t for t in tags if len(t)>TAG_NAME_MAX_LENGTH]

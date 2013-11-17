@@ -5,7 +5,7 @@ from wom_river.utils.netscape_bookmarks import parse_netscape_bookmarks
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import Reference
-from wom_pebbles.models import Source
+from wom_pebbles.models import SourceProductionsMapper
 
 from celery import task
 
@@ -67,6 +67,7 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
   Return a dictionary mapping each reference with the BookmarkMetadata
   associated to it according to the input content.
   """
+  date_now = datetime.datetime.now(timezone.utc)
   # Parse the file
   collected_bmks = parse_netscape_bookmarks(nsbmk_txt)
   if not collected_bmks:
@@ -75,11 +76,17 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
   # exists or create it to be able to link new references to it.
   source_url = "internal://bookmark-import-nsbmk"
   try:
-    common_source = Source.objects.get(url=source_url)
+    common_source = Reference.objects.get(url=source_url)
   except ObjectDoesNotExist:
-    common_source = Source(url=source_url,
-                           name="Bookmark Import (Netscape-style bookmarks)")
+    common_source = Reference(url=source_url,
+                              title="Bookmark Import (Netscape-style bookmarks)",
+                              pub_date=date_now)
     common_source.save()
+  try:
+    common_source_link = SourceProductionsMapper.objects.get(source=common_source)
+  except ObjectDoesNotExist:
+    common_source_link = SourceProductionsMapper(source=common_source)
+    common_source_link.save()
   new_refs  = []
   ref_and_metadata = []
   for bmk_info in collected_bmks:
@@ -95,15 +102,16 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
       u = u[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
     t = bmk_info.get("title") or build_reference_title_from_url(u)
     if "posix_timestamp" in bmk_info:
-      d = datetime.datetime.utcfromtimestamp(float(bmk_info["posix_timestamp"])).replace(tzinfo=timezone.utc)
+      d = datetime.datetime\
+                  .utcfromtimestamp(float(bmk_info["posix_timestamp"]))\
+                  .replace(tzinfo=timezone.utc)
     else:
-      d = datetime.datetime.now(timezone.utc)
+      d = date_now
     try:
       ref = Reference.objects.get(url=u)
     except ObjectDoesNotExist:
       ref = Reference(url=u,title=truncate_reference_title(t),
                       pub_date=d,description=info)
-      ref.source = common_source
       new_refs.append(ref)
     meta = BookmarkMetadata(bmk_info.get("note",""),
                             set(bmk_info.get("tags","").split(",")),
@@ -112,6 +120,7 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
   with transaction.commit_on_success():
     for ref in new_refs:
       ref.save()
+      common_source_link.productions.add(ref)
   # Note: We have to wait until now to convert the list to a dict,
   # because only now will the model instances have their specific ids and
   # hashes (before that they would have looked the same for the dict).

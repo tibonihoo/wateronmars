@@ -2,10 +2,9 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from wom_pebbles.models import Source
 from wom_pebbles.models import Reference
 
-from wom_river.models import FeedSource
+from wom_river.models import WebFeed
 
 
   
@@ -15,11 +14,10 @@ class UserProfile(models.Model):
   """
   # The user of whom this is the profile
   user = models.OneToOneField(User)
-  # User's selection of sources (including "private" ones)
-  sources = models.ManyToManyField(Source)
-  # User's selection of syndicated sources (subset of the list of
-  # sources and used to ease the feeds update procedure )
-  feed_sources = models.ManyToManyField(FeedSource,related_name="+")
+  # User's selection of syndicated sources
+  web_feeds = models.ManyToManyField(WebFeed,related_name="+")
+  # User sources (includes the sources related to the web_feeds too !)
+  sources = models.ManyToManyField(Reference)
   
   def __unicode__(self):
     return "%s>Profile" % self.user

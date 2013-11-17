@@ -1,4 +1,4 @@
-from urlparse import urlparse
+# -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 
 from datetime import datetime
 from django.utils import timezone
@@ -11,15 +11,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from wateronmars import settings
 
 from wom_pebbles.models import URL_MAX_LENGTH
-from wom_pebbles.models import SOURCE_NAME_MAX_LENGTH
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import Reference
-from wom_pebbles.models import Source
-from wom_pebbles.tasks import truncate_reference_title
+from wom_pebbles.models import SourceProductionsMapper
 from wom_pebbles.tasks import build_reference_title_from_url
 from wom_pebbles.tasks import build_source_url_from_reference_url
 
-from wom_river.models import FeedSource
+from wom_river.models import WebFeed
 from wom_river.models import ReferenceUserStatus
 
 from wom_user.models import UserProfile
@@ -68,7 +66,8 @@ class UserBookmarkAdditionForm(forms.Form):
                             widget=forms.Textarea(
                               attrs={"class":"input-xxlarge"}))
   pub_date = forms.DateTimeField(required=False)
-  source_name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH,required=False,
+  source_name = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
+                                required=False,
                                 widget=forms.TextInput(
                                   attrs={"class":"input-xxlarge"}))
   source_url = forms.CharField(max_length=URL_MAX_LENGTH,required=False,
@@ -97,17 +96,23 @@ class UserBookmarkAdditionForm(forms.Form):
     # Find or create a matching reference
     try:
       bookmarked_ref = Reference.objects.get(url=url)
-      ref_src = bookmarked_ref.source
+      ref_src = SourceProductionsMapper.get_sources(bookmarked_ref).get()
     except ObjectDoesNotExist:
       try:
-        ref_src = Source.objects.get(url=src_url)
+        ref_src = Reference.objects.get(url=src_url)
       except ObjectDoesNotExist:
-        ref_src = Source(url=src_url,name=src_name)
+        ref_src = Reference(url=src_url,title=src_name,pub_date=pub_date)
         ref_src.save()
-      bookmarked_ref = Reference(url=url, title=title,
-                                 pub_date=pub_date,
-                                 source=ref_src)
+      bookmarked_ref = Reference(url=url,
+                                 title=title,
+                                 pub_date=pub_date)
+      try:
+        spm = SourceProductionsMapper.objects.get(source=ref_src)
+      except ObjectDoesNotExist:
+        spm = SourceProductionsMapper(source=ref_src)
+        spm.save()
       bookmarked_ref.save()
+      spm.productions.add(bookmarked_ref)
     with transaction.commit_on_success():
       try:
         bmk = UserBookmark.objects.get(owner=self.user,reference=bookmarked_ref)
@@ -147,7 +152,8 @@ class UserSourceAdditionForm(forms.Form):
   url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
                         widget=forms.TextInput(
                           attrs={"class":"input-xxlarge"}))
-  name = forms.CharField(max_length=SOURCE_NAME_MAX_LENGTH, required=False,
+  name = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
+                         required=False,
                          widget=forms.TextInput(
                            attrs={"class":"input-large"}))
   feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
@@ -218,44 +224,44 @@ class UserSourceAdditionForm(forms.Form):
     form_url = self.cleaned_data["url"]
     form_name = self.cleaned_data["name"]
     form_feed_url = self.cleaned_data["feed_url"]
-    if self.user.userprofile.feed_sources.filter(url=form_url).exists():
+    if self.user.userprofile.web_feeds.filter(source__url=form_url).exists():
       # nothing to do
       return
     # try a bigger look-up anyway
-    same_sources = FeedSource.objects.filter(url=form_url).all()
+    same_sources = WebFeed.objects.filter(source__url=form_url).all()
     # url are unique for sources
     if same_sources:
-      new_source = same_sources[0]
+      new_feed = same_sources[0]
     else:
       if form_name:
         source_name = form_name
       else:
-        url_cpt = urlparse(form_url)
-        source_name = url_cpt.hostname or ""
-        if url_cpt.path.split("/") and url_cpt.path != "/":
-          source_name +=  url_cpt.path
-      new_source = FeedSource()
-      new_source.url = form_url
-      new_source.name = source_name
+        source_name = build_reference_title_from_url(form_url)
+      try:
+        source_ref = Reference.objects.get(url=form_url)
+      except ObjectDoesNotExist:
+        source_ref = Reference(url=form_url,title=source_name,
+                               pub_date=datetime.now(timezone.utc))
+        source_ref.save()
+      new_feed = WebFeed(source=source_ref)
       # assume that either form_feed_url or form_url have been
       # validated as a valid feed url
-      new_source.xmlURL = form_feed_url or form_url
-      new_source.last_update_check = datetime.utcfromtimestamp(0)\
-                                             .replace(tzinfo=timezone.utc)
-      new_source.is_public = True
-      new_source.save()      
-    if not self.user.userprofile.sources.filter(url=form_url).exists():
-      self.user.userprofile.sources.add(new_source)
-    self.user.userprofile.feed_sources.add(new_source)
+      new_feed.xmlURL = form_feed_url or form_url
+      new_feed.last_update_check = datetime.utcfromtimestamp(0)\
+                                           .replace(tzinfo=timezone.utc)
+      new_feed.save()      
+    self.user.userprofile.sources.add(source_ref)
+    self.user.userprofile.web_feeds.add(new_feed)
     self.user.save()
-    return new_source
+    return new_feed
+
 
 def CreateUserSourceRemovalForm(user,*args, **kwargs):
       
   class UserSourceRemovalForm(forms.Form):
     """Gather a selection of syndication sources from which the user wants to un-subsribe."""   
     sources_to_remove = forms.ModelMultipleChoiceField(\
-      user.userprofile.feed_sources,
+      user.userprofile.web_feeds,
       widget=forms.SelectMultiple(attrs={"class":"input-xxlarge","size":"13"}))
     
     def __init__(self):
@@ -271,7 +277,7 @@ def CreateUserSourceRemovalForm(user,*args, **kwargs):
       """
       sources_to_remove = self.cleaned_data["sources_to_remove"] 
       for feed_source in sources_to_remove:
-        self.user.userprofile.feed_sources.remove(feed_source)
+        self.user.userprofile.web_feeds.remove(feed_source)
       if commit:
         self.user.userprofile.save()
       return sources_to_remove

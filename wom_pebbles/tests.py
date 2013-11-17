@@ -6,10 +6,9 @@ from django.utils import timezone
 from django.test import TestCase
 from django.db import IntegrityError
 
-from wom_pebbles.models import Source
+from wom_pebbles.models import SourceProductionsMapper
 from wom_pebbles.models import Reference
 from wom_pebbles.models import URL_MAX_LENGTH
-from wom_pebbles.models import SOURCE_NAME_MAX_LENGTH
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.tasks  import build_reference_title_from_url
 from wom_pebbles.tasks  import truncate_reference_title
@@ -18,54 +17,10 @@ from wom_pebbles.tasks  import import_references_from_ns_bookmark_list
 
 if URL_MAX_LENGTH>255:
   print "WARNING: the current max length for URLs may cause portability problems (see https://docs.djangoproject.com/en/1.4/ref/databases/#character-fields)"
-
-
-class SourceModelTest(TestCase):
-  
-  def test_construction_defaults(self):
-    """
-    This tests just makes it possible to double check that a
-    change in the default is voluntary.
-    """
-    s = Source.objects.create(url="http://mouf",name="glop")
-    self.assertEqual(s.url,"http://mouf")
-    self.assertEqual(s.name,"glop")
-    self.assertEqual(s.description,"")
-    
-  def test_construction_with_max_length_url(self):
-    """
-    Test that the max length constant guarantees that a string of
-    the corresponding length will be accepted.
-    """
-    max_length_url = "u"*URL_MAX_LENGTH
-    s = Source.objects.create(url=max_length_url,name="glop")
-    # Check also that url wasn't truncated
-    self.assertEqual(max_length_url,s.url)
-
-  def test_construction_with_max_length_name(self):
-    """
-    Test that the max length constant guarantees that a string of
-    the corresponding length will be accepted.
-    """
-    max_length_name = "u"*SOURCE_NAME_MAX_LENGTH
-    s = Source.objects.create(url="http://mouf",name=max_length_name)
-    # Check also that name wasn't truncated
-    self.assertEqual(max_length_name,s.name)
-    
-  def test_unicity_of_urls(self):
-    """
-    Test the unicity guaranty on names.
-    """
-    s = Source.objects.create(url="http://mouf",name="glop")
-    self.assertRaises(IntegrityError,
-                      Source.objects.create,
-                      url=s.url,name="paglop")
-    
     
 class ReferenceModelTest(TestCase):
 
   def setUp(self):
-    self.test_source = Source.objects.create(url="http://mouf",name="glop")
     self.test_date = datetime.datetime.now(timezone.utc)
     
   def test_construction_defaults(self):
@@ -74,8 +29,7 @@ class ReferenceModelTest(TestCase):
     change in the default is voluntary.
     """
     r = Reference.objects.create(url="http://mouf",title="glop",
-                                 pub_date=self.test_date,
-                                 source=self.test_source)    
+                                 pub_date=self.test_date)    
     self.assertEqual(r.url,"http://mouf")
     self.assertEqual(r.title,"glop")
     self.assertEqual(r.description,"")
@@ -88,8 +42,7 @@ class ReferenceModelTest(TestCase):
     max_length_url = "u"*URL_MAX_LENGTH
     r = Reference.objects.create(url=max_length_url,
                                  title="glop",
-                                 pub_date=self.test_date,
-                                 source=self.test_source)
+                                 pub_date=self.test_date)
     # Check also that url wasn't truncated
     self.assertEqual(max_length_url,r.url)
 
@@ -101,11 +54,48 @@ class ReferenceModelTest(TestCase):
     max_length_title = "u"*REFERENCE_TITLE_MAX_LENGTH
     s = Reference.objects.create(url="http://mouf",
                                  title=max_length_title,
-                                 pub_date=self.test_date,
-                                 source=self.test_source)
+                                 pub_date=self.test_date)
     # Check also that title wasn't truncated
     self.assertEqual(max_length_title,s.title)
 
+  def test_unicity_of_urls(self):
+    """
+    Test the unicity guaranty on names.
+    """
+    s = Reference.objects.create(url="http://mouf",
+                                 title="glop",
+                                 pub_date=self.test_date)
+    self.assertRaises(IntegrityError,
+                      Reference.objects.create,
+                      url=s.url,
+                      title="paglop",
+                      pub_date=self.test_date)
+
+
+class SourceProductionsMapperModelTest(TestCase):
+
+  def setUp(self):
+    date = datetime.datetime.now(timezone.utc)
+    self.source = Reference.objects.create(
+      url=u"http://mouf",
+      title=u"mouf",
+      pub_date=date)
+    self.reference = Reference.objects.create(
+      url=u"http://mouf/a",
+      title=u"glop",
+      pub_date=date)
+    s = SourceProductionsMapper.objects.create(source=self.source)
+    s.productions.add(self.reference)
+
+  def test_get_sources(self):
+    sources = SourceProductionsMapper.get_sources(self.reference)
+    self.assertEqual(1,len(sources.all()))
+    self.assertEqual(self.source, sources.all()[0])
+
+  def test_get_productions(self):
+    productions = SourceProductionsMapper.get_productions(self.source)
+    self.assertEqual(1,len(productions.all()))
+    self.assertEqual(self.reference, productions.all()[0])
 
 class UtilityFunctionsTests(TestCase):
 
@@ -139,14 +129,16 @@ class ImportReferencesFromNSBookmarkListTaskTest(TestCase):
 
   def setUp(self):
     date = datetime.datetime.now(timezone.utc)
-    self.source = Source.objects.create(
+    self.source = Reference.objects.create(
       url=u"http://mouf",
-      name=u"mouf")
+      title=u"mouf",
+      pub_date=date)
     self.reference = Reference.objects.create(
       url=u"http://mouf/a",
       title=u"glop",
-      pub_date=date,
-      source=self.source)
+      pub_date=date)
+    s = SourceProductionsMapper.objects.create(source=self.source)
+    s.productions.add(self.reference)
     nsbmk_txt = """\
 <!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
@@ -168,7 +160,8 @@ Do Not Edit! -->
     
   def test_references_are_added_with_correct_urls(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(3,len(references_in_db))
+    # 5: 3 bookmarks + 2 sources
+    self.assertEqual(5,len(references_in_db))
     ref_urls = [r.url for r in references_in_db]
     self.assertIn("http://www.example.com",ref_urls)
     self.assertIn("http://mouf/a",ref_urls)
