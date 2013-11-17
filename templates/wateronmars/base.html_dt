@@ -12,26 +12,13 @@
   
 {% block nav_items %}  
 <li class="divider-vertical"></li>
-{% if realm == "public" %}
-<li><a href="/public/river" title="Public River"><i class="icon-align-left icon-white"></i></a></li>
-<li><a href="/public/sieve" title="Public Sieve"><i class="icon-filter icon-white"></i></a></li>
-<li><a href="/public/sources" title="Public Sources"><i class="icon-book icon-white"></i></a></li>
-{% else %}
-<li><a href="/{{ realm }}/river" title="Your River"><i class="icon-align-left icon-white"></i></a></li>
-{% if visitor_name == owner_name %}
-<li><a href="/{{ realm }}/sieve" title="Your Sieve"><i class="icon-filter icon-white"></i></a></li>
-<li><a href="/{{ realm }}/collection" title="Your Collection"><i class="icon-bookmark icon-white"></i></a></li>
-{% endif %}
-<li><a href="/{{ realm }}/sources" title="Your Sources"><i class="icon-book icon-white"></i></a></li>
-{% endif %}
-<li class="divider-vertical"></li>
 {% if visitor_name %}
+<li><a href="/u/{{visitor_name}}/river" title="Your River"><i class="icon-align-left icon-white"></i></a></li>
+<li><a href="/u/{{visitor_name}}/sieve" title="Your Sieve"><i class="icon-filter icon-white"></i></a></li>
+<li><a href="/u/{{visitor_name}}/collection" title="Your Collection"><i class="icon-bookmark icon-white"></i></a></li>
+<li><a href="/u/{{visitor_name}}/sources" title="Your Sources"><i class="icon-book icon-white"></i></a></li>
+<li class="divider-vertical"></li>
 <li><a href="/accounts/profile" title="Check your profile.">Welcome {{ username }} !</a></li>
-{% if realm == "public" %}
-<li><a href="/u/{{ visitor_name }}/river" title="Contemplate your personal river.">&raquo; Check also your personal river.</a></li>
-{% else %}
-<li><a href="/public/river" title="Contemplate the public river.">&raquo; Check also the public river.</a></li>
-{% endif %}
 {% else %}
 <li><a href="/accounts/login"><i class="icon-user icon-white"></i>Login</a></li>
 {% endif %}

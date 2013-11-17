@@ -2,8 +2,12 @@
 
 import urllib
 
+from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+
+from wom_river.tasks import collect_all_new_references_sync
+from wom_river.tasks import delete_old_references_sync
 
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
@@ -96,6 +100,15 @@ class WOMPublic(object):
 
 WOMPublic = WOMPublic()
 
+def request_for_update(request):
+  collect_all_new_references_sync()
+  delete_old_references_sync()
+  return HttpResponseRedirect(reverse('/'))
+
+
+def request_for_cleanup(request):
+  delete_old_references_sync()
+  return HttpResponseRedirect(reverse('/'))
 
 def add_base_template_context_data(d,visitor_name, owner_name):
   """Generate the context data needed for templates that inherit from
@@ -103,23 +116,19 @@ def add_base_template_context_data(d,visitor_name, owner_name):
   
   'd': the dictionary of custom data for the context.
   'visitor_name': the username of the visitor ("None" if anonymous).
-  'owner_name': the username of the owner (WOMPublic if public).
+  'owner_name': the username of the owner.
+  'title_qualify': the property qualifier adapted to wether the user is the owner or not.
+  'demo': flag indicating whether the demo mode is activated
   """
   if visitor_name == owner_name:
     tq = "Your"
-  elif owner_name is WOMPublic:
-    tq = "Public"
   else:
     tq = "%s's" % owner_name
-  if owner_name is WOMPublic:
-    r = "public"
-  else:
-    r = "u/%s" % owner_name
   d.update({
-      'visitor_name' : visitor_name,
-      'owner_name' : owner_name,
-      'title_qualify': tq,
-      'realm': r
+    'visitor_name' : visitor_name,
+    'owner_name' : owner_name,
+    'title_qualify': tq,
+    'demo': settings.DEMO,
       })
   return d
 

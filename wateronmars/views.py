@@ -1,18 +1,15 @@
-from django.http import HttpResponseRedirect
-from wom_river.tasks import collect_all_new_references_sync
-from wom_river.tasks import delete_old_references_sync
-
+from wom_user.views import add_base_template_context_data
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.http import HttpResponseNotAllowed
 
 
 def home(request):
-  return HttpResponseRedirect('/public/river')
+  if request.method != 'GET':
+    return HttpResponseNotAllowed(['GET'])
+  d = add_base_template_context_data({},
+                                     request.user.username,
+                                     request.user.username)
+  return render_to_response('wateronmars/home.html',d,
+                            context_instance=RequestContext(request))
 
-def request_for_update(request):
-  collect_all_new_references_sync()
-  delete_old_references_sync()
-  return HttpResponseRedirect('/public/river')
-
-
-def request_for_cleanup(request):
-  delete_old_references_sync()
-  return HttpResponseRedirect('/public/river')

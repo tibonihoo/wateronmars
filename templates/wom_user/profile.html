@@ -1,7 +1,7 @@
 {% extends "wateronmars/base.html_dt" %}
 
 {% block title %}
-{{ realm }} Profile
+{{title_qualify}} Profile
 {% endblock %}
 
 {% block content %}
@@ -10,23 +10,22 @@
 <p>Feel free to browse through the following pages:</p>
 
 <dl>
-<dt><a href="/{{ realm }}/river" title="Your River"><i class="icon-align-left"></i>Your river</a></dt>
+<dt><a href="/u/{{owner_name}}/river" title="{{title_qualify}} River"><i class="icon-align-left"></i>Your river</a></dt>
 <dd>A streamlined view of the most recent news comming from your own selection of sources.</dd>
-<dt><a href="/{{ realm }}/sieve" title="Your Sieve"><i class="icon-filter"></i>Your sieve</a></dt>
+<dt><a href="/u/{{owner_name}}/sieve" title="{{title_qualify}} Sieve"><i class="icon-filter"></i>Your sieve</a></dt>
 <dd>An inbox-like view to help you filter the news and make sure you don't miss anything.</dd>
-<dt><a href="/{{ realm }}/collection" title="Your Collection"><i class="icon-bookmark"></i>Your collection</a></dt>
+<dt><a href="/u/{{owner_name}}/collection" title="{{title_qualify}} Collection"><i class="icon-bookmark"></i>Your collection</a></dt>
 <dd>All the links you've picked up from your river and from the web, in a word: your bookmarks :)</dd>
-<dt><a href="/{{ realm }}/sources" title="Your Sources"><i class="icon-book"></i>Your sources</a></dt>
+<dt><a href="/u/{{owner_name}}/sources" title="{{title_qualify}} Sources"><i class="icon-book"></i>Your sources</a></dt>
 <dd>A list of where you take your information from: the news sources to which you've suscribed as well as the sites referenced by your bookmarks.</dd>
 </dl>
 
-<p>And if you're looking for fresh water, have a look at the community's selection:</p>
-<p><a href="/public/river" title="News from the community's selection of news sources."><i class="icon-align-left"></i>Public river</a>  <a href="/public/sources" title="Community's sources."><i class="icon-book"></i>Public sources</a></p>
 
+{% if visitor_name == owner_name %}
 
 <h2>Add bookmarks</h2>
 
-<p>Add bookmarks via the <a href="/{{ realm }}/sieve" title="Your Sieve">sieve</a>, or when visiting a web page thanks to the following <abbr title="drag'n'drop this link button on your browser's toolbar">bookmarlet</abbr>.</p>
+<p>Add bookmarks via the <a href="/u/{{owner_name}}/sieve" title="Your Sieve">sieve</a>, or when visiting a web page thanks to the following <abbr title="drag'n'drop this link button on your browser's toolbar">bookmarlet</abbr>.</p>
 
 <p><a href="{{ source_add_bookmarklet|safe }}" class="btn btn-large btn-primary disabled" title="Add bookmark to WOM">Bookmark!</a></p>
 
@@ -57,5 +56,5 @@
   <input type="submit" value="Import sources" class="btn" />
 </form>
 
-
+{% endif %}
 {% endblock %}

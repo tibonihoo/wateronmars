@@ -18,6 +18,9 @@ if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
 # blacklisting some user-agents)
 USER_AGENT = "WOM"
 
+# Set to True to activate the DEMO mode
+DEMO = True
+
 
 # DEBUG or not DEBUG
 if DEPLOYMENT_PLATFORM == "heroku":

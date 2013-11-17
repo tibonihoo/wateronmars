@@ -32,15 +32,6 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block content %}
-
-{% if realm == "public" %}
-<div class="alert fade in">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong>Warning, demo only !</strong> 
-  <p>This shows how a logged user can browse his private feed items with the sieve. The 'read status' of items of this public sieve won't be recorded!</p> 
-</div>
-{% endif %}
-
 <p><i class="icon-filter"></i><strong>{{ title_qualify }} sieve</strong>
   <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_references }}</span> unread items.</small>
 </p>
@@ -89,10 +80,6 @@ prepareKeyBindings();
 
 {% block extrascript %}
 <script>
-{% if realm == "public" %}
-activateKeyBindings(false, "{{ user_collection_url }}", {{ num_unread_references }});
-{% else %}
 activateKeyBindings(true, "{{ user_collection_url }}", {{ num_unread_references }});
-{% endif %}
 </script>
 {% endblock %}
