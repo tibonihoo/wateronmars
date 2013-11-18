@@ -18,10 +18,10 @@ from wom_pebbles.tasks import build_reference_title_from_url
 from wom_pebbles.tasks import build_source_url_from_reference_url
 
 from wom_river.models import WebFeed
-from wom_river.models import ReferenceUserStatus
 
 from wom_user.models import UserProfile
 from wom_user.models import UserBookmark
+from wom_user.models import ReferenceUserStatus
 
 from wom_river.utils import feedfinder
 feedfinder.setUserAgent(settings.USER_AGENT)

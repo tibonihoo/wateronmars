@@ -12,7 +12,6 @@ from wom_pebbles.models import SourceProductionsMapper
 
 from wom_river.models import WebFeed
 from wom_river.models import URL_MAX_LENGTH
-from wom_river.models import ReferenceUserStatus
 
 from wom_river.tasks import import_feedsources_from_opml
 from wom_river.tasks import add_new_references_from_feedparser_entries
@@ -74,26 +73,6 @@ class WebFeedModelTest(TestCase):
     spm = s.get_source_productions_mapper()
     self.assertEqual(r,spm.source)
 
-
-class ReferenceUserStatusModelTest(TestCase):
-
-  def setUp(self):
-    self.date = datetime.now(timezone.utc)
-    self.reference = Reference.objects.create(url="http://mouf",
-                                              title="glop",
-                                              pub_date=self.date)
-    self.user = User.objects.create(username="name")
-    
-  def test_construction_defaults(self):
-    """
-    This tests just makes it possible to double check that a
-    change in the default is voluntary.
-    """
-    rust = ReferenceUserStatus.objects.create(ref=self.reference,
-                                              user=self.user,
-                                              ref_pub_date=self.date)
-    self.assertFalse(rust.has_been_read)
-    self.assertFalse(rust.has_been_saved)
 
 
 

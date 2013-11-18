@@ -27,6 +27,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 from wom_user.models import UserBookmark
+from wom_user.models import ReferenceUserStatus
+
 from wom_user.forms import OPMLFileUploadForm
 from wom_user.forms import NSBookmarkFileUploadForm
 from wom_user.forms import UserProfileCreationForm
@@ -34,10 +36,9 @@ from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
 from wom_user.forms import CreateUserSourceRemovalForm
 
-from wom_river.models import ReferenceUserStatus
 
 from wom_river.tasks import import_feedsources_from_opml
-from wom_river.tasks import check_user_unread_feed_items
+from wom_user.tasks import check_user_unread_feed_items
 
 from wom_pebbles.models import SourceProductionsMapper
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list

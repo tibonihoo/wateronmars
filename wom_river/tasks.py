@@ -12,7 +12,6 @@ from wom_pebbles.models import Reference
 from wom_pebbles.models import SourceProductionsMapper
 
 from wom_river.models import WebFeed
-from wom_river.models import ReferenceUserStatus
 from wom_river.utils.read_opml import parse_opml
 
 from wom_pebbles.models import URL_MAX_LENGTH
@@ -106,49 +105,6 @@ def delete_old_references_sync():
   time_threshold = datetime.now(timezone.utc)-datetime.timedelta(weeks=12)
   Reference.objects.filter(save_count=0,pub_date__lt=time_threshold).delete()
 
-
-class FakeReferenceUserStatus:
-
-  def __init__(self):
-    self.user = None 
-
-
-def generate_reference_user_status(user,references):
-  """Generate reference user status instances for a given list of references.
-  WARNING: the new instances are not saved in the database!
-  If user is None, then the created instances are not saveable at all.
-  """
-  new_ref_status = []
-  for ref in references.select_related("referenceuserstatus_set").all():
-    if user and not ref.referenceuserstatus_set.filter(user=user).exists():
-      rust = ReferenceUserStatus()
-      rust.user = user
-      rust.ref = ref
-      rust.ref_pub_date = ref.pub_date
-      new_ref_status.append(rust)
-      # TODO: check here that the corresponding reference has not
-      # been saved already !
-    elif user is None:
-      rust = FakeReferenceUserStatus()
-      rust.ref = ref
-      rust.ref_pub_date = ref.pub_date
-      new_ref_status.append(rust)      
-  return new_ref_status
-
-
-@task()  
-def check_user_unread_feed_items(user):
-  """
-  Browse all feed sources registered by a given user and create as
-  many UnreadReferenceByUser instances as there are unread items.
-  """
-  new_ref_status = []
-  for feed in user.userprofile.web_feeds.select_related("source").all():
-    new_ref_status += generate_reference_user_status(user,
-                                                     SourceProductionsMapper.get_productions(feed.source).select_related("referenceuserstatus_set").all())
-  with transaction.commit_on_success():
-    for r in new_ref_status:
-      r.save()
 
 
 @task()

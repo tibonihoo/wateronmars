@@ -10,14 +10,17 @@ from celery.task.schedules import crontab
 from celery.decorators import periodic_task  
 from celery.decorators import task  
 
+from wom_pebbles.tasks import import_references_from_ns_bookmark_list
+
 from wom_river.tasks import collect_all_new_references_sync
 from wom_river.tasks import delete_old_references_sync
-
-from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 from wom_river.tasks import import_feedsources_from_opml
+
+from wom_pebbles.models import SourceProductionsMapper
 
 from wom_user.models import UserBookmark
 from wom_user.models import UserProfile
+from wom_user.models import ReferenceUserStatus
 
 from wom_classification.models import TAG_NAME_MAX_LENGTH
 from wom_classification.models import set_item_tag_names
@@ -88,4 +91,47 @@ def import_user_feedsources_from_opml(user,opml_txt):
     for cd in classif_data_to_save:
       cd.save()
   # TODO add a tag in a new tag list of the user profile
+
+class FakeReferenceUserStatus:
+
+  def __init__(self):
+    self.user = None 
+
+
+def generate_reference_user_status(user,references):
+  """Generate reference user status instances for a given list of references.
+  WARNING: the new instances are not saved in the database!
+  If user is None, then the created instances are not saveable at all.
+  """
+  new_ref_status = []
+  for ref in references.select_related("referenceuserstatus_set").all():
+    if user and not ref.referenceuserstatus_set.filter(user=user).exists():
+      rust = ReferenceUserStatus()
+      rust.user = user
+      rust.ref = ref
+      rust.ref_pub_date = ref.pub_date
+      new_ref_status.append(rust)
+      # TODO: check here that the corresponding reference has not
+      # been saved already !
+    elif user is None:
+      rust = FakeReferenceUserStatus()
+      rust.ref = ref
+      rust.ref_pub_date = ref.pub_date
+      new_ref_status.append(rust)      
+  return new_ref_status
+
+
+@task()  
+def check_user_unread_feed_items(user):
+  """
+  Browse all feed sources registered by a given user and create as
+  many UnreadReferenceByUser instances as there are unread items.
+  """
+  new_ref_status = []
+  for feed in user.userprofile.web_feeds.select_related("source").all():
+    new_ref_status += generate_reference_user_status(user,
+                                                     SourceProductionsMapper.get_productions(feed.source).select_related("referenceuserstatus_set").all())
+  with transaction.commit_on_success():
+    for r in new_ref_status:
+      r.save()
 

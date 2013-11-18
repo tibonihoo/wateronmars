@@ -46,3 +46,25 @@ class UserBookmark(models.Model):
     return "%s%s>%s" % (self.owner,"" if self.is_public else "<private",
                         self.reference)
 
+
+class ReferenceUserStatus(models.Model):
+  """
+  Mainly represents the "unread" flag: if no instance exists for a
+  given feed item, then the corresponding reference is unread, as it
+  is too if an instance exists with the read flag set to false, but if
+  the read flag is set to true, then the user has read the reference.
+  """
+  # The reference that waits to be read
+  ref = models.ForeignKey(Reference)
+  # The user that is supposed to read it
+  user = models.ForeignKey(User)
+  # Repeat the publication date of the reference
+  ref_pub_date = models.DateTimeField('reference publication date')
+  # Read flag
+  has_been_read = models.BooleanField(default=False)
+  # Saved flag
+  has_been_saved = models.BooleanField(default=False)
+
+  def __unicode__(self):
+    return "'%s' (read: %s, saved: %s by '%s')" \
+      % (self.ref.title,self.has_been_read,self.has_been_saved,self.user.username)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 
-import datetime
+from datetime import datetime
+from datetime import timedelta
 from django.utils import timezone
 from django.utils import simplejson
 
@@ -17,6 +18,8 @@ from wom_river.models import WebFeed
 
 from wom_user.models import UserProfile
 from wom_user.models import UserBookmark
+from wom_user.models import ReferenceUserStatus
+
 
 from wom_user.views import MAX_ITEMS_PER_PAGE
 from wom_user.views import check_and_set_owner
@@ -52,7 +55,7 @@ class UserProfileModelTest(TestCase):
 class UserBookmarkModelTest(TestCase):
 
   def setUp(self):
-    self.date = datetime.datetime.now(timezone.utc)
+    self.date = datetime.now(timezone.utc)
     self.reference = Reference.objects.create(url="http://mouf",
                                               title="glop",
                                               pub_date=self.date)
@@ -174,7 +177,7 @@ class UserBookmarkAddTestMixin:
     raise NotImplementedError("This method should be reimplemented")
   
   def setUp(self):
-    date = datetime.datetime.now(timezone.utc)
+    date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
       url=u"http://mouf",
       title=u"mouf",
@@ -559,7 +562,7 @@ class UserSourceAddTestMixin:
     raise NotImplementedError("This method should be reimplemented")
   
   def setUp(self):
-    self.date = datetime.datetime.now(timezone.utc)
+    self.date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
       url=u"http://mouf",
       title=u"a mouf",
@@ -676,7 +679,7 @@ class ImportUserBookmarksFromNSList(TestCase):
     # Create a single reference with its source, and a user with a
     # single bookmark on this reference. Create also another user to
     # check for user data isolation.
-    date = datetime.datetime.now(timezone.utc)
+    date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
       url=u"http://mouf",
       title=u"mouf",
@@ -755,7 +758,7 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
     self.user_profile = UserProfile.objects.create(user=self.user)
     self.other_user = User.objects.create_user(username="uB",password="pB")
     self.other_user_profile = UserProfile.objects.create(user=self.other_user)
-    date = datetime.datetime.now(timezone.utc)
+    date = datetime.now(timezone.utc)
     r1 = Reference.objects.create(url="http://mouf",title="f1",pub_date=date)
     fs1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                  last_update_check=date,
@@ -845,7 +848,7 @@ class UserRiverViewTest(TestCase):
         user1_profile = UserProfile.objects.create(user=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
         user2_profile = UserProfile.objects.create(user=self.user2)
-        date = datetime.datetime.now(timezone.utc)
+        date = datetime.now(timezone.utc)
         r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
         spm1 = SourceProductionsMapper.objects.create(source=r1)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
@@ -867,7 +870,7 @@ class UserRiverViewTest(TestCase):
         user2_profile.web_feeds.add(f3)
         num_items = MAX_ITEMS_PER_PAGE+1
         for i in range(num_items):
-            date += datetime.timedelta(hours=1)
+            date += timedelta(hours=1)
             r = Reference.objects.create(url="http://moufa%d"%i,title="s1r%d" % i,
                                          pub_date=date)#,source=s1
             spm1.productions.add(r)
@@ -946,7 +949,7 @@ class UserSieveViewTest(TestCase):
         user1_profile = UserProfile.objects.create(user=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
         user2_profile = UserProfile.objects.create(user=self.user2)
-        date = datetime.datetime.now(timezone.utc)
+        date = datetime.now(timezone.utc)
         r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
         spm1 = SourceProductionsMapper.objects.create(source=r1)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
@@ -968,7 +971,7 @@ class UserSieveViewTest(TestCase):
         user2_profile.web_feeds.add(f3)
         num_items = MAX_ITEMS_PER_PAGE+1
         for i in range(num_items):
-            date += datetime.timedelta(hours=1)
+            date += timedelta(hours=1)
             if i==0:
               r = Reference.objects.create(url="http://r1",title="s1r%d" % i,
                                            pub_date=date)#,source=s1
@@ -1144,7 +1147,7 @@ class UserSourcesViewTest(TestCase):
         user1_profile = UserProfile.objects.create(user=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
         user2_profile = UserProfile.objects.create(user=self.user2)
-        date = datetime.datetime.now(timezone.utc)
+        date = datetime.now(timezone.utc)
         r1 = Reference.objects.create(url="http://mouf",title="f1",pub_date=date)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                     last_update_check=date,
@@ -1246,3 +1249,24 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(feedNames,set((1,3)))
         feedTypes = set([s.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
+
+
+class ReferenceUserStatusModelTest(TestCase):
+
+  def setUp(self):
+    self.date = datetime.now(timezone.utc)
+    self.reference = Reference.objects.create(url="http://mouf",
+                                              title="glop",
+                                              pub_date=self.date)
+    self.user = User.objects.create(username="name")
+    
+  def test_construction_defaults(self):
+    """
+    This tests just makes it possible to double check that a
+    change in the default is voluntary.
+    """
+    rust = ReferenceUserStatus.objects.create(ref=self.reference,
+                                              user=self.user,
+                                              ref_pub_date=self.date)
+    self.assertFalse(rust.has_been_read)
+    self.assertFalse(rust.has_been_saved)
