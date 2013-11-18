@@ -9,7 +9,6 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from wom_pebbles.models import Reference
-from wom_pebbles.models import SourceProductionsMapper
 
 from wom_river.models import WebFeed
 from wom_river.utils.read_opml import parse_opml
@@ -30,14 +29,14 @@ def create_reference_from_feedparser_entry(entry):
   """
   url = entry.link
   info = ""
-  tags = [t.term for t in entry.tags]
+  tags = set([t.term for t in entry.tags])
   if len(url)>URL_MAX_LENGTH:
     # WOM should be configured in such a way that this never happens !
     truncation_txt = "<wom truncation>"
     # Save the full url in info to limit the loss of information
     info = u"<WOM had to truncate the following URL: %s>" % url
-    logger.error("Found an url of length %d (>%d) \
-en importing Netscape-style bookmark list." % (len(url),URL_MAX_LENGTH))
+    logger.warning("Found an url of length %d (>%d) \
+when importing references from feed." % (len(url),URL_MAX_LENGTH))
     url = url[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
   title = truncate_reference_title(entry.get("title") or url)
   try:
@@ -63,7 +62,7 @@ def add_new_references_from_feedparser_entries(feed,entries):
   Returns a dictionary mapping the saved references to the tags that are
   associated to them in the feed.
   """
-  common_source_link = feed.get_source_productions_mapper()
+  common_source = feed.source
   feed_last_update_check = feed.last_update_check
   latest_item_date = feed_last_update_check
   all_references = []
@@ -80,13 +79,15 @@ def add_new_references_from_feedparser_entries(feed,entries):
   with transaction.commit_on_success():
     for r,_ in all_references:
       r.save()
-      common_source_link.productions.add(r)
+      r.sources.add(common_source)
   return dict(all_references)
 
-  
+
 @task()
 def collect_new_references_for_feed(feed):
-  """Get the feed data from its URL and collect the new references into the db."""
+  """Get the feed data from its URL and collect the new references into the db.
+  Return a dictionary mapping the new references to a corresponding set of tags.
+  """
   try:
     d = feedparser.parse(feed.xmlURL)
   except Exception,e:

@@ -8,7 +8,6 @@ import feedparser
 from django.test import TestCase
 
 from wom_pebbles.models import Reference
-from wom_pebbles.models import SourceProductionsMapper
 
 from wom_river.models import WebFeed
 from wom_river.models import URL_MAX_LENGTH
@@ -49,32 +48,6 @@ class WebFeedModelTest(TestCase):
                                source=r)
     # Check also that url wasn't truncated
     self.assertEqual(max_length_xmlURL,s.xmlURL)
-
-  def test_get_source_productions_mapper_when_already_exists(self):
-    """Test that when the SourceProductionsMapper already exists it is
-    correctly recovered.
-    """
-    r = Reference.objects.create(url="http://mouf",
-                                 pub_date=self.date)
-    spm = SourceProductionsMapper.objects.create(source=r)
-    s = WebFeed.objects.create(xmlURL="http://bla",
-                               last_update_check=self.date,
-                               source=r)
-    self.assertEqual(spm,s.get_source_productions_mapper())
-    
-  def test_get_source_productions_mapper_when_none_exists(self):
-    """Test that when the SourceProductionsMapper has not yet been created.
-    """
-    r = Reference.objects.create(url="http://mouf",
-                                 pub_date=self.date)
-    s = WebFeed.objects.create(xmlURL="http://bla",
-                               last_update_check=self.date,
-                               source=r)
-    spm = s.get_source_productions_mapper()
-    self.assertEqual(r,spm.source)
-
-
-
 
     
 class ImportFeedSourcesFromOPMLTaskTest(TestCase):
@@ -159,8 +132,6 @@ class AddReferencesFromFeedParserEntriesTask(TestCase):
       url=u"http://example.com",
       title=u"Test Source",
       pub_date=date)
-    self.src_prod_map = SourceProductionsMapper\
-        .objects.create(source=self.source)
     web_feed  = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                        source=self.source,
                                        last_update_check=\
@@ -235,6 +206,13 @@ class AddReferencesFromFeedParserEntriesTask(TestCase):
     # description field to 'save' url info from oblivion.
     self.assertIn("http://uuu",
                   Reference.objects.get(url__contains="uuu").description)
+    
+  def test_references_are_added_with_correct_sources(self):
+    references_in_db = list(Reference.objects.all())
+    self.assertEqual(4,len(references_in_db))
+    for ref in references_in_db:
+      if ref!=self.source:
+        self.assertIn(self.source,ref.sources.all(),ref)
     
   def test_check_metadata_correctly_associated_to_refs(self):
     self.assertEqual(3,len(self.ref_and_tags))

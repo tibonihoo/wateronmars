@@ -13,7 +13,6 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 
 from wom_pebbles.models import Reference
-from wom_pebbles.models import SourceProductionsMapper
 from wom_river.models import WebFeed
 
 from wom_user.models import UserProfile
@@ -182,24 +181,23 @@ class UserBookmarkAddTestMixin:
       url=u"http://mouf",
       title=u"mouf",
       pub_date=date)
-    source_productions = SourceProductionsMapper.objects.create(source=self.source)
     reference = Reference.objects.create(
       url=u"http://mouf/a",
       title=u"glop",
       pub_date=date)
-    source_productions.productions.add(reference)
+    reference.sources.add(self.source)
     reference_private = Reference.objects.create(
       url=u"http://mouf/p",
       title=u"nop",
       pub_date=date)
-    source_productions.productions.add(reference_private)
+    reference_private.sources.add(self.source)
     reference_b = Reference.objects.create(
       url=u"http://mouf/b",
       title=u"paglop",
       pub_date=date)
-    source_productions.productions.add(reference_b)
+    reference_b.sources.add(self.source)
     self.user = User.objects.create_user(username="uA",
-                                              password="pA")
+                                         password="pA")
     p = UserProfile.objects.create(user=self.user)
     p.sources.add(self.source)
     self.bkm = UserBookmark.objects.create(
@@ -273,10 +271,8 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(3,resp.context["num_bookmarks"])
     items = resp.context["user_bookmarks"]
     self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
-    
     self.assertIn(u"http://new",
-                  [SourceProductionsMapper.get_sources(b.reference).get().url\
-                   for b in items],
+                  [b.reference.sources.get().url for b in items],
                   "Unexpexted guess for the source URL !")
     self.assertIn(u"mouf",[b.comment for b in items \
                            if b.reference.url==u"http://new/mouf"])
@@ -311,11 +307,8 @@ class UserBookmarkAddTestMixin:
     self.assertIn(u"mouf",[b.comment for b in items \
                            if b.reference.url==u"http://new/mouf"])
     self.assertEqual(self.source,
-                     SourceProductionsMapper\
-                     .get_sources(Reference\
-                                  .objects.get(url=u"http://new/mouf")).get())
-    self.assertEqual(1,SourceProductionsMapper.objects\
-                     .filter(source__url=self.source.url).count())
+                     Reference\
+                     .objects.get(url=u"http://new/mouf").sources.get())
 
   def test_post_json_new_item_is_added_with_existing_url(self):
     """
@@ -346,8 +339,7 @@ class UserBookmarkAddTestMixin:
              Reference.objects\
                .filter(url=self.bkm.reference.url).count())
     r = Reference.objects.get(url=self.bkm.reference.url)
-    self.assertEqual(self.source.url,
-                     SourceProductionsMapper.get_sources(r).get().url)
+    self.assertEqual(self.source.url,r.sources.get().url)
     # The ref info hasn't changed
     self.assertEqual(u"glop",r.title)
     self.assertEqual(u"",r.description)
@@ -385,7 +377,7 @@ class UserBookmarkAddTestMixin:
                .filter(url=self.bkm.reference.url).count())
     r = Reference.objects.get(url=self.bkm.reference.url)
     # The source has not changed
-    self.assertEqual(u"http://mouf",SourceProductionsMapper.get_sources(r).get().url)
+    self.assertEqual(u"http://mouf",r.sources.get().url)
     # The ref info has not changed
     self.assertEqual(u"glop",r.title)
     self.assertEqual(u"",r.description)
@@ -424,9 +416,9 @@ class UserBookmarkAddTestMixin:
              Reference.objects\
                .filter(url=self.bkm.reference.url).count())
     r = Reference.objects.get(url=self.bkm.reference.url)
-    self.assertEqual(self.source.url,SourceProductionsMapper.get_sources(r).get().url)
+    self.assertEqual(self.source.url,r.sources.get().url)
     # The source name has not changed
-    self.assertEqual(u"mouf",SourceProductionsMapper.get_sources(r).get().title)
+    self.assertEqual(u"mouf",r.sources.get().title)
     # The ref info has not changed
     self.assertEqual(u"glop",r.title)
     self.assertEqual(u"",r.description)
@@ -684,12 +676,11 @@ class ImportUserBookmarksFromNSList(TestCase):
       url=u"http://mouf",
       title=u"mouf",
       pub_date=date)
-    source_productions = SourceProductionsMapper.objects.create(source=self.source)
     reference = Reference.objects.create(
         url=u"http://mouf/a",
         title=u"glop",
         pub_date=date)
-    source_productions.productions.add(reference)
+    reference.source.add(self.source)
     self.user = User.objects.create_user(username="uA",
                                          password="pA")
     self.user_profile = UserProfile.objects.create(user=self.user)
@@ -850,17 +841,14 @@ class UserRiverViewTest(TestCase):
         user2_profile = UserProfile.objects.create(user=self.user2)
         date = datetime.now(timezone.utc)
         r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
-        spm1 = SourceProductionsMapper.objects.create(source=r1)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                     last_update_check=date,
                                     source=r1)
         r2 = Reference.objects.create(url="http://bla",title="bla",pub_date=date)
-        spm2 = SourceProductionsMapper.objects.create(source=r2)
         f2 = WebFeed.objects.create(xmlURL="http://bla/rss.xml",
                                     last_update_check=date,
                                     source=r2)
         r3 = Reference.objects.create(url="http://greuh",title="greuh",pub_date=date)
-        spm3 = SourceProductionsMapper.objects.create(source=r3)
         f3 = WebFeed.objects.create(xmlURL="http://greuh/rss.xml",
                                     last_update_check=date,
                                     source=r3)
@@ -873,14 +861,14 @@ class UserRiverViewTest(TestCase):
             date += timedelta(hours=1)
             r = Reference.objects.create(url="http://moufa%d"%i,title="s1r%d" % i,
                                          pub_date=date)#,source=s1
-            spm1.productions.add(r)
+            r.sources.add(r1)
             r = Reference.objects.create(url="http://moufb%d"%i,title="s2r%d" % i,
                                          pub_date=date)#,source=s2
-            spm2.productions.add(r)
+            r.sources.add(r2)
             r = Reference.objects.create(url="http://moufc%d"%i,title="s3r%d" % i,
                                          pub_date=date)#,source=s3
-            spm3.productions.add(r)
-
+            r.sources.add(r3)
+    
     def test_get_html_for_owner_returns_max_items_ordered_newest_first(self):
         """
         Make sure a user can see its river properly ordered
@@ -951,17 +939,14 @@ class UserSieveViewTest(TestCase):
         user2_profile = UserProfile.objects.create(user=self.user2)
         date = datetime.now(timezone.utc)
         r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
-        spm1 = SourceProductionsMapper.objects.create(source=r1)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                     last_update_check=date,
                                     source=r1)
         r2 = Reference.objects.create(url="http://bla",title="bla",pub_date=date)
-        spm2 = SourceProductionsMapper.objects.create(source=r2)
         f2 = WebFeed.objects.create(xmlURL="http://bla/rss.xml",
                                     last_update_check=date,
                                     source=r2)
         r3 = Reference.objects.create(url="http://greuh",title="greuh",pub_date=date)
-        spm3 = SourceProductionsMapper.objects.create(source=r3)
         f3 = WebFeed.objects.create(xmlURL="http://greuh/rss.xml",
                                     last_update_check=date,
                                     source=r3)
@@ -975,23 +960,23 @@ class UserSieveViewTest(TestCase):
             if i==0:
               r = Reference.objects.create(url="http://r1",title="s1r%d" % i,
                                            pub_date=date)#,source=s1
-              spm1.productions.add(r)
+              r.sources.add(r1)
               r = Reference.objects.create(url="http://r2",title="s2r%d" % i,
                                            pub_date=date)#,source=s2
-              spm2.productions.add(r)
+              r.sources.add(r2)
               r = Reference.objects.create(url="http://r3",title="s3r%d" % i,
                                            pub_date=date)#,source=s3
-              spm3.productions.add(r)
+              r.sources.add(r3)
             else:
               r = Reference.objects.create(url="http://r1%d" % i,title="s1r%d" % i,
                                            pub_date=date)#,source=s1
-              spm1.productions.add(r)
+              r.sources.add(r1)
               r = Reference.objects.create(url="http://r2%d" % i,title="s2r%d" % i,
                                            pub_date=date)#,source=s2
-              spm2.productions.add(r)
+              r.sources.add(r2)
               r = Reference.objects.create(url="http://r3%d" % i,title="s3r%d" % i,
                                            pub_date=date)#,source=s3
-              spm3.productions.add(r)
+              r.sources.add(r3)
 
     def test_get_html_for_owner_returns_max_items_ordered_oldest_first(self):
         """

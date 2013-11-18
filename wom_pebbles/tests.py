@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.test import TestCase
 from django.db import IntegrityError
 
-from wom_pebbles.models import SourceProductionsMapper
 from wom_pebbles.models import Reference
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
@@ -72,30 +71,19 @@ class ReferenceModelTest(TestCase):
                       pub_date=self.test_date)
 
 
-class SourceProductionsMapperModelTest(TestCase):
-
-  def setUp(self):
+  def test_get_productions(self):
     date = datetime.datetime.now(timezone.utc)
-    self.source = Reference.objects.create(
+    source = Reference.objects.create(
       url=u"http://mouf",
       title=u"mouf",
       pub_date=date)
-    self.reference = Reference.objects.create(
+    reference = Reference.objects.create(
       url=u"http://mouf/a",
       title=u"glop",
       pub_date=date)
-    s = SourceProductionsMapper.objects.create(source=self.source)
-    s.productions.add(self.reference)
+    reference.sources.add(source)
+    self.assertEqual(reference,source.productions.get())
 
-  def test_get_sources(self):
-    sources = SourceProductionsMapper.get_sources(self.reference)
-    self.assertEqual(1,len(sources.all()))
-    self.assertEqual(self.source, sources.all()[0])
-
-  def test_get_productions(self):
-    productions = SourceProductionsMapper.get_productions(self.source)
-    self.assertEqual(1,len(productions.all()))
-    self.assertEqual(self.reference, productions.all()[0])
 
 class UtilityFunctionsTests(TestCase):
 
@@ -137,8 +125,7 @@ class ImportReferencesFromNSBookmarkListTaskTest(TestCase):
       url=u"http://mouf/a",
       title=u"glop",
       pub_date=date)
-    s = SourceProductionsMapper.objects.create(source=self.source)
-    s.productions.add(self.reference)
+    self.reference.sources.add(self.source)
     nsbmk_txt = """\
 <!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">

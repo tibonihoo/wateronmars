@@ -5,7 +5,6 @@ from wom_river.utils.netscape_bookmarks import parse_netscape_bookmarks
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import Reference
-from wom_pebbles.models import SourceProductionsMapper
 
 from celery import task
 
@@ -19,6 +18,7 @@ from collections import namedtuple
 
 import logging
 logger = logging.getLogger(__name__)
+
 
 def build_reference_title_from_url(url):
   """Generate a valid reference title from an url.
@@ -82,11 +82,6 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
                               title="Bookmark Import (Netscape-style bookmarks)",
                               pub_date=date_now)
     common_source.save()
-  try:
-    common_source_link = SourceProductionsMapper.objects.get(source=common_source)
-  except ObjectDoesNotExist:
-    common_source_link = SourceProductionsMapper(source=common_source)
-    common_source_link.save()
   new_refs  = []
   ref_and_metadata = []
   for bmk_info in collected_bmks:
@@ -97,7 +92,7 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
       truncation_txt = "<wom truncation>"
       # Save the full url in info to limit the loss of information
       info = u"<WOM had to truncate the following URL: %s>" % u
-      logger.error("Found an url of length %d (>%d) \
+      logger.warning("Found an url of length %d (>%d) \
 when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
       u = u[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
     t = bmk_info.get("title") or build_reference_title_from_url(u)
@@ -120,7 +115,7 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
   with transaction.commit_on_success():
     for ref in new_refs:
       ref.save()
-      common_source_link.productions.add(ref)
+      ref.sources.add(common_source)
   # Note: We have to wait until now to convert the list to a dict,
   # because only now will the model instances have their specific ids and
   # hashes (before that they would have looked the same for the dict).

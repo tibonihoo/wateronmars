@@ -40,7 +40,6 @@ from wom_user.forms import CreateUserSourceRemovalForm
 from wom_river.tasks import import_feedsources_from_opml
 from wom_user.tasks import check_user_unread_feed_items
 
-from wom_pebbles.models import SourceProductionsMapper
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
 from wom_classification.models import get_item_tag_names
@@ -387,7 +386,7 @@ def user_river_view(request,owner_name):
   user_profile = request.owner_user.userprofile
   latest_items = []
   for feed in user_profile.web_feeds.all():
-    latest_items.extend(SourceProductionsMapper.get_productions(feed.source)\
+    latest_items.extend(feed.source.productions.all()\
                         .order_by('-pub_date')[:MAX_ITEMS_PER_PAGE])
   latest_items.sort(key=lambda x:x.pub_date)
   latest_items.reverse()
@@ -407,7 +406,7 @@ def generate_user_sieve(request,owner_name):
   check_user_unread_feed_items(request.user)
   unread_references = ReferenceUserStatus.objects.filter(has_been_read=False)
   num_unread = unread_references.count()
-  oldest_unread_references = unread_references.select_related("ref","source").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
+  oldest_unread_references = unread_references.select_related("ref","sources").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
       'num_unread_references': num_unread,

@@ -16,8 +16,6 @@ from wom_river.tasks import collect_all_new_references_sync
 from wom_river.tasks import delete_old_references_sync
 from wom_river.tasks import import_feedsources_from_opml
 
-from wom_pebbles.models import SourceProductionsMapper
-
 from wom_user.models import UserBookmark
 from wom_user.models import UserProfile
 from wom_user.models import ReferenceUserStatus
@@ -92,6 +90,7 @@ def import_user_feedsources_from_opml(user,opml_txt):
       cd.save()
   # TODO add a tag in a new tag list of the user profile
 
+
 class FakeReferenceUserStatus:
 
   def __init__(self):
@@ -130,7 +129,9 @@ def check_user_unread_feed_items(user):
   new_ref_status = []
   for feed in user.userprofile.web_feeds.select_related("source").all():
     new_ref_status += generate_reference_user_status(user,
-                                                     SourceProductionsMapper.get_productions(feed.source).select_related("referenceuserstatus_set").all())
+                                                     feed.source\
+                                                     .productions.all()\
+                                                     .select_related("referenceuserstatus_set"))
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()

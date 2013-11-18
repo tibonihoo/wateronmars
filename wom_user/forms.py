@@ -13,7 +13,6 @@ from wateronmars import settings
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import Reference
-from wom_pebbles.models import SourceProductionsMapper
 from wom_pebbles.tasks import build_reference_title_from_url
 from wom_pebbles.tasks import build_source_url_from_reference_url
 
@@ -96,7 +95,8 @@ class UserBookmarkAdditionForm(forms.Form):
     # Find or create a matching reference
     try:
       bookmarked_ref = Reference.objects.get(url=url)
-      ref_src = SourceProductionsMapper.get_sources(bookmarked_ref).get()
+      # Arbitrarily chose one of the possible sources 
+      ref_src = bookmarked_ref.sources.all().get()
     except ObjectDoesNotExist:
       try:
         ref_src = Reference.objects.get(url=src_url)
@@ -106,13 +106,8 @@ class UserBookmarkAdditionForm(forms.Form):
       bookmarked_ref = Reference(url=url,
                                  title=title,
                                  pub_date=pub_date)
-      try:
-        spm = SourceProductionsMapper.objects.get(source=ref_src)
-      except ObjectDoesNotExist:
-        spm = SourceProductionsMapper(source=ref_src)
-        spm.save()
       bookmarked_ref.save()
-      spm.productions.add(bookmarked_ref)
+      bookmarked_ref.sources.add(ref_src)
     with transaction.commit_on_success():
       try:
         bmk = UserBookmark.objects.get(owner=self.user,reference=bookmarked_ref)

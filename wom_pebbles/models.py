@@ -1,7 +1,6 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 
 from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
 
 
 # Max number of characters in a URL.
@@ -38,29 +37,11 @@ class Reference(models.Model): # A pebble !
   pub_date = models.DateTimeField('date published')
   # Count the number of users that saved this reference
   save_count = models.IntegerField(default=0)
+  # Sources of this reference
+  sources = models.ManyToManyField("self",symmetrical=False,related_name="productions")
+  
   
   def __unicode__(self):
     return "%s[%s]" % (self.title,self.url)
 
 
-class SourceProductionsMapper(models.Model):
-  """
-  Describe the link between a source and the references that are linked to it.
-  Note: the source is itself a reference.
-  """
-  source = models.ForeignKey(Reference,related_name="productionsmapper_set")
-  productions = models.ManyToManyField(Reference,related_name="sourcemapper_set")
-  
-  def __unicode__(self):
-    return "%s{#%d}" % (self.source,self.productions.count())
-
-  @staticmethod
-  def get_sources(reference):
-    return Reference.objects.filter(productionsmapper_set__productions=reference)
-
-  @staticmethod
-  def get_productions(source):
-    try:
-      return SourceProductionsMapper.objects.get(source=source).productions
-    except ObjectDoesNotExist:
-      return Reference.objects.none()
