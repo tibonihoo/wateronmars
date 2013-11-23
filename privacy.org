@@ -14,17 +14,6 @@
 *** typically corresponds to verbs like POST, PATCH etc
 *** also corresponds to bookmarklet-based actions
 * resources
-** public
-*** river
-**** read: everyone
-**** write: staff
-*** sieve (demo)
-**** read: everyone
-**** write: no-one
-**** note: the demo sieve doesn't take 'read' status into account
-*** sources
-**** read: everyone
-**** write: staff
 ** user-owner's
 *** river
 **** read: everyone 
@@ -50,3 +39,14 @@
 *** profile
 **** read: owner
 **** write: owner
+** demo-user's
+*** river
+**** read: everyone
+**** write: staff
+*** sieve (demo)
+**** read: everyone
+**** write: no-one
+**** note: the demo sieve doesn't take 'read' status into account
+*** sources
+**** read: everyone
+**** write: staff

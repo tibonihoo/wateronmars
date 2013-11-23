@@ -18,7 +18,7 @@
 <li><a href="/u/{{visitor_name}}/collection" title="Your Collection"><i class="icon-bookmark icon-white"></i></a></li>
 <li><a href="/u/{{visitor_name}}/sources" title="Your Sources"><i class="icon-book icon-white"></i></a></li>
 <li class="divider-vertical"></li>
-<li><a href="/accounts/profile" title="Check your profile.">Welcome {{ username }} !</a></li>
+<li><a href="/accounts/profile" title="Check your profile.">Welcome {{ visitor_name }} !</a></li>
 {% else %}
 <li><a href="/accounts/login"><i class="icon-user icon-white"></i>Login</a></li>
 {% endif %}

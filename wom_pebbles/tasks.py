@@ -6,7 +6,6 @@ from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import Reference
 
-from celery import task
 
 from django.utils import timezone
 from django.db import transaction
@@ -56,7 +55,7 @@ def build_source_url_from_reference_url(ref_url):
 # instance from bookmark list.
 BookmarkMetadata = namedtuple("BookmarkMetadata",'note, tags, is_public')
 
-@task()
+
 def import_references_from_ns_bookmark_list(nsbmk_txt):
   """Extract bookmarks from a Netscape-style bookmark file and save
   them as Reference instances in the database.
@@ -121,3 +120,8 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
   # hashes (before that they would have looked the same for the dict).
   return dict(ref_and_metadata)
 
+def delete_old_references(time_threshold):
+  """Delete references that are older that the time_threshold and have a
+  save count equal to 0.
+  """
+  Reference.objects.filter(save_count=0,pub_date__lt=time_threshold).delete()

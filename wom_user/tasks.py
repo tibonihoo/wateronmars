@@ -1,21 +1,25 @@
-# -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 4 -*-
+# -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
-import datetime
+from datetime import datetime
 from django.utils import timezone
 
 from celery.task.schedules import crontab  
 from celery.decorators import periodic_task  
 from celery.decorators import task  
 
+
+from wom_pebbles.tasks import delete_old_references
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
-from wom_river.tasks import collect_all_new_references_sync
-from wom_river.tasks import delete_old_references_sync
+from wom_river.tasks import collect_news_from_feeds
 from wom_river.tasks import import_feedsources_from_opml
 
+from wom_user.settings import NEWS_TIME_THRESHOLD
+
+from wom_pebbles.models import Reference
 from wom_user.models import UserBookmark
 from wom_user.models import UserProfile
 from wom_user.models import ReferenceUserStatus
@@ -32,12 +36,12 @@ logger = logging.getLogger(__name__)
 
 @periodic_task(run_every=crontab(hour="*", minute="*/20", day_of_week="*"))
 def collect_all_new_references_regularly():
-  collect_all_new_references_sync()
+  collect_news_from_feeds()
 
 
 @periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
 def delete_old_references_regularly():
-  delete_old_references_sync()
+  delete_old_references(NEWS_TIME_THRESHOLD)
 
 
 @task()
@@ -49,7 +53,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
       bmk = UserBookmark.objects.get(owner=user,reference=ref)
     except ObjectDoesNotExist:
       bmk = UserBookmark(owner=user,reference=ref,
-                         saved_date=datetime.datetime.now(timezone.utc))    
+                         saved_date=datetime.now(timezone.utc))    
     bmk_to_save.append((bmk,meta))
   with transaction.commit_on_success():
     for b,_ in bmk_to_save:
@@ -107,15 +111,26 @@ def generate_reference_user_status(user,references):
     if user and not ref.referenceuserstatus_set.filter(user=user).exists():
       rust = ReferenceUserStatus()
       rust.user = user
-      rust.ref = ref
-      rust.ref_pub_date = ref.pub_date
+      rust.reference = ref
+      rust.reference_pub_date = ref.pub_date
+      try:
+        rust.main_source = ref.sources.filter(userprofile=user.userprofile).distinct().order_by("pub_date").get()
+      except ObjectDoesNotExist:
+        try:
+          rust.main_source = Reference.objects.get(url="<unknown>")
+        except ObjectDoesNotExist:
+          s = Reference(url="<unknown>",title="<unknown>",
+                        pub_date=datetime.utcfromtimestamp(0)\
+                        .replace(tzinfo=timezone.utc))
+          s.save()
+          rust.main_source = s
       new_ref_status.append(rust)
       # TODO: check here that the corresponding reference has not
       # been saved already !
     elif user is None:
       rust = FakeReferenceUserStatus()
-      rust.ref = ref
-      rust.ref_pub_date = ref.pub_date
+      rust.reference = ref
+      rust.reference_pub_date = ref.pub_date
       new_ref_status.append(rust)      
   return new_ref_status
 

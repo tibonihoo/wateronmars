@@ -135,7 +135,7 @@ class UserBookmarkAdditionForm(forms.Form):
         self.user.userprofile.save()
     with transaction.commit_on_success():
       for rust in ReferenceUserStatus.objects.filter(user=self.user,
-                                                     ref=bookmarked_ref).all():
+                                                     reference=bookmarked_ref).all():
         rust.has_been_saved = True
         rust.save()
     return bmk

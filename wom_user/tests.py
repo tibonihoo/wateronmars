@@ -469,6 +469,8 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertEqual(200,resp.status_code)
     self.assertIn("wom_user/collection.html_dt",
             [t.name for t in resp.templates])
+    self.assertIn("owner_name", resp.context)
+    self.assertEqual("uA", resp.context["owner_name"])
     self.assertIn(u"user_bookmarks", resp.context)
     self.assertIn(u"num_bookmarks", resp.context)
     self.assertIn(u"collection_url", resp.context)
@@ -680,7 +682,7 @@ class ImportUserBookmarksFromNSList(TestCase):
         url=u"http://mouf/a",
         title=u"glop",
         pub_date=date)
-    reference.source.add(self.source)
+    reference.sources.add(self.source)
     self.user = User.objects.create_user(username="uA",
                                          password="pA")
     self.user_profile = UserProfile.objects.create(user=self.user)
@@ -938,46 +940,48 @@ class UserSieveViewTest(TestCase):
         self.user2 = User.objects.create_user(username="uB",password="pB")
         user2_profile = UserProfile.objects.create(user=self.user2)
         date = datetime.now(timezone.utc)
-        r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
+        self.s1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                     last_update_check=date,
-                                    source=r1)
-        r2 = Reference.objects.create(url="http://bla",title="bla",pub_date=date)
+                                    source=self.s1)
+        self.s2 = Reference.objects.create(url="http://bla",title="bla",pub_date=date)
         f2 = WebFeed.objects.create(xmlURL="http://bla/rss.xml",
                                     last_update_check=date,
-                                    source=r2)
-        r3 = Reference.objects.create(url="http://greuh",title="greuh",pub_date=date)
+                                    source=self.s2)
+        self.s3 = Reference.objects.create(url="http://greuh",title="greuh",pub_date=date)
         f3 = WebFeed.objects.create(xmlURL="http://greuh/rss.xml",
                                     last_update_check=date,
-                                    source=r3)
+                                    source=self.s3)
         user1_profile.web_feeds.add(f1)
         user1_profile.web_feeds.add(f3)
+        user1_profile.sources.add(self.s1,self.s3)
         user2_profile.web_feeds.add(f2)
         user2_profile.web_feeds.add(f3)
+        user2_profile.sources.add(self.s2,self.s3)
         num_items = MAX_ITEMS_PER_PAGE+1
         for i in range(num_items):
             date += timedelta(hours=1)
             if i==0:
               r = Reference.objects.create(url="http://r1",title="s1r%d" % i,
                                            pub_date=date)#,source=s1
-              r.sources.add(r1)
+              r.sources.add(self.s1)
               r = Reference.objects.create(url="http://r2",title="s2r%d" % i,
                                            pub_date=date)#,source=s2
-              r.sources.add(r2)
+              r.sources.add(self.s2)
               r = Reference.objects.create(url="http://r3",title="s3r%d" % i,
                                            pub_date=date)#,source=s3
-              r.sources.add(r3)
+              r.sources.add(self.s3)
             else:
               r = Reference.objects.create(url="http://r1%d" % i,title="s1r%d" % i,
                                            pub_date=date)#,source=s1
-              r.sources.add(r1)
+              r.sources.add(self.s1)
               r = Reference.objects.create(url="http://r2%d" % i,title="s2r%d" % i,
                                            pub_date=date)#,source=s2
-              r.sources.add(r2)
+              r.sources.add(self.s2)
               r = Reference.objects.create(url="http://r3%d" % i,title="s3r%d" % i,
                                            pub_date=date)#,source=s3
-              r.sources.add(r3)
-
+              r.sources.add(self.s3)
+              
     def test_get_html_for_owner_returns_max_items_ordered_oldest_first(self):
         """
         Make sure a user can see its river properly ordered
@@ -994,11 +998,14 @@ class UserSieveViewTest(TestCase):
         self.assertIn("oldest_unread_references", resp.context)
         items = resp.context["oldest_unread_references"]
         self.assertGreaterEqual(MAX_ITEMS_PER_PAGE,len(items))
-        self.assertEqual((False,),tuple(set([s.has_been_read for s in items])))
-        sourceNames = set([int(s.ref.title[1]) for s in items])
-        self.assertEqual(sourceNames,set((1,3)))
-        referenceNumbers = [int(s.ref.title[3:]) for s in items]
+        self.assertEqual((False,),tuple(set([r.has_been_read for r in items])))
+        rustTitles = set([int(r.reference.title[1]) for r in items])
+        self.assertEqual(rustTitles,set((1,3)))
+        referenceNumbers = [int(r.reference.title[3:]) for r in items]
         self.assertEqual(list(sorted(referenceNumbers)),referenceNumbers)
+        for rust in items:
+          expected_source = getattr(self,"s%d" % int(rust.reference.title[1]))
+          self.assertEqual(expected_source,rust.main_source,"Wrong main source for %s" % rust)
         
     def test_get_html_for_non_owner_logged_user_is_forbidden(self):
         """
@@ -1036,7 +1043,7 @@ class UserSieveViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
-        num_ref_r1 = [r.ref.url for r in items].count("http://r1")
+        num_ref_r1 = [r.reference.url for r in items].count("http://r1")
         self.assertLessEqual(1,num_ref_r1)
         # mark the first reference as read.
         resp = self.client.post(reverse("wom_user.views.user_river_sieve",
@@ -1052,7 +1059,7 @@ class UserSieveViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
-        self.assertEqual(0,[r.ref.url for r in items].count("http://r1"))
+        self.assertEqual(0,[r.reference.url for r in items].count("http://r1"))
 
     def test_post_json_pick_several_items_out_of_sieve(self):
         """
@@ -1064,9 +1071,9 @@ class UserSieveViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
-        num_ref_r1 = [r.ref.url for r in items].count("http://r1")
+        num_ref_r1 = [r.reference.url for r in items].count("http://r1")
         self.assertLessEqual(1,num_ref_r1)
-        num_ref_r3 = [r.ref.url for r in items].count("http://r3")
+        num_ref_r3 = [r.reference.url for r in items].count("http://r3")
         self.assertLessEqual(1,num_ref_r3)
         # mark the first reference as read.
         resp = self.client.post(reverse("wom_user.views.user_river_sieve",
@@ -1083,8 +1090,8 @@ class UserSieveViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
-        self.assertEqual(0,[r.ref.url for r in items].count("http://r1"))
-        self.assertEqual(0,[r.ref.url for r in items].count("http://r3"))        
+        self.assertEqual(0,[r.reference.url for r in items].count("http://r1"))
+        self.assertEqual(0,[r.reference.url for r in items].count("http://r3"))        
 
     def test_post_malformed_json_returns_error(self):
         """
@@ -1250,8 +1257,10 @@ class ReferenceUserStatusModelTest(TestCase):
     This tests just makes it possible to double check that a
     change in the default is voluntary.
     """
-    rust = ReferenceUserStatus.objects.create(ref=self.reference,
+    s = Reference.objects.create(url="http://source",title="source",pub_date=self.date)
+    rust = ReferenceUserStatus.objects.create(reference=self.reference,
                                               user=self.user,
-                                              ref_pub_date=self.date)
+                                              reference_pub_date=self.date,
+                                              main_source=s)
     self.assertFalse(rust.has_been_read)
     self.assertFalse(rust.has_been_saved)

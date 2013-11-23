@@ -19,7 +19,7 @@ if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
 USER_AGENT = "WOM"
 
 # Set to True to activate the DEMO mode
-DEMO = False
+DEMO = True
 
 
 # DEBUG or not DEBUG

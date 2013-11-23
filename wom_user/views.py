@@ -2,12 +2,14 @@
 
 import urllib
 
+
 from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from wom_river.tasks import collect_all_new_references_sync
-from wom_river.tasks import delete_old_references_sync
+from wom_pebbles.tasks import delete_old_references
+from wom_river.tasks import collect_news_from_feeds
 
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
@@ -44,8 +46,8 @@ from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
 from wom_classification.models import get_item_tag_names
 
-
-MAX_ITEMS_PER_PAGE = 100
+from wom_user.settings import NEWS_TIME_THRESHOLD
+from wom_user.settings import MAX_ITEMS_PER_PAGE
 
 
 def check_and_set_owner(func):
@@ -94,16 +96,38 @@ def loggedin_and_owner_required(func):
   return _loggedin_and_owner_required
 
 
+
+def home(request):
+  """
+  Return the home page of the site.
+  """
+  if request.method != 'GET':
+    return HttpResponseNotAllowed(['GET'])
+  d = add_base_template_context_data({},
+                                     request.user.username,
+                                     request.user.username)
+  return render_to_response('wateronmars/home.html',d,
+                            context_instance=RequestContext(request))
+
+
 def request_for_update(request):
-  collect_all_new_references_sync()
-  delete_old_references_sync()
-  return HttpResponseRedirect(reverse('/'))
+  """Trigger the collection of news from all known feeds and the cleanup
+  of all references that have never been saved (past an arbitrary
+  delay).
+  """
+  collect_news_from_feeds()
+  delete_old_references(NEWS_TIME_THRESHOLD)
+  return HttpResponseRedirect(reverse("wom_user.views.home"))
 
 
 def request_for_cleanup(request):
-  delete_old_references_sync()
-  return HttpResponseRedirect(reverse('/'))
+  """Trigger a cleanup of all references that have never been saved
+  (past an arbitrary delay).
+  """
+  delete_old_references(NEWS_TIME_THRESHOLD)
+  return HttpResponseRedirect(reverse("wom_user.views.home"))
 
+  
 def add_base_template_context_data(d,visitor_name, owner_name):
   """Generate the context data needed for templates that inherit from
   the base template.
@@ -406,7 +430,7 @@ def generate_user_sieve(request,owner_name):
   check_user_unread_feed_items(request.user)
   unread_references = ReferenceUserStatus.objects.filter(has_been_read=False)
   num_unread = unread_references.count()
-  oldest_unread_references = unread_references.select_related("ref","sources").order_by('ref_pub_date')[:MAX_ITEMS_PER_PAGE]
+  oldest_unread_references = unread_references.select_related("reference","sources").order_by('reference_pub_date')[:MAX_ITEMS_PER_PAGE]
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
       'num_unread_references': num_unread,
@@ -438,8 +462,8 @@ def apply_to_user_sieve(request,owner_name):
     return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
   modified_rust = []
   for read_url in action_dict.get(u"references",[]):
-    for rust in ReferenceUserStatus.objects.filter(has_been_read=False,user=request.user).select_related("ref").all():
-      if rust.ref.url == read_url:
+    for rust in ReferenceUserStatus.objects.filter(has_been_read=False,user=request.user).select_related("reference").all():
+      if rust.reference.url == read_url:
         rust.has_been_read = True
         modified_rust.append(rust)
   with transaction.commit_on_success():

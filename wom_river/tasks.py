@@ -1,7 +1,5 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 
-from celery import task
-
 import feedparser
 from datetime import datetime
 from django.utils import timezone
@@ -29,7 +27,9 @@ def create_reference_from_feedparser_entry(entry):
   """
   url = entry.link
   info = ""
-  tags = set([t.term for t in entry.tags])
+  tags = set()
+  if hasattr(entry, "tags"):
+    tags = set([t.term for t in entry.tags])
   if len(url)>URL_MAX_LENGTH:
     # WOM should be configured in such a way that this never happens !
     truncation_txt = "<wom truncation>"
@@ -83,7 +83,6 @@ def add_new_references_from_feedparser_entries(feed,entries):
   return dict(all_references)
 
 
-@task()
 def collect_new_references_for_feed(feed):
   """Get the feed data from its URL and collect the new references into the db.
   Return a dictionary mapping the new references to a corresponding set of tags.
@@ -94,21 +93,18 @@ def collect_new_references_for_feed(feed):
     logger.warning("Skipping feed at %s because of a parse problem (%s))."\
                    % (feed.source.url,e))
     return []
-  return add_new_references_from_feedparser_entries(d.entries)
+  return add_new_references_from_feedparser_entries(feed,d.entries)
 
 
 
-def collect_all_new_references_sync():
+def collect_news_from_feeds():
+  """Fetch and parse all feeds to collect new items and fill the db of
+  References with them.
+  """
   for feed in WebFeed.objects.iterator():
     collect_new_references_for_feed(feed)
 
-def delete_old_references_sync():
-  time_threshold = datetime.now(timezone.utc)-datetime.timedelta(weeks=12)
-  Reference.objects.filter(save_count=0,pub_date__lt=time_threshold).delete()
 
-
-
-@task()
 def import_feedsources_from_opml(opml_txt):
   """
   Save in the db the FeedSources found in the OPML-formated text.

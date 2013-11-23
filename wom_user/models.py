@@ -6,7 +6,6 @@ from wom_pebbles.models import Reference
 
 from wom_river.models import WebFeed
 
-
   
 class UserProfile(models.Model):
   """
@@ -55,16 +54,19 @@ class ReferenceUserStatus(models.Model):
   the read flag is set to true, then the user has read the reference.
   """
   # The reference that waits to be read
-  ref = models.ForeignKey(Reference)
+  reference = models.ForeignKey(Reference)
   # The user that is supposed to read it
   user = models.ForeignKey(User)
   # Repeat the publication date of the reference
-  ref_pub_date = models.DateTimeField('reference publication date')
+  reference_pub_date = models.DateTimeField('reference publication date')
   # Read flag
   has_been_read = models.BooleanField(default=False)
   # Saved flag
   has_been_saved = models.BooleanField(default=False)
-
+  # The main source (used to ease display)
+  main_source = models.ForeignKey(Reference,related_name="+")
+  
+  
   def __unicode__(self):
     return "'%s' (read: %s, saved: %s by '%s')" \
-      % (self.ref.title,self.has_been_read,self.has_been_saved,self.user.username)
+      % (self.reference.title,self.has_been_read,self.has_been_saved,self.user.username)
