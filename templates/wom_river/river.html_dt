@@ -53,7 +53,7 @@ jQuery.ias({
 </div>
 {% endfor %}
 
-{% if news_items.paginator.num_pages %}
+{% if news_items.paginator.num_pages > 1 %}
 <div  id="pagination" class="pagination">
     <ul>
     <li
