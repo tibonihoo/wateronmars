@@ -7,10 +7,21 @@
 
 
 {% block extrahead %}
+<script src="/static/js/jquery-ias.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+jQuery.ias({
+    container : '.news_list',
+    item: '.source_group',
+    pagination: '#pagination',
+    next: '.next a',
+    loader: '<img src="/static/img/loader.gif"/>'
+});
+</script>
 <style type="text/css">
    .source_group { border-left: 3px solid #d3d7cf;padding-left:3px; margin-bottom:-.7em; }
    .source_group:hover { border-width: 6px; margin-left: -3px; background-color: #eeeeec; }
-   .source_name a { decoration: none; color: #babdb6; }
+   .source_name a { text-decoration: none; color: #babdb6; }
+   .source_name { color: #babdb6; }
    .source_group:hover .source_name a { color: #888a85 }
    .source_ref_list { padding-left: 1em; }
    .source_ref_list li { padding-bottom: 1em; }
@@ -19,13 +30,13 @@
 
 {% block content %}
 <p><i class="icon-align-left"></i><strong>{{ title_qualify }} river</strong></p>
-<div>
+<div class="news_list">
 {% regroup news_items by main_source.title as source_groups %}
 {% for source_refs in source_groups %}
 <div class="source_group" style="border-color: {% cycle '#d3d7cf' '#babdb6' %};">
     {% for rust in source_refs.list %}
     {% if forloop.first %}
-    <small class="source_name"><a href="{{ rust.main_source.url }}">{{ rust.main_source.title }}</a></small>
+    <small class="source_name"><a href="{{ rust.main_source.url }}">{{ rust.main_source.title }}</a> ({{ rust.reference_pub_date }})</small>
     <ul class="unstyled source_ref_list"> 
     {% endif %}
     <li id="ref{{forloop.counter0}}-title" ><strong><a id="ref{{forloop.counter0}}-title" class="reference-title" href="{{rust.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ rust.reference_pub_date }} -- {{ rust.reference.description|striptags|truncatewords:30 }}">{{ rust.reference.title }}</a></strong></li>
@@ -42,7 +53,7 @@
 </div>
 {% endfor %}
 
-<div class="pagination">
+<div  id="pagination" class="pagination">
     <ul>
     <li
         {% if news_items.has_previous %}
