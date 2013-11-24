@@ -10,7 +10,7 @@
 <script src="/static/js/jquery-ias.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 jQuery.ias({
-    container : '.news_list',
+    container : '#news_list',
     item: '.source_group',
     pagination: '#pagination',
     next: '.next a',
@@ -30,7 +30,7 @@ jQuery.ias({
 
 {% block content %}
 <p><i class="icon-align-left"></i><strong>{{ title_qualify }} river</strong></p>
-<div class="news_list">
+<div id="news_list">
 {% regroup news_items by main_source.title as source_groups %}
 {% for source_refs in source_groups %}
 <div class="source_group" style="border-color: {% cycle '#d3d7cf' '#babdb6' %};">
@@ -53,6 +53,7 @@ jQuery.ias({
 </div>
 {% endfor %}
 
+{% if news_items.paginator.num_pages %}
 <div  id="pagination" class="pagination">
     <ul>
     <li
@@ -80,4 +81,5 @@ jQuery.ias({
     </li>
     </ul>
 </div>
+{% endif %}
 {% endblock %}
