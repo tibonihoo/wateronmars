@@ -6,6 +6,7 @@ from wom_pebbles.models import Reference
 
 from wom_river.models import WebFeed
 
+from wom_classification.models import get_item_tag_names
   
 class UserProfile(models.Model):
   """
@@ -45,7 +46,15 @@ class UserBookmark(models.Model):
     return "%s%s>%s" % (self.owner,"" if self.is_public else "<private",
                         self.reference)
 
+  def get_sources(self):
+    """Get the sources of the reference that are also known to the user."""
+    return self.reference.sources.filter(userprofile=self.owner.userprofile).all()
 
+  def get_tag_names(self):
+    """Get the names of the tags related to this reference."""
+    return get_item_tag_names(self.owner,self.reference)
+
+    
 class ReferenceUserStatus(models.Model):
   """
   Mainly represents the "unread" flag: if no instance exists for a

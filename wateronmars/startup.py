@@ -47,6 +47,12 @@ Do Not Edit! -->
 <DD>The free encyclopedia that anyone can edit.
 """
 
+NS_BOOKMARKS_TXT_MORE_TEMPLATE = """\
+<DT><A HREF="http://example.org/%d" PRIVATE="0" TAGS="culture">Example %d</A>
+<DD>An example tag to test the pagination.
+"""
+
+
 def run():
   if settings.DEMO and not User.objects.filter(username="demo").exists():
     print("DEMO mode: Creating demo user.")
@@ -56,7 +62,10 @@ def run():
     demo_profile = UserProfile.objects.create(user=demo_user)
     demo_profile.save()
     print("DEMO mode: Importing default bookmarks and feeds for demo user.")
-    import_user_bookmarks_from_ns_list(demo_user,NS_BOOKMARKS_TXT)
+    import_user_bookmarks_from_ns_list(demo_user,
+                                       NS_BOOKMARKS_TXT \
+                                       + "".join(NS_BOOKMARKS_TXT_MORE_TEMPLATE \
+                                                 % (i,i) for i in range(200)))
     import_user_feedsources_from_opml(demo_user,OPML_TXT)
     print("DEMO mode: demo user setup finished.")
 

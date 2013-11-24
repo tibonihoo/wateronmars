@@ -7,6 +7,16 @@
 
 
 {% block extrahead %}
+<script src="/static/js/jquery-ias.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+jQuery.ias({
+    container : '#bookmark_list',
+    item: '.in_bookmark_def',
+    pagination: '#pagination',
+    next: '.next a',
+    loader: '<img src="/static/img/loader.gif"/>'
+});
+</script>
 <script src="/static/js/mousetrap.min.js"></script>
 <!-- <script src="/static/js/collection_ux.js"></script> -->
 <style type="text/css">
@@ -14,11 +24,11 @@
   #bookmark_list dd { margin-top: 3px; }
   #server-sync-problem {display : none;}
   #server-save-failed  {display : none;}
-  .sourceURL { color: black; decoration: None; }
-  .sourceFeedURL { color: black; decoration: None; }
+  .sourceURL { color: black; text-decoration: None; }
+  .sourceFeedURL { color: black; text-decoration: None; }
  </style>
 <script>
-prepareKeyBindings();
+/*prepareKeyBindings();*/
 </script>
 {% endblock %}
 
@@ -27,12 +37,20 @@ prepareKeyBindings();
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
-  <dt><a id="bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a></dt>
-  <dd><small><em>@<a class="sourceURL" id="bmk{{forloop.counter0}}-sourceURL" style="padding-right:0.5em;" href="{{ bookmark.reference.source.url }}" title="{{ bookmark.reference.source.name }}">{{ bookmark.reference.source.name }}</a></em></small>
-    {% for tag in bookmark.tag_names %}
+  <dt class="in_bookmark_def"><a id="bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> </dt>
+  <dd class="in_bookmark_def">
+      <small><em>@
+      {% for source in bookmark.get_sources %}
+        <a class="sourceURL" id="bmk{{forloop.counter0}}-sourceURL" style="padding-right:0.5em;" href="{{ source.url }}" title="{{ source.title }}">{{ source.title }}</a>
+      {% if not forloop.last %}
+      ,
+      {% endif %}
+      {% endfor %}
+      </em></small>
+    {% for tag in bookmark.get_tag_names %}
     {% if forloop.first %}
     <i class="icon-tags" title="Tags"></i>
-    {% endif %}          
+    {% endif %}
     {{ tag }}
     {% if not forloop.last %}
     ,
@@ -47,6 +65,36 @@ prepareKeyBindings();
   <p>You haven't picked any link for your collection.</p>
   <p>You can add a link to your collection either by bookmarking or sharing an item found in your <a href="../river">river of news</a> or <a href="../sieve">sieve</a> or by sending a link with the following bookmarklet: <a href="{{ collection_add_bookmarklet }}">Bookmark !</a></p>.
     
+</div>
+{% endif %}
+
+{% if user_bookmarks.paginator.num_pages > 1 %}
+<div id="pagination" class="pagination">
+    <ul>
+    <li
+        {% if user_bookmarks.has_previous %}
+        class = "previous" > <a href="?page={{ user_bookmarks.previous_page_number }}">
+        {% else %}
+        class = "previous disabled" > <a>
+        {% endif %}
+        Previous
+        </a>
+    </li>
+    
+    <li class="disabled">
+        <a> Page {{ user_bookmarks.number }} of {{ user_bookmarks.paginator.num_pages }}.</a>
+    </li>
+
+    <li
+        {% if user_bookmarks.has_next %}
+        class = "next" > <a href="?page={{ user_bookmarks.next_page_number }}">
+        {% else %}
+        class = "next disabled" > <a>
+        {% endif %}
+        Next
+        </a>
+    </li>
+    </ul>
 </div>
 {% endif %}
 {% endblock %}

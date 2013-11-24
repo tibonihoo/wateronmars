@@ -4,46 +4,90 @@
 {{ title_qualify }} Sources
 {% endblock %}
 
+{% block extrahead %}
+<script src="/static/js/jquery-ias.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+jQuery.ias({
+    container : '#sources_list',
+    item: '.source_def',
+    pagination: '#pagination',
+    next: '.next a',
+    loader: '<img src="/static/img/loader.gif"/>'
+});
+</script>
+{% endblock %}
+
+
 {% block content %}
 <p><i class="icon-book"></i><strong>{{ title_qualify }} sources</strong></p>
 <ul class="unstyled">
-{% if syndicated_sources %}
-  <li>Syndicated sources
+{% if web_feeds %}
+  <li>Web Feeds
     <ul class="unstyled">
-      {% for source in syndicated_sources %}
-      <li><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/><a href="{{ source.xmlURL}}"><img src="/static/img/feed-icon-14x14.png" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.name }}</a></li>
+      {% for feed in web_feeds %}
+      <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
+          <a href="{{ feed.xmlURL}}"><img src="/static/img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
+          <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
+      </li>
       {% endfor %}
     </ul>
   </li>
+{% else %}
+  {% if visitor_name == owner_name and source_add_bookmarklet %}
+  <p>You can subscribe to news sources with the following bookmarklet: <a href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
+  {% endif %}
 {% endif %}
-{% if referenced_sources %}
-  <li>Bookmarked sources
-  <ul class="unstyled">
-   {% for source in referenced_sources %}
-   <li><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.name }}</a></li>
+
+{% if other_sources %}
+  <li>Bookmark sources
+  <ul id="sources_list" class=" unstyled">
+   {% for source in other_sources %}
+   <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.title }}</a></li>
    {% endfor %}
   </li>
-{% else %}
-{% endif %}
 </ul>
-{% if syndicated_sources %}
-{% if not referenced_sources %}
-<div class="alert alert-block">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <p>No source apart from the feed subscriptions.</p>
+{% else %}
+  {% if web_feeds %}
+  <div class="alert alert-block">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <p>No source apart from the feed subscriptions.</p>
+  </div>
+  {% else %}
+  <div class="alert alert-block">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <p>No source yet.</p>   
+  </div>
+  {% endif %}
+{% endif %}
+
+{% if sources_list.paginator.num_pages > 1 %}
+<div  id="pagination" class="pagination">
+  <ul>
+  <li
+    {% if sources_list.has_previous %}
+    class = "previous" > <a href="?page={{ sources_list.previous_page_number }}">
+    {% else %}
+    class = "previous disabled" > <a>
+    {% endif %}
+    Previous
+    </a>
+  </li>
+  
+  <li class="disabled">
+    <a> Page {{ sources_list.number }} of {{ sources_list.paginator.num_pages }}.</a>
+  </li>
+
+  <li
+    {% if sources_list.has_next %}
+    class = "next" > <a href="?page={{ sources_list.next_page_number }}">
+    {% else %}
+    class = "next disabled" > <a>
+    {% endif %}
+    Next
+    </a>
+  </li>
+  </ul>
 </div>
 {% endif %}
-{% else %}
-<div class="alert alert-block">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-{% if referenced_sources %}
-  <p>No subscription.</p>
-{% else %}
-  <p>No source yet.</p>   
-{% endif %}
-{% if source_add_bookmarklet %}
-  <p>You can subscribe to news sources with the following bookmarklet: <a href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
-{% endif %}
-</div>
-{% endif %}
+
 {% endblock %}

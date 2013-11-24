@@ -47,19 +47,24 @@ def delete_old_references_regularly():
 @task()
 def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
   ref_and_metadata = import_references_from_ns_bookmark_list(nsbmk_txt)
-  bmk_to_save = []
+  bmk_to_process = []
   for ref,meta in ref_and_metadata.items():
     try:
       bmk = UserBookmark.objects.get(owner=user,reference=ref)
     except ObjectDoesNotExist:
       bmk = UserBookmark(owner=user,reference=ref,
-                         saved_date=datetime.now(timezone.utc))    
-    bmk_to_save.append((bmk,meta))
+                         saved_date=datetime.now(timezone.utc))
+      for src in ref.sources.all():
+        user.userprofile.sources.add(src)
+    bmk.is_public = meta.is_public
+    bmk.comment = meta.note
+    # pile up the bookmarks for tag attribution
+    bmk_to_process.append((bmk,meta))
   with transaction.commit_on_success():
-    for b,_ in bmk_to_save:
+    for b,_ in bmk_to_process:
       b.save()
   classif_data_to_save = []
-  for bmk,meta in bmk_to_save:
+  for bmk,meta in bmk_to_process:
     valid_tags = [t for t in meta.tags if len(t)<=TAG_NAME_MAX_LENGTH]
     if len(valid_tags)!=len(meta.tags):
       invalid_tags = [t for t in meta.tags if len(t)>TAG_NAME_MAX_LENGTH]
@@ -69,9 +74,6 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
   with transaction.commit_on_success():
     for cd in classif_data_to_save:
       cd.save()
-  # TODO take into account private bmks !
-  # TODO set a user-description
-  # TODO add a tag in a new tag list of the user profile
 
 
 @task()
@@ -92,7 +94,6 @@ def import_user_feedsources_from_opml(user,opml_txt):
   with transaction.commit_on_success():
     for cd in classif_data_to_save:
       cd.save()
-  # TODO add a tag in a new tag list of the user profile
 
 
 class FakeReferenceUserStatus:

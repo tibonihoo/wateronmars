@@ -55,31 +55,31 @@ jQuery.ias({
 
 {% if news_items.paginator.num_pages > 1 %}
 <div  id="pagination" class="pagination">
-    <ul>
-    <li
-        {% if news_items.has_previous %}
-        class = "previous" > <a href="?page={{ news_items.previous_page_number }}">
-        {% else %}
-        class = "previous disabled" > <a>
-        {% endif %}
-        Previous
-        </a>
-    </li>
-    
-    <li class="disabled">
-        <a> Page {{ news_items.number }} of {{ news_items.paginator.num_pages }}.</a>
-    </li>
+  <ul>
+  <li
+    {% if news_items.has_previous %}
+    class = "previous" > <a href="?page={{ news_items.previous_page_number }}">
+    {% else %}
+    class = "previous disabled" > <a>
+    {% endif %}
+    Previous
+    </a>
+  </li>
+  
+  <li class="disabled">
+    <a> Page {{ news_items.number }} of {{ news_items.paginator.num_pages }}.</a>
+  </li>
 
-    <li
-        {% if news_items.has_next %}
-        class = "next" > <a href="?page={{ news_items.next_page_number }}">
-        {% else %}
-        class = "next disabled" > <a>
-        {% endif %}
-        Next
-        </a>
-    </li>
-    </ul>
+  <li
+    {% if news_items.has_next %}
+    class = "next" > <a href="?page={{ news_items.next_page_number }}">
+    {% else %}
+    class = "next disabled" > <a>
+    {% endif %}
+    Next
+    </a>
+  </li>
+  </ul>
 </div>
 {% endif %}
 {% endblock %}

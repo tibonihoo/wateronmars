@@ -73,12 +73,12 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
     return {}
   # Make sure that the source common to all the following import
   # exists or create it to be able to link new references to it.
-  source_url = "internal://bookmark-import-nsbmk"
+  source_url = "#internal-bookmark-import"
   try:
     common_source = Reference.objects.get(url=source_url)
   except ObjectDoesNotExist:
     common_source = Reference(url=source_url,
-                              title="Bookmark Import (Netscape-style bookmarks)",
+                              title="Bookmark Import",
                               pub_date=date_now)
     common_source.save()
   new_refs  = []

@@ -379,14 +379,21 @@ def get_user_collection(request,owner_name):
                                   .select_related("reference").all()
   if request.user!=request.owner_user:
     bookmarks = bookmarks.filter(is_public=True)
-  # 'artifically' add the tag names to the bookmark instances
-  for b in bookmarks:
-    b.tag_names = get_item_tag_names(request.owner_user,b.reference)
+  paginator = Paginator(bookmarks, MAX_ITEMS_PER_PAGE)
+  page = request.GET.get('page')
+  try:
+    bookmarks = paginator.page(page)
+  except (PageNotAnInteger,EmptyPage):
+    # If page is not an integer or out of range, deliver first page.
+    bookmarks = paginator.page(1)
+  # # 'artifically' add the tag names to the bookmark instances
+  # for b in bookmarks:
+  #   b.tag_names = get_item_tag_names(request.owner_user,b.reference)
   # TODO preload sources ?
   d = add_base_template_context_data(
     {
       'user_bookmarks': bookmarks,
-      'num_bookmarks': len(bookmarks),
+      'num_bookmarks': bookmarks.count,
       'collection_url' : request.build_absolute_uri(request.path).rstrip("/"),
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
@@ -494,11 +501,11 @@ def user_river_sieve(request,owner_name):
 def user_river_sources(request,owner_name):
   if request.method == 'GET':
     owner_profile = request.owner_user.userprofile
-    syndicated_sources = [f.source for f in owner_profile.web_feeds.all().order_by('source__title')]
-    other_sources = owner_profile.sources.exclude(id__in=[s.id for s in syndicated_sources]).order_by("title")
+    web_feeds = owner_profile.web_feeds.all().order_by('source__title').select_related("source")
+    other_sources = owner_profile.sources.exclude(webfeed__userprofile=owner_profile).order_by("title")
     d = add_base_template_context_data({
-        'syndicated_sources': syndicated_sources,
-        'referenced_sources': other_sources,
+        'web_feeds': web_feeds,
+        'other_sources': other_sources,
         'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
         }, request.user.username, owner_name)
     return render_to_response('wom_river/river_sources.html_dt',d, context_instance=RequestContext(request))
