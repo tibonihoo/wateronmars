@@ -14,7 +14,7 @@ class UserProfile(models.Model):
   # The user of whom this is the profile
   user = models.OneToOneField(User)
   # User's selection of syndicated sources
-  web_feeds = models.ManyToManyField(WebFeed,related_name="+")
+  web_feeds = models.ManyToManyField(WebFeed)
   # User sources (includes the sources related to the web_feeds too !)
   sources = models.ManyToManyField(Reference)
   

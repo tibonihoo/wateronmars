@@ -139,7 +139,7 @@ def generate_reference_user_status(user,references):
 def check_user_unread_feed_items(user):
   """
   Browse all feed sources registered by a given user and create as
-  many UnreadReferenceByUser instances as there are unread items.
+  many ReferenceUserStatus instances as there are unread items.
   """
   new_ref_status = []
   for feed in user.userprofile.web_feeds.select_related("source").all():

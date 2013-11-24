@@ -20,15 +20,15 @@
 {% block content %}
 <p><i class="icon-align-left"></i><strong>{{ title_qualify }} river</strong></p>
 <div>
-{% regroup latest_unread_references by source.name as source_groups %}
+{% regroup news_items by main_source.title as source_groups %}
 {% for source_refs in source_groups %}
 <div class="source_group" style="border-color: {% cycle '#d3d7cf' '#babdb6' %};">
-    {% for reference in source_refs.list %}
+    {% for rust in source_refs.list %}
     {% if forloop.first %}
-    <small class="source_name"><a href="{{ reference.source.url }}">{{ reference.source.name }}</a></small>
+    <small class="source_name"><a href="{{ rust.main_source.url }}">{{ rust.main_source.title }}</a></small>
     <ul class="unstyled source_ref_list"> 
     {% endif %}
-    <li id="ref{{forloop.counter0}}-title" ><strong><a id="ref{{forloop.counter0}}-title" class="reference-title" href="{{reference.url}}" data-toggle="tooltip" data-html="true" title="{{ reference.pub_date }} -- {{ reference.description|striptags|truncatewords:30 }}">{{ reference.title }}</a></strong></li>
+    <li id="ref{{forloop.counter0}}-title" ><strong><a id="ref{{forloop.counter0}}-title" class="reference-title" href="{{rust.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ rust.reference_pub_date }} -- {{ rust.reference.description|striptags|truncatewords:30 }}">{{ rust.reference.title }}</a></strong></li>
     {% endfor %}
   </ul>
 </div>
@@ -41,4 +41,32 @@
 {% endif %}
 </div>
 {% endfor %}
+
+<div class="pagination">
+    <ul>
+    <li
+        {% if news_items.has_previous %}
+        class = "previous" > <a href="?page={{ news_items.previous_page_number }}">
+        {% else %}
+        class = "previous disabled" > <a>
+        {% endif %}
+        Previous
+        </a>
+    </li>
+    
+    <li class="disabled">
+        <a> Page {{ news_items.number }} of {{ news_items.paginator.num_pages }}.</a>
+    </li>
+
+    <li
+        {% if news_items.has_next %}
+        class = "next" > <a href="?page={{ news_items.next_page_number }}">
+        {% else %}
+        class = "next disabled" > <a>
+        {% endif %}
+        Next
+        </a>
+    </li>
+    </ul>
+</div>
 {% endblock %}

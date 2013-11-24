@@ -883,12 +883,12 @@ class UserRiverViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("wom_river/river.html_dt",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("latest_unread_references", resp.context)
-        items = resp.context["latest_unread_references"]
+        self.assertIn("news_items", resp.context)
+        items = resp.context["news_items"]
         self.assertGreaterEqual(MAX_ITEMS_PER_PAGE,len(items))
-        sourceNames = set(int(ref.title[1]) for ref in items)
+        sourceNames = set(int(rust.reference.title[1]) for rust in items)
         self.assertItemsEqual(sourceNames,(1,3))
-        referenceNumbers = [int(r.title[3:]) for r in items]
+        referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
         
     def test_get_html_for_non_owner_logged_user_returns_max_items_ordered_newest_first(self):
@@ -903,12 +903,12 @@ class UserRiverViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("wom_river/river.html_dt",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("latest_unread_references", resp.context)
-        items = resp.context["latest_unread_references"]
+        self.assertIn("news_items", resp.context)
+        items = resp.context["news_items"]
         self.assertGreaterEqual(MAX_ITEMS_PER_PAGE,len(items))
-        sourceNames = set(int(ref.title[1]) for ref in items)
+        sourceNames = set(int(rust.reference.title[1]) for rust in items)
         self.assertItemsEqual(sourceNames,(2,3))
-        referenceNumbers = [int(r.title[3:]) for r in items]
+        referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
         
     def test_get_html_for_anonymous_returns_max_items_ordered_newest_first(self):
@@ -921,12 +921,13 @@ class UserRiverViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("wom_river/river.html_dt",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("latest_unread_references", resp.context)
-        items = resp.context["latest_unread_references"]
+        self.assertIn("news_items", resp.context)
+        items = resp.context["news_items"]
         self.assertGreaterEqual(MAX_ITEMS_PER_PAGE,len(items))
-        sourceNames = set(int(ref.title[1]) for ref in items)
+        self.assertLess(0,len(items))
+        sourceNames = set(int(rust.reference.title[1]) for rust in items)
         self.assertItemsEqual(sourceNames,(1,3))
-        referenceNumbers = [int(r.title[3:]) for r in items]
+        referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
 
 

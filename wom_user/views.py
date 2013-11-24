@@ -407,18 +407,22 @@ def user_collection(request,owner_name):
 
 @check_and_set_owner
 def user_river_view(request,owner_name):
-  user_profile = request.owner_user.userprofile
-  latest_items = []
-  for feed in user_profile.web_feeds.all():
-    latest_items.extend(feed.source.productions.all()\
-                        .order_by('-pub_date')[:MAX_ITEMS_PER_PAGE])
-  latest_items.sort(key=lambda x:x.pub_date)
-  latest_items.reverse()
+  check_user_unread_feed_items(request.owner_user)
+  river_items = ReferenceUserStatus.objects\
+                                   .filter(user=request.owner_user)\
+                                   .order_by('-reference_pub_date')\
+                                   .select_related("reference")
+  paginator = Paginator(river_items, MAX_ITEMS_PER_PAGE)
+  page = request.GET.get('page')
+  try:
+    news_items = paginator.page(page)
+  except (PageNotAnInteger,EmptyPage):
+    # If page is not an integer or out of range, deliver first page.
+    news_items = paginator.page(1)
   d = add_base_template_context_data({
-      # TODO rename to latest_references
-      'latest_unread_references': latest_items[:MAX_ITEMS_PER_PAGE],
-      'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
-      }, request.user.username, owner_name)
+    'news_items': news_items,
+    'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+  }, request.user.username, owner_name)
   return render_to_response('wom_river/river.html_dt',d, context_instance=RequestContext(request))
 
 
@@ -427,7 +431,7 @@ def generate_user_sieve(request,owner_name):
   Generate the HTML page on which a given user will be able to see and
   use it's sieve to read and sort out the latests news.
   """
-  check_user_unread_feed_items(request.user)
+  check_user_unread_feed_items(request.owner_user)
   unread_references = ReferenceUserStatus.objects.filter(has_been_read=False)
   num_unread = unread_references.count()
   oldest_unread_references = unread_references.select_related("reference","sources").order_by('reference_pub_date')[:MAX_ITEMS_PER_PAGE]
@@ -453,7 +457,7 @@ def apply_to_user_sieve(request,owner_name):
   """
   if settings.DEMO:
     return HttpResponseForbidden("Changing the sieve's state is not possible in DEMO mode.")
-  check_user_unread_feed_items(request.user)
+  check_user_unread_feed_items(request.owner_user)
   try:
     action_dict = simplejson.loads(request.body)
   except:
