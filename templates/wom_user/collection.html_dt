@@ -33,7 +33,7 @@ jQuery.ias({
 {% endblock %}
 
 {% block content %}
-<p><i class="icon-bookmark"></i><strong>{{ title_qualify }} collection of {{ num_bookmarks }} bookmarks.</strong>
+<p><i class="icon-bookmark"></i><strong>{{ title_qualify }} collection of {{ user_bookmarks.paginator.count }} bookmarks.</strong>
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}

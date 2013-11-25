@@ -226,7 +226,7 @@ class UserBookmarkAddTestMixin:
     # check presence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": u"http://new/mouf",
@@ -240,7 +240,7 @@ class UserBookmarkAddTestMixin:
     # check absence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(3,resp.context["num_bookmarks"])
+    self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
     self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
     self.assertIn(u"mouf",[b.comment for b in items \
@@ -256,7 +256,7 @@ class UserBookmarkAddTestMixin:
     # check presence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": u"http://new/mouf",
@@ -268,7 +268,7 @@ class UserBookmarkAddTestMixin:
     # check absence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(3,resp.context["num_bookmarks"])
+    self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
     self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
     self.assertIn(u"http://new",
@@ -288,7 +288,7 @@ class UserBookmarkAddTestMixin:
     # check presence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": u"http://new/mouf",
@@ -301,7 +301,7 @@ class UserBookmarkAddTestMixin:
     # check absence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(3,resp.context["num_bookmarks"])
+    self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
     self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
     self.assertIn(u"mouf",[b.comment for b in items \
@@ -320,7 +320,7 @@ class UserBookmarkAddTestMixin:
     # check presence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": self.bkm.reference.url,
@@ -332,7 +332,7 @@ class UserBookmarkAddTestMixin:
     # check absence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertIn(self.bkm.reference.url,
             [b.reference.url for b  in resp.context["user_bookmarks"]])
     self.assertEqual(1,
@@ -356,7 +356,7 @@ class UserBookmarkAddTestMixin:
     # check presence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": self.bkm.reference.url,
@@ -369,7 +369,7 @@ class UserBookmarkAddTestMixin:
     # check absence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertIn(self.bkm.reference.url,
             [b.reference.url for b  in resp.context["user_bookmarks"]])
     self.assertEqual(1,
@@ -395,7 +395,7 @@ class UserBookmarkAddTestMixin:
     # check presence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": self.bkm.reference.url,
@@ -409,7 +409,7 @@ class UserBookmarkAddTestMixin:
     # check absence of r1 reference
     resp = self.client.get(reverse("wom_user.views.user_collection",
                      kwargs={"owner_name":"uA"}))
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertIn(self.bkm.reference.url,
             [b.reference.url for b  in resp.context["user_bookmarks"]])
     self.assertEqual(1,
@@ -475,12 +475,12 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertIn(u"num_bookmarks", resp.context)
     self.assertIn(u"collection_url", resp.context)
     self.assertIn(u"collection_add_bookmarklet", resp.context)
-    self.assertEqual(2,resp.context["num_bookmarks"])
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertEqual(2,len(resp.context["user_bookmarks"]))
     self.assertEqual(set([self.bkm,self.bkm_private]),
                      set(resp.context["user_bookmarks"]))
     # test additional attribute
-    self.assertNotIn(False,[hasattr(b,"tag_names") \
+    self.assertNotIn(False,[hasattr(b,"get_tag_names") \
                             for b in resp.context["user_bookmarks"]])
   
   def test_get_html_non_owner_logged_in_user_returns_all(self):
@@ -498,7 +498,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertIn(u"num_bookmarks", resp.context)
     self.assertIn(u"collection_url", resp.context)
     self.assertIn(u"collection_add_bookmarklet", resp.context)
-    self.assertEqual(1,resp.context["num_bookmarks"])
+    self.assertEqual(1,resp.context["user_bookmarks"].paginator.count)
     self.assertEqual([self.bkm_b],
              list(resp.context["user_bookmarks"]))
  
@@ -514,7 +514,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertIn(u"num_bookmarks", resp.context)
     self.assertIn(u"collection_url", resp.context)
     self.assertIn(u"collection_add_bookmarklet", resp.context)
-    self.assertEqual(1,resp.context["num_bookmarks"])
+    self.assertEqual(1,resp.context["user_bookmarks"].paginator.count)
     self.assertEqual([self.bkm],
              list(resp.context["user_bookmarks"]))
 
@@ -658,13 +658,13 @@ class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
     self.assertIn("visitor_name",resp.context)
     self.assertIn("source_add_bookmarklet",resp.context)
     self.assertIn("owner_name",resp.context)
-    self.assertIn("syndicated_sources",resp.context)
-    self.assertIn("referenced_sources",resp.context)
+    self.assertIn("web_feeds",resp.context)
+    self.assertIn("other_sources",resp.context)
     self.assertEqual("uA",resp.context["owner_name"])
-    self.assertEqual(1,len(resp.context["syndicated_sources"]))
-    self.assertEqual("http://barf",resp.context["syndicated_sources"][0].url)
-    self.assertEqual(1,len(resp.context["referenced_sources"]))
-    self.assertEqual("http://mouf",resp.context["referenced_sources"][0].url)
+    self.assertEqual(1,len(resp.context["web_feeds"]))
+    self.assertEqual("http://barf",resp.context["web_feeds"][0].source.url)
+    self.assertEqual(1,len(resp.context["other_sources"]))
+    self.assertEqual("http://mouf",resp.context["other_sources"][0].url)
 
 
 class ImportUserBookmarksFromNSList(TestCase):
@@ -1182,17 +1182,17 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("wom_river/river_sources.html_dt",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("syndicated_sources", resp.context)
-        self.assertIn("referenced_sources", resp.context)
-        items = resp.context["referenced_sources"]
+        self.assertIn("web_feeds", resp.context)
+        self.assertIn("other_sources", resp.context)
+        items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
         self.assertEqual(sourceNames,set((1,3)))
         sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
-        feed_items = resp.context["syndicated_sources"]
-        feedNames = set([int(s.title[1]) for s in feed_items])
+        feed_items = resp.context["web_feeds"]
+        feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((1,3)))
-        feedTypes = set([s.title[0] for s in feed_items])
+        feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
         
     def test_get_html_for_non_owner_logged_user_returns_all_sources(self):
@@ -1207,17 +1207,17 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("wom_river/river_sources.html_dt",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("syndicated_sources", resp.context)
-        self.assertIn("referenced_sources", resp.context)
-        items = resp.context["referenced_sources"]
+        self.assertIn("web_feeds", resp.context)
+        self.assertIn("other_sources", resp.context)
+        items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
         self.assertEqual(sourceNames,set((2,3)))
         sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
-        feed_items = resp.context["syndicated_sources"]
-        feedNames = set([int(s.title[1]) for s in feed_items])
+        feed_items = resp.context["web_feeds"]
+        feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((2,3)))
-        feedTypes = set([s.title[0] for s in feed_items])
+        feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
         
     def test_get_html_for_anonymous_returns_all_sources(self):
@@ -1230,17 +1230,17 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("wom_river/river_sources.html_dt",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("syndicated_sources", resp.context)
-        self.assertIn("referenced_sources", resp.context)
-        items = resp.context["referenced_sources"]
+        self.assertIn("web_feeds", resp.context)
+        self.assertIn("other_sources", resp.context)
+        items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
         self.assertEqual(sourceNames,set((1,3)))
         sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
-        feed_items = resp.context["syndicated_sources"]
-        feedNames = set([int(s.title[1]) for s in feed_items])
+        feed_items = resp.context["web_feeds"]
+        feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((1,3)))
-        feedTypes = set([s.title[0] for s in feed_items])
+        feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
 
 
