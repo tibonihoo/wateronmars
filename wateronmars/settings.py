@@ -9,25 +9,35 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# User-Agent (important for websites that protect against DDOS by
+# blacklisting some user-agents)
+USER_AGENT = "wateronmars"
+
+try:
+  import djcelery  
+  djcelery.setup_loader()
+  USE_CELERY = True
+except ImportError:
+  print "djcelery not available, no background task possible"
+  USE_CELERY = False
+
+# Feel free to force de-activation of celery
+USE_CELERY = False
+
+
 # Test if we're on heroku environment
 DEPLOYMENT_PLATFORM = None
 if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
   DEPLOYMENT_PLATFORM = "heroku"
+else:
+  DEPLOYMENT_PLATFORM = os.environ.get("DEPLOYMENT_PLATFORM","")
 
-# User-Agent (important for websites that protect against DDOS by
-# blacklisting some user-agents)
-USER_AGENT = "WOM"
 
 # Set to True to activate the DEMO mode
 DEMO = True
 
-
 # DEBUG or not DEBUG
-if DEPLOYMENT_PLATFORM == "heroku":
-  DEBUG = False
-else:
-  DEBUG = True
-
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
   
@@ -91,7 +101,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static")
   
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -103,21 +113,16 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #"/home/thibauld/Development/wateronmars/wom-experiment/static",
+  os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static"),
   )
 
-if DEPLOYMENT_PLATFORM=="heroku":
-  STATIC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static")
-else:
-  STATICFILES_DIRS = (
-    os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static"),
-    )
-  
+
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -153,6 +158,8 @@ TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__),os.pardir,"templates"),
 )
 
+
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -165,8 +172,6 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'south',
-    'kombu.transport.django',  
-    'djcelery',  
     'wom_pebbles',
     'wom_river',
     'wom_classification',
@@ -174,10 +179,15 @@ INSTALLED_APPS = (
     )
 
 
+if USE_CELERY:
+  INSTALLED_APPS += (
+    'kombu.transport.django',  
+    'djcelery',  
+  )
+
+
 BROKER_BACKEND = "django"
 
-import djcelery  
-djcelery.setup_loader()  
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

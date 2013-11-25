@@ -96,6 +96,30 @@ def loggedin_and_owner_required(func):
   return _loggedin_and_owner_required
 
 
+def add_base_template_context_data(d,visitor_name, owner_name):
+  """Generate the context data needed for templates that inherit from
+  the base template.
+  
+  'd': the dictionary of custom data for the context.
+  'visitor_name': the username of the visitor ("None" if anonymous).
+  'owner_name': the username of the owner.
+  'title_qualify': the property qualifier adapted to wether the user is the owner or not.
+  'demo': flag indicating whether the demo mode is activated
+  'auto_update': flag indicating whether updating news is automatic or not.
+  """
+  if visitor_name == owner_name:
+    tq = "Your"
+  else:
+    tq = "%s's" % owner_name
+  d.update({
+    'visitor_name' : visitor_name,
+    'owner_name' : owner_name,
+    'title_qualify': tq,
+    'demo': settings.DEMO,
+    'auto_update': settings.USE_CELERY,
+  })
+  return d
+
 
 def home(request):
   """
@@ -128,27 +152,6 @@ def request_for_cleanup(request):
   return HttpResponseRedirect(reverse("wom_user.views.home"))
 
   
-def add_base_template_context_data(d,visitor_name, owner_name):
-  """Generate the context data needed for templates that inherit from
-  the base template.
-  
-  'd': the dictionary of custom data for the context.
-  'visitor_name': the username of the visitor ("None" if anonymous).
-  'owner_name': the username of the owner.
-  'title_qualify': the property qualifier adapted to wether the user is the owner or not.
-  'demo': flag indicating whether the demo mode is activated
-  """
-  if visitor_name == owner_name:
-    tq = "Your"
-  else:
-    tq = "%s's" % owner_name
-  d.update({
-    'visitor_name' : visitor_name,
-    'owner_name' : owner_name,
-    'title_qualify': tq,
-    'demo': settings.DEMO,
-      })
-  return d
 
 
 def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):

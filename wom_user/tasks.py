@@ -6,11 +6,26 @@ from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 from django.utils import timezone
 
-from celery.task.schedules import crontab  
-from celery.decorators import periodic_task  
-from celery.decorators import task  
+from django.conf import settings
+
+if settings.USE_CELERY:
+  from celery.task.schedules import crontab  
+  from celery.decorators import periodic_task  
+  from celery.decorators import task  
+else:
+  def crontab(*args,**kwargs):
+    return None
+  def periodic_task(*args,**kwargs):
+    def wrap(f):
+      return f
+    return wrap
+  def task(*args,**kwargs):
+    def wrap(f):
+      return f
+    return wrap
 
 
+    
 from wom_pebbles.tasks import delete_old_references
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 

@@ -12,13 +12,14 @@ urlpatterns = patterns('',
                        url(r'^u/', include('wom_user.urls')),
                        
                        # temporary hack to avoid depending too much on
-                       # celery for background tasks
+                       # background tasks
                        url(r'^houston/we_ve_got_an_update_request/$',
                            'wom_user.views.request_for_update'),
                        url(r'^houston/we_ve_got_a_cleanup_request/$',
                            'wom_user.views.request_for_cleanup'),
                        url(r'^static/(?P<path>.*)$',
-                           'django.views.static.serve', {'document_root': settings.STATIC_ROOT})
+                           'django.views.static.serve',
+                           {'document_root': settings.STATIC_ROOT})
                        )
 
 if not settings.DEMO:
@@ -27,8 +28,9 @@ if not settings.DEMO:
                               'wom_user.views.user_creation'),
                           url(r'^admin/',
                               include(admin.site.urls)),
-                          # Uncomment the admin/doc line below to enable admin documentation
+                          # Uncomment the admin/doc line below to
+                          # enable admin documentation
                           url(r'^admin/doc/',
                               include('django.contrib.admindocs.urls')),
-  )
+                        )
 
