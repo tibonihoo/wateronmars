@@ -65,10 +65,10 @@ class UserBookmarkAdditionForm(forms.Form):
                             widget=forms.Textarea(
                               attrs={"class":"input-xxlarge"}))
   pub_date = forms.DateTimeField(required=False)
-  source_name = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
-                                required=False,
-                                widget=forms.TextInput(
-                                  attrs={"class":"input-xxlarge"}))
+  source_title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
+                                 required=False,
+                                 widget=forms.TextInput(
+                                   attrs={"class":"input-xxlarge"}))
   source_url = forms.CharField(max_length=URL_MAX_LENGTH,required=False,
                                widget=forms.TextInput(
                                  attrs={"class":"input-xxlarge"}))
@@ -90,7 +90,7 @@ class UserBookmarkAdditionForm(forms.Form):
                or datetime.now(timezone.utc)
     src_url = self.cleaned_data["source_url"] \
               or build_source_url_from_reference_url(url)
-    src_name = self.cleaned_data["source_name"] \
+    src_title = self.cleaned_data["source_title"] \
                or build_reference_title_from_url(src_url)
     # Find or create a matching reference
     try:
@@ -101,7 +101,7 @@ class UserBookmarkAdditionForm(forms.Form):
       try:
         ref_src = Reference.objects.get(url=src_url)
       except ObjectDoesNotExist:
-        ref_src = Reference(url=src_url,title=src_name,pub_date=pub_date)
+        ref_src = Reference(url=src_url,title=src_title,pub_date=pub_date)
         ref_src.save()
       bookmarked_ref = Reference(url=url,
                                  title=title,
@@ -147,7 +147,7 @@ class UserSourceAdditionForm(forms.Form):
   url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
                         widget=forms.TextInput(
                           attrs={"class":"input-xxlarge"}))
-  name = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
+  title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
                          required=False,
                          widget=forms.TextInput(
                            attrs={"class":"input-large"}))
@@ -217,7 +217,7 @@ class UserSourceAdditionForm(forms.Form):
     Returns the source.
     """
     form_url = self.cleaned_data["url"]
-    form_name = self.cleaned_data["name"]
+    form_title = self.cleaned_data["title"]
     form_feed_url = self.cleaned_data["feed_url"]
     if self.user.userprofile.web_feeds.filter(source__url=form_url).exists():
       # nothing to do
@@ -228,14 +228,14 @@ class UserSourceAdditionForm(forms.Form):
     if same_sources:
       new_feed = same_sources[0]
     else:
-      if form_name:
-        source_name = form_name
+      if form_title:
+        source_title = form_title
       else:
-        source_name = build_reference_title_from_url(form_url)
+        source_title = build_reference_title_from_url(form_url)
       try:
         source_ref = Reference.objects.get(url=form_url)
       except ObjectDoesNotExist:
-        source_ref = Reference(url=form_url,title=source_name,
+        source_ref = Reference(url=form_url,title=source_title,
                                pub_date=datetime.now(timezone.utc))
         source_ref.save()
       new_feed = WebFeed(source=source_ref)
@@ -246,6 +246,7 @@ class UserSourceAdditionForm(forms.Form):
                                            .replace(tzinfo=timezone.utc)
       new_feed.save()      
     self.user.userprofile.sources.add(source_ref)
+    self.user.userprofile.public_sources.add(source_ref)
     self.user.userprofile.web_feeds.add(new_feed)
     self.user.save()
     return new_feed

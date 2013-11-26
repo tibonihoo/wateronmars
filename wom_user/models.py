@@ -7,7 +7,8 @@ from wom_pebbles.models import Reference
 from wom_river.models import WebFeed
 
 from wom_classification.models import get_item_tag_names
-  
+
+
 class UserProfile(models.Model):
   """
   Gather user-specific information and settings. 
@@ -16,8 +17,10 @@ class UserProfile(models.Model):
   user = models.OneToOneField(User)
   # User's selection of syndicated sources
   web_feeds = models.ManyToManyField(WebFeed)
-  # User sources (includes the sources related to the web_feeds too !)
-  sources = models.ManyToManyField(Reference)
+  # All (public+private) sources of user bookmarks
+  sources = models.ManyToManyField(Reference,related_name="userprofile")
+  # Public sources of a user bookmarks and web_feeds
+  public_sources = models.ManyToManyField(Reference,related_name="publicly_related_userprofile")
   
   def __unicode__(self):
     return "%s>Profile" % self.user
@@ -46,14 +49,47 @@ class UserBookmark(models.Model):
     return "%s%s>%s" % (self.owner,"" if self.is_public else "<private",
                         self.reference)
 
+  def get_public_sources(self):
+    """Get the sources of the reference that are also known to the user and publicly visible."""
+    return self.reference.sources.filter(publicly_related_userprofile=self.owner.userprofile).all()
+
   def get_sources(self):
-    """Get the sources of the reference that are also known to the user."""
+    """Get the sources of the reference that are also known to the user and privately visible."""
     return self.reference.sources.filter(userprofile=self.owner.userprofile).all()
 
   def get_tag_names(self):
     """Get the names of the tags related to this reference."""
     return get_item_tag_names(self.owner,self.reference)
 
+  def set_private(self):
+    """Set the bookmark as private."""
+    if not self.is_public: return
+    self.is_public = False
+    # Check if the corresponding source should be made private, the
+    # method is a bit heavy here, which is not so critical because the
+    # usual workflow is more private -> public than the opposite
+    owner_profile = self.owner.userprofile
+    for src in self.reference.sources\
+                             .filter(publicly_related_userprofile\
+                                     =owner_profile):
+      if not src.productions.filter(userbookmark__owner=self.owner,
+                                    userbookmark__is_public=True).exists():
+        if owner_profile.web_feeds.filter(source=src).exists():
+          # Sources related to web feed remain public
+          continue
+        owner_profile.public_sources.remove(src)
+    self.save()
+    
+  def set_public(self):
+    """Set the bookmark as public."""
+    if self.is_public: return
+    self.is_public = True
+    owner_profile = self.owner.userprofile
+    for src in self.reference.sources\
+                             .filter(userprofile=owner_profile):
+      owner_profile.public_sources.add(src)
+    self.save()
+    
     
 class ReferenceUserStatus(models.Model):
   """

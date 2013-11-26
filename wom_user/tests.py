@@ -70,7 +70,84 @@ class UserBookmarkModelTest(TestCase):
                     saved_date=self.date)
     self.assertFalse(b.is_public)
 
+  def test_get_public_sources(self):
+    source = Reference.objects.create(url="http://src",
+                                      title="src",
+                                      pub_date=self.date)
+    b = UserBookmark.objects.create(owner=self.user,
+                                    reference=self.reference,
+                                    saved_date=self.date)
+    b.reference.sources.add(source)
+    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile.sources.add(source)
+    self.assertEqual([],list(b.get_public_sources()))
+    userprofile.public_sources.add(source)
+    self.assertEqual([source],list(b.get_public_sources()))
+  
+  def test_get_sources(self):
+    source = Reference.objects.create(url="http://src",
+                                      title="src",
+                                      pub_date=self.date)
+    b = UserBookmark.objects.create(owner=self.user,
+                                    reference=self.reference,
+                                    saved_date=self.date)
+    b.reference.sources.add(source)
+    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile.sources.add(source)
+    self.assertEqual([source],list(b.get_sources()))
 
+  def test_set_public(self):
+    source = Reference.objects.create(url="http://src",
+                                      title="src",
+                                      pub_date=self.date)
+    b = UserBookmark.objects.create(owner=self.user,
+                                    reference=self.reference,
+                                    saved_date=self.date)
+    b.reference.sources.add(source)
+    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile.sources.add(source)
+    self.assertNotIn(source,userprofile.public_sources.all())
+    b.set_public()
+    self.assertIn(source,userprofile.public_sources.all())    
+    self.assertIn(source,userprofile.sources.all())    
+
+  def test_set_private_when_public(self):
+    source = Reference.objects.create(url="http://src",
+                                      title="src",
+                                      pub_date=self.date)
+    b = UserBookmark.objects.create(owner=self.user,
+                                    reference=self.reference,
+                                    saved_date=self.date)
+    b.reference.sources.add(source)
+    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile.sources.add(source)
+    userprofile.public_sources.add(source)
+    b.is_public = True
+    b.set_private()
+    self.assertNotIn(source,userprofile.public_sources.all())
+    self.assertIn(source,userprofile.sources.all())
+    
+  def test_set_private_when_has_feed(self):
+    source = Reference.objects.create(url="http://src",
+                                      title="src",
+                                      pub_date=self.date)
+    feed = WebFeed.objects.create(xmlURL="http://barf/bla.xml",
+                                  last_update_check=self.date,
+                                  source=source)
+    b = UserBookmark.objects.create(owner=self.user,
+                                    reference=self.reference,
+                                    saved_date=self.date)
+    b.reference.sources.add(source)
+    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile.web_feeds.add(feed)
+    userprofile.sources.add(source)
+    userprofile.public_sources.add(source)
+    b.is_public = True
+    b.set_private()
+    # Since the feed exists: the source is still public !
+    self.assertIn(source,userprofile.public_sources.all())
+    self.assertIn(source,userprofile.sources.all())
+    
 class CheckAndSetOwnerDecoratorTest(TestCase):
 
   def setUp(self):
@@ -233,7 +310,7 @@ class UserBookmarkAddTestMixin:
                   "title": u"new title",
                   "comment": u"mouf",
                   "source_url": u"http://glop",
-                  "source_name": u"new name",
+                  "source_title": u"new name",
                   })
     # resp_dic = simplejson.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -402,7 +479,7 @@ class UserBookmarkAddTestMixin:
                   "title": u"new title",
                   "comment": u"mouf",
                   "source_url": self.source.url,
-                  "source_name": u"new name",
+                  "source_title": u"new name",
                   })
     # resp_dic = simplejson.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -437,7 +514,7 @@ class UserBookmarkAddTestMixin:
                "title": u"new title",
                "comment": u"mouf",
                "source_url": u"http://glop",
-               "source_name": u"new name",
+               "source_title": u"new name",
                },
              expectedStatusCode=403)
     
@@ -1166,10 +1243,12 @@ class UserSourcesViewTest(TestCase):
         s2 = Reference.objects.create(url="http://s2",title="s2",pub_date=date)
         s3 = Reference.objects.create(url="http://s3",title="s3",pub_date=date)
         user1_profile.sources.add(s1)
+        user1_profile.public_sources.add(s1)
         user1_profile.sources.add(s3)
         user2_profile.sources.add(s2)
+        user2_profile.public_sources.add(s2)
         user2_profile.sources.add(s3)
-
+        
     def test_get_html_for_owner_returns_separate_source_and_feed(self):
         """
         Make sure a user can see its sources in two categories.
@@ -1195,7 +1274,7 @@ class UserSourcesViewTest(TestCase):
         feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
         
-    def test_get_html_for_non_owner_logged_user_returns_all_sources(self):
+    def test_get_html_for_non_owner_logged_user_returns_public_source_only(self):
         """
         Make sure a logged in user can see another user's sources.
         """
@@ -1211,9 +1290,13 @@ class UserSourcesViewTest(TestCase):
         self.assertIn("other_sources", resp.context)
         items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
-        self.assertEqual(sourceNames,set((2,3)))
+        self.assertEqual(sourceNames,set((2,)))
         sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
+        # All feeds being systematically public they should all be
+        # visible (NB: in practice the app guarantees that a source
+        # associated to a feed is always public which is not the case
+        # here with s3)
         feed_items = resp.context["web_feeds"]
         feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((2,3)))
@@ -1234,15 +1317,19 @@ class UserSourcesViewTest(TestCase):
         self.assertIn("other_sources", resp.context)
         items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
-        self.assertEqual(sourceNames,set((1,3)))
+        self.assertEqual(sourceNames,set((1,)))
         sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
+        # All feeds being systematically public they should all be
+        # visible (NB: in practice the app guarantees that a source
+        # associated to a feed is always public which is not the case
+        # here with s3)
         feed_items = resp.context["web_feeds"]
         feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((1,3)))
         feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
-
+        
 
 class ReferenceUserStatusModelTest(TestCase):
 

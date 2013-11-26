@@ -21,21 +21,18 @@
 *** sieve
 **** read: owner
 **** write: owner
+*** sources
+**** read: owner
+**** write: owner
+**** note: sources of web feeds and public bookmarks are automatically public
 *** private bookmarks
 **** read: owner
 **** write: owner
+**** note: added bookmarks are private by default
 *** public bookmarks
 **** read: everyone
 **** write: owner
 **** note: bookmarks are made public by an explicit choice of the owner
-*** public sources
-**** read: owner
-**** write: owner
-**** note: syndication sources are public (so long as they don't require authentication)
-*** private sources
-**** read: owner
-**** write: owner
-**** note: private sources are typically created when a bookmark is added that is not related to an existing public source.
 *** profile
 **** read: owner
 **** write: owner
@@ -50,3 +47,13 @@
 *** sources
 **** read: everyone
 **** write: staff
+*** private bookmarks
+**** read: owner
+**** write: owner
+*** public bookmarks
+**** read: everyone
+**** write: staff
+*** profile
+**** read: owner
+**** write: staff
+

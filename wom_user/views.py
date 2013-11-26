@@ -2,7 +2,6 @@
 
 import urllib
 
-
 from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -325,7 +324,7 @@ def user_river_source_remove(request,owner_name):
 def user_collection_add(request,owner_name):
   """Handle bookmarlet and form-based addition of a bookmark.
   The bookmarlet is formatted in the following way:
-  .../collection/add/?url="..."&title="..."&comment="..."&source_url="..."&source_name="..."&pub_date="..."
+  .../collection/add/?url="..."&title="..."&comment="..."&source_url="..."&source_title="..."&pub_date="..."
   """
   if settings.DEMO:
     return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
@@ -352,7 +351,7 @@ def post_to_user_collection(request,owner_name):
       "title": "the title", // optional but recommended
       "comment": "", // optional
       "source_url": "<url>", // optional
-      "source_name": "the name", // optional
+      "source_title": "the name", // optional
     }
   """
   try:
@@ -490,7 +489,7 @@ def apply_to_user_sieve(request,owner_name):
 
 @loggedin_and_owner_required
 def user_river_sieve(request,owner_name):
-  if owner_name != request.user.username:
+  if request.owner_user != request.user:
     return HttpResponseForbidden()
   if request.method == 'GET':
     return generate_user_sieve(request,owner_name)
@@ -505,14 +504,18 @@ def user_river_sources(request,owner_name):
   if request.method == 'GET':
     owner_profile = request.owner_user.userprofile
     web_feeds = owner_profile.web_feeds.all().order_by('source__title').select_related("source")
-    other_sources = owner_profile.sources.exclude(webfeed__userprofile=owner_profile).order_by("title")
+    if request.user == request.owner_user:
+      other_sources = owner_profile.sources.all()
+    else:
+      other_sources = owner_profile.public_sources.all()
+    other_sources = other_sources.exclude(webfeed__userprofile=owner_profile).order_by("title")
     d = add_base_template_context_data({
         'web_feeds': web_feeds,
         'other_sources': other_sources,
         'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
         }, request.user.username, owner_name)
     return render_to_response('wom_river/river_sources.html_dt',d, context_instance=RequestContext(request))
-  elif owner_name != request.user.username:
+  elif request.user != request.owner_user:
       return HttpResponseForbidden()
   elif request.method == 'POST':
     return user_river_source_add(request, owner_name)

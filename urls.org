@@ -28,7 +28,7 @@
 **** TODO the OPML list of sources
 ** post
 *** json
-**** TODO {"url"="the url", "name"="the name", "feed_url"="the url of the Atom/RSS feed"}
+**** TODO {"url"="the url", "title"="the name", "feed_url"="the url of the Atom/RSS feed"}
 * u/me/sources/add/?url='the url'&name='the name'&feed_url='the url of the Atom/RSS feed'
 ** get
 *** html
@@ -45,7 +45,7 @@
 ** post
 *** json
 **** DONE {"url"= "the url", "title" = "the name" } : add bookmark to the given url
-**** DONE {"url"= "the url", "title" = "the name", description = "a description", source_url="the source URL", source_name="the source title" } : same with more details
+**** DONE {"url"= "the url", "title" = "the name", description = "a description", source_url="the source URL", source_title="the source title" } : same with more details
 * u/me/collection/add/?url='the url'&title='the reference title'
 ** get
 *** html
