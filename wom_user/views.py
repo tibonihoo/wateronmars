@@ -43,8 +43,6 @@ from wom_user.tasks import check_user_unread_feed_items
 
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
-from wom_classification.models import get_item_tag_names
-
 from wom_user.settings import NEWS_TIME_THRESHOLD
 from wom_user.settings import MAX_ITEMS_PER_PAGE
 
