@@ -94,7 +94,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
 @task()
 def import_user_feedsources_from_opml(user,opml_txt):
   feeds_and_tags = import_feedsources_from_opml(opml_txt)
-  profile = UserProfile.objects.get(user=user)
+  profile = UserProfile.objects.get(owner=user)
   classif_data_to_save = []
   for feed,tags in feeds_and_tags.items():
     profile.web_feeds.add(feed)
@@ -124,9 +124,9 @@ def generate_reference_user_status(user,references):
   """
   new_ref_status = []
   for ref in references.select_related("referenceuserstatus_set").all():
-    if user and not ref.referenceuserstatus_set.filter(user=user).exists():
+    if user and not ref.referenceuserstatus_set.filter(owner=user).exists():
       rust = ReferenceUserStatus()
-      rust.user = user
+      rust.owner = user
       rust.reference = ref
       rust.reference_pub_date = ref.pub_date
       try:

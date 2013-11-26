@@ -49,7 +49,7 @@ class UserProfileCreationForm(UserCreationForm):
     user.email = self.cleaned_data["email"]
     user.save()
     profile = UserProfile()
-    profile.user = user
+    profile.owner = user
     if commit:
       profile.save()
     return profile
@@ -134,7 +134,7 @@ class UserBookmarkAdditionForm(forms.Form):
         self.user.userprofile.sources.add(ref_src)
         self.user.userprofile.save()
     with transaction.commit_on_success():
-      for rust in ReferenceUserStatus.objects.filter(user=self.user,
+      for rust in ReferenceUserStatus.objects.filter(owner=self.user,
                                                      reference=bookmarked_ref).all():
         rust.has_been_saved = True
         rust.save()

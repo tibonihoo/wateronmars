@@ -416,7 +416,7 @@ def user_collection(request,owner_name):
 def user_river_view(request,owner_name):
   check_user_unread_feed_items(request.owner_user)
   river_items = ReferenceUserStatus.objects\
-                                   .filter(user=request.owner_user)\
+                                   .filter(owner=request.owner_user)\
                                    .order_by('-reference_pub_date')\
                                    .select_related("reference")
   paginator = Paginator(river_items, MAX_ITEMS_PER_PAGE)
@@ -436,10 +436,10 @@ def user_river_view(request,owner_name):
 def generate_user_sieve(request,owner_name):
   """
   Generate the HTML page on which a given user will be able to see and
-  use it's sieve to read and sort out the latests news.
+  use its sieve to read and sort out the latests news.
   """
   check_user_unread_feed_items(request.owner_user)
-  unread_references = ReferenceUserStatus.objects.filter(has_been_read=False)
+  unread_references = ReferenceUserStatus.objects.filter(owner=request.owner_user,has_been_read=False)
   num_unread = unread_references.count()
   oldest_unread_references = unread_references.select_related("reference","sources").order_by('reference_pub_date')[:MAX_ITEMS_PER_PAGE]
   d = add_base_template_context_data({
@@ -473,7 +473,7 @@ def apply_to_user_sieve(request,owner_name):
     return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
   modified_rust = []
   for read_url in action_dict.get(u"references",[]):
-    for rust in ReferenceUserStatus.objects.filter(has_been_read=False,user=request.user).select_related("reference").all():
+    for rust in ReferenceUserStatus.objects.filter(has_been_read=False,owner=request.owner_user).select_related("reference").all():
       if rust.reference.url == read_url:
         rust.has_been_read = True
         modified_rust.append(rust)

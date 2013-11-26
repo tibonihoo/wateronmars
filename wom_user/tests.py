@@ -43,12 +43,12 @@ class UserProfileModelTest(TestCase):
     se but useful anyway to make sure the model given enough
     information and list the info we rely on)
     """
-    p = UserProfile.objects.create(user=self.user)
-    self.assertEqual(p.user,self.user)
+    p = UserProfile.objects.create(owner=self.user)
+    self.assertEqual(p.owner,self.user)
     self.assertEqual(0,len(p.sources.all()))
     self.assertEqual(0,len(p.web_feeds.all()))
     # just to be sure it is still provided by django
-    self.assertNotEqual(p.user.date_joined,None)
+    self.assertNotEqual(p.owner.date_joined,None)
 
 
 class UserBookmarkModelTest(TestCase):
@@ -78,7 +78,7 @@ class UserBookmarkModelTest(TestCase):
                                     reference=self.reference,
                                     saved_date=self.date)
     b.reference.sources.add(source)
-    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile = UserProfile.objects.create(owner=self.user)
     userprofile.sources.add(source)
     self.assertEqual([],list(b.get_public_sources()))
     userprofile.public_sources.add(source)
@@ -92,7 +92,7 @@ class UserBookmarkModelTest(TestCase):
                                     reference=self.reference,
                                     saved_date=self.date)
     b.reference.sources.add(source)
-    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile = UserProfile.objects.create(owner=self.user)
     userprofile.sources.add(source)
     self.assertEqual([source],list(b.get_sources()))
 
@@ -104,7 +104,7 @@ class UserBookmarkModelTest(TestCase):
                                     reference=self.reference,
                                     saved_date=self.date)
     b.reference.sources.add(source)
-    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile = UserProfile.objects.create(owner=self.user)
     userprofile.sources.add(source)
     self.assertNotIn(source,userprofile.public_sources.all())
     b.set_public()
@@ -119,7 +119,7 @@ class UserBookmarkModelTest(TestCase):
                                     reference=self.reference,
                                     saved_date=self.date)
     b.reference.sources.add(source)
-    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile = UserProfile.objects.create(owner=self.user)
     userprofile.sources.add(source)
     userprofile.public_sources.add(source)
     b.is_public = True
@@ -138,7 +138,7 @@ class UserBookmarkModelTest(TestCase):
                                     reference=self.reference,
                                     saved_date=self.date)
     b.reference.sources.add(source)
-    userprofile = UserProfile.objects.create(user=self.user)
+    userprofile = UserProfile.objects.create(owner=self.user)
     userprofile.web_feeds.add(feed)
     userprofile.sources.add(source)
     userprofile.public_sources.add(source)
@@ -275,7 +275,7 @@ class UserBookmarkAddTestMixin:
     reference_b.sources.add(self.source)
     self.user = User.objects.create_user(username="uA",
                                          password="pA")
-    p = UserProfile.objects.create(user=self.user)
+    p = UserProfile.objects.create(owner=self.user)
     p.sources.add(self.source)
     self.bkm = UserBookmark.objects.create(
       owner=self.user,
@@ -647,13 +647,13 @@ class UserSourceAddTestMixin:
       xmlURL="http://barf/bla.xml",
       last_update_check=self.date,
       source=self.feed_source)
-    self.user_profile = UserProfile.objects.create(user=self.user)
+    self.user_profile = UserProfile.objects.create(owner=self.user)
     self.user_profile.sources.add(self.source)
     self.user_profile.sources.add(self.feed_source)
     self.user_profile.web_feeds.add(self.web_feed)
     self.other_user = User.objects.create_user(username="uB",
                                                password="pB")
-    self.other_profile = UserProfile.objects.create(user=self.other_user)
+    self.other_profile = UserProfile.objects.create(owner=self.other_user)
     self.source_b = Reference.objects.create(
       url=u"http://glop",
       title=u"a glop",
@@ -762,7 +762,7 @@ class ImportUserBookmarksFromNSList(TestCase):
     reference.sources.add(self.source)
     self.user = User.objects.create_user(username="uA",
                                          password="pA")
-    self.user_profile = UserProfile.objects.create(user=self.user)
+    self.user_profile = UserProfile.objects.create(owner=self.user)
     self.user_profile.sources.add(self.source)
     self.bkm = UserBookmark.objects.create(
         owner=self.user,
@@ -825,9 +825,9 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
   def setUp(self):
     # Create 2 users but only create sources for one of them.
     self.user = User.objects.create_user(username="uA",password="pA")
-    self.user_profile = UserProfile.objects.create(user=self.user)
+    self.user_profile = UserProfile.objects.create(owner=self.user)
     self.other_user = User.objects.create_user(username="uB",password="pB")
-    self.other_user_profile = UserProfile.objects.create(user=self.other_user)
+    self.other_user_profile = UserProfile.objects.create(owner=self.other_user)
     date = datetime.now(timezone.utc)
     r1 = Reference.objects.create(url="http://mouf",title="f1",pub_date=date)
     fs1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
@@ -915,9 +915,9 @@ class UserRiverViewTest(TestCase):
         # Create 2 users and 3 sources (1 exclusive to each and a
         # shared one) with more references than MAX_ITEM_PER_PAGE
         self.user1 = User.objects.create_user(username="uA",password="pA")
-        user1_profile = UserProfile.objects.create(user=self.user1)
+        user1_profile = UserProfile.objects.create(owner=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
-        user2_profile = UserProfile.objects.create(user=self.user2)
+        user2_profile = UserProfile.objects.create(owner=self.user2)
         date = datetime.now(timezone.utc)
         r1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
@@ -1014,9 +1014,9 @@ class UserSieveViewTest(TestCase):
         # Create 2 users and 3 sources (1 exclusive to each and a
         # shared one) with more references than MAX_ITEM_PER_PAGE
         self.user1 = User.objects.create_user(username="uA",password="pA")
-        user1_profile = UserProfile.objects.create(user=self.user1)
+        user1_profile = UserProfile.objects.create(owner=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
-        user2_profile = UserProfile.objects.create(user=self.user2)
+        user2_profile = UserProfile.objects.create(owner=self.user2)
         date = datetime.now(timezone.utc)
         self.s1 = Reference.objects.create(url="http://mouf",title="glop",pub_date=date)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
@@ -1214,9 +1214,9 @@ class UserSourcesViewTest(TestCase):
         # Create 2 users and 3 feed sources (1 exclusive to each and a
         # shared one) and 3 non-feed sources.
         self.user1 = User.objects.create_user(username="uA",password="pA")
-        user1_profile = UserProfile.objects.create(user=self.user1)
+        user1_profile = UserProfile.objects.create(owner=self.user1)
         self.user2 = User.objects.create_user(username="uB",password="pB")
-        user2_profile = UserProfile.objects.create(user=self.user2)
+        user2_profile = UserProfile.objects.create(owner=self.user2)
         date = datetime.now(timezone.utc)
         r1 = Reference.objects.create(url="http://mouf",title="f1",pub_date=date)
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
@@ -1347,7 +1347,7 @@ class ReferenceUserStatusModelTest(TestCase):
     """
     s = Reference.objects.create(url="http://source",title="source",pub_date=self.date)
     rust = ReferenceUserStatus.objects.create(reference=self.reference,
-                                              user=self.user,
+                                              owner=self.user,
                                               reference_pub_date=self.date,
                                               main_source=s)
     self.assertFalse(rust.has_been_read)
@@ -1358,7 +1358,7 @@ class ReferenceUserStatusModelTest(TestCase):
     ref = Reference(url="http://source",title="other",pub_date=self.date)
     ref.save()
     rust = ReferenceUserStatus(reference=ref,
-                               user=self.user,
+                               owner=self.user,
                                reference_pub_date=self.date,
                                main_source=src)
     rust.save()

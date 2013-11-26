@@ -14,7 +14,7 @@ class UserProfile(models.Model):
   Gather user-specific information and settings. 
   """
   # The user of whom this is the profile
-  user = models.OneToOneField(User)
+  owner = models.OneToOneField(User)
   # User's selection of syndicated sources
   web_feeds = models.ManyToManyField(WebFeed)
   # All (public+private) sources of user bookmarks
@@ -23,7 +23,7 @@ class UserProfile(models.Model):
   public_sources = models.ManyToManyField(Reference,related_name="publicly_related_userprofile")
   
   def __unicode__(self):
-    return "%s>Profile" % self.user
+    return "%s>Profile" % self.owner
 
 
 class UserBookmark(models.Model):
@@ -101,7 +101,7 @@ class ReferenceUserStatus(models.Model):
   # The reference that waits to be read
   reference = models.ForeignKey(Reference)
   # The user that is supposed to read it
-  user = models.ForeignKey(User)
+  owner = models.ForeignKey(User)
   # Repeat the publication date of the reference
   reference_pub_date = models.DateTimeField('reference publication date')
   # Read flag
@@ -114,4 +114,8 @@ class ReferenceUserStatus(models.Model):
   
   def __unicode__(self):
     return "'%s' (read: %s, saved: %s by '%s')" \
-      % (self.reference.title,self.has_been_read,self.has_been_saved,self.user.username)
+      % (self.reference.title,self.has_been_read,self.has_been_saved,self.owner.username)
+  
+  def get_tag_names(self):
+    """Get the names of the tags related to this reference."""
+    return get_item_tag_names(self.owner,self.reference)
