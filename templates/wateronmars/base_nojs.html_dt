@@ -18,7 +18,7 @@
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
-          <a class="brand" href="/">Water On Mars</a>
+          <a class="brand" href="/" accesskey="h">Water On Mars</a>
             <ul class="nav">
               {% block nav_items %}
               {% endblock %}

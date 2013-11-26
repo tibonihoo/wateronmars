@@ -52,9 +52,7 @@ function showWarning(warningId) {
   warningElt.popover();
   warningElt.css({ 
     "display": "block",
-    "position": "absolute",
-    "left": "3px",
-    "top": $(window).height()/3.});
+  });
 }
 
 // Hide a specific warning.

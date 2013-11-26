@@ -13,16 +13,18 @@
 {% block nav_items %}  
 <li class="divider-vertical"></li>
 {% if visitor_name %}
-<li><a href="/u/{{visitor_name}}/river" title="Your River"><i class="icon-align-left icon-white"></i></a></li>
-<li><a href="/u/{{visitor_name}}/sieve" title="Your Sieve"><i class="icon-filter icon-white"></i></a></li>
-<li><a href="/u/{{visitor_name}}/collection" title="Your Collection"><i class="icon-bookmark icon-white"></i></a></li>
-<li><a href="/u/{{visitor_name}}/sources" title="Your Sources"><i class="icon-book icon-white"></i></a></li>
+<li><a href="/u/{{visitor_name}}/river" title="Your River" accesskey="r"><i class="icon-align-left icon-white"></i></a></li>
+<li><a href="/u/{{visitor_name}}/sieve" title="Your Sieve" accesskey="f"><i class="icon-filter icon-white"></i></a></li>
+<li><a href="/u/{{visitor_name}}/collection" title="Your Collection" accesskey="c"><i class="icon-bookmark icon-white"></i></a></li>
+<li><a href="/u/{{visitor_name}}/sources" title="Your Sources" accesskey="s"><i class="icon-book icon-white"></i></a></li>
 <li class="divider-vertical"></li>
-<li><a href="/accounts/profile" title="Check your profile.">Welcome {{ visitor_name }} !</a></li>
+{% block head_notification %}  
+{% endblock %}
+<li><a href="/accounts/profile" title="Check your profile." accesskey="p">Welcome {{ visitor_name }} !</a></li>
   {% if not auto_update %}
   </ul><ul class="nav pull-right">
   <li class="divider-vertical"></li>
-  <li class=".pull-right"><a href="/houston/we_ve_got_an_update_request/">Check for news</a></li>
+  <li class=".pull-right"><a href="/houston/we_ve_got_an_update_request/" accesskey="u">Check for news</a></li>
   {% endif %}
 {% else %}
 <li><a href="/accounts/login"><i class="icon-user icon-white"></i>Login</a></li>

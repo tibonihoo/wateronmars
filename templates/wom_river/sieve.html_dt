@@ -31,13 +31,17 @@ prepareKeyBindings();
 </script>
 {% endblock %}
 
+{% block head_notification %}  
+{# Error messages #}
+<li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-white"></i></a>
+<a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Bookmarking failed"><i class="icon-warning-sign icon-white"></i></a>
+</li>
+{% endblock %}
+
 {% block content %}
 <p><i class="icon-filter"></i><strong>{{ title_qualify }} sieve</strong>
   <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_references }}</span> unread items.</small>
 </p>
-{# Error messages #}
-<a id="server-sync-problem" class="btn btn-warning" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="right" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-white"></i></a>
-<a id="server-save-failed" class="btn btn-warning" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="right" href="#" data-original-title="Bookmarking failed"><i class="icon-warning-sign icon-white"></i></a>
 
 {# List the references #}
 <div class="accordion" id="sieve-accordion">
