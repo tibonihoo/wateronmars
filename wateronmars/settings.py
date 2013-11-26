@@ -37,7 +37,7 @@ else:
 DEMO = True
 
 # DEBUG or not DEBUG
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
   
@@ -101,7 +101,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static")
+STATIC_ROOT = ""
   
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"

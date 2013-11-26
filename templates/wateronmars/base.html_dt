@@ -32,16 +32,16 @@
 {% endblock %}  
 
 {% block body_below_nav %}
+{% if messages %}
 <div id="messages">
-  {% if messages %}
   {% for message in messages %}
-  <div class="alert alert-{{message.tags}}">
+  <div class="alert alert-{{message.tag}}">
     <a class="close" data-dismiss="alert">×</a>
     {{message}}
   </div>
   {% endfor %}
-  {% endif %}
 </div>
+{% endif %}
 <div class="container-fluid">
   {% block content %}
   {% endblock %}

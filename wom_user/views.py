@@ -108,12 +108,23 @@ def add_base_template_context_data(d,visitor_name, owner_name):
     tq = "Your"
   else:
     tq = "%s's" % owner_name
+  messages = []
+  class Message(object):
+    def __init__(self,tag,message):
+      self.message = message
+      self.tag = tag
+    def __unicode__(self):
+      return self.message
+  if settings.DEMO:
+    m = Message("warning","WaterOnMars is running in demo mode, many features are disabled (like marking news as read or subscribing to new feeds) !")
+    messages.append(m)
   d.update({
     'visitor_name' : visitor_name,
     'owner_name' : owner_name,
     'title_qualify': tq,
     'demo': settings.DEMO,
     'auto_update': settings.USE_CELERY,
+    'messages': messages,
   })
   return d
 
