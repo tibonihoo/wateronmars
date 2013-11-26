@@ -1352,3 +1352,18 @@ class ReferenceUserStatusModelTest(TestCase):
                                               main_source=s)
     self.assertFalse(rust.has_been_read)
     self.assertFalse(rust.has_been_saved)
+
+  def test_disappear_when_reference_is_cleaned(self):
+    src = self.reference
+    ref = Reference(url="http://source",title="other",pub_date=self.date)
+    ref.save()
+    rust = ReferenceUserStatus(reference=ref,
+                               user=self.user,
+                               reference_pub_date=self.date,
+                               main_source=src)
+    rust.save()
+    self.assertTrue(Reference.objects.filter(title="other").exists())
+    self.assertTrue(ReferenceUserStatus.objects.filter(main_source=src).exists())
+    Reference.objects.filter(title="other").delete()
+    self.assertFalse(Reference.objects.filter(title="other").exists())
+    self.assertFalse(ReferenceUserStatus.objects.filter(main_source=src).exists())
