@@ -2,7 +2,7 @@
 
 
 {% block title %}
-{{ title_qualify }} River
+{{ title_qualify }} Collection
 {% endblock %}
 
 
@@ -18,7 +18,6 @@ jQuery.ias({
 });
 </script>
 <script src="/static/js/mousetrap.min.js"></script>
-<!-- <script src="/static/js/collection_ux.js"></script> -->
 <style type="text/css">
   #bookmark_list dt { margin-bottom: 3px; }
   #bookmark_list dd { margin-top: 3px; }
@@ -27,9 +26,6 @@ jQuery.ias({
   .sourceURL { color: black; text-decoration: None; }
   .sourceFeedURL { color: black; text-decoration: None; }
  </style>
-<script>
-/*prepareKeyBindings();*/
-</script>
 {% endblock %}
 
 {% block content %}
@@ -37,11 +33,11 @@ jQuery.ias({
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
-  <dt class="in_bookmark_def"><a id="bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> </dt>
+  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> </dt>
   <dd class="in_bookmark_def">
       <small><em>@
       {% for source in bookmark.get_sources %}
-        <a class="sourceURL" id="bmk{{forloop.counter0}}-sourceURL" style="padding-right:0.5em;" href="{{ source.url }}" title="{{ source.title }}">{{ source.title }}</a>
+        <a class="sourceURL" id="page{{user_bookmarks.number}}-bmk{{forloop.parentloop.counter0}}-source{{forloop.counter0}}-URL" style="padding-right:0.5em;" href="{{ source.url }}" title="{{ source.title }}">{{ source.title }}</a>
       {% if not forloop.last %}
       ,
       {% endif %}
@@ -97,10 +93,4 @@ jQuery.ias({
     </ul>
 </div>
 {% endif %}
-{% endblock %}
-
-{% block extrascript %}
-<script>
-<!-- $(".bookmark-title").tooltip({"trigger":"hover", "placement":"bottom"}); -->
-</script>
 {% endblock %}
