@@ -48,7 +48,7 @@ Do Not Edit! -->
 """
 
 NS_BOOKMARKS_TXT_MORE_TEMPLATE = """\
-<DT><A HREF="http://example.org/%d" PRIVATE="0" TAGS="culture">Example %d</A>
+<DT><A HREF="http://example.org/%d" PRIVATE="1" TAGS="culture">Example %d</A>
 <DD>An example tag to test the pagination.
 """
 
@@ -59,7 +59,7 @@ def run():
     demo_user = User(username="demo")
     demo_user.set_password("redh2o")
     demo_user.save()
-    demo_profile = UserProfile.objects.create(user=demo_user)
+    demo_profile = UserProfile.objects.create(owner=demo_user)
     demo_profile.save()
     print("DEMO mode: Importing default bookmarks and feeds for demo user.")
     import_user_bookmarks_from_ns_list(demo_user,
