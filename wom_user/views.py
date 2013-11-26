@@ -226,6 +226,8 @@ def handle_uploaded_opml(opmlUploadedFile,user):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_upload_opml(request,owner_name):
+  if settings.DEMO:
+    return HttpResponseForbidden("Uploading sources from OPML is disabled in DEMO mode.")
   if request.method == 'POST':
     form = OPMLFileUploadForm(request.POST, request.FILES,
                               error_class=CustomErrorList)
@@ -257,6 +259,8 @@ def handle_uploaded_nsbmk(nsbmkUploadedFile,user):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_upload_nsbmk(request,owner_name):
+  if settings.DEMO:
+    return HttpResponseForbidden("Uploading bookmarks from NS bookmark list is disabled in DEMO mode.")
   if request.method == 'POST':
     form = NSBookmarkFileUploadForm(request.POST, request.FILES,
                                     error_class=CustomErrorList)
@@ -312,7 +316,7 @@ def user_river_source_add(request,owner_name):
 def user_river_source_remove(request,owner_name):
   """Stop subscriptions to sources via a form only !"""
   if settings.DEMO:
-    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
+    return HttpResponseForbidden("Source removal is not possible in DEMO mode.")
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
@@ -336,7 +340,7 @@ def user_collection_add(request,owner_name):
   .../collection/add/?url="..."&title="..."&comment="..."&source_url="..."&source_title="..."&pub_date="..."
   """
   if settings.DEMO:
-    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
+    return HttpResponseForbidden("Bookmark addition is not possible in DEMO mode.")
   if request.method == 'POST':
     bmk_info = request.POST
   elif request.GET: # GET
@@ -363,6 +367,8 @@ def post_to_user_collection(request,owner_name):
       "source_title": "the name", // optional
     }
   """
+  if settings.DEMO:
+    return HttpResponseForbidden("Bookmark addition is not possible in DEMO mode.")
   try:
     bmk_info = simplejson.loads(request.body)
   except Exception,e:
