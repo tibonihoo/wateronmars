@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
     {% block head_after_css %}
     {% endblock %}
   </head>
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <a class="brand" href="{% url wom_user.views.home %}" accesskey="h">Water On Mars</a>
         <div class="container">
