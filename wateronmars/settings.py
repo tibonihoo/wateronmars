@@ -152,7 +152,6 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #"/home/thibauld/Development/wateronmars/wom-experiment/templates"
-    os.path.join(os.path.dirname(__file__),os.pardir,"templates"),
 )
 
 
