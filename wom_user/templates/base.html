@@ -4,8 +4,8 @@
 <!--[if lt IE 9]>
   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
-<script src="/static/js/jquery-1.8.2.min.js" type="text/javascript"></script>
-<script src="/static/bootstrap/js/bootstrap.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}js/jquery-1.8.2.min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js" type="text/javascript"></script>
 {% block extrahead %}
 {% endblock %}
 {% endblock%}
@@ -13,21 +13,21 @@
 {% block nav_items %}  
 <li class="divider-vertical"></li>
 {% if visitor_name %}
-<li><a href="/u/{{visitor_name}}/river" title="Your River" accesskey="r"><i class="icon-align-left icon-white"></i></a></li>
-<li><a href="/u/{{visitor_name}}/sieve" title="Your Sieve" accesskey="f"><i class="icon-filter icon-white"></i></a></li>
-<li><a href="/u/{{visitor_name}}/collection" title="Your Collection" accesskey="c"><i class="icon-bookmark icon-white"></i></a></li>
-<li><a href="/u/{{visitor_name}}/sources" title="Your Sources" accesskey="s"><i class="icon-book icon-white"></i></a></li>
+<li><a href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River" accesskey="r"><i class="icon-align-left icon-white"></i></a></li>
+<li><a href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve" accesskey="f"><i class="icon-filter icon-white"></i></a></li>
+<li><a href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection" accesskey="c"><i class="icon-bookmark icon-white"></i></a></li>
+<li><a href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources" accesskey="s"><i class="icon-book icon-white"></i></a></li>
 <li class="divider-vertical"></li>
 {% block head_notification %}  
 {% endblock %}
-<li><a href="/accounts/profile" title="Check your profile." accesskey="p">Welcome {{ visitor_name }} !</a></li>
+<li><a href="{% url wom_user.views.user_profile %}" title="Check your profile." accesskey="p">Welcome {{ visitor_name }} !</a></li>
   {% if not auto_update %}
   </ul><ul class="nav pull-right">
   <li class="divider-vertical"></li>
-  <li class=".pull-right"><a href="/houston/we_ve_got_an_update_request/" accesskey="u">Check for news</a></li>
+  <li class=".pull-right"><a href="{% url wom_user.views.request_for_update %}" accesskey="f">Check for news</a></li>
   {% endif %}
 {% else %}
-<li><a href="/accounts/login"><i class="icon-user icon-white"></i>Login</a></li>
+<li><a href="{% url django.contrib.auth.views.login %}"><i class="icon-user icon-white"></i>Login</a></li>
 {% endif %}
 {% endblock %}  
 

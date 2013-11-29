@@ -17,7 +17,7 @@ OPML Import
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form action="/u/{{visitor_name}}/sources/opml/" method="post" enctype="multipart/form-data">
+<form action="{% url wom_user.views.user_upload_opml visitor_name %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}

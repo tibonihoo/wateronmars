@@ -10,13 +10,13 @@
 <p>Feel free to browse through the following pages:</p>
 
 <dl>
-<dt><a href="/u/{{owner_name}}/river" title="{{title_qualify}} River"><i class="icon-align-left"></i>Your river</a></dt>
+<dt><a href="{% url wom_user.views.user_river_view owner_name %}" title="{{title_qualify}} River"><i class="icon-align-left"></i>Your river</a></dt>
 <dd>A streamlined view of the most recent news comming from your own selection of sources.</dd>
-<dt><a href="/u/{{owner_name}}/sieve" title="{{title_qualify}} Sieve"><i class="icon-filter"></i>Your sieve</a></dt>
+<dt><a href="{% url wom_user.views.user_river_sieve owner_name %}" title="{{title_qualify}} Sieve"><i class="icon-filter"></i>Your sieve</a></dt>
 <dd>An inbox-like view to help you filter the news and make sure you don't miss anything.</dd>
-<dt><a href="/u/{{owner_name}}/collection" title="{{title_qualify}} Collection"><i class="icon-bookmark"></i>Your collection</a></dt>
+<dt><a href="{% url wom_user.views.user_collection owner_name %}" title="{{title_qualify}} Collection"><i class="icon-bookmark"></i>Your collection</a></dt>
 <dd>All the links you've picked up from your river and from the web, in a word: your bookmarks :)</dd>
-<dt><a href="/u/{{owner_name}}/sources" title="{{title_qualify}} Sources"><i class="icon-book"></i>Your sources</a></dt>
+<dt><a href="{% url wom_user.views.user_river_sources owner_name %}" title="{{title_qualify}} Sources"><i class="icon-book"></i>Your sources</a></dt>
 <dd>A list of where you take your information from: the news sources to which you've suscribed as well as the sites referenced by your bookmarks.</dd>
 </dl>
 
@@ -41,7 +41,7 @@
   <input type="submit" value="Import bookmarks" class="btn" />
 </form>
 
-<p>You can also add bookmarks via the <a href="/u/{{owner_name}}/sieve" title="Your Sieve">sieve</a></p>
+<p>You can also add bookmarks via the <a href="{% url wom_user.views.user_river_sieve owner_name %}" title="Your Sieve">sieve</a></p>
 </div>
 <div class="span6">
 <h2>Subscribe to news sources</h2>

@@ -17,7 +17,7 @@ Add a bookmark
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form action="/u/{{visitor_name}}/collection/add/" method="post">
+<form action="{% url wom_user.views.user_collection_add visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}

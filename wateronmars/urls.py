@@ -11,17 +11,21 @@ urlpatterns = patterns('',
                        url(r'^accounts/profile/$', 'wom_user.views.user_profile'),
                        url(r'^u/', include('wom_user.urls')),
                        
+                       url(r'^static/(?P<path>.*)$',
+                           'django.views.static.serve',
+                           {'document_root': settings.STATIC_ROOT})
+                       )
+
+if not settings.USE_CELERY:
+  urlpatterns += patterns('',
                        # temporary hack to avoid depending too much on
                        # background tasks
                        url(r'^houston/we_ve_got_an_update_request/$',
                            'wom_user.views.request_for_update'),
                        url(r'^houston/we_ve_got_a_cleanup_request/$',
                            'wom_user.views.request_for_cleanup'),
-                       url(r'^static/(?P<path>.*)$',
-                           'django.views.static.serve',
-                           {'document_root': settings.STATIC_ROOT})
-                       )
-
+                        )
+  
 if not settings.DEMO:
   urlpatterns += patterns('',
                           url(r'^accounts/new/$',

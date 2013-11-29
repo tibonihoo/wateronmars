@@ -17,7 +17,7 @@ Stop subscriptions
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form action="/u/{{visitor_name}}/sources/remove/" method="post">
+<form action="{% url wom_user.views.user_river_source_remove visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}
