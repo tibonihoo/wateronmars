@@ -8,6 +8,10 @@
     <meta name="author" content="">
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <style>
+    .footer { text-align: center; line-height: 60%; margin-top: 3em; }
+    .footer ul li { display: inline; }
+    </style>
     {% block head_after_css %}
     {% endblock %}
   </head>
@@ -40,6 +44,15 @@
     </div>
     {% block body_below_nav %}
     {% endblock %}
+
+    <div class="footer">
+      <div class="container">
+        <p>Code licensed under <a href="http://www.gnu.org/licenses/agpl-3.0.html" target="_blank">GNU Affero GPL v3.0</a>, and available at <a href="">TODO</a>.</p>
+        <p>Icons by <a href="http://glyphicons.com">Glyphicons Free</a> set and other artworks licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
+        <p>WaterOnMars is a project initiated by <a href="http://tibonihoo.net">Thibauld Nion</a>.</p>
+      </div>
+    </div>
+
   </body>   
   {% block after_body %}
   {% endblock %}
