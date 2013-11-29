@@ -12,12 +12,12 @@ User authentication
     {
       height: 2em;
     }
+    .container-fluid {
+      margin-top: 40px;
+    }
   </style>
 {% endblock %}
 
-{% block nav_items %}
-<li><a href="#"><strong>User authentication</strong></a></li>
-{% endblock %}
 
 {% block body_below_nav %}  
 {% if form.errors %}
@@ -25,6 +25,8 @@ User authentication
   <p>Your username and password didn't match. Please try again.</p>
 </div>
 {% endif %}
+<div class="container-fluid">
+  <h1>User authentication</h1>
 <form class="form-horizontal" 
       method="post" action="{% url django.contrib.auth.views.login %}">
   {% csrf_token %}
@@ -47,4 +49,5 @@ User authentication
     </div>
   </div>
 </form>
+</div>
 {% endblock %}

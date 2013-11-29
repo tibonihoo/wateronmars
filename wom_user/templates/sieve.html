@@ -31,11 +31,9 @@ prepareKeyBindings();
 </script>
 {% endblock %}
 
-{% block head_notification %}  
-{# Error messages #}
-<li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-white"></i></a>
-<a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Bookmarking failed"><i class="icon-warning-sign icon-white"></i></a>
-</li>
+{% block head_notification %}{# Error messages #}
+<li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-white"></i></a></li>
+<li><a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Bookmarking failed"><i class="icon-warning-sign icon-white"></i></a></li>
 {% endblock %}
 
 {% block content %}

@@ -14,6 +14,11 @@ MANAGERS = ADMINS
 # blacklisting some user-agents)
 USER_AGENT = "wateronmars"
 
+# Login URL
+# WARNING: please check that the url mapping correctly maps the login
+# view to this login url.
+LOGIN_URL = "/accounts/login/"
+
 try:
   import djcelery  
   djcelery.setup_loader()

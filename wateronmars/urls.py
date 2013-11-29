@@ -7,7 +7,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
                        url(r'^$', 'wom_user.views.home', name='home'),
-                       url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
+                       url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
+                       url(r'^accounts/logout/$', 'wom_user.views.user_logout'),
                        url(r'^accounts/profile/$', 'wom_user.views.user_profile'),
                        url(r'^u/(?P<owner_name>[^/]*)/sources/opml/$', 'wom_user.views.user_upload_opml'),
                        url(r'^u/(?P<owner_name>[^/]*)/collection/$', 'wom_user.views.user_collection'),

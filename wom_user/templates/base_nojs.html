@@ -8,26 +8,39 @@
     <meta name="author" content="">
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-    <style>
-      /* 60px to make the container go all the way to the bottom of the topbar */
-      body { padding-top: 60px;}
-    </style>
     {% block head_after_css %}
     {% endblock %}
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
-          <a class="brand" href="/" accesskey="h">Water On Mars</a>
+        <a class="brand" href="{% url wom_user.views.home %}" accesskey="h">Water On Mars</a>
+        <div class="container">
+          <a class="btn btn-navbar collapsed" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <ul class="nav">
+            {% if visitor_name %}
+            <li><a href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River" accesskey="r"><i class="icon-align-left icon-white"></i></a></li>
+            <li><a href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve" accesskey="f"><i class="icon-filter icon-white"></i></a></li>
+            <li><a href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection" accesskey="c"><i class="icon-bookmark icon-white"></i></a></li>
+            <li><a href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources" accesskey="s"><i class="icon-book icon-white"></i></a></li>
+            {% endif %}
+          </ul>
+          <div style="height: 0px;" class="nav-collapse navbar-responsive-collapse collapse">
             <ul class="nav">
-              {% block nav_items %}
-              {% endblock %}
+            {% block nav_items %}
+            {% endblock %}
             </ul>
+          </div>
+        </div>
       </div>
     </div>
     {% block body_below_nav %}
     {% endblock %}
-  </body>    
+  </body>   
   {% block after_body %}
   {% endblock %}
 </html>

@@ -26,6 +26,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.auth import logout
 
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
@@ -45,6 +46,7 @@ from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
 from wom_user.settings import NEWS_TIME_THRESHOLD
 from wom_user.settings import MAX_ITEMS_PER_PAGE
+
 
 
 def check_and_set_owner(func):
@@ -83,7 +85,7 @@ def loggedin_and_owner_required(func):
   # TODO when not logged in send a 401 authentication requested and
   # implement corresponding template (at least send a 401 for non-GET
   # requests !)
-  @login_required(login_url='/accounts/login/')
+  @login_required(login_url=settings.LOGIN_URL)
   @check_and_set_owner
   def _loggedin_and_owner_required(request, owner_name, *args, **kwargs):
     if request.user != request.owner_user:
@@ -180,7 +182,7 @@ class CustomErrorList(ErrorList):
       % ''.join([ unicode(e) for e in self])
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url=settings.LOGIN_URL)
 @csrf_protect
 def user_creation(request):
   if not request.user.is_staff:
@@ -189,7 +191,8 @@ def user_creation(request):
     form = UserProfileCreationForm(request.POST, error_class=CustomErrorList)
     if form.is_valid():
       form.save()
-      return HttpResponseRedirect('/accounts/profile')
+      return HttpResponseRedirect(reverse('wom_user.views.user_profile',
+                                          args=(request.username,)))
   elif request.method == 'GET':
     form = UserProfileCreationForm(error_class=CustomErrorList)
   else:
@@ -199,7 +202,7 @@ def user_creation(request):
                             context_instance=RequestContext(request))
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url=settings.LOGIN_URL)
 @csrf_protect
 def user_profile(request):
   d =  add_base_template_context_data(
@@ -213,6 +216,10 @@ def user_profile(request):
   return render_to_response('profile.html', d, context_instance=RequestContext(request))
 
 
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("wom_user.views.home"))
+    
 def handle_uploaded_opml(opmlUploadedFile,user):
   if opmlUploadedFile.name.endswith(".opml") \
      or opmlUploadedFile.name.endswith(".xml"):
@@ -233,7 +240,8 @@ def user_upload_opml(request,owner_name):
                               error_class=CustomErrorList)
     if form.is_valid():
       handle_uploaded_opml(request.FILES['opml_file'],user=request.user)
-      return HttpResponseRedirect('/u/%s/sources' % request.user.username)
+      return HttpResponseRedirect(reverse("wom_user.views.user_river_sources",
+                                          args=(request.user.username,)))
   else:
     form = OPMLFileUploadForm(error_class=CustomErrorList)
   d = add_base_template_context_data({'form': form},
@@ -266,7 +274,8 @@ def user_upload_nsbmk(request,owner_name):
                                     error_class=CustomErrorList)
     if form.is_valid():
       handle_uploaded_nsbmk(request.FILES['bookmarks_file'],user=request.user)
-      return HttpResponseRedirect('/u/%s/collection' % request.user.username)
+      return HttpResponseRedirect(reverse("wom_user.views.user_collection",
+                                          args=(request.user.username,)))
   else:
     form = NSBookmarkFileUploadForm(error_class=CustomErrorList)
   d = add_base_template_context_data({'form': form},
@@ -302,7 +311,8 @@ def user_river_source_add(request,owner_name):
                                 error_class=CustomErrorList)
   if src_info and form.is_valid():
     form.save()
-    return HttpResponseRedirect('/u/%s/sources/' % request.user.username)
+    return HttpResponseRedirect(reverse('wom_user.views.user_river_sources',
+                                        args=(request.user.username,)))
   d = add_base_template_context_data({'form': form},
                                      request.user.username,
                                      request.user.username)
@@ -326,9 +336,11 @@ def user_river_source_remove(request,owner_name):
   form = CreateUserSourceRemovalForm(request.user, src_info, error_class=CustomErrorList)
   if src_info and form.is_valid():
     form.save()
-    return HttpResponseRedirect('/u/%s/sources/' % request.user.username)
+    return HttpResponseRedirect(reverse('wom_user.views.user_river_sources',
+                                        args=(request.user.username,)))
   d = add_base_template_context_data({'form': form},request.user.username,request.user.username)
-  return render_to_response('source_removal.html',d, context_instance=RequestContext(request))
+  return render_to_response('source_removal.html',d,
+                            context_instance=RequestContext(request))
 
 
 @loggedin_and_owner_required
@@ -350,9 +362,11 @@ def user_collection_add(request,owner_name):
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
   if form.is_valid():
     form.save()
-    return HttpResponseRedirect('/u/%s/collection' % request.user.username)
+    return HttpResponseRedirect(reverse('wom_user.views.user_collection',
+                                        args=(request.user.username,)))
   d = add_base_template_context_data({'form': form},request.user.username,request.user.username)
-  return render_to_response('bookmark_addition.html',d, context_instance=RequestContext(request))
+  return render_to_response('bookmark_addition.html',d,
+                            context_instance=RequestContext(request))
   
   
 @loggedin_and_owner_required
@@ -371,9 +385,8 @@ def post_to_user_collection(request,owner_name):
     return HttpResponseForbidden("Bookmark addition is not possible in DEMO mode.")
   try:
     bmk_info = simplejson.loads(request.body)
-  except Exception,e:
+  except Exception:
     bmk_info = {}
-    print e
   if not u"url" in bmk_info:
     return HttpResponseBadRequest("Only a JSON formatted request with a 'url' parameter is accepted.")
   form = UserBookmarkAdditionForm(request.user, bmk_info)
@@ -462,10 +475,13 @@ def generate_user_sieve(request,owner_name):
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
       'num_unread_references': num_unread,
-      'user_collection_url': "/u/%s/collection/" % request.user.username,
-      'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+      'user_collection_url': reverse("wom_user.views.user_collection",
+                                     args=(request.user.username,)),
+      'source_add_bookmarklet': generate_source_add_bookmarklet(
+        request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, request.user.username)
-  return render_to_response('sieve.html',d, context_instance=RequestContext(request))
+  return render_to_response('sieve.html',d,
+                            context_instance=RequestContext(request))
 
 
 def apply_to_user_sieve(request,owner_name):
