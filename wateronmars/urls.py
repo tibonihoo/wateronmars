@@ -9,8 +9,16 @@ urlpatterns = patterns('',
                        url(r'^$', 'wom_user.views.home', name='home'),
                        url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
                        url(r'^accounts/profile/$', 'wom_user.views.user_profile'),
-                       url(r'^u/', include('wom_user.urls')),
-                       
+                       url(r'^u/(?P<owner_name>[^/]*)/sources/opml/$', 'wom_user.views.user_upload_opml'),
+                       url(r'^u/(?P<owner_name>[^/]*)/collection/$', 'wom_user.views.user_collection'),
+                       url(r'^u/(?P<owner_name>[^/]*)/collection/nsbmk/$', 'wom_user.views.user_upload_nsbmk'),
+                       url(r'^u/(?P<owner_name>[^/]*)/sources/$', 'wom_user.views.user_river_sources'),
+                       url(r'^u/(?P<owner_name>[^/]*)/sources/add/$', 'wom_user.views.user_river_source_add'),
+                       url(r'^u/(?P<owner_name>[^/]*)/sources/remove/$', 'wom_user.views.user_river_source_remove'),
+                       url(r'^u/(?P<owner_name>[^/]*)/river/$', 'wom_user.views.user_river_view'),
+                       url(r'^u/(?P<owner_name>[^/]*)/sieve/$', 'wom_user.views.user_river_sieve'),
+                       url(r'^u/(?P<owner_name>[^/]*)/collection/add/$','wom_user.views.user_collection_add'),
+                       # access to static files
                        url(r'^static/(?P<path>.*)$',
                            'django.views.static.serve',
                            {'document_root': settings.STATIC_ROOT})
