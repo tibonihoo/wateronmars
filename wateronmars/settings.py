@@ -1,6 +1,7 @@
 # Django settings for wateronmars project.
 
 import os
+APP_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 ADMINS = (
@@ -108,21 +109,17 @@ STATIC_ROOT = ""
 STATIC_URL = '/static/'
 
 # Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    #"/home/thibauld/Development/wateronmars/wom-experiment/static",
-  os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir,"static"),
-  )
-
+# Put strings here, like "/home/html/static" or "C:/www/django/static".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
+# "/home/thibauld/Development/wateronmars/wom-experiment/static"
+STATICFILES_DIRS = []
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
