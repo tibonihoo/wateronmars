@@ -227,7 +227,7 @@ class UserProfileViewTest(TestCase):
     self.assertTrue(self.client.login(username="A",password="pA"))
     resp = self.client.get(reverse("wom_user.views.user_profile"))
     self.assertEqual(200,resp.status_code)
-    self.assertIn("wom_user/profile.html",[t.name for t in resp.templates])
+    self.assertIn("profile.html",[t.name for t in resp.templates])
     self.assertIn("username", resp.context)
     self.assertEqual("A", resp.context["username"])
     self.assertIn("opml_form", resp.context)
@@ -544,7 +544,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
       reverse("wom_user.views.user_collection",
           kwargs={"owner_name":"uA"}))
     self.assertEqual(200,resp.status_code)
-    self.assertIn("wom_user/collection.html_dt",
+    self.assertIn("collection.html",
             [t.name for t in resp.templates])
     self.assertIn("owner_name", resp.context)
     self.assertEqual("uA", resp.context["owner_name"])
@@ -569,7 +569,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
       reverse("wom_user.views.user_collection",
           kwargs={"owner_name":"uB"}))
     self.assertEqual(200,resp.status_code)
-    self.assertIn("wom_user/collection.html_dt",
+    self.assertIn("collection.html",
             [t.name for t in resp.templates])
     self.assertIn(u"user_bookmarks", resp.context)
     self.assertIn(u"num_bookmarks", resp.context)
@@ -585,7 +585,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
       reverse("wom_user.views.user_collection",
           kwargs={"owner_name":"uA"}))
     self.assertEqual(200,resp.status_code)
-    self.assertIn("wom_user/collection.html_dt",
+    self.assertIn("collection.html",
             [t.name for t in resp.templates])
     self.assertIn(u"user_bookmarks", resp.context)
     self.assertIn(u"num_bookmarks", resp.context)
@@ -958,7 +958,7 @@ class UserRiverViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_view",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
-        self.assertIn("wom_river/river.html_dt",[t.name for t in resp.templates])
+        self.assertIn("river.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
         self.assertIn("news_items", resp.context)
         items = resp.context["news_items"]
@@ -978,7 +978,7 @@ class UserRiverViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_view",
                                        kwargs={"owner_name":"uB"}))
         self.assertEqual(200,resp.status_code)
-        self.assertIn("wom_river/river.html_dt",[t.name for t in resp.templates])
+        self.assertIn("river.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
         self.assertIn("news_items", resp.context)
         items = resp.context["news_items"]
@@ -996,7 +996,7 @@ class UserRiverViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_view",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
-        self.assertIn("wom_river/river.html_dt",[t.name for t in resp.templates])
+        self.assertIn("river.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
         self.assertIn("news_items", resp.context)
         items = resp.context["news_items"]
@@ -1070,7 +1070,7 @@ class UserSieveViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
-        self.assertIn("wom_river/sieve.html_dt",[t.name for t in resp.templates])
+        self.assertIn("sieve.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
         self.assertIn("user_collection_url", resp.context)
         self.assertIn("oldest_unread_references", resp.context)
@@ -1259,7 +1259,7 @@ class UserSourcesViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sources",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
-        self.assertIn("wom_river/river_sources.html_dt",[t.name for t in resp.templates])
+        self.assertIn("sources.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
         self.assertIn("web_feeds", resp.context)
         self.assertIn("other_sources", resp.context)
@@ -1284,7 +1284,7 @@ class UserSourcesViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sources",
                                        kwargs={"owner_name":"uB"}))
         self.assertEqual(200,resp.status_code)
-        self.assertIn("wom_river/river_sources.html_dt",[t.name for t in resp.templates])
+        self.assertIn("sources.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
         self.assertIn("web_feeds", resp.context)
         self.assertIn("other_sources", resp.context)
@@ -1311,7 +1311,7 @@ class UserSourcesViewTest(TestCase):
         resp = self.client.get(reverse("wom_user.views.user_river_sources",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
-        self.assertIn("wom_river/river_sources.html_dt",[t.name for t in resp.templates])
+        self.assertIn("sources.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
         self.assertIn("web_feeds", resp.context)
         self.assertIn("other_sources", resp.context)

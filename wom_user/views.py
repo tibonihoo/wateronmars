@@ -138,7 +138,7 @@ def home(request):
   d = add_base_template_context_data({},
                                      request.user.username,
                                      request.user.username)
-  return render_to_response('wateronmars/home.html',d,
+  return render_to_response('home.html',d,
                             context_instance=RequestContext(request))
 
 
@@ -194,7 +194,7 @@ def user_creation(request):
     form = UserProfileCreationForm(error_class=CustomErrorList)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
-  return render_to_response('registration/user_creation.html',
+  return render_to_response('user_creation.html',
                             {'form': form},
                             context_instance=RequestContext(request))
 
@@ -210,7 +210,7 @@ def user_profile(request):
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       },request.user.username,request.user.username)
-  return render_to_response('wom_user/profile.html', d, context_instance=RequestContext(request))
+  return render_to_response('profile.html', d, context_instance=RequestContext(request))
 
 
 def handle_uploaded_opml(opmlUploadedFile,user):
@@ -239,7 +239,7 @@ def user_upload_opml(request,owner_name):
   d = add_base_template_context_data({'form': form},
                                      request.user.username,
                                      request.user.username)
-  return render_to_response('wom_user/opml_upload.html',d,
+  return render_to_response('opml_upload.html',d,
                             context_instance=RequestContext(request))
 
 
@@ -272,7 +272,7 @@ def user_upload_nsbmk(request,owner_name):
   d = add_base_template_context_data({'form': form},
                                      request.user.username,
                                      request.user.username)
-  return render_to_response('wom_user/nsbmk_upload.html',d,
+  return render_to_response('nsbmk_upload.html',d,
                             context_instance=RequestContext(request))
 
 
@@ -306,7 +306,7 @@ def user_river_source_add(request,owner_name):
   d = add_base_template_context_data({'form': form},
                                      request.user.username,
                                      request.user.username)
-  return render_to_response('wom_user/source_addition.html',d,
+  return render_to_response('source_addition.html',d,
                             context_instance=RequestContext(request))
 
 
@@ -328,7 +328,7 @@ def user_river_source_remove(request,owner_name):
     form.save()
     return HttpResponseRedirect('/u/%s/sources/' % request.user.username)
   d = add_base_template_context_data({'form': form},request.user.username,request.user.username)
-  return render_to_response('wom_user/source_removal.html',d, context_instance=RequestContext(request))
+  return render_to_response('source_removal.html',d, context_instance=RequestContext(request))
 
 
 @loggedin_and_owner_required
@@ -352,7 +352,7 @@ def user_collection_add(request,owner_name):
     form.save()
     return HttpResponseRedirect('/u/%s/collection' % request.user.username)
   d = add_base_template_context_data({'form': form},request.user.username,request.user.username)
-  return render_to_response('wom_user/bookmark_addition.html',d, context_instance=RequestContext(request))
+  return render_to_response('bookmark_addition.html',d, context_instance=RequestContext(request))
   
   
 @loggedin_and_owner_required
@@ -414,7 +414,7 @@ def get_user_collection(request,owner_name):
       'collection_url' : request.build_absolute_uri(request.path).rstrip("/"),
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
-  return render_to_response('wom_user/collection.html_dt',d,
+  return render_to_response('collection.html',d,
                             context_instance=RequestContext(request))
 
 
@@ -447,7 +447,7 @@ def user_river_view(request,owner_name):
     'news_items': news_items,
     'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
   }, request.user.username, owner_name)
-  return render_to_response('wom_river/river.html_dt',d, context_instance=RequestContext(request))
+  return render_to_response('river.html',d, context_instance=RequestContext(request))
 
 
 def generate_user_sieve(request,owner_name):
@@ -465,7 +465,7 @@ def generate_user_sieve(request,owner_name):
       'user_collection_url': "/u/%s/collection/" % request.user.username,
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, request.user.username)
-  return render_to_response('wom_river/sieve.html_dt',d, context_instance=RequestContext(request))
+  return render_to_response('sieve.html',d, context_instance=RequestContext(request))
 
 
 def apply_to_user_sieve(request,owner_name):
@@ -529,7 +529,7 @@ def user_river_sources(request,owner_name):
         'other_sources': other_sources,
         'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
         }, request.user.username, owner_name)
-    return render_to_response('wom_river/river_sources.html_dt',d, context_instance=RequestContext(request))
+    return render_to_response('sources.html',d, context_instance=RequestContext(request))
   elif request.user != request.owner_user:
       return HttpResponseForbidden()
   elif request.method == 'POST':
