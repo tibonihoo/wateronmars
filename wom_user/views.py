@@ -419,19 +419,22 @@ def get_user_collection(request,owner_name):
   except (PageNotAnInteger,EmptyPage):
     # If page is not an integer or out of range, deliver first page.
     bookmarks = paginator.page(1)
-  # # 'artifically' add the tag names to the bookmark instances
-  # for b in bookmarks:
-  #   b.tag_names = get_item_tag_names(request.owner_user,b.reference)
-  # TODO preload sources ?
   d = add_base_template_context_data(
     {
       'user_bookmarks': bookmarks,
       'num_bookmarks': bookmarks.count,
       'collection_url' : request.build_absolute_uri(request.path).rstrip("/"),
-      'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+      'collection_add_bookmarklet': generate_collection_add_bookmarklet(
+        request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
-  return render_to_response('collection.html',d,
-                            context_instance=RequestContext(request))
+  expectedFormat = request.GET.get("format","html")
+  if expectedFormat.lower()=="ns-bmk-list":
+    return render_to_response('collection_nsbmk.html',d,
+                              context_instance=RequestContext(request),
+                              mimetype="text/html")
+  else:
+    return render_to_response('collection.html',d,
+                              context_instance=RequestContext(request))
 
 
 def user_collection(request,owner_name):
@@ -539,12 +542,15 @@ def user_river_sieve(request,owner_name):
 def user_river_sources(request,owner_name):
   if request.method == 'GET':
     owner_profile = request.owner_user.userprofile
-    web_feeds = owner_profile.web_feeds.all().order_by('source__title').select_related("source")
+    web_feeds = owner_profile.web_feeds.all()\
+                                       .order_by('source__title')\
+                                       .select_related("source")
     if request.user == request.owner_user:
       other_sources = owner_profile.sources.all()
     else:
       other_sources = owner_profile.public_sources.all()
-    other_sources = other_sources.exclude(webfeed__userprofile=owner_profile).order_by("title")
+    other_sources = other_sources.exclude(webfeed__userprofile=owner_profile)\
+                                 .order_by("title")
     def add_tag_to_feed(feed):
       tag_names = get_item_tag_names(request.owner_user,feed)
       feed.main_tag_name = tag_names[0] if tag_names else ""
@@ -555,7 +561,8 @@ def user_river_sources(request,owner_name):
         'tagged_web_feeds': web_feeds,
         'user_tags': get_user_tags(request.owner_user), 
         'other_sources': other_sources,
-        'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+        'source_add_bookmarklet': generate_source_add_bookmarklet(
+          request.build_absolute_uri("/"),request.user.username),
         }, request.user.username, owner_name)
     expectedFormat = request.GET.get("format","html")
     if expectedFormat.lower()=="opml":

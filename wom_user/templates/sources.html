@@ -22,7 +22,7 @@ jQuery.ias({
 <p><i class="icon-book"></i><strong>{{ title_qualify }} sources</strong></p>
 <ul class="unstyled">
 {% if tagged_web_feeds %}
-  <li>Web Feeds (<a href="?format=opml">export as OPML</a>)
+  <li>Web Feeds
     <ul class="unstyled">
       {% for feed in tagged_web_feeds %}
       <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
