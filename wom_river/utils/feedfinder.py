@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# TODO: merge with https://github.com/dfm/feedfinder2
 
 """feedfinder: Find the Web feed for a Web page
 http://www.aaronsw.com/2002/feedfinder/
