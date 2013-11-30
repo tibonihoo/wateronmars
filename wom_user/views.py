@@ -215,7 +215,8 @@ def user_profile(request):
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       },request.user.username,request.user.username)
-  return render_to_response('profile.html', d, context_instance=RequestContext(request))
+  return render_to_response('profile.html', d,
+                            context_instance=RequestContext(request))
 
 
 def user_logout(request):
@@ -462,7 +463,8 @@ def user_river_view(request,owner_name):
     'news_items': news_items,
     'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
   }, request.user.username, owner_name)
-  return render_to_response('river.html',d, context_instance=RequestContext(request))
+  return render_to_response('river.html',d,
+                            context_instance=RequestContext(request))
 
 
 def generate_user_sieve(request,owner_name):
@@ -557,9 +559,12 @@ def user_river_sources(request,owner_name):
         }, request.user.username, owner_name)
     expectedFormat = request.GET.get("format","html")
     if expectedFormat.lower()=="opml":
-      return render_to_response('sources_opml.xml',d, context_instance=RequestContext(request))
+      return render_to_response('sources_opml.xml',d,
+                                context_instance=RequestContext(request),
+                                mimetype="text/xml")
     else:
-      return render_to_response('sources.html',d, context_instance=RequestContext(request))
+      return render_to_response('sources.html',d,
+                                context_instance=RequestContext(request))
   elif request.user != request.owner_user:
       return HttpResponseForbidden()
   elif request.method == 'POST':
