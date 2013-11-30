@@ -7,6 +7,8 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from wom_classification.models import get_item_tag_names
+from wom_classification.models import get_user_tags
 from wom_pebbles.tasks import delete_old_references
 from wom_river.tasks import collect_news_from_feeds
 
@@ -530,6 +532,7 @@ def user_river_sieve(request,owner_name):
     return HttpResponseNotAllowed(['GET','POST'])
 
 
+  
 @check_and_set_owner
 def user_river_sources(request,owner_name):
   if request.method == 'GET':
@@ -540,12 +543,23 @@ def user_river_sources(request,owner_name):
     else:
       other_sources = owner_profile.public_sources.all()
     other_sources = other_sources.exclude(webfeed__userprofile=owner_profile).order_by("title")
+    def add_tag_to_feed(feed):
+      tag_names = get_item_tag_names(request.owner_user,feed)
+      feed.main_tag_name = tag_names[0] if tag_names else ""
+      return feed
+    web_feeds = [add_tag_to_feed(f) for f in web_feeds.iterator()]
+    web_feeds.sort(key=lambda f:f.main_tag_name)
     d = add_base_template_context_data({
-        'web_feeds': web_feeds,
+        'tagged_web_feeds': web_feeds,
+        'user_tags': get_user_tags(request.owner_user), 
         'other_sources': other_sources,
         'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
         }, request.user.username, owner_name)
-    return render_to_response('sources.html',d, context_instance=RequestContext(request))
+    expectedFormat = request.GET.get("format","html")
+    if expectedFormat.lower()=="opml":
+      return render_to_response('sources_opml.xml',d, context_instance=RequestContext(request))
+    else:
+      return render_to_response('sources.html',d, context_instance=RequestContext(request))
   elif request.user != request.owner_user:
       return HttpResponseForbidden()
   elif request.method == 'POST':

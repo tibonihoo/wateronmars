@@ -21,10 +21,10 @@ jQuery.ias({
 {% block content %}
 <p><i class="icon-book"></i><strong>{{ title_qualify }} sources</strong></p>
 <ul class="unstyled">
-{% if web_feeds %}
-  <li>Web Feeds
+{% if tagged_web_feeds %}
+  <li>Web Feeds (<a href="?format=opml">export as OPML</a>)
     <ul class="unstyled">
-      {% for feed in web_feeds %}
+      {% for feed in tagged_web_feeds %}
       <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
           <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
@@ -47,7 +47,7 @@ jQuery.ias({
   </li>
 </ul>
 {% else %}
-  {% if web_feeds %}
+  {% if tagged_web_feeds %}
   <div class="alert alert-block">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     <p>No source apart from the feed subscriptions.</p>

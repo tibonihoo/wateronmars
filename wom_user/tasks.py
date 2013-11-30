@@ -105,7 +105,7 @@ def import_user_feedsources_from_opml(user,opml_txt):
       logger.error("Could not import some source tags with too long names (%s>%s)"\
                    % (",".join(str(len(t)) for t in invalid_tags),
                       TAG_NAME_MAX_LENGTH))
-    classif_data_to_save.append(set_item_tag_names(user,feed,tags))
+    classif_data_to_save.append(set_item_tag_names(user,feed,valid_tags))
   with transaction.commit_on_success():
     for cd in classif_data_to_save:
       cd.save()

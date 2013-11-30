@@ -82,7 +82,7 @@ class ImportFeedSourcesFromOPMLTaskTest(TestCase):
     <outline text="Mouf"
          title="Mouf" type="rss"
          xmlUrl="http://mouf/rss.xml" htmlUrl="http://mouf"/>
-    <outline text="Dave's LifeLiner" title="Dave's LifeLiner"
+    <outline text="Dave&#39;s LifeLiner" title="Dave&#39;s LifeLiner"
          type="rss" xmlUrl="http://www.scripting.com/rss.xml" htmlUrl="http://scripting.com/"/>
   </outline>
   <outline title="Culture" text="Culture">
@@ -98,11 +98,20 @@ class ImportFeedSourcesFromOPMLTaskTest(TestCase):
     self.assertEqual(5,WebFeed.objects.count())
     self.assertIn("http://stallman.org/rss/rss.xml",
                   [s.xmlURL for s in WebFeed.objects.all()])
+    self.assertEqual("Richard Stallman's Political Notes",
+                     WebFeed.objects.get(
+                       xmlURL="http://stallman.org/rss/rss.xml").source.title)
     self.assertIn("http://www.scripting.com/rss.xml",
                   [s.xmlURL for s in WebFeed.objects.all()])
+    self.assertEqual("Dave's LifeLiner",
+                     WebFeed.objects.get(
+                       xmlURL="http://www.scripting.com/rss.xml").source.title)
     self.assertIn("http://www.openculture.com/feed",
                   [s.xmlURL for s in WebFeed.objects.all()])
-  
+    self.assertEqual("Open Culture",
+                     WebFeed.objects.get(
+                       xmlURL="http://www.openculture.com/feed").source.title)
+    
   def test_check_sources_correctly_returned(self):
     self.assertEqual(4,len(self.feeds_and_tags.keys()))
     returned_xmlURLs = [s.xmlURL for s in self.feeds_and_tags.keys()]

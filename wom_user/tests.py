@@ -735,11 +735,11 @@ class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
     self.assertIn("visitor_name",resp.context)
     self.assertIn("source_add_bookmarklet",resp.context)
     self.assertIn("owner_name",resp.context)
-    self.assertIn("web_feeds",resp.context)
+    self.assertIn("tagged_web_feeds",resp.context)
     self.assertIn("other_sources",resp.context)
     self.assertEqual("uA",resp.context["owner_name"])
-    self.assertEqual(1,len(resp.context["web_feeds"]))
-    self.assertEqual("http://barf",resp.context["web_feeds"][0].source.url)
+    self.assertEqual(1,len(resp.context["tagged_web_feeds"]))
+    self.assertEqual("http://barf",resp.context["tagged_web_feeds"][0].source.url)
     self.assertEqual(1,len(resp.context["other_sources"]))
     self.assertEqual("http://mouf",resp.context["other_sources"][0].url)
 
@@ -861,7 +861,7 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
     <outline text="Mouf"
          title="Mouf" type="rss"
          xmlUrl="http://mouf/rss.xml" htmlUrl="http://mouf"/>
-    <outline text="Dave's LifeLiner" title="Dave's LifeLiner"
+    <outline text="Dave&#39;s LifeLiner" title="Dave&#39;s LifeLiner"
          type="rss" xmlUrl="http://www.scripting.com/rss.xml" htmlUrl="http://scripting.com/"/>
   </outline>
   <outline title="Culture" text="Culture">
@@ -1261,18 +1261,20 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("sources.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("web_feeds", resp.context)
+        self.assertIn("tagged_web_feeds", resp.context)
         self.assertIn("other_sources", resp.context)
         items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
         self.assertEqual(sourceNames,set((1,3)))
         sourceTypes = set([s.title[0] for s in items])
         self.assertEqual(set(("s",)),sourceTypes)
-        feed_items = resp.context["web_feeds"]
+        feed_items = resp.context["tagged_web_feeds"]
         feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((1,3)))
         feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
+        feedTags = set([s.main_tag_name for s in feed_items])
+        self.assertEqual(set(("",)),feedTags)
         
     def test_get_html_for_non_owner_logged_user_returns_public_source_only(self):
         """
@@ -1286,7 +1288,7 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("sources.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("web_feeds", resp.context)
+        self.assertIn("tagged_web_feeds", resp.context)
         self.assertIn("other_sources", resp.context)
         items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
@@ -1297,7 +1299,7 @@ class UserSourcesViewTest(TestCase):
         # visible (NB: in practice the app guarantees that a source
         # associated to a feed is always public which is not the case
         # here with s3)
-        feed_items = resp.context["web_feeds"]
+        feed_items = resp.context["tagged_web_feeds"]
         feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((2,3)))
         feedTypes = set([s.source.title[0] for s in feed_items])
@@ -1313,7 +1315,7 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(200,resp.status_code)
         self.assertIn("sources.html",[t.name for t in resp.templates])
         self.assertIn("source_add_bookmarklet", resp.context)
-        self.assertIn("web_feeds", resp.context)
+        self.assertIn("tagged_web_feeds", resp.context)
         self.assertIn("other_sources", resp.context)
         items = resp.context["other_sources"]
         sourceNames = set([int(s.title[1]) for s in items])
@@ -1324,12 +1326,32 @@ class UserSourcesViewTest(TestCase):
         # visible (NB: in practice the app guarantees that a source
         # associated to a feed is always public which is not the case
         # here with s3)
-        feed_items = resp.context["web_feeds"]
+        feed_items = resp.context["tagged_web_feeds"]
         feedNames = set([int(s.source.title[1]) for s in feed_items])
         self.assertEqual(feedNames,set((1,3)))
         feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
         
+    def test_get_opml_for_anonymous_returns_all_sources(self):
+        """
+        Make sure an anonymous user can see users' sources as OPML.
+        """
+        # request uA's river
+        resp = self.client.get(reverse("wom_user.views.user_river_sources",
+                                       kwargs={"owner_name":"uA"})+"?format=opml")
+        self.assertEqual(200,resp.status_code)
+        self.assertIn("sources_opml.xml",[t.name for t in resp.templates])
+        self.assertIn("tagged_web_feeds", resp.context)
+        # All feeds being systematically public they should all be
+        # visible (NB: in practice the app guarantees that a source
+        # associated to a feed is always public which is not the case
+        # here with s3)
+        feed_items = resp.context["tagged_web_feeds"]
+        feedNames = set([int(s.source.title[1]) for s in feed_items])
+        self.assertEqual(feedNames,set((1,3)))
+        feedTypes = set([s.source.title[0] for s in feed_items])
+        self.assertEqual(set(("f",)),feedTypes)
+
 
 class ReferenceUserStatusModelTest(TestCase):
 

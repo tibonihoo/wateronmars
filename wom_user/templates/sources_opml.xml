@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opml version="1.0">
   <head>
-    <title>{{ owner_name }}'s sources in WaterOnMars</title>
+    <title>WaterOnMars sources for {{ owner_name }}.</title>
   </head>
   <body>
-{% regroup tagged_web_feeds by get_tag_names.get as tag_groups %}
-{{ tag_groups }}
+{% regroup tagged_web_feeds by main_tag_name as tag_groups %}
 {% for tagged_items in tag_groups %}
-{{ tagged_items }}
-{% for item in tagged_items %}
-{% if forloop.first %} 
-  <outline title="{{ item.get_tag_names.get }}" text="{{ item.get_tag_names.get }}">
-{% endif %}
-    <outline text="{{ item.feed.source.title }}" title="{{ item.feed.source.title }}" 
-             xmlUrl="{{ item.feed.xmlURL }}" htmlUrl="{{ item.feed.source.url }}" />
-{% if forloop.last %} 
+  <outline title="{{ tagged_items.grouper }}" text="{{ tagged_items.grouper }}">
+  {% for feed in tagged_items.list %}
+    <outline text="{{ feed.source.title }}" title="{{ feed.source.title }}" 
+              xmlUrl="{{ feed.xmlURL }}" htmlUrl="{{ feed.source.url }}" />
+  {% endfor %}
   </outline>
-{% endif %}
-{% endfor %}
 {% endfor %}
   </body>
 </opml>
-
