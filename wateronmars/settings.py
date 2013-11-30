@@ -66,12 +66,12 @@ DEMO = True
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-  
+
 # Database setup
 if DEPLOYMENT_PLATFORM == "heroku":
-  # use Herok's prostgres
+  # use Heroku's prostgres
   import dj_database_url
-  DATABASES = {'default': dj_database_url.config(default='postgres://localhost')}
+  DATABASES = {'default': dj_database_url.config()}
 else:
   # use a local sqlite
   DATABASES = {
