@@ -2,14 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Water on Mars | {% block title %}Untitled{% endblock %}</title>
+    <title>Water on Mars | {% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
     <style>
+    .navbar .nav > li > a { border-right: none; border-left: none; }
     a { color: #3465a4; }
+    .navbar .brand { margin-left: 0px; }
     .footer { text-align: center; line-height: 60%; margin-top: 3em; }
     .footer ul li { display: inline; }
     </style>
