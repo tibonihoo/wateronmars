@@ -412,7 +412,11 @@ def get_user_collection(request,owner_name):
                                   .select_related("reference").all()
   if request.user!=request.owner_user:
     bookmarks = bookmarks.filter(is_public=True)
-  paginator = Paginator(bookmarks, MAX_ITEMS_PER_PAGE)
+  expectedFormat = request.GET.get("format","html").lower()
+  if expectedFormat=="ns-bmk-list":
+    paginator = Paginator(bookmarks, bookmarks.count())
+  else:
+    paginator = Paginator(bookmarks, MAX_ITEMS_PER_PAGE)
   page = request.GET.get('page')
   try:
     bookmarks = paginator.page(page)
@@ -427,8 +431,7 @@ def get_user_collection(request,owner_name):
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(
         request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
-  expectedFormat = request.GET.get("format","html")
-  if expectedFormat.lower()=="ns-bmk-list":
+  if expectedFormat=="ns-bmk-list":
     return render_to_response('collection_nsbmk.html',d,
                               context_instance=RequestContext(request),
                               mimetype="text/html")
