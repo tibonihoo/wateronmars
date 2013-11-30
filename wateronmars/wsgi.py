@@ -37,11 +37,18 @@ import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wateronmars.settings")
 
+# Use Eldarion/Pinax's trick to get an entry point at startup
+# (see http://eldarion.com/blog/2013/02/14/entry-point-hook-django-projects/)
+import wateronmars.startup as startup
+startup.run()
+
+
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
+
 
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
