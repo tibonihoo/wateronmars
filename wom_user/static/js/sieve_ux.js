@@ -237,6 +237,7 @@ function markAsRead(refElement,refIdx) {
     refElement.addClass("read") 
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
     if (!gWaitingForServerAnswer) {
+      gWaitingForServerAnswer = true;
       var syncedReadURLS = gReadURLs.slice(0)
       gReadURLs = [];
       // we still upload the full *current* list of read items (if
@@ -246,7 +247,7 @@ function markAsRead(refElement,refIdx) {
         gNumUnread -= syncedReadURLS.length;
         document.getElementById("num_unread").textContent = gNumUnread.toString();
         hideWarning("server-sync-problem");
-        gWaitingForServerAnswer=true;});      
+        gWaitingForServerAnswer=false;});      
     }
   };   
 }
