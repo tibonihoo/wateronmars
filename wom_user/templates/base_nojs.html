@@ -15,6 +15,9 @@
     .navbar .brand { margin-left: 0px; }
     .footer { text-align: center; line-height: 60%; margin-top: 3em; }
     .footer ul li { display: inline; }
+    @media (min-width: 1200px) {
+      #below-nav { padding-top: 60px; }
+    }
     </style>
     {% block head_after_css %}
     {% endblock %}
@@ -46,9 +49,10 @@
         </div>
       </div>
     </div>
+    <div id="below-nav">
     {% block body_below_nav %}
     {% endblock %}
-
+    </div>
     <div class="footer">
       <div class="container">
         <p>Code licensed under <a href="http://www.gnu.org/licenses/agpl-3.0.html" target="_blank">GNU Affero GPL v3.0</a> and available on <a href="https://github.com/tibonihoo/wateronmars">GitHub</a>.</p>
