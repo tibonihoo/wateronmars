@@ -58,11 +58,12 @@
 
 <p>Import <em>several sources at once</em> by uploading an <a href="http://opml.org">OPML</a> file with the following form:</p>
 
-<form class="form-inline" 
+<form class="form-inline" enctype="multipart/form-data"
       method="post" action="{% url wom_user.views.user_upload_opml visitor_name %}">
   {% csrf_token %}
   <span class="input-small">{{ opml_form.opml_file }}</span>
   <input type="submit" value="Import sources" class="btn" />
+  {% endfor %}
 </form>
 </div>
 </div>
