@@ -19,18 +19,16 @@ OPML Import
 {% endif %}
 <form action="{% url wom_user.views.user_upload_opml visitor_name %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
-  {% for field in form %}
-  {% if field.errors %}
+  {% if form.opml_file.errors %}
   <div class="control-group error">
   {%  else %}
   <div class="control-group">
   {% endif %}  
     <span class="control-label">Select the OPML file to upload</span>
     <div class="controls">
-      {{ field }} {{ field.errors|safe }}
+      {{ form.opml_file }} {{ form.opml_file.errors|safe }}
     </div>
   </div>
-  {% endfor %}
   <div class="control-groups">
     <div class="controls">
     <input type="submit" value="Import these sources of news." class="btn" />
