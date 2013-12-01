@@ -25,7 +25,7 @@ APP_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 ADMINS = (
-    ('Thibauld Nion', 'thibauld@tibonihoo.net'),
+    # ('Your name', 'your@email'),
 )
 
 MANAGERS = ADMINS
