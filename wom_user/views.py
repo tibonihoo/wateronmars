@@ -212,7 +212,7 @@ def user_creation(request):
     if form.is_valid():
       form.save()
       return HttpResponseRedirect(reverse('wom_user.views.user_profile',
-                                          args=(request.username,)))
+                                          args=(request.user.username,)))
   elif request.method == 'GET':
     form = UserProfileCreationForm(error_class=CustomErrorList)
   else:
