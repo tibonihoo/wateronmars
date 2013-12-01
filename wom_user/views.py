@@ -240,7 +240,11 @@ def user_profile(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse("wom_user.views.home"))
-    
+
+def user_root(request,owner_name):
+  return HttpResponseRedirect(reverse("wom_user.views.user_river_view", args=(owner_name,)))
+
+
 def handle_uploaded_opml(opmlUploadedFile,user):
   if opmlUploadedFile.name.endswith(".opml") \
      or opmlUploadedFile.name.endswith(".xml"):
