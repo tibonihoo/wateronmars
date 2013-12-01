@@ -22,8 +22,14 @@
 
 
 {% if visitor_name == owner_name %}
-
 <div class="bs-docs-grid">
+{% if is_superuser %}
+<div class="row show-grid">
+  <div class="span6">
+  <p><a href="{% url wom_user.views.user_creation %}" class="btn">Create a new user</a></p>
+  </div>
+</div>
+{% endif %}
 <div class="row show-grid">
 <div class="span6">
 <h2>Add bookmarks</h2>

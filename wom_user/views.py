@@ -232,6 +232,7 @@ def user_profile(request):
       'nsbmk_form': NSBookmarkFileUploadForm(error_class=CustomErrorList),
       'collection_add_bookmarklet': generate_collection_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+      'is_superuser': request.user.is_superuser,
       },request.user.username,request.user.username)
   return render_to_response('profile.html', d,
                             context_instance=RequestContext(request))

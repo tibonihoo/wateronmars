@@ -44,7 +44,7 @@ urlpatterns = patterns('',
                        # access to static files
                        url(r'^static/(?P<path>.*)$',
                            'django.views.static.serve',
-                           {'document_root': settings.STATIC_ROOT})
+                           {'document_root': settings.STATIC_ROOT}),
                        )
 
 if not settings.USE_CELERY:
@@ -56,7 +56,7 @@ if not settings.USE_CELERY:
                        url(r'^houston/we_ve_got_a_cleanup_request/$',
                            'wom_user.views.request_for_cleanup'),
                         )
-  
+
 if not settings.DEMO:
   urlpatterns += patterns('',
                           url(r'^accounts/new/$',
