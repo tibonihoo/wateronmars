@@ -3,6 +3,8 @@ Water On Mars!
 
 *Where good old rivers (of news) have been dicovered (again).*
 
+[![Build Status](https://travis-ci.org/tibonihoo/wateronmars.png?branch=master)](https://travis-ci.org/tibonihoo/wateronmars)
+
 This project intends to provide a free (as in freedom) alternative to
 web news readers and bookmark collection site.
 
