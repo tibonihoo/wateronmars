@@ -94,6 +94,8 @@ def parse_netscape_bookmarks(bookmarkHTMFile):
       continue
     if line.rstrip() and not correct_doctype_found:
       raise ValueError("Couldn't find a correct DOCTYPE in the bookmark file (wrong format?)")
+    if not line.rstrip():
+      continue
     if line.startswith(BOOKMARK_LINE_PREFIX):
       # we will successively apply the various regexes until we get
       # all the bookmark's info
@@ -183,10 +185,10 @@ In the second case a new file is created called bookmarkfilepath_expanded.html
     print USAGE
     sys.exit(2)
   if sys.argv[1]=="PRINT":
-    bookmarks = parse_netscape_bookmarks(open(sys.argv[2], 'r+'))
+    bookmarks = parse_netscape_bookmarks(open(sys.argv[2], 'r+').read())
     print "Found %d bookmarks" % len(bookmarks)
     for b in bookmarks:
-      print "  - %s: %s" % (b.get("title","<no title>"), b["url"])
+      print "  - %s: %s (%s)" % (b.get("title","<no title>"), b["url"], b.get("note",""))
   elif sys.argv[1]=="EXPAND":
     input_file_path = os.path.abspath(sys.argv[2])
     input_path,input_ext = os.path.splitext(input_file_path)
