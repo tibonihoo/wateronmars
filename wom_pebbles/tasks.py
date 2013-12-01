@@ -101,6 +101,7 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
     common_source.save()
   new_refs  = []
   ref_and_metadata = []
+  new_ref_by_url = {}
   for bmk_info in collected_bmks:
     u = bmk_info["url"]
     info = ""
@@ -119,12 +120,16 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
                   .replace(tzinfo=timezone.utc)
     else:
       d = date_now
-    try:
-      ref = Reference.objects.get(url=u)
-    except ObjectDoesNotExist:
-      ref = Reference(url=u,title=truncate_reference_title(t),
-                      pub_date=d,description=info)
-      new_refs.append(ref)
+    if u in new_ref_by_url:
+      ref = new_ref_by_url[u]
+    else:
+      try:
+        ref = Reference.objects.get(url=u)
+      except ObjectDoesNotExist:
+        ref = Reference(url=u,title=truncate_reference_title(t),
+                        pub_date=d,description=info)
+        new_refs.append(ref)
+        new_ref_by_url[u] = ref
     meta = BookmarkMetadata(bmk_info.get("note",""),
                             set(bmk_info.get("tags","").split(",")),
                             bmk_info.get("private","0")=="0")
