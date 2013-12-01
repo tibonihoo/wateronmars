@@ -146,7 +146,7 @@ def select_model_items_with_tags(user,model,tags):
                                          content_type=model_type)
   for tag in tags:
     qs = qs.filter(tags=tag)
-  item_id_set = {cd.object_id for cd in qs}
+  item_id_set = set([cd.object_id for cd in qs])
   return model.objects.filter(id__in=item_id_set)
 
   
