@@ -34,6 +34,7 @@ function prepareKeyBindings()
   gCurrentlyExpandedItem = -1;
   gNumReferences = 0;
   gSyncWithServer = false;
+  gWaitingForServerAnswer = false;
   gReadURLs = [];
   gUserCollectionURL = "";
   gNumUnread = 0;
@@ -235,16 +236,21 @@ function markAsRead(refElement,refIdx) {
   if ( !refElement.hasClass('read') ) { 
     refElement.addClass("read") 
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
-    // we still upload the full *current* list of read items (if
-    // there's more than one it probably means that something went
-    // wrong with the latest update)
-    updateReadStatusOnServer(gReadURLs,function (data) {
-      gReadURLs = []; 
-      gNumUnread -= 1; 
-      document.getElementById("num_unread").textContent = gNumUnread.toString();
-      hideWarning("server-sync-problem");});
-  };
+    if (!gWaitingForServerAnswer) {
+      var syncedReadURLS = gReadURLs.slice(0)
+      gReadURLs = [];
+      // we still upload the full *current* list of read items (if
+      // there's more than one it probably means that something went
+      // wrong with the latest update)
+      updateReadStatusOnServer(syncedReadURLS,function (data) {         
+        gNumUnread -= syncedReadURLS.length;
+        document.getElementById("num_unread").textContent = gNumUnread.toString();
+        hideWarning("server-sync-problem");
+        gWaitingForServerAnswer=true;});      
+    }
+  };   
 }
+
 
 // Make sure that the user gets a visual feedback indicating that the
 // reference has been saved.
