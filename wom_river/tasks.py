@@ -84,8 +84,13 @@ def add_new_references_from_feedparser_entries(feed,entries):
   feed_last_update_check = feed.last_update_check
   latest_item_date = feed_last_update_check
   all_references = []
+  ref_by_url = {}
   for entry in entries:
     r,tags = create_reference_from_feedparser_entry(entry)
+    if r.url in ref_by_url:
+      # skip duplicate reference
+      continue
+    ref_by_url[r.url] = r
     current_ref_date = r.pub_date
     if  current_ref_date < feed_last_update_check:
       continue
