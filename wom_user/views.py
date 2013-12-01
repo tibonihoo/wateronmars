@@ -59,10 +59,9 @@ from wom_user.forms import UserSourceAdditionForm
 from wom_user.forms import CreateUserSourceRemovalForm
 
 
-from wom_river.tasks import import_feedsources_from_opml
+from wom_user.tasks import import_user_feedsources_from_opml
+from wom_user.tasks import import_user_bookmarks_from_ns_list
 from wom_user.tasks import check_user_unread_feed_items
-
-from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
 from wom_user.settings import NEWS_TIME_THRESHOLD
 from wom_user.settings import MAX_ITEMS_PER_PAGE
@@ -255,8 +254,7 @@ def user_root(request,owner_name):
 def handle_uploaded_opml(opmlUploadedFile,user):
   if opmlUploadedFile.name.endswith(".opml") \
      or opmlUploadedFile.name.endswith(".xml"):
-    import_feedsources_from_opml(opmlUploadedFile.read(),isPath=False,
-                                 user_profile=user.userprofile)
+    import_user_feedsources_from_opml(user,opmlUploadedFile.read())
   else:
     raise ValueError("Uploaded file '%s' is not OPML !" % opmlUploadedFile.name)
     
@@ -289,7 +287,7 @@ def user_upload_opml(request,owner_name):
 def handle_uploaded_nsbmk(nsbmkUploadedFile,user):
   if nsbmkUploadedFile.name.endswith(".html") \
      or nsbmkUploadedFile.name.endswith(".htm"):
-    import_references_from_ns_bookmark_list(nsbmkUploadedFile.read(),user=user)
+    import_user_bookmarks_from_ns_list(user,nsbmkUploadedFile.read())
   else:
     raise ValueError("Uploaded file '%s' is not a Netscape-style bookmarks file !"\
                      % nsbmkUploadedFile.name)
