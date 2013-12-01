@@ -35,5 +35,12 @@ git push heroku master
 # heroku db migration with south (south generated migration files must be committed to git)
 # (see also http://www.mikeball.us/blog/using-south-on-heroku-hosted-django-project)
 heroku run python manage.py migrate app_name
+# ---------------------
+# Dreamhost: 
+# - http://dashdrum.com/blog/2011/08/django-on-dreamhost/
+# - http://wiki.dreamhost.com/Django
+# I had to remove all deps related to celery and psycopg for pip install to work.
+# after that the usual syncdb, migrate and collectstatic worked ok
+#
 
 
