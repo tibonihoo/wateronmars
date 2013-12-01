@@ -72,10 +72,10 @@ NS_BOOKMARKS_TXT_MORE_TEMPLATE = """\
 
 
 def run():
-  if settings.DEMO and not User.objects.filter(username="demo").exists():
+  if settings.DEMO and not User.objects.filter(username=settings.DEMO_USER_NAME).exists():
     print("DEMO mode: Creating demo user.")
-    demo_user = User(username="demo")
-    demo_user.set_password("redh2o")
+    demo_user = User(username=settings.DEMO_USER_NAME)
+    demo_user.set_password(settings.DEMO_USER_PASSWD)
     demo_user.save()
     demo_profile = UserProfile.objects.create(owner=demo_user)
     demo_profile.save()

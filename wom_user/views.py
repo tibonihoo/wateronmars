@@ -157,9 +157,15 @@ def home(request):
   """
   if request.method != 'GET':
     return HttpResponseNotAllowed(['GET'])
-  d = add_base_template_context_data({},
-                                     request.user.username,
-                                     request.user.username)
+  if settings.DEMO:
+    demo_u_name = settings.DEMO_USER_NAME
+    demo_u_password = settings.DEMO_USER_PASSWD
+  else:
+    demo_u_name = None
+    demo_u_password = None
+  d = add_base_template_context_data(
+    {"demo_u_name":demo_u_name,"demo_u_password":demo_u_password},
+    request.user.username,request.user.username)
   return render_to_response('home.html',d,
                             context_instance=RequestContext(request))
 
@@ -206,7 +212,7 @@ class CustomErrorList(ErrorList):
 @csrf_protect
 def user_creation(request):
   if not request.user.is_staff:
-    return HttpResponseForbidden()
+    return HttpResponseForbidden("Sorry, you're not allowed to create new users.")
   if request.method == 'POST':
     form = UserProfileCreationForm(request.POST, error_class=CustomErrorList)
     if form.is_valid():

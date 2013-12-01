@@ -24,6 +24,9 @@ Landing site
 </p>
 {% else %}
 <a class="btn btn-primary btn-large" href="{% url django.contrib.auth.views.login %}" title="Login"><i class="icon-user icon-white"></i>&nbsp; Login</a>
+{% if demo_u_name and demo_u_password %}
+  <p>You can login as the 'demo' user, with the username {{demo_u_name}} and the password {{demo_u_password}}.</p>  
+{% endif %}
 {% endif %}
 </div>
 
