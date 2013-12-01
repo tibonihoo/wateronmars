@@ -24,7 +24,7 @@
     </ul>
   </li>
     {% if not auto_update %}
-  <li class=".pull-right"><a href="{% url wom_user.views.request_for_update %}" accesskey="f">Check for news</a></li>
+  <li class="pull-right"><a href="{% url wom_user.views.request_for_update %}" accesskey="f">Check for news</a></li>
     {% endif %}
   {% else %}
   <li><a href="{% url django.contrib.auth.views.login %}"><i class="icon-user icon-white"></i>Login</a></li>
