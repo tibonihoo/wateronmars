@@ -65,7 +65,7 @@ DEMO_USER_NAME = "demo"
 DEMO_USER_PASSWD = "redh2o"
 
 # DEBUG or not DEBUG
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 
