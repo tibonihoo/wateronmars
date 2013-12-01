@@ -21,5 +21,10 @@ boilerplate mechanics for news and bookmarks manipulation in order to
 implement and experiment new features around this (now admitedly
 old-fashioned) theme.
 
-Thibauld Nion, 2012-2013
+The project is licensed under the [GNU Affero GPL v3](http://www.gnu.org/licenses/agpl-3.0.html).
+
+
+- - -
+
+(C) Thibauld Nion, 2012-2013
 
