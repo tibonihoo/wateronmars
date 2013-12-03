@@ -236,15 +236,15 @@ function markAsRead(refElement,refIdx) {
   if ( !refElement.hasClass('read') ) { 
     refElement.addClass("read") 
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
-    rollingUpdateReadStatusOnServer();
+    rollingUpdateReadStatusOnServer(true);
   }
 }
 
 // Make sure to synchronize the read status of update on the server.
 // Will continue to update the status if when the server answers, new
 // items have been read.
-function rollingUpdateReadStatusOnServer() {
-  if (!gWaitingForServerAnswer) {
+function rollingUpdateReadStatusOnServer(check_lock) {
+  if (!check_lock || !gWaitingForServerAnswer) {
     gWaitingForServerAnswer = true;
     var syncedReadURLS = gReadURLs.slice(0)
     gReadURLs = [];
@@ -255,7 +255,7 @@ function rollingUpdateReadStatusOnServer() {
       gNumUnread -= syncedReadURLS.length;
       document.getElementById("num_unread").textContent = gNumUnread.toString();
       hideWarning("server-sync-problem");
-      if (gReadURLs.length>0) {rollingUpdateReadStatusOnServer()} 
+      if (gReadURLs.length>0) {rollingUpdateReadStatusOnServer(false)} 
       else {gWaitingForServerAnswer=false;} });
   }
 }
