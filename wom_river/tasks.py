@@ -23,6 +23,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import MultipleObjectsReturned
 
 from wom_pebbles.models import Reference
 
@@ -101,7 +102,12 @@ def add_new_references_from_feedparser_entries(feed,entries):
   # save all references at once
   with transaction.commit_on_success():
     for r,_ in all_references:
-      r.save()
+      try:
+        r.save()
+      except Exception,e:
+        logger.warning("Skipping news item %s because of exception: %s."\
+                       % (r.url,e))
+        continue
       r.sources.add(common_source)
   return dict(all_references)
 
@@ -140,6 +146,8 @@ def import_feedsources_from_opml(opml_txt):
   for current_feed in collected_feeds:
     try:
       feed_source = WebFeed.objects.get(xmlURL=current_feed.xmlUrl)
+    except MultipleObjectsReturned:
+      feed_source = WebFeed.objects.all()[0]
     except ObjectDoesNotExist:
       url_id = current_feed.htmlUrl or current_feed.xmlUrl
       try:

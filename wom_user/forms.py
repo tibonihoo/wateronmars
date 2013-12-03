@@ -113,8 +113,12 @@ class UserBookmarkAdditionForm(forms.Form):
     # Find or create a matching reference
     try:
       bookmarked_ref = Reference.objects.get(url=url)
-      # Arbitrarily chose one of the possible sources 
-      ref_src = bookmarked_ref.sources.all().get()
+      # Arbitrarily chose one of the possible sources
+      src_query = bookmarked_ref.sources
+      if src_query.count() > 1:
+        ref_src = src_query.all()[0]
+      else:
+        ref_src = src_query.get()
     except ObjectDoesNotExist:
       try:
         ref_src = Reference.objects.get(url=src_url)

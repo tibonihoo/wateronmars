@@ -20,6 +20,7 @@
 
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import MultipleObjectsReturned
 
 from datetime import datetime
 from django.utils import timezone
@@ -147,8 +148,11 @@ def generate_reference_user_status(user,references):
       rust.owner = user
       rust.reference = ref
       rust.reference_pub_date = ref.pub_date
+      source_query = ref.sources.filter(userprofile=user.userprofile).distinct().order_by("pub_date")
       try:
-        rust.main_source = ref.sources.filter(userprofile=user.userprofile).distinct().order_by("pub_date").get()
+        rust.main_source = source_query.get()
+      except MultipleObjectsReturned:
+        rust.main_source = source_query.all()[0]
       except ObjectDoesNotExist:
         try:
           rust.main_source = Reference.objects.get(url="<unknown>")
