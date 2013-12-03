@@ -319,8 +319,14 @@ Mousetrap.bind('v', function() {
 // open the currently expanded items' linked page in the browser
 Mousetrap.bind('r', function() { 
   var window_location = window.location;
-  updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; window_location.reload();});
+  if (gReadURLs.length>0) {
+    updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; window_location.reload();});
+  }
+  else {
+    window_location.reload();
+  }
 });
+
 
 // save the ref corresponding to the currently expanded items
 function saveCurrentItem() {
