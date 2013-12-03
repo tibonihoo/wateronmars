@@ -20,6 +20,9 @@
 
 import urllib
 
+from datetime import datetime
+from django.utils import timezone
+
 from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -175,7 +178,7 @@ def request_for_update(request):
   delay).
   """
   collect_news_from_feeds()
-  delete_old_references(NEWS_TIME_THRESHOLD)
+  delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
   return HttpResponseRedirect(reverse("wom_user.views.home"))
 
 
@@ -183,10 +186,10 @@ def request_for_cleanup(request):
   """Trigger a cleanup of all references that have never been saved
   (past an arbitrary delay).
   """
-  delete_old_references(NEWS_TIME_THRESHOLD)
+  delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
   return HttpResponseRedirect(reverse("wom_user.views.home"))
 
-  
+
 
 
 def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):

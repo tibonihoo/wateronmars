@@ -75,7 +75,7 @@ def collect_all_new_references_regularly():
 
 @periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
 def delete_old_references_regularly():
-  delete_old_references(NEWS_TIME_THRESHOLD)
+  delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
 
 
 @task()

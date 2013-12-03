@@ -99,6 +99,7 @@ def add_new_references_from_feedparser_entries(feed,entries):
     if current_ref_date > latest_item_date:
       latest_item_date = current_ref_date
   feed.last_update_check = latest_item_date
+  feed.save()
   # save all references at once
   with transaction.commit_on_success():
     for r,_ in all_references:
