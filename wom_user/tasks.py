@@ -88,6 +88,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
     except ObjectDoesNotExist:
       bmk = UserBookmark(owner=user,reference=ref,
                          saved_date=datetime.now(timezone.utc))
+      ref.save_count += 1
       for src in ref.sources.all():
         user.userprofile.sources.add(src)
     bmk.is_public = meta.is_public
@@ -96,6 +97,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
     bmk_to_process.append((bmk,meta))
   with transaction.commit_on_success():
     for b,_ in bmk_to_process:
+      b.reference.save()
       b.save()
   classif_data_to_save = []
   for bmk,meta in bmk_to_process:
