@@ -439,6 +439,7 @@ def post_to_user_collection(request,owner_name):
 def get_user_collection(request,owner_name):
   """Display the collection of bookmarks"""
   bookmarks = UserBookmark.objects.filter(owner=request.owner_user)\
+                                  .order_by('-saved_date')\
                                   .select_related("reference").all()
   if request.user!=request.owner_user:
     bookmarks = bookmarks.filter(is_public=True)
