@@ -35,24 +35,26 @@ jQuery.ias({
   {% for bookmark in user_bookmarks %}
   <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> </dt>
   <dd class="in_bookmark_def">
-      <small><em>@
-      {% for source in bookmark.get_sources %}
-        <a class="sourceURL" id="page{{user_bookmarks.number}}-bmk{{forloop.parentloop.counter0}}-source{{forloop.counter0}}-URL" style="padding-right:0.5em;" href="{{ source.url }}" title="{{ source.title }}">{{ source.title }}</a>
+      <small><em>{% spaceless %}
+          {% if bookmark.get_sources %}@
+          {% for source in bookmark.get_sources %}
+          <a class="sourceURL" id="page{{user_bookmarks.number}}-bmk{{forloop.parentloop.counter0}}-source{{forloop.counter0}}-URL" style="padding-right:0.5em;" href="{{ source.url }}" title="{{ source.title }}">{{ source.title }}</a>
+          {% if not forloop.last %}
+          ,
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+      </em></small>
+      {% if bookmark.get_tag_names %}
+      <i class="icon-tags" title="Tags"></i>
+      {% for tag in bookmark.get_tag_names %}
+      {{ tag }}
       {% if not forloop.last %}
       ,
       {% endif %}
       {% endfor %}
-      </em></small>
-    {% for tag in bookmark.get_tag_names %}
-    {% if forloop.first %}
-    <i class="icon-tags" title="Tags"></i>
-    {% endif %}
-    {{ tag }}
-    {% if not forloop.last %}
-    ,
-    {% endif %}
-    {% endfor %}
-  </dd>
+      {% endif %}
+  {% endspaceless %}</dd>
 {% endfor %}
 </dl>
 {% else %}
