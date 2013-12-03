@@ -236,22 +236,29 @@ function markAsRead(refElement,refIdx) {
   if ( !refElement.hasClass('read') ) { 
     refElement.addClass("read") 
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
-    if (!gWaitingForServerAnswer) {
-      gWaitingForServerAnswer = true;
-      var syncedReadURLS = gReadURLs.slice(0)
-      gReadURLs = [];
-      // we still upload the full *current* list of read items (if
-      // there's more than one it probably means that something went
-      // wrong with the latest update)
-      updateReadStatusOnServer(syncedReadURLS,function (data) {         
-        gNumUnread -= syncedReadURLS.length;
-        document.getElementById("num_unread").textContent = gNumUnread.toString();
-        hideWarning("server-sync-problem");
-        gWaitingForServerAnswer=false;});      
-    }
-  };   
+    rollingUpdateReadStatusOnServer();
+  }
 }
 
+// Make sure to synchronize the read status of update on the server.
+// Will continue to update the status if when the server answers, new
+// items have been read.
+function rollingUpdateReadStatusOnServer() {
+  if (!gWaitingForServerAnswer) {
+    gWaitingForServerAnswer = true;
+    var syncedReadURLS = gReadURLs.slice(0)
+    gReadURLs = [];
+    // we still upload the full *current* list of read items (if
+    // there's more than one it probably means that something went
+    // wrong with the latest update)
+    updateReadStatusOnServer(syncedReadURLS,function (data) {         
+      gNumUnread -= syncedReadURLS.length;
+      document.getElementById("num_unread").textContent = gNumUnread.toString();
+      hideWarning("server-sync-problem");
+      if (gReadURLs.length>0) {rollingUpdateReadStatusOnServer()} 
+      else {gWaitingForServerAnswer=false;} });
+  }
+}
 
 // Make sure that the user gets a visual feedback indicating that the
 // reference has been saved.
