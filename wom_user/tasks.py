@@ -87,7 +87,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
       bmk = UserBookmark.objects.get(owner=user,reference=ref)
     except ObjectDoesNotExist:
       bmk = UserBookmark(owner=user,reference=ref,
-                         saved_date=datetime.now(timezone.utc))
+                         saved_date=ref.pub_date)
       ref.save_count += 1
       for src in ref.sources.all():
         user.userprofile.sources.add(src)
