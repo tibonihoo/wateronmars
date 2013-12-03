@@ -79,7 +79,7 @@ class UserBookmark(models.Model):
 
   def get_tag_names(self):
     """Get the names of the tags related to this reference."""
-    return get_item_tag_names(self.owner,self.reference)
+    return [t for t in get_item_tag_names(self.owner,self.reference) if t.strip()]
 
   def set_private(self):
     """Set the bookmark as private."""
