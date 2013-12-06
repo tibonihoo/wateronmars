@@ -81,20 +81,21 @@ function hideWarning(warningId) {
   $("#"+warningId).css("display", "none");
 }
 
-// Make sure that an element is visible by scrolling the page if necessary to make it appear in the first 3 quarters of the page.
+// Make sure that an element is visible by scrolling the page if
+// necessary to make it appear at a comfortable place on the page.
 // Note: adapted from http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling 
-function ensureVisibilityInFirstThreeQuarters(elem)
+function ensureCorrectVisibility(elem)
 {
   var windowHeight = $(window).height();
   var windowTop = $(window).scrollTop();
-  var docView4thTop = windowTop + windowHeight/4;
-  var docView4thBottom = windowTop + ((2*windowHeight)/3);
+  var docViewTopThreshold = windowTop + windowHeight/4;
+  var docViewBottomThreshold = windowTop + (windowHeight/2);
   var elemTop = $(elem).offset().top;
-  if (elemTop <= docView4thTop)
+  if (elemTop <= docViewTopThreshold)
   {
     $('body,html').animate({scrollTop: elemTop-windowHeight/4}, 400); 
   }
-  else if (elemTop >= docView4thBottom)
+  else if (elemTop >= docViewBottomThreshold)
   {
     $('body,html').animate({scrollTop: elemTop-windowHeight/3}, 400); 
   }
@@ -131,7 +132,7 @@ function createShownCallback(i) {
     {
       gMouseTrapDisabled = false;
     }
-    ensureVisibilityInFirstThreeQuarters("#collapse"+i.toString());
+    ensureCorrectVisibility("#collapse"+i.toString());
   }
 }
 
@@ -327,6 +328,7 @@ Mousetrap.bind('v', function() {
 Mousetrap.bind('r', function() { 
   var window_location = window.location;
   if (gReadURLs.length>0) {
+    showWarning("news-loading");
     updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; window_location.reload();});
   }
   else {

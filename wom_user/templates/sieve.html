@@ -23,6 +23,8 @@
    }
    #server-sync-problem {display : none;}
    #server-save-failed  {display : none;}
+   #news-loading  { display : none;}
+   #news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
    .sourceURL { color: black; decoration: None; }
    .sourceFeedURL { color: black; decoration: None; }
  </style>
@@ -32,6 +34,7 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block head_notification %}{# Error messages #}
+<li><a id="news-loading" data-content="Fresh news are being downloaded from server." title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="News refresh !"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
 <li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-white"></i></a></li>
 <li><a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Bookmarking failed"><i class="icon-warning-sign icon-white"></i></a></li>
 {% endblock %}
