@@ -439,10 +439,10 @@ def post_to_user_collection(request,owner_name):
 def get_user_collection(request,owner_name):
   """Display the collection of bookmarks"""
   bookmarks = UserBookmark.objects.filter(owner=request.owner_user)\
-                                  .order_by('-saved_date')\
                                   .select_related("reference").all()
   if request.user!=request.owner_user:
     bookmarks = bookmarks.filter(is_public=True)
+  bookmarks = bookmarks.order_by('-saved_date')
   expectedFormat = request.GET.get("format","html").lower()
   if expectedFormat=="ns-bmk-list":
     paginator = Paginator(bookmarks, bookmarks.count())
@@ -510,9 +510,12 @@ def generate_user_sieve(request,owner_name):
   use its sieve to read and sort out the latests news.
   """
   check_user_unread_feed_items(request.owner_user)
-  unread_references = ReferenceUserStatus.objects.filter(owner=request.owner_user,has_been_read=False)
+  unread_references = ReferenceUserStatus.objects.filter(owner=request.owner_user,
+                                                         has_been_read=False)
   num_unread = unread_references.count()
-  oldest_unread_references = unread_references.select_related("reference","sources").order_by('reference_pub_date')[:MAX_ITEMS_PER_PAGE]
+  oldest_unread_references = unread_references\
+    .select_related("reference","sources")\
+    .order_by('reference_pub_date')[:MAX_ITEMS_PER_PAGE]
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
       'num_unread_references': num_unread,
@@ -547,7 +550,10 @@ def apply_to_user_sieve(request,owner_name):
     return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
   modified_rust = []
   for read_url in action_dict.get(u"references",[]):
-    for rust in ReferenceUserStatus.objects.filter(has_been_read=False,owner=request.owner_user).select_related("reference").all():
+    for rust in ReferenceUserStatus.objects\
+                                   .filter(has_been_read=False,
+                                           owner=request.owner_user)\
+                                   .select_related("reference").all():
       if rust.reference.url == read_url:
         rust.has_been_read = True
         modified_rust.append(rust)
