@@ -137,6 +137,7 @@ class UserBookmarkAdditionForm(forms.Form):
         bmk = UserBookmark(owner=self.user,reference=bookmarked_ref,
                            saved_date=datetime.now(timezone.utc))
         bookmarked_ref.save_count += 1
+        bmk.save()
         bookmarked_ref.save()
       # allow the user-specific comment to be changed and also prefix
       # it with the user specified title if it differs from the
@@ -154,7 +155,6 @@ class UserBookmarkAdditionForm(forms.Form):
     with transaction.commit_on_success():
       if ref_src not in self.user.userprofile.sources.all():
         self.user.userprofile.sources.add(ref_src)
-        self.user.userprofile.save()
     with transaction.commit_on_success():
       for rust in ReferenceUserStatus.objects.filter(owner=self.user,
                                                      reference=bookmarked_ref).all():
@@ -266,11 +266,10 @@ class UserSourceAdditionForm(forms.Form):
       new_feed.xmlURL = form_feed_url or form_url
       new_feed.last_update_check = datetime.utcfromtimestamp(0)\
                                            .replace(tzinfo=timezone.utc)
-      new_feed.save()      
+      new_feed.save()
     self.user.userprofile.sources.add(source_ref)
     self.user.userprofile.public_sources.add(source_ref)
     self.user.userprofile.web_feeds.add(new_feed)
-    self.user.save()
     return new_feed
 
 
@@ -296,8 +295,6 @@ def CreateUserSourceRemovalForm(user,*args, **kwargs):
       sources_to_remove = self.cleaned_data["sources_to_remove"] 
       for feed_source in sources_to_remove:
         self.user.userprofile.web_feeds.remove(feed_source)
-      if commit:
-        self.user.userprofile.save()
       return sources_to_remove
   
   return UserSourceRemovalForm()
