@@ -97,7 +97,7 @@ function ensureCorrectVisibility(elem)
   }
   else if (elemTop >= docViewBottomThreshold)
   {
-    $('body,html').animate({scrollTop: elemTop-windowHeight/3}, 400); 
+    $('body,html').animate({scrollTop: elemTop-windowHeight/4}, 400); 
   }
 }
 
@@ -206,10 +206,8 @@ function updateReadStatusOnServer(read_items_urls, callback) {
 // @param callback function to be called when the server's answer is received
 function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
   if (gUserCollectionURL=="") return;
-  var jsonStr = JSON.stringify({"url": url, "title" : title, "source_url" : sourceURL, "source_name" : sourceTitle });
+  var jsonStr = JSON.stringify({"url": url, "title" : title, "source_url" : sourceURL, "source_title" : sourceTitle });
   var csrftoken = getCookie('csrftoken');
-  // TODO: find something more generic (like saving the url for
-  // collection in the page and/or passing it as arg to this function)
   $.ajax({
     crossDomain: false, // obviates need for sameOrigin test
     beforeSend: function(xhr, settings) {
@@ -273,7 +271,7 @@ function markAsSaved(refIdx) {
     var title = document.getElementById('ref'+refIdxStr+'-URL').title;
     var sourceURL = document.getElementById('ref'+refIdxStr+'-sourceURL').href;
     var sourceTitle = document.getElementById('ref'+refIdxStr+'-sourceURL').title;
-    saveBookmarkOnServer(url,title,sourceURL,sourceTitle,function(data) {refElement.addClass("saved");});
+    saveBookmarkOnServer(url,title,sourceURL,sourceTitle, function(data) {refElement.addClass("saved");});
   };
 }
 
