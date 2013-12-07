@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="48"
+   height="48"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="wom-logo.svg">
+  <title
+     id="title3885">Water On Mars Logo</title>
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.6568543"
+     inkscape:cx="-9.9351715"
+     inkscape:cy="9.6484672"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1366"
+     inkscape:window-height="716"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Water On Mars Logo</dc:title>
+        <dc:date>2013-12-07</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Thibauld Nion (http://tibonihoo.net)</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Thibauld Nion (http://tibonihoo.net)</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Thibauld Nion (http://tibonihoo.net)</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:source>https://github.com/tibonihoo/wateronmars</dc:source>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-1004.3622)">
+    <path
+       sodipodi:type="arc"
+       style="fill:#ce5c00;fill-opacity:1;stroke:none"
+       id="path2985"
+       sodipodi:cx="25.758928"
+       sodipodi:cy="20.008928"
+       sodipodi:rx="13.4375"
+       sodipodi:ry="13.4375"
+       d="m 39.196428,20.008928 a 13.4375,13.4375 0 1 1 -26.875,0 13.4375,13.4375 0 1 1 26.875,0 z"
+       transform="matrix(1.3787376,0,0,1.3787376,-16.27373,1005.6234)" />
+    <path
+       transform="translate(0,1004.3622)"
+       style="fill:none;stroke:none"
+       d="m 0.17857143,14.160713 47.76786057,0 0,33.75 -47.76786057,0 z"
+       id="rect3775" />
+    <g
+       id="g3862"
+       transform="matrix(1.1409385,0,0,1.1409385,-6.7675652,-141.55079)">
+      <path
+         inkscape:connector-curvature="0"
+         id="rect3778"
+         d="m 28.796365,1019.4655 11.342583,-11.3426 4.189604,4.1897 -11.342584,11.3425 z"
+         style="fill:#ce5c00;stroke:none" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path3781"
+         d="m 46.3288,1006.0334 -14.678706,0 14.678706,14.4775 z"
+         style="color:#000000;fill:#ce5c00;fill-opacity:1;fill-rule:nonzero;stroke:#ce5c00;stroke-width:3.37811303;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
+    <g
+       id="g3838"
+       transform="translate(0.43502498,-5.5357143)">
+      <g
+         id="g3857">
+        <path
+           sodipodi:nodetypes="czzc"
+           inkscape:connector-curvature="0"
+           id="path3843"
+           d="m 8.054123,1032.3305 c 0,0 2.886907,-1.8027 6.438278,-1.8027 3.55137,0 5.507042,3.7343 9.142355,3.7343 3.635313,0 5.923216,-1.9316 5.923216,-1.9316"
+           style="color:#000000;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <path
+           style="color:#000000;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           d="m 8.054123,1038.4096 c 0,0 2.886908,-1.8026 6.438278,-1.8026 3.55137,0 5.507042,3.7341 9.142356,3.7341 3.635312,0 5.923216,-1.9315 5.923216,-1.9315"
+           id="path3845"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="czzc" />
+        <path
+           sodipodi:nodetypes="czzc"
+           inkscape:connector-curvature="0"
+           id="path3847"
+           d="m 8.054123,1044.4887 c 0,0 2.886908,-1.8026 6.438278,-1.8026 3.55137,0 5.507042,3.7341 9.142356,3.7341 3.635312,0 5.923216,-1.9315 5.923216,-1.9315"
+           style="color:#000000;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      </g>
+    </g>
+  </g>
+</svg>
