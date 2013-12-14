@@ -39,6 +39,7 @@ from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseForbidden
 from django.http import HttpResponseNotFound
+from django.http import QueryDict
 
 from django.shortcuts import render_to_response
 from django.utils import simplejson
@@ -329,13 +330,7 @@ def user_river_source_add(request,owner_name):
   if settings.DEMO:
     return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
   if request.method == 'POST':
-    try:
-      src_info = simplejson.loads(request.body)
-    except Exception,e:
-      src_info = {}
-      print e
-    if not u"url" in src_info:
-      return HttpResponseBadRequest("Only a JSON formatted request with a 'url' parameter is accepted.")
+    src_info = request.POST
   elif request.GET: # GET
     src_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
   else:
@@ -393,7 +388,7 @@ def user_collection_add(request,owner_name):
   else:
     bmk_info = None
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
-  if form.is_valid():
+  if bmk_info and form.is_valid():
     form.save()
     return HttpResponseRedirect(reverse('wom_user.views.user_collection',
                                         args=(request.user.username,)))
@@ -514,7 +509,7 @@ def generate_user_sieve(request,owner_name):
                                                          has_been_read=False)
   num_unread = unread_references.count()
   oldest_unread_references = unread_references\
-    .select_related("reference","sources")\
+    .select_related("reference","main_source")\
     .order_by('reference_pub_date')[:MAX_ITEMS_PER_PAGE]
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
@@ -613,8 +608,17 @@ def user_river_sources(request,owner_name):
       return render_to_response('sources.html',d,
                                 context_instance=RequestContext(request))
   elif request.user != request.owner_user:
-      return HttpResponseForbidden()
+    return HttpResponseForbidden()
   elif request.method == 'POST':
+    try:
+      src_info = simplejson.loads(request.body)
+    except Exception:
+      src_info = {}
+    if not u"url" in src_info:
+      return HttpResponseBadRequest("Only a JSON formatted request with a 'url' parameter is accepted.")
+    q = QueryDict('', mutable=True)
+    q.update(src_info)
+    request.POST = q
     return user_river_source_add(request, owner_name)
   # TODO
   # elif request.method == 'DELETE':
