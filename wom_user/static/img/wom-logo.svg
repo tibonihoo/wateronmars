@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="wom-logo.svg">
+   sodipodi:docname="wom-logo.svg"
+   inkscape:export-filename="/home/thibauld/Development/wateronmars/wom-experiment/wom_user/static/img/wom-logo-128.png"
+   inkscape:export-xdpi="240.72937"
+   inkscape:export-ydpi="240.72937">
   <title
      id="title3885">Water On Mars Logo</title>
   <defs
@@ -96,7 +99,7 @@
        sodipodi:cy="20.008928"
        sodipodi:rx="13.4375"
        sodipodi:ry="13.4375"
-       d="m 39.196428,20.008928 a 13.4375,13.4375 0 1 1 -26.875,0 13.4375,13.4375 0 1 1 26.875,0 z"
+       d="m 39.196428,20.008928 c 0,7.421327 -6.016173,13.4375 -13.4375,13.4375 -7.421326,0 -13.4375,-6.016173 -13.4375,-13.4375 0,-7.421326 6.016174,-13.4374997 13.4375,-13.4374997 7.421327,0 13.4375,6.0161737 13.4375,13.4374997 z"
        transform="matrix(1.3787376,0,0,1.3787376,-16.27373,1005.6234)" />
     <path
        transform="translate(0,1004.3622)"
@@ -119,7 +122,7 @@
     </g>
     <g
        id="g3838"
-       transform="translate(0.43502498,-5.5357143)">
+       transform="matrix(0.92073578,0,0,1,1.9256717,-5.2635382)">
       <g
          id="g3857">
         <path
