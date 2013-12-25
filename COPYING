@@ -2,14 +2,20 @@ WaterOnMars is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE (below).
 
 However the following software and artwork are distributed 
 with their own different licenses:
+- jquery (https://jquery.org) under the MIT license
 - Twitter Bootstrap (http://getbootstrap.com) under the Apache License v2.0
 - Glyphicons Free (http://glyphicons.com/) under CC BY 3.0
 - United boostrap them (http://bootswatch.com/united/) under the Apache License v2.0
 - mousetrap.js (http://craig.is/killing/mice) under the Apache License v2.0
+- Infinite Ajax Scroll (http://plugins.jquery.com/ias/) under the MIT license
+- TouchSwipe-Jquery-Plugin (https://github.com/mattbryson/TouchSwipe-Jquery-Plugin) under the MIT license
 - feedfinder.py (http://www.aaronsw.com/2002/feedfinder/) under the Python license
 
-Note: the Apache License v2.0 is available at http://www.apache.org/licenses/LICENSE-2.0
-and the CC BY 3.0 is available at http://creativecommons.org/licenses/by/3.0/
+Mentioned licenses location:
+- the Apache License v2.0 is available at http://www.apache.org/licenses/LICENSE-2.0
+- the CC BY 3.0 is available at http://creativecommons.org/licenses/by/3.0/
+- the Python license is available at http://docs.python.org/2/license.html
+- the MIT license is available at http://opensource.org/licenses/mit-license.php
 
 ----------------------------------------------------------------------------
 
