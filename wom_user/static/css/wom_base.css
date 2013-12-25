@@ -11,6 +11,7 @@ a { color: #3465a4; }
 .navbar .brand { margin-left: 0px; }
 .footer { text-align: center; line-height: 60%; margin-top: 3em; }
 .footer ul li { display: inline; }
-@media (min-width: 1200px) {
+
+@media (min-width: 900px) {
   #below-nav { padding-top: 60px; }
 }

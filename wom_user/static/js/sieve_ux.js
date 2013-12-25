@@ -66,7 +66,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread
-  $("#sieve-reload").on('click',function (){reloadSieve()});
+  $("#sieve-reload").on('click',function (){reloadSieve();});
   // check if viewed in a touch device (and if so activate the
   // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
   var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
