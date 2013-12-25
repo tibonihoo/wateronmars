@@ -70,23 +70,24 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
   // check if viewed in a touch device (and if so activate the
   // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
   var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-  var isExpliticCarouselURL = window.location.href.endsWith("?view=carousel") || window.location.href.endsWith("?view=carousel#sieve-frame"); 
-  var isExpliticAccordionURL = window.location.href.endsWith("?view=accordion") || window.location.href.endsWith("?view=accordion#sieve-frame"); 
+  var isExpliticCarouselURL = window.location.href.match("\\?view=carousel(#|$)"); 
+  var isExpliticAccordionURL = window.location.href.match("\\?view=accordion(#|$)");
   if ( isExpliticCarouselURL || (isTouch && !isExpliticAccordionURL))
   {
     gInCarousel = true;
-    // make sure to disable the collapsible parts of the accordion
-    $(".collapse").removeClass("collapse").addClass("carousel-fig");
-    if (gNumReferences>0) 
-    {
-      // show carousel nav buttons
-      $(".carousel-control").show();
-    } else { $(".carousel-control").hide(); }
-    // show the right "switch" text taking into account that accordion
-    // is the default view for non-touch devices
     var accordionURLQuery = "./";
     if (isTouch) { accordionURLQuery = "./?view=accordion"; }
     $("#view-switch").attr("href",accordionURLQuery).text(switchToAccordionText);
+    // make sure to disable the collapsible parts of the accordion
+    $(".collapse").removeClass("collapse").addClass("carousel-fig");
+    if (gNumReferences==0) 
+    {
+      $(".carousel-control").hide(); 
+      return true;
+    }
+    $(".carousel-control").show(); 
+    // show the right "switch" text taking into account that accordion
+    // is the default view for non-touch devices
     // add event
     $(".carousel").on('slid',  function () { onCarouselSlid()});
     $(".carousel").carousel("next");
@@ -287,6 +288,8 @@ function markAsRead(refElement,refIdx) {
     refElement.addClass("read") 
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
     rollingUpdateReadStatusOnServer(true);
+    gNumUnread -= 1;
+    $("#num_unread").text(gNumUnread.toString());
   }
 }
 
@@ -302,8 +305,6 @@ function rollingUpdateReadStatusOnServer(check_lock) {
     // there's more than one it probably means that something went
     // wrong with the latest update)
     updateReadStatusOnServer(syncedReadURLS,function (data) {         
-      gNumUnread -= syncedReadURLS.length;
-      document.getElementById("num_unread").textContent = gNumUnread.toString();
       hideWarning("server-sync-problem");
       if (gReadURLs.length>0) {rollingUpdateReadStatusOnServer(false)} 
       else {gWaitingForServerAnswer=false;} });
