@@ -414,6 +414,7 @@ Mousetrap.bind('v', function() {
 // items on the server before quitting page.
 function reloadSieve() 
 {
+  $('#sieve-reload-message').modal('hide');
   var window_location = window.location;
   if (gReadURLs.length>0) {
     showWarning("news-loading");
