@@ -64,9 +64,22 @@ prepareKeyBindings();
   </div>
   {% endfor %}
 </div>
-<a class="left carousel-control" href="#sieve-frame" title="previous">&nbsp;</a>
-<a class="right carousel-control" href="#sieve-frame" title="next">&nbsp;</a>
+<a class="left carousel-control" title="previous">&nbsp;</a>
+<a class="right carousel-control" title="next">&nbsp;</a>
 </div>
+
+<div class="modal hide fade" id="sieve-reload-message">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>No more news in sieve !</h3>
+  </div>
+  <div class="modal-body">
+    <p>You've emptied the sieve, press the button below to reload with more news (if any).</p>
+    <p><button id="sieve-reload" class="btn btn-large btn-primary" type="button">Reload the sieve.</button></p>
+    <p><small>You can also press 'r' to reload the sieve at any time.</small></p>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extrascript %}

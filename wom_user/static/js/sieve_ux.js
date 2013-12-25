@@ -66,11 +66,13 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread
+  $("#sieve-reload").on('click',function (){reloadSieve()});
   // check if viewed in a touch device (and if so activate the
   // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
   var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-  if (window.location.href.endsWith("?view=carousel") ||
-      (isTouch && !window.location.href.endsWith("?view=accordion")))
+  var isExpliticCarouselURL = window.location.href.endsWith("?view=carousel") || window.location.href.endsWith("?view=carousel#sieve-frame"); 
+  var isExpliticAccordionURL = window.location.href.endsWith("?view=accordion") || window.location.href.endsWith("?view=accordion#sieve-frame"); 
+  if ( isExpliticCarouselURL || (isTouch && !isExpliticAccordionURL))
   {
     gInCarousel = true;
     // make sure to disable the collapsible parts of the accordion
@@ -330,8 +332,12 @@ function markAsSaved(refIdx) {
 
 // Expand previous item
 Mousetrap.bind('p', function() { 
-  if (gInCarousel) {
-    $(".carousel").carousel("prev");
+  if (gInCarousel) 
+  {
+    if (gCurrentlyExpandedItem>0) 
+    {
+      $(".carousel").carousel("prev");
+    }
     return true;
   }
   if(gMouseTrapDisabled) {return false;}
@@ -353,7 +359,14 @@ Mousetrap.bind('p', function() {
 // Expand next item
 Mousetrap.bind('n', function() { 
   if (gInCarousel) {
-    $(".carousel").carousel("next");
+    if (gCurrentlyExpandedItem>=gNumReferences-1) 
+    {
+      $('#sieve-reload-message').modal('show')
+    }
+    else 
+    {
+      $(".carousel").carousel("next");
+    }
     return true;
   }
   if(gMouseTrapDisabled) {return false;}
@@ -366,6 +379,7 @@ Mousetrap.bind('n', function() {
     // "previous" item will start by expanding the last one.
     gCurrentlyExpandedItem = gNumReferences;
     gMouseTrapDisabled = false;
+    $('#sieve-reload-message').modal('show')
   }
   else
   {
@@ -379,8 +393,10 @@ Mousetrap.bind('v', function() {
   window.open(document.getElementById(itemToShow).href);
 });
 
-// open the currently expanded items' linked page in the browser
-Mousetrap.bind('r', function() { 
+// Reload the sieve but also makes sure to sync the read state of news
+// items on the server before quitting page.
+function reloadSieve() 
+{
   var window_location = window.location;
   if (gReadURLs.length>0) {
     showWarning("news-loading");
@@ -389,6 +405,11 @@ Mousetrap.bind('r', function() {
   else {
     window_location.reload();
   }
+}
+
+// open the currently expanded items' linked page in the browser
+Mousetrap.bind('r', function() { 
+  reloadSieve();
 });
 
 
