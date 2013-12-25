@@ -92,8 +92,8 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
     $(".carousel").on('slid',  function () { onCarouselSlid()});
     $(".carousel").carousel("next");
     gCurrentlyExpandedItem = 0;
-    $(".carousel-control.left").on('click',function (){$(".carousel").carousel("prev")});
-    $(".carousel-control.right").on('click',function (){$(".carousel").carousel("next")});
+    $(".carousel-control.left").on('click',function (){carouselSlideToPrevious()});
+    $(".carousel-control.right").on('click',function (){carouselSlideToNext()});
   }
   else 
   {
@@ -284,7 +284,7 @@ function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
 // @param refIdx the index of this reference (typically as indicated
 // in #ref{refIdx}
 function markAsRead(refElement,refIdx) {
-  if ( !refElement.hasClass('read') ) { 
+  if ( gNumReferences>0 && !refElement.hasClass('read') ) { 
     refElement.addClass("read") 
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
     rollingUpdateReadStatusOnServer(true);
@@ -330,17 +330,18 @@ function markAsSaved(refIdx) {
 
 // Keybinding activation
 
+function carouselSlideToPrevious() 
+{
+  if (gCurrentlyExpandedItem>0) 
+  {
+    $(".carousel").carousel("prev");
+  }
+  return true;
+}
 
 // Expand previous item
 Mousetrap.bind('p', function() { 
-  if (gInCarousel) 
-  {
-    if (gCurrentlyExpandedItem>0) 
-    {
-      $(".carousel").carousel("prev");
-    }
-    return true;
-  }
+  if (gInCarousel) { carouselSlideToPrevious(); }
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var collapsedItemIdx = collapseCurrentlyExpandedItem();
@@ -357,22 +358,25 @@ Mousetrap.bind('p', function() {
   }
 });
 
+function carouselSlideToNext() 
+{
+  if (gCurrentlyExpandedItem>=gNumReferences-1) 
+  {
+    var idx = (gNumReferences-1);
+    var referenceId = '#ref' + idx.toString();
+    markAsRead($(referenceId),idx);
+    $('#sieve-reload-message').modal('show')
+  }
+  else 
+  {
+    $(".carousel").carousel("next");
+  }
+  return true;
+}
+
 // Expand next item
 Mousetrap.bind('n', function() { 
-  if (gInCarousel) {
-    if (gCurrentlyExpandedItem>=gNumReferences-1) 
-    {
-      var idx = (gNumReferences-1);
-      var referenceId = '#ref' + idx.toString();
-      markAsRead($(referenceId),idx);
-      $('#sieve-reload-message').modal('show')
-    }
-    else 
-    {
-      $(".carousel").carousel("next");
-    }
-    return true;
-  }
+  if (gInCarousel) { carouselSlideToNext(); }
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var collapsedItemIdx = collapseCurrentlyExpandedItem();
