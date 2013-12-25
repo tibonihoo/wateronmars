@@ -95,6 +95,14 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
     gCurrentlyExpandedItem = 0;
     $(".carousel-control.left").on('click',function (){carouselSlideToPrevious()});
     $(".carousel-control.right").on('click',function (){carouselSlideToNext()});
+    $(".carousel").swipe({
+      swipeLeft:function(event, direction, distance, duration, fingerCount) {
+        carouselSlideToNext();
+      },
+      swipeRight:function(event, direction, distance, duration, fingerCount) {
+        carouselSlideToPrevious();
+      }
+    });
   }
   else 
   {
