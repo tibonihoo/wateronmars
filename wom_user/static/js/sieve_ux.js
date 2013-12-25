@@ -362,6 +362,9 @@ Mousetrap.bind('n', function() {
   if (gInCarousel) {
     if (gCurrentlyExpandedItem>=gNumReferences-1) 
     {
+      var idx = (gNumReferences-1);
+      var referenceId = '#ref' + idx.toString();
+      markAsRead($(referenceId),idx);
       $('#sieve-reload-message').modal('show')
     }
     else 
