@@ -1,0 +1,60 @@
+/* 
+WaterOnMars's sieve styling.
+Author: Thibauld Nion
+Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYING)
+Site: https://github.com/tibonihoo/wateronmars
+*/
+
+.read .accordion-heading {color: gray; border: none}
+.read .accordion-heading a {color: gray; border: none}
+.bookmarked {display: none;}
+.saved .save-link {display: none;}
+.saved .bookmarked {display: inline-block;}
+.collapse {
+  -webkit-transition: height 0.15s ease;
+     -moz-transition: height 0.15s ease;
+       -o-transition: height 0.15s ease;
+          transition: height 0.15s ease;
+}
+#server-sync-problem {display : none;}
+#server-save-failed  {display : none;}
+#news-loading  { display : none;}
+#news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
+.sourceURL { color: black; decoration: None; }
+.sourceFeedURL { color: black; decoration: None; }
+.carousel-control {
+  font-size: 20px;
+  width: 20px;
+  height: 75%;
+  border: none;
+  top: 20%;
+  opacity: 1;
+  background-color: rgb(128,128,128);
+}
+.carousel-control:hover {
+  background-color: rgb(212, 68, 19);
+  opacity: 1;
+}
+.carousel-control:focus {
+  background-color: rgb(128, 128, 128);
+  opacity: 1;
+}
+.carousel-control.right {
+   left: auto;
+   right: 8px;
+}
+.carousel-control.left {
+   left: 5px;
+   right: auto;
+}
+.carousel-fig { padding-left: 20px; padding-right: 20px;}
+.carousel-fig .news-abstract { height: 25em; overflow: auto; }
+.news-metadata { margin-top: 3px; }
+@media screen and (max-width: 699px) {
+  body { padding-right: 1px; padding-left: 5px; }
+  .carousel-control { font-size: 10px; width: 10px;}
+  .carousel-control.right { right: 6px; }
+  .carousel-control.left { left: 2px; }
+  .carousel-fig { padding-left: 2px; padding-right: 2px;}
+  .accordion-inner { padding: 12px; }
+}

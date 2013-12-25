@@ -9,25 +9,7 @@
 {% block extrahead %}
 <script src="{{ STATIC_URL }}js/mousetrap.min.js"></script>
 <script src="{{ STATIC_URL }}js/sieve_ux.js"></script>
-<style type="text/css">
-   .read .accordion-heading {color: gray; border: none}
-   .read .accordion-heading a {color: gray; border: none}
-   .bookmarked {display: none;}
-   .saved .save-link {display: none;}
-   .saved .bookmarked {display: inline-block;}
-   .collapse {
-     -webkit-transition: height 0.15s ease;
-        -moz-transition: height 0.15s ease;
-          -o-transition: height 0.15s ease;
-             transition: height 0.15s ease;
-   }
-   #server-sync-problem {display : none;}
-   #server-save-failed  {display : none;}
-   #news-loading  { display : none;}
-   #news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
-   .sourceURL { color: black; decoration: None; }
-   .sourceFeedURL { color: black; decoration: None; }
- </style>
+<link href="{{ STATIC_URL }}css/wom_sieve.css" rel="stylesheet">
 <script>
 prepareKeyBindings();
 </script>
@@ -41,22 +23,23 @@ prepareKeyBindings();
 
 {% block content %}
 <p><i class="icon-filter"></i><strong>{{ title_qualify }} sieve</strong>
-  <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_references }}</span> unread items.</small>
+  <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_references }}</span> unread items <a href="./" id="view-switch"></a>.</small>
 </p>
 
 {# List the references #}
-<div class="accordion" id="sieve-accordion">
+<div class="carousel slide">
+<div class="accordion carousel-inner" id="sieve-frame">
 {% for rust in oldest_unread_references %}
-  <div class="accordion-group reference{% if rust.has_been_saved %} saved{% endif %}" id="ref{{forloop.counter0}}">
-    <div class="accordion-heading accordion-toggle reference-short-description"  style="background-color:#eeeeec;padding:3px;">
-      <a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-accordion" href="#collapse{{forloop.counter0}}">{{ rust.reference.title }}</a> <small> - {{ rust.reference_pub_date }} <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+  <div class="accordion-group item reference{% if rust.has_been_saved %} saved{% endif %}" id="ref{{forloop.counter0}}">
+    <div class="accordion-heading accordion-toggle accordion-heading reference-short-description"  style="background-color:#eeeeec;padding:3px;">
+      <a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-frame" href="#collapse{{forloop.counter0}}">{{ rust.reference.title }}</a> <small> - {{ rust.reference_pub_date }} <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
     </div>
     <div id="collapse{{forloop.counter0}}" class="accordion-body collapse reference-details">
       <div class="accordion-inner">
-        <div>
+        <div class="news-abstract">
         {{ rust.reference.description|safe }}
         </div>
-        <p style="padding-top:0.5em;"> <a class="save-link" href="javascript:saveCurrentItem()" style="padding-right:0.5em;"><i class="icon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked icon-bookmark"></i> <a id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}" style="padding-right:0.5em;"><i class="icon-globe"></i>view on site (v)</a>      
+        <div class="news-metadata" style="padding-top:0.5em;"> <a class="save-link" href="javascript:saveCurrentItem()" style="padding-right:0.5em;"><i class="icon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked icon-bookmark"></i> <a id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}" style="padding-right:0.5em;"><i class="icon-globe"></i>view on site (v)</a>
           {% for tag in rust.get_tag_names %}
           {% if forloop.first %}
           <i class="icon-tags" title="Tags"></i>
@@ -66,7 +49,7 @@ prepareKeyBindings();
           ,
           {% endif %}
           {% endfor %}
-        </p>
+        </div>
       </div>
     </div>
   </div>
@@ -75,16 +58,20 @@ prepareKeyBindings();
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     <strong>No news is good news ?</strong> 
     <p>No new items were found since your last visit !</p> 
-{% if source_add_bookmarklet %}
+    {% if source_add_bookmarklet %}
     <p>You can subscribe to news sources with the following bookmarklet: <a href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
-{% endif %}
+    {% endif %}
   </div>
   {% endfor %}
+</div>
+<a class="left carousel-control" href="#sieve-frame" title="previous">&nbsp;</a>
+<a class="right carousel-control" href="#sieve-frame" title="next">&nbsp;</a>
 </div>
 {% endblock %}
 
 {% block extrascript %}
 <script>
-activateKeyBindings(true, "{{ user_collection_url }}", {{ num_unread_references }});
+activateKeyBindings(true, "{{ user_collection_url }}", {{ num_unread_references }},"(switch to accordion view)","(switch to carousel view)");
 </script>
+
 {% endblock %}

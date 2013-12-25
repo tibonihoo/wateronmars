@@ -1,0 +1,16 @@
+/* 
+WaterOnMars's base styling.
+Author: Thibauld Nion
+Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYING)
+Site: https://github.com/tibonihoo/wateronmars
+*/
+
+.navbar .nav > li > a { border-right: none; border-left: none; }
+.navbar .nav > li > a:hover { border-right: none; border-left: none; }
+a { color: #3465a4; }
+.navbar .brand { margin-left: 0px; }
+.footer { text-align: center; line-height: 60%; margin-top: 3em; }
+.footer ul li { display: inline; }
+@media (min-width: 1200px) {
+  #below-nav { padding-top: 60px; }
+}

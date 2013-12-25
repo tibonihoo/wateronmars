@@ -38,15 +38,26 @@ function prepareKeyBindings()
   gReadURLs = [];
   gUserCollectionURL = "";
   gNumUnread = 0;
+  gInCarousel = false;
 }
 
+function onCarouselSlid() {  
+  var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(3));
+  $(".carousel").carousel("pause");
+  var previouslyShownItemIdx = gCurrentlyExpandedItem;
+  if (previouslyShownItemIdx>=0) {
+    var referenceId = '#ref'+previouslyShownItemIdx;
+    markAsRead($(referenceId),previouslyShownItemIdx);  
+  }
+  gCurrentlyExpandedItem  = newlyShownItemIdx;
+}
 
 // Activation that needs to be called once the page is fully generated
 // @param syncWithServer a boolean telling whether the read status
 // @param userCollectionURL the url to which new bookmarks should be posted
 // @param numUnread the total number of unread items
 // should be synced with the server.
-function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
+function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchToAccordionText,switchToCarouselText)
 {
   // keybindings globals
   gCurrentlyExpandedItem = -1;
@@ -55,12 +66,50 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread
-  // hook the hide/show calbacks in the feed items
-  for(idx=0;idx<gNumReferences;idx+=1)
+  // check if viewed in a touch device (and if so activate the
+  // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
+  var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
+  if (window.location.href.endsWith("?view=carousel") ||
+      (isTouch && !window.location.href.endsWith("?view=accordion")))
   {
-    currentId = 'collapse'+idx.toString()
-    $("#"+currentId).on('hidden', createHiddenCallback(idx) );
-    $("#"+currentId).on('shown', createShownCallback(idx) );
+    gInCarousel = true;
+    // make sure to disable the collapsible parts of the accordion
+    $(".collapse").removeClass("collapse").addClass("carousel-fig");
+    if (gNumReferences>0) 
+    {
+      // show carousel nav buttons
+      $(".carousel-control").show();
+    } else { $(".carousel-control").hide(); }
+    // show the right "switch" text taking into account that accordion
+    // is the default view for non-touch devices
+    var accordionURLQuery = "./";
+    if (isTouch) { accordionURLQuery = "./?view=accordion"; }
+    $("#view-switch").attr("href",accordionURLQuery).text(switchToAccordionText);
+    // add event
+    $(".carousel").on('slid',  function () { onCarouselSlid()});
+    $(".carousel").carousel("next");
+    gCurrentlyExpandedItem = 0;
+    $(".carousel-control.left").on('click',function (){$(".carousel").carousel("prev")});
+    $(".carousel-control.right").on('click',function (){$(".carousel").carousel("next")});
+  }
+  else 
+  {
+    // make sure the carousel won't be activated by bootstrap
+    $("#sieve-frame").removeClass("carousel-inner");
+    // cleanup display from useless buttons
+    $(".carousel-control").hide();
+    // show the right "switch" text taking into account that carousel
+    // is the default view for touch devices
+    var carouselURLQuery = "./?view=carousel";
+    if (isTouch) { carouselURLQuery = "./"; }
+    $("#view-switch").attr("href",carouselURLQuery).text(switchToCarouselText);
+    // hook the hide/show calbacks in the feed items
+    for(idx=0;idx<gNumReferences;idx+=1)
+    {
+      currentId = 'collapse'+idx.toString()
+      $("#"+currentId).on('hidden', createHiddenCallback(idx) );
+      $("#"+currentId).on('shown', createShownCallback(idx) );
+    }
   }
 }
 
@@ -281,6 +330,10 @@ function markAsSaved(refIdx) {
 
 // Expand previous item
 Mousetrap.bind('p', function() { 
+  if (gInCarousel) {
+    $(".carousel").carousel("prev");
+    return true;
+  }
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var collapsedItemIdx = collapseCurrentlyExpandedItem();
@@ -299,6 +352,10 @@ Mousetrap.bind('p', function() {
 
 // Expand next item
 Mousetrap.bind('n', function() { 
+  if (gInCarousel) {
+    $(".carousel").carousel("next");
+    return true;
+  }
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var collapsedItemIdx = collapseCurrentlyExpandedItem();
