@@ -141,37 +141,28 @@ class FakeReferenceUserStatus:
 def generate_reference_user_status(user,references):
   """Generate reference user status instances for a given list of references.
   WARNING: the new instances are not saved in the database!
-  If user is None, then the created instances are not saveable at all.
   """
   new_ref_status = []
-  for ref in references.select_related("referenceuserstatus_set").all():
-    if user and not ref.referenceuserstatus_set.filter(owner=user).exists():
-      rust = ReferenceUserStatus()
-      rust.owner = user
-      rust.reference = ref
-      rust.reference_pub_date = ref.pub_date
-      source_query = ref.sources.filter(userprofile=user.userprofile).distinct().order_by("pub_date")
+  for ref in references.exclude(referenceuserstatus__owner=user).all():
+    rust = ReferenceUserStatus()
+    rust.owner = user
+    rust.reference = ref
+    rust.reference_pub_date = ref.pub_date
+    source_query = ref.sources.filter(userprofile=user.userprofile).distinct().order_by("pub_date")
+    try:
+      rust.main_source = source_query.get()
+    except MultipleObjectsReturned:
+      rust.main_source = source_query.all()[0]
+    except ObjectDoesNotExist:
       try:
-        rust.main_source = source_query.get()
-      except MultipleObjectsReturned:
-        rust.main_source = source_query.all()[0]
+        rust.main_source = Reference.objects.get(url="<unknown>")
       except ObjectDoesNotExist:
-        try:
-          rust.main_source = Reference.objects.get(url="<unknown>")
-        except ObjectDoesNotExist:
-          s = Reference(url="<unknown>",title="<unknown>",
-                        pub_date=datetime.utcfromtimestamp(0)\
-                        .replace(tzinfo=timezone.utc))
-          s.save()
-          rust.main_source = s
-      new_ref_status.append(rust)
-      # TODO: check here that the corresponding reference has not
-      # been saved already !
-    elif user is None:
-      rust = FakeReferenceUserStatus()
-      rust.reference = ref
-      rust.reference_pub_date = ref.pub_date
-      new_ref_status.append(rust)      
+        s = Reference(url="<unknown>",title="<unknown>",
+                      pub_date=datetime.utcfromtimestamp(0)\
+                      .replace(tzinfo=timezone.utc))
+        s.save()
+        rust.main_source = s
+    new_ref_status.append(rust)
   return new_ref_status
 
 
@@ -183,10 +174,7 @@ def check_user_unread_feed_items(user):
   """
   new_ref_status = []
   for feed in user.userprofile.web_feeds.select_related("source").all():
-    new_ref_status += generate_reference_user_status(user,
-                                                     feed.source\
-                                                     .productions.all()\
-                                                     .select_related("referenceuserstatus_set"))
+    new_ref_status += generate_reference_user_status(user,feed.source.productions)
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()

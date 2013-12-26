@@ -536,7 +536,6 @@ def apply_to_user_sieve(request,owner_name):
   """
   if settings.DEMO:
     return HttpResponseForbidden("Changing the sieve's state is not possible in DEMO mode.")
-  check_user_unread_feed_items(request.owner_user)
   try:
     action_dict = simplejson.loads(request.body)
   except:
@@ -544,14 +543,13 @@ def apply_to_user_sieve(request,owner_name):
   if action_dict.get(u"action") != u"read":
     return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
   modified_rust = []
-  for read_url in action_dict.get(u"references",[]):
-    for rust in ReferenceUserStatus.objects\
-                                   .filter(has_been_read=False,
-                                           owner=request.owner_user)\
-                                   .select_related("reference").all():
-      if rust.reference.url == read_url:
-        rust.has_been_read = True
-        modified_rust.append(rust)
+  for rust in ReferenceUserStatus.objects\
+                                 .filter(has_been_read=False,
+                                         owner=request.owner_user,
+                                         reference__url__in=\
+                                         action_dict.get(u"references",[])):
+    rust.has_been_read = True
+    modified_rust.append(rust)
   with transaction.commit_on_success():
     for r in modified_rust:
       r.save()
