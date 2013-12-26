@@ -79,7 +79,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
     if (isTouch) { accordionURLQuery = "./?view=accordion"; }
     $("#view-switch").attr("href",accordionURLQuery).text(switchToAccordionText);
     // make sure to disable the collapsible parts of the accordion
-    $(".collapse").removeClass("collapse").addClass("carousel-fig");
+    $(".carousel .collapse").removeClass("collapse").addClass("carousel-fig");
     $(".accordion-heading").addClass("carousel-capt");
     $(".accordion-group").addClass("carousel-item-frame");
     if (gNumReferences==0)
