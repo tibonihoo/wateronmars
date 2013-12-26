@@ -31,7 +31,7 @@ Site: https://github.com/tibonihoo/wateronmars
   opacity: 1;
   background-color: rgb(230, 230, 230);
 }
-.carousel-control:hover {
+.carousel-control:active {
   background-color: rgb(212, 68, 19);
   opacity: 1;
 }
@@ -47,9 +47,24 @@ Site: https://github.com/tibonihoo/wateronmars
    left: 5px;
    right: auto;
 }
-.carousel-fig { padding-left: 20px; padding-right: 20px; }
+.carousel-item-frame {
+  border-radius: 0px;
+}
+.carousel-fig .accordion-inner {
+  border-top: none;
+}
+.carousel-fig { 
+  padding-left: 20px; 
+  padding-right: 20px; 
+  border-top: 1px solid rgb(229, 229, 229);
+}
 .carousel-fig .news-abstract { overflow: auto; }
 .news-metadata { margin-top: 3px; }
+.carousel-item-frame {
+-webkit-box-shadow: 5px 5px 5px 5px #ddd;
+-moz-box-shadow: 5px 5px 5px 5px #ddd;
+box-shadow: 5px 5px 5px 5px #ddd;
+}
 
 @media screen and (max-width: 699px) {
   body { padding-right: 1px; padding-left: 5px; }

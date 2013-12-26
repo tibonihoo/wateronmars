@@ -81,6 +81,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
     // make sure to disable the collapsible parts of the accordion
     $(".collapse").removeClass("collapse").addClass("carousel-fig");
     $(".accordion-heading").addClass("carousel-capt");
+    $(".accordion-group").addClass("carousel-item-frame");
     if (gNumReferences==0)
     {
       $(".carousel-control").hide(); 
