@@ -40,7 +40,7 @@ jQuery.ias({
     <small class="source_name"><a href="{{ rust.main_source.url }}">{{ rust.main_source.title }}</a> ({{ rust.reference_pub_date }})</small>
     <ul class="unstyled source_ref_list"> 
     {% endif %}
-    <li id="page{{news_items.number}}-src{{forloop.parentloop.counter0}}-ref{{forloop.counter0}}-title" ><strong><a class="reference-title" href="{{rust.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ rust.reference_pub_date }} -- {{ rust.reference.description|striptags|truncatewords:30 }}">{{ rust.reference.title }}</a></strong></li>
+    <li id="page{{news_items.number}}-src{{forloop.parentloop.counter0}}-ref{{forloop.counter0}}-title" ><strong><a class="reference-title" href="{{rust.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ rust.reference_pub_date }} -- {{ rust.reference.description|striptags|truncatewords:30|safe }}">{{ rust.reference.title }}</a></strong></li>
     {% endfor %}
   </ul>
 </div>
