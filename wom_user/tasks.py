@@ -172,6 +172,14 @@ def check_user_unread_feed_items(user):
   Browse all feed sources registered by a given user and create as
   many ReferenceUserStatus instances as there are unread items.
   """
+  # first cleanup strange corruption happening sometimes in the db
+  for rust in ReferenceUserStatus.objects.filter(owner=user,has_been_read=False):
+    try:
+      int(rust.reference.pk)
+    except ObjectDoesNotExist:
+      rust.delete()
+    except Exception:
+      continue
   new_ref_status = []
   for feed in user.userprofile.web_feeds.select_related("source").all():
     new_ref_status += generate_reference_user_status(user,feed.source.productions)

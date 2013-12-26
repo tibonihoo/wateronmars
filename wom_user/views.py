@@ -508,9 +508,9 @@ def generate_user_sieve(request,owner_name):
   unread_references = ReferenceUserStatus.objects.filter(owner=request.owner_user,
                                                          has_been_read=False)
   num_unread = unread_references.count()
-  oldest_unread_references = unread_references\
-    .select_related("reference","main_source")\
-    .order_by('reference_pub_date')[:MAX_ITEMS_PER_PAGE]
+  oldest_unread_references = unread_references.order_by('reference_pub_date')\
+                             [:MAX_ITEMS_PER_PAGE]\
+                               .select_related("reference","main_source")
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
       'num_unread_references': num_unread,
