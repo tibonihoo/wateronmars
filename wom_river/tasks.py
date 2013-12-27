@@ -39,30 +39,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def create_reference_from_feedparser_entry(entry):
+def get_date_from_feedparser_entry(entry):
   """
-  Takes a FeedParser entry and create a reference from it.
-  Return a tuple with the unsaved reference and a list of tag names.
+  Extract the date from the 'parsed date' fields of a feedparser generated entry.
   """
-  url = entry.link
-  info = ""
-  tags = set()
-  if hasattr(entry, "tags"):
-    tags = set([t.term for t in entry.tags])
-  if len(url)>URL_MAX_LENGTH:
-    # WOM should be configured in such a way that this never happens !
-    truncation_txt = "<wom truncation>"
-    # Save the full url in info to limit the loss of information
-    info = u"<WOM had to truncate the following URL: %s>" % url
-    logger.warning("Found an url of length %d (>%d) \
-when importing references from feed." % (len(url),URL_MAX_LENGTH))
-    url = url[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
-  title = truncate_reference_title(entry.get("title") or url)
-  try:
-    return (Reference.objects.get(url=url),tags)
-  except ObjectDoesNotExist:
-    ref = Reference(url=url,title=title)
-  ref.description = " ".join((info,entry.get("description","")))
   if entry.has_key("updated_parsed"):
     updated_date_utc = entry.updated_parsed[:6]
   elif entry.has_key("published_parsed"):
@@ -70,9 +50,41 @@ when importing references from feed." % (len(url),URL_MAX_LENGTH))
   else:
     logger.warning("Using 'now' as date for item %s" % (entry.link))
     updated_date_utc = timezone.now().utctimetuple()[:6]
-  date = datetime(*(updated_date_utc),tzinfo=timezone.utc)
+  return datetime(*(updated_date_utc),tzinfo=timezone.utc)
+
+
+def create_reference_from_feedparser_entry(entry,date,previous_ref):
+  """Takes a FeedParser entry and create a reference from it and
+  attributing it the publication date given in argument.
+
+  If the corresponding Reference already exists, it must be given as
+  the previous_ref argument, and if previous_ref is None, it will be
+  assumed that there is no matching Rerefence in the db.
+  
+  Return a tuple with the unsaved reference and a list of tag names.
+  """
+  url = entry.link
+  info = ""
+  tags = set()
+  if hasattr(entry, "tags"):
+    tags = set([t.term for t in entry.tags])
+  if previous_ref is None:
+    if len(url)>URL_MAX_LENGTH:
+      # WOM should be configured in such a way that this never happens !
+      truncation_txt = "<wom truncation>"
+      # Save the full url in info to limit the loss of information
+      info = u"<WOM had to truncate the following URL: %s>" % url
+      logger.warning("Found an url of length %d (>%d) \
+when importing references from feed." % (len(url),URL_MAX_LENGTH))
+      url = url[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
+    # set the title only for new ref (should avoid weird behaviour
+    # from the user point of view)
+    title = truncate_reference_title(entry.get("title") or url)
+    ref = Reference(url=url,title=title)
+  ref.description = " ".join((info,entry.get("description","")))
   ref.pub_date = date
   return (ref,tags)
+
 
 def add_new_references_from_feedparser_entries(feed,entries):
   """Create and save references from the entries found in a feedparser
@@ -86,15 +98,26 @@ def add_new_references_from_feedparser_entries(feed,entries):
   latest_item_date = feed_last_update_check
   all_references = []
   ref_by_url = {}
-  for entry in entries:
-    r,tags = create_reference_from_feedparser_entry(entry)
+  entries_with_dates = [(e,get_date_from_feedparser_entry(e)) for e in entries]
+  new_entries = [(e,d) for e,d in entries_with_dates \
+                 if d>feed_last_update_check]
+  entries_url = [e.link for e,_ in new_entries if hasattr(e,"link")]
+  existing_references = list(Reference.objects.filter(url__in=entries_url).all())
+  existing_references_by_url = dict([(r,r.url) for r in existing_references])
+  for entry,date in new_entries:
+    if not hasattr(entry,"link"):
+      logger.warning("Skeeping a feed entry without 'link' : %s." % entry)
+      continue
+    if entry.link in existing_references_by_url:
+      previous_ref = existing_references_by_url[entry.link]
+    else:
+      previous_ref = None
+    r,tags = create_reference_from_feedparser_entry(entry,date,previous_ref)
     if r.url in ref_by_url:
       # skip duplicate reference
       continue
     ref_by_url[r.url] = r
     current_ref_date = r.pub_date
-    if  current_ref_date < feed_last_update_check:
-      continue
     all_references.append((r,tags))
     if current_ref_date > latest_item_date:
       latest_item_date = current_ref_date

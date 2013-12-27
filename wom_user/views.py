@@ -178,8 +178,8 @@ def request_for_update(request):
   of all references that have never been saved (past an arbitrary
   delay).
   """
-  collect_news_from_feeds()
   delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
+  collect_news_from_feeds()
   return HttpResponseRedirect(reverse("wom_user.views.home"))
 
 
