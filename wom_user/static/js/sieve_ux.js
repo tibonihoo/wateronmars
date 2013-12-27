@@ -62,7 +62,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
   // keybindings globals
   gCurrentlyExpandedItem = -1;
   gMouseTrapDisabled = false;   
-  gNumReferences = $(".reference").length;
+  gNumReferences = $(".wom.reference").length;
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread;

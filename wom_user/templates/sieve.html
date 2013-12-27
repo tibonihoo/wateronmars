@@ -31,7 +31,7 @@ prepareKeyBindings();
 <div class="carousel slide">
 <div class="accordion carousel-inner" id="sieve-frame">
 {% for rust in oldest_unread_references %}
-  <div class="accordion-group item reference{% if rust.has_been_saved %} saved{% endif %}" id="ref{{forloop.counter0}}">
+  <div class="accordion-group item wom reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
     <div class="accordion-heading accordion-toggle accordion-heading reference-short-description"  style="background-color:#eeeeec;padding:3px;">
       <a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-frame" href="#collapse{{forloop.counter0}}">{{ rust.reference.title }}</a> <small> - {{ rust.reference_pub_date }} <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
     </div>
