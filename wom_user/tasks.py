@@ -177,8 +177,17 @@ def check_user_unread_feed_items(user):
     try:
       int(rust.reference.pk)
     except ObjectDoesNotExist:
+      try:
+        rust_src = unicode(rust.main_source)
+      except:
+        rust_src = "not-found"
+      logger.warning("Deleting corrupted ReferenceUserStatus \
+      whose reference cannot be found \
+      (RUST: read %s, pub_date %s, source %s)." \
+                     % (rust.has_been_read,rust.reference_pub_date,rust_src))
       rust.delete()
-    except Exception:
+    except Exception,e:
+      logger.error("Could not delete a ReferenceUserStatus (%s)." % e)
       continue
   new_ref_status = []
   for feed in user.userprofile.web_feeds.select_related("source").all():
