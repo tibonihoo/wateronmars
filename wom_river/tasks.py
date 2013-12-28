@@ -48,7 +48,7 @@ def get_date_from_feedparser_entry(entry):
   elif entry.has_key("published_parsed"):
     updated_date_utc = entry.published_parsed[:6]
   else:
-    logger.warning("Using 'now' as date for item %s" % (entry.link))
+    logger.debug("Using 'now' as date for item %s" % entry.link)
     updated_date_utc = datetime.now(timezone.utc).utctimetuple()[:6]
   return datetime(*(updated_date_utc),tzinfo=timezone.utc)
 
