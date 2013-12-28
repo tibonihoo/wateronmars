@@ -148,7 +148,8 @@ def generate_reference_user_status(user,references):
     rust.owner = user
     rust.reference = ref
     rust.reference_pub_date = ref.pub_date
-    source_query = ref.sources.filter(userprofile=user.userprofile).distinct().order_by("pub_date")
+    source_query = ref.sources.filter(userprofile=user.userprofile)\
+                              .distinct().order_by("pub_date")
     try:
       rust.main_source = source_query.get()
     except MultipleObjectsReturned:
@@ -158,37 +159,55 @@ def generate_reference_user_status(user,references):
         rust.main_source = Reference.objects.get(url="<unknown>")
       except ObjectDoesNotExist:
         s = Reference(url="<unknown>",title="<unknown>",
+                      save_count=1,
                       pub_date=datetime.utcfromtimestamp(0)\
-                      .replace(tzinfo=timezone.utc))
+                      .replace(tzinfo=timezone.utc))        
         s.save()
         rust.main_source = s
     new_ref_status.append(rust)
   return new_ref_status
 
 
+def clean_corrupted_rusts(user):
+  """Check that a user's ReferenceUserStatus still correspond to a
+  valid reference and a valid main_source.
+  """
+  # first cleanup strange corruption happening sometimes in the db
+  for rust in ReferenceUserStatus.objects.filter(owner=user,has_been_read=False):
+    corrupted = False
+    try:
+      rust_ref = unicode(rust.reference)
+    except ObjectDoesNotExist:
+      rust_ref = "not-found"
+      corrupted = True
+    except Exception,e:
+      rust_ref = "err(%s)" % e
+    try:
+      rust_src = unicode(rust.main_source)
+    except ObjectDoesNotExist:
+      rust_src = "not-found"
+      corrupted = True
+    except Exception,e:
+      rust_src = "err(%s)" % e
+    if corrupted:
+      logger.warning("Deleting corrupted ReferenceUserStatus: \
+read %s, pub_date %s, reference %s, source %s." \
+                     % (rust.has_been_read,rust.reference_pub_date,
+                        rust_ref,rust_src))
+    try:
+      rust.delete()
+    except Exception,e:
+      logger.error("Could not delete a corrupted ReferenceUserStatus (%s)." % e)
+      continue
+
+  
 @task()  
 def check_user_unread_feed_items(user):
   """
   Browse all feed sources registered by a given user and create as
   many ReferenceUserStatus instances as there are unread items.
   """
-  # first cleanup strange corruption happening sometimes in the db
-  for rust in ReferenceUserStatus.objects.filter(owner=user,has_been_read=False):
-    try:
-      int(rust.reference.pk)
-    except ObjectDoesNotExist:
-      try:
-        rust_src = unicode(rust.main_source)
-      except:
-        rust_src = "not-found"
-      logger.warning("Deleting corrupted ReferenceUserStatus \
-      whose reference cannot be found \
-      (RUST: read %s, pub_date %s, source %s)." \
-                     % (rust.has_been_read,rust.reference_pub_date,rust_src))
-      rust.delete()
-    except Exception,e:
-      logger.error("Could not delete a ReferenceUserStatus (%s)." % e)
-      continue
+  clean_corrupted_rusts(user)
   new_ref_status = []
   for feed in user.userprofile.web_feeds.select_related("source").all():
     new_ref_status += generate_reference_user_status(user,feed.source.productions)
