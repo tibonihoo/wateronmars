@@ -166,6 +166,7 @@ def import_feedsources_from_opml(opml_txt):
   collected_feeds,_ = parse_opml(opml_txt,False)
   db_new_feedsources = []
   feeds_and_tags = []
+  newly_referenced_source = []
   for current_feed in collected_feeds:
     try:
       feed_source = WebFeed.objects.get(xmlURL=current_feed.xmlUrl)
@@ -182,11 +183,16 @@ def import_feedsources_from_opml(opml_txt):
       feed_source = WebFeed(source=ref,xmlURL=current_feed.xmlUrl)
       feed_source.last_update_check = datetime.utcfromtimestamp(0)\
                                               .replace(tzinfo=timezone.utc)
+      newly_referenced_source.append(ref)
       db_new_feedsources.append(feed_source)
     feeds_and_tags.append((feed_source,current_feed.tags))
   with transaction.commit_on_success():
     for f in db_new_feedsources:
       f.save()
+      # make sure to record the fact
+    for r in newly_referenced_source:
+      r.save_count += 1
+      r.save()
   return dict(feeds_and_tags)
 
 
