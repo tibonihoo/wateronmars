@@ -27,6 +27,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+                       url(r'^robots.txt$', 'wom_user.views.get_robots_txt'),
+                       url(r'^humans.txt$', 'wom_user.views.get_humans_txt'),
                        url(r'^$', 'wom_user.views.home', name='home'),
                        url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
                        url(r'^accounts/logout/$', 'wom_user.views.user_logout'),

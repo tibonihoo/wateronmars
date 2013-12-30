@@ -38,4 +38,23 @@ if hasattr(settings,"WOM_USER_MAX_ITEMS_PER_PAGE"):
 else:
   MAX_ITEMS_PER_PAGE = 100
 
+if hasattr(settings,"WOM_USER_HUMANS_TEAM"):
+  HUMANS_TEAM = settings.WOM_USER_HUMANS_TEAM
+else:
+  HUMANS_TEAM = ""
   
+if hasattr(settings,"WOM_USER_HUMANS_THANKS"):
+  HUMANS_THANKS = settings.WOM_USER_HUMANS_THANKS
+else:
+  HUMANS_THANKS = """/* THANKS */
+  RSS Hero: Dave Winer.
+  Site: http://davewiner.com/
+
+  Feed & Freedom Hero: Aaron Swartz
+  Site: http://www.aaronsw.com
+
+  feedparser and feedfinder Creator: Mark Pilgrim
+  Site: https://en.wikipedia.org/wiki/Mark_Pilgrim(software_developer)
+"""
+
+

@@ -69,6 +69,8 @@ from wom_user.tasks import check_user_unread_feed_items
 
 from wom_user.settings import NEWS_TIME_THRESHOLD
 from wom_user.settings import MAX_ITEMS_PER_PAGE
+from wom_user.settings import HUMANS_TEAM
+from wom_user.settings import HUMANS_THANKS
 
 
 
@@ -192,7 +194,33 @@ def request_for_cleanup(request):
 
 
 
+def get_robots_txt(request):
+  """Generate a set of robots.txt rules.""" 
+  return HttpResponse("""
+User-agent: *
+Disallow: /u/*/river
+Disallow: /u/*/sieve
+Disallow: /accounts
+""",mimetype='text/plain')
 
+def get_humans_txt(request):
+  """Generate a set of humans.txt rules. See also http://humanstxt.org/."""
+  
+  return HttpResponse("""
+%s  
+
+%s
+  
+/* SITE */
+  Standards: HTML5, CSS3
+  Platform: WaterOnMars
+  Sources: https://github.com/tibonihoo/wateronmars
+  License: Affero GPLv3
+  Components: Twitter Bootstrap, mousetrap.js, jQuery, Infinite Ajax Scroll, TouchSwipe-Jquery-Plugin.
+  Software: Django, Emacs, Firefox, Firebug, Inkscape
+""" % (HUMANS_TEAM, HUMANS_THANKS),mimetype='text/plain')
+
+  
 def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):
   return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&comment='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_collection_add',args=(owner_name,)))
 

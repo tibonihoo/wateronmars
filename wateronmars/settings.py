@@ -30,6 +30,22 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# A string formatted following the example of TEAM section given at:
+# http://humanstxt.org/Standard.html
+# WOM_USER_HUMANS_TEAM = """/* TEAM */
+#   Admin: Me.
+#   Site: http://example.com
+#   From: Where ?
+# """
+
+# A string formatted following the example of THANKS section given at:
+# http://humanstxt.org/Standard.html
+# WOM_USER_HUMANS_THANKS = """/* THANKS */
+#   My Hero: Her Name.
+#   Site: http://example.com/
+# """
+
+
 # User-Agent (important for websites that protect against DDOS by
 # blacklisting some user-agents)
 USER_AGENT = "wateronmars"
