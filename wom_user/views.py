@@ -28,6 +28,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from wom_pebbles.models import Reference
 from wom_classification.models import get_item_tag_names
 from wom_classification.models import get_user_tags
 from wom_pebbles.tasks import delete_old_references
@@ -182,6 +183,12 @@ def request_for_update(request):
   """
   delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
   collect_news_from_feeds()
+  if settings.DEMO:
+    # keep only a short number of refs (the most recent) to avoid bloating the demo
+    with transaction.commit_on_success():
+      for ref in Reference.objects.filter(save_count__lt=1)\
+                                  .order_by("-pub_date")[MAX_ITEMS_PER_PAGE:]:
+        ref.delete()
   return HttpResponseRedirect(reverse("wom_user.views.home"))
 
 
