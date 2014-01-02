@@ -28,9 +28,12 @@ Feature list:
 
 
 For the curious developers the aim is also to provide the base
-boilerplate mechanics for news and bookmarks manipulation in order to
-experiment new features around this (now admitedly old-fashioned)
-theme.
+mechanics for news and bookmarks manipulation. For instance, there is
+now a "good enough" database scheme, a RESTful API and a "not too
+ridiculous" UX.
+
+Everything is set up to start experimenting new features around the
+admitedly old-fashioned theme of news feeds and bookmarks !
 
 The project is licensed under the [GNU Affero GPL v3](http://www.gnu.org/licenses/agpl-3.0.html).
 
