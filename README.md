@@ -10,16 +10,27 @@ web news readers and bookmark collection apps.
 
 As such Water On Mars intends to be a news reading platform built around the following analogies:
 
-> The user can contemplate the river of news flowing down from her selection of sources.
+> You contemplate the river of news flowing down from yur selection of sources.
 
-> If she wants she can use a sieve to filter out the most interesting pebbles (and among them maybe also some gold nuggets ?) to put them in her collection.
+> You can then use a sieve to filter out the most interesting links and collect them.
 
 An demo website is up and running thanks to Heroku at: http://wateronmars-demo.herokuapp.com.
 
-For the adventurous developers the aim is also to provide the base
+Feature list:
+
+- Read news from web feeds
+- List your collection of bookmarks
+- Bookmarklets let you add bookmarks and feeds
+- A tablet-friendly carousel view let you swipe among the news
+- A mailbox-view (plus keyboard shortcut) let you browse the news efficiently
+- Import bookmarks from Netscape-style bookmark list (as exported by delicious.com)
+- Import subscription from OPML file (as exported by most feed readers)
+
+
+For the curious developers the aim is also to provide the base
 boilerplate mechanics for news and bookmarks manipulation in order to
-implement and experiment new features around this (now admitedly
-old-fashioned) theme.
+experiment new features around this (now admitedly old-fashioned)
+theme.
 
 The project is licensed under the [GNU Affero GPL v3](http://www.gnu.org/licenses/agpl-3.0.html).
 
