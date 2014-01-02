@@ -24,7 +24,7 @@ Feature list:
 - A tablet-friendly carousel view lets you swipe among the news
 - A mailbox-view (plus keyboard shortcut) lets you browse the news efficiently
 - Import bookmarks from Netscape-style bookmark list (as exported by delicious.com)
-- Import subscription from OPML file (as exported by most feed readers)
+- Import subscriptions from OPML file (as exported by most feed readers)
 
 
 For the curious developers the aim is also to provide the base
