@@ -186,8 +186,9 @@ def request_for_update(request):
   if settings.DEMO:
     # keep only a short number of refs (the most recent) to avoid bloating the demo
     with transaction.commit_on_success():
-      for ref in Reference.objects.filter(save_count__lt=1)\
-                                  .order_by("-pub_date")[MAX_ITEMS_PER_PAGE:]:
+      for ref in list(Reference.objects\
+                      .filter(save_count=0)\
+                      .order_by("-pub_date")[MAX_ITEMS_PER_PAGE:]):
         ref.delete()
   return HttpResponseRedirect(reverse("wom_user.views.home"))
 
