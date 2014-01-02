@@ -1,12 +1,12 @@
 Water On Mars!
 ==============
 
-*Where good old rivers (of news) have been dicovered (again).*
+*Where good old rivers (of news) have been discovered (again).*
 
 [![Build Status](https://travis-ci.org/tibonihoo/wateronmars.png?branch=master)](https://travis-ci.org/tibonihoo/wateronmars)
 
 This project intends to provide a free (as in freedom) alternative to
-web news readers and bookmark collection site.
+web news readers and bookmark collection apps.
 
 As such Water On Mars intends to be a news reading platform built around the following analogies:
 
@@ -24,7 +24,9 @@ old-fashioned) theme.
 The project is licensed under the [GNU Affero GPL v3](http://www.gnu.org/licenses/agpl-3.0.html).
 
 
+Thibauld Nion
+
 - - -
 
-(C) Thibauld Nion, 2012-2013
+For more legal info read COPYING.
 
