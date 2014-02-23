@@ -2,7 +2,7 @@ Django==1.4
 South==0.7.5
 amqplib==1.0.2
 anyjson==0.3.3
-argparse==1.2.1
+argparse
 billiard==2.7.3.13
 celery==3.0.9
 dj-database-url==0.2.1
