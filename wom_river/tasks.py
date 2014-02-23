@@ -33,6 +33,7 @@ from wom_river.utils.read_opml import parse_opml
 from wom_pebbles.models import URL_MAX_LENGTH
 
 from wom_pebbles.tasks import truncate_reference_title
+from wom_pebbles.tasks import truncate_url
 
 
 import logging
@@ -69,14 +70,13 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   if entry.has_key("tags"):
     tags = set([t.term for t in entry.tags])
   if previous_ref is None:
-    if len(url)>URL_MAX_LENGTH:
-      # WOM should be configured in such a way that this never happens !
-      truncation_txt = "<wom truncation>"
+    url_truncated,did_truncate = truncate_url(url)
+    if did_truncate:
       # Save the full url in info to limit the loss of information
       info = u"<WOM had to truncate the following URL: %s>" % url
       logger.warning("Found an url of length %d (>%d) \
 when importing references from feed." % (len(url),URL_MAX_LENGTH))
-      url = url[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
+      url = url_truncated
     # set the title only for new ref (should avoid weird behaviour
     # from the user point of view)
     title = truncate_reference_title(entry.get("title") or url)
@@ -107,8 +107,8 @@ def add_new_references_from_feedparser_entries(feed,entries):
   existing_references = list(Reference.objects.filter(url__in=entries_url).all())
   existing_references_by_url = dict([(r.url,r) for r in existing_references])
   for entry,date in new_entries:
-    if not entry.has_key("link"):
-      logger.warning("Skeeping a feed entry without 'link' : %s." % entry)
+    if not entry.has_key("link") or not entry.link:
+      logger.warning("Skipping a feed entry without 'link' : %s." % entry)
       continue
     previous_ref = existing_references_by_url.get(entry.link,None)
     if previous_ref is None:

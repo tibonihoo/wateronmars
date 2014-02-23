@@ -30,6 +30,7 @@ from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.tasks  import build_reference_title_from_url
 from wom_pebbles.tasks  import truncate_reference_title
+from wom_pebbles.tasks  import truncate_url
 from wom_pebbles.tasks  import import_references_from_ns_bookmark_list
 
 
@@ -131,6 +132,24 @@ class UtilityFunctionsTests(TestCase):
     ref_title = "p" + "m"*REFERENCE_TITLE_MAX_LENGTH
     self.assertEqual("...",truncate_reference_title(ref_title)[-3:])
 
+  def test_truncate_url(self):
+    short_url = "http://mouf"
+    self.assertTrue(len(short_url)<URL_MAX_LENGTH)
+    self.assertEqual((short_url,False),truncate_url(short_url))
+    long_url = "http://" + ("u"*URL_MAX_LENGTH)
+    res_long_url,did_truncate = truncate_url(long_url)
+    self.assertTrue(did_truncate)
+    self.assertGreaterEqual(URL_MAX_LENGTH,len(res_long_url))
+    query_start = "/?"
+    campain_string = "utm_source=rss&utm_medium=rss&utm_campaign=on-peut"
+    filler_size = URL_MAX_LENGTH-7-len(campain_string)-len(query_start)+1
+    long_url_campain = "http://" + ("u"*filler_size) + query_start + campain_string
+    res_long_url,did_truncate = truncate_url(long_url_campain)
+    self.assertTrue(did_truncate)
+    self.assertGreaterEqual(URL_MAX_LENGTH,len(res_long_url))
+    self.assertEqual(long_url_campain[:-len(campain_string)],res_long_url)
+    
+    
 
 class ImportReferencesFromNSBookmarkListTaskTest(TestCase):
 

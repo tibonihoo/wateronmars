@@ -36,6 +36,11 @@ from collections import namedtuple
 import logging
 logger = logging.getLogger(__name__)
 
+import re
+
+# A string defining the query string related to "campain" trackers,
+# that may end up being stripped out when a url is too long.
+URL_CAMPAIN_QS_RE = re.compile("utm_[^&]*(&|$)")
 
 def build_reference_title_from_url(url):
   """Generate a valid reference title from an url.
@@ -57,6 +62,21 @@ def truncate_reference_title(title):
   else:
     return title
 
+
+def truncate_url(url):
+  """Truncate a URL to make sure it enforces the URL_MAX_LENGTH constraint.
+  Returns a tuple: (new_url,did_truncate) where new_url is either the input url or its truncated version and did_truncate is True iff the url has to be truncated.
+  """
+  # WOM should be configured in such a way that this never happens !
+  if len(url)<=URL_MAX_LENGTH:
+    return url,False
+  url = URL_CAMPAIN_QS_RE.sub("",url)
+  if len(url)>URL_MAX_LENGTH:
+    truncation_txt = "<wom truncation>"
+    url = url[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
+  return url,True
+  
+    
 def build_source_url_from_reference_url(ref_url):
   """Generate a url that could realistically by considered as the source
   of the given url.
@@ -104,15 +124,17 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
   new_ref_by_url = {}
   for bmk_info in collected_bmks:
     u = bmk_info["url"]
+    if not u:
+      logger.warning("Skipping a bookmark that has an empty URL.")
+      continue
     info = ""
-    if len(u)>URL_MAX_LENGTH:
-      # WOM should be configured in such a way that this never happens !
-      truncation_txt = "<wom truncation>"
+    u_truncated, did_truncate = truncate_url(u)
+    if did_truncate:
       # Save the full url in info to limit the loss of information
       info = u"<WOM had to truncate the following URL: %s>" % u
       logger.warning("Found an url of length %d (>%d) \
 when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
-      u = u[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
+      u = u_truncated
     t = bmk_info.get("title") or build_reference_title_from_url(u)
     if "posix_timestamp" in bmk_info:
       d = datetime.datetime\
