@@ -72,10 +72,10 @@ def truncate_url(url):
     return url,False
   url = URL_CAMPAIN_QS_RE.sub("",url)
   if len(url)>URL_MAX_LENGTH:
-    truncation_txt = "<wom truncation>"
+    truncation_txt = "#wom_truncation#"
     url = url[:URL_MAX_LENGTH-len(truncation_txt)]+truncation_txt
   return url,True
-  
+
     
 def build_source_url_from_reference_url(ref_url):
   """Generate a url that could realistically by considered as the source
