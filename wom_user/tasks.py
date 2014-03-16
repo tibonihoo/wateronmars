@@ -194,11 +194,11 @@ def clean_corrupted_rusts(user):
 read %s, pub_date %s, reference %s, source %s." \
                      % (rust.has_been_read,rust.reference_pub_date,
                         rust_ref,rust_src))
-    try:
-      rust.delete()
-    except Exception,e:
-      logger.error("Could not delete a corrupted ReferenceUserStatus (%s)." % e)
-      continue
+      try:
+        rust.delete()
+      except Exception,e:
+        logger.error("Could not delete a corrupted ReferenceUserStatus (%s)." % e)
+        continue
 
   
 @task()  
