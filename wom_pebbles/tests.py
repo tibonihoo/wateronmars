@@ -33,6 +33,8 @@ from wom_pebbles.tasks  import truncate_reference_title
 from wom_pebbles.tasks  import truncate_url
 from wom_pebbles.tasks  import import_references_from_ns_bookmark_list
 
+from wom_pebbles.templatetags.html_sanitizers  import defang_html
+
 
 if URL_MAX_LENGTH>255:
   print "WARNING: the current max length for URLs may cause portability problems (see https://docs.djangoproject.com/en/1.4/ref/databases/#character-fields)"
@@ -229,3 +231,41 @@ Do Not Edit! -->
     self.assertEqual("A too long URL.",meta.note)
     self.assertTrue(meta.is_public)
 
+
+class HTMLSanitizersTemplateTagsTest(TestCase):
+  
+  def test_defang_html_on_correct_html(self):
+    html = """\
+<div class="mouf"><p><span><img/>Hello</span><b>World!</b><script>...
+    </script></p></div>"""
+    safer_html = """\
+ <p> <img/>Hello <b>World!</b></p> """
+    output = defang_html(html)
+    self.assertEqual(safer_html,output)
+
+  def test_defang_html_on_snippet_missing_span_close(self):
+    html = """\
+<div class="mouf"><p><span><img/>Hello <b>World!</b><script>...
+    </script></p></div>"""
+    safer_html = """\
+ <p> <img/>Hello <b>World!</b> </p> """
+    output = defang_html(html)
+    self.assertEqual(safer_html,output)
+    
+  def test_defang_html_on_snippet_missing_p_close(self):
+    html = """\
+<div class="mouf"><p><span><img/>Hello <b>World!</b><script>...
+    </script></div>"""
+    safer_html = """\
+ <p> <img/>Hello <b>World!</b> </p> """
+    output = defang_html(html)
+    self.assertEqual(safer_html,output)
+
+  def test_defang_html_on_snippet_missing_b_close(self):
+    html = """\
+<div class="mouf"><p><span><img/>Hello <b>World!<script>...
+    </script></p></div>"""
+    safer_html = """\
+ <p> <img/>Hello <b>World!</b> </p> """
+    output = defang_html(html)
+    self.assertEqual(safer_html,output)
