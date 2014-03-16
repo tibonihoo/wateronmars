@@ -33,6 +33,6 @@ def defang_html(text, autoescape=None):
   for tag in soup.find_all("script"):
     tag.replace_with('')
   html = unicode(soup)
-  text = DANGEROUS_TAGS_RE.sub(" ",auto_esc(html,autoescape))
+  text = DANGEROUS_TAGS_RE.sub(" ",html)
   return mark_safe(text)
 

@@ -39,7 +39,7 @@ prepareKeyBindings();
     <div id="collapse{{forloop.counter0}}" class="accordion-body collapse reference-details">
       <div class="accordion-inner">
         <div class="news-abstract">
-        {{ rust.reference.description|defang_html|safe }}
+        {{ rust.reference.description|safe|defang_html }}
         </div>
         <div class="news-metadata" style="padding-top:0.5em;"> <a class="save-link" href="javascript:saveCurrentItem()" style="padding-right:0.5em;"><i class="icon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked icon-bookmark"></i> <a id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}" style="padding-right:0.5em;"><i class="icon-globe"></i>view on site (v)</a>
           {% for tag in rust.get_tag_names %}
