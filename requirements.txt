@@ -14,3 +14,4 @@ psycopg2==2.4.5
 python-dateutil==1.5
 pytz==2012d
 wsgiref==0.1.2
+beautifulsoup4
