@@ -18,6 +18,8 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from django.utils.encoding import iri_to_uri
+
 from wom_river.utils.netscape_bookmarks import parse_netscape_bookmarks
 
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
@@ -67,6 +69,8 @@ def truncate_url(url):
   """Truncate a URL to make sure it enforces the URL_MAX_LENGTH constraint.
   Returns a tuple: (new_url,did_truncate) where new_url is either the input url or its truncated version and did_truncate is True iff the url has to be truncated.
   """
+  # Check encoding and make sure that URL are 
+  url = iri_to_uri(url)
   # WOM should be configured in such a way that this never happens !
   if len(url)<=URL_MAX_LENGTH:
     return url,False

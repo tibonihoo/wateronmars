@@ -18,10 +18,9 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import urllib
-
 from datetime import datetime
 from django.utils import timezone
+from django.utils.http import urlunquote_plus
 
 from django.conf import settings
 from django.template import RequestContext
@@ -368,7 +367,7 @@ def user_river_source_add(request,owner_name):
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
-    src_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+    src_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
   else:
     src_info = None
   form = UserSourceAdditionForm(request.user, src_info,
@@ -394,7 +393,7 @@ def user_river_source_remove(request,owner_name):
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
-    src_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+    src_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
   else:
     src_info = None
   form = CreateUserSourceRemovalForm(request.user, src_info, error_class=CustomErrorList)
@@ -420,7 +419,7 @@ def user_collection_add(request,owner_name):
   if request.method == 'POST':
     bmk_info = request.POST
   elif request.GET: # GET
-    bmk_info = dict( (k,urllib.unquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+    bmk_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
   else:
     bmk_info = None
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
@@ -432,7 +431,7 @@ def user_collection_add(request,owner_name):
   return render_to_response('bookmark_addition.html',d,
                             context_instance=RequestContext(request))
   
-  
+
 @loggedin_and_owner_required
 @csrf_protect
 def post_to_user_collection(request,owner_name):
@@ -578,12 +577,12 @@ def apply_to_user_sieve(request,owner_name):
     action_dict = {}
   if action_dict.get(u"action") != u"read":
     return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
+  target_urls = action_dict.get(u"references",[])
   modified_rust = []
   for rust in ReferenceUserStatus.objects\
                                  .filter(has_been_read=False,
                                          owner=request.owner_user,
-                                         reference__url__in=\
-                                         action_dict.get(u"references",[])):
+                                         reference__url__in=target_urls):
     rust.has_been_read = True
     modified_rust.append(rust)
   with transaction.commit_on_success():
