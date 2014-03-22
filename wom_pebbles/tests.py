@@ -134,14 +134,18 @@ class UtilityFunctionsTests(TestCase):
     ref_title = "p" + "m"*REFERENCE_TITLE_MAX_LENGTH
     self.assertEqual("...",truncate_reference_title(ref_title)[-3:])
 
-  def test_truncate_url(self):
+  def test_truncate_url_on_short_ascii_url(self):
     short_url = "http://mouf"
     self.assertTrue(len(short_url)<URL_MAX_LENGTH)
     self.assertEqual((short_url,False),truncate_url(short_url))
+  
+  def test_truncate_url_on_long_ascii_url(self):
     long_url = "http://" + ("u"*URL_MAX_LENGTH)
     res_long_url,did_truncate = truncate_url(long_url)
     self.assertTrue(did_truncate)
     self.assertGreaterEqual(URL_MAX_LENGTH,len(res_long_url))
+    
+  def test_truncate_url_on_long_ascii_url_with_campain_args(self):
     query_start = "/?"
     campain_string = "utm_source=rss&utm_medium=rss&utm_campaign=on-peut"
     filler_size = URL_MAX_LENGTH-7-len(campain_string)-len(query_start)+1
@@ -151,7 +155,34 @@ class UtilityFunctionsTests(TestCase):
     self.assertGreaterEqual(URL_MAX_LENGTH,len(res_long_url))
     self.assertEqual(long_url_campain[:-len(campain_string)],res_long_url)
     
+  def test_truncate_url_with_non_ascii_characters(self):
+    short_url = "http://méhœñ۳予"
+    self.assertTrue(len(short_url)<URL_MAX_LENGTH)
+    escaped_url= "http://m%C3%A9h%C5%93%C3%B1%DB%B3%E4%BA%88"
+    self.assertEqual((escaped_url,False),truncate_url(short_url))
     
+  def test_truncate_url_with_long_after_quote_url(self):
+    short_url = "http://é"
+    short_url += ("u"*(URL_MAX_LENGTH-len(short_url)-1))
+    self.assertTrue(len(short_url)<URL_MAX_LENGTH)
+    truncated_url, did_truncate = truncate_url(short_url)
+    self.assertEqual(True,did_truncate)
+    self.assertGreaterEqual(URL_MAX_LENGTH,len(truncated_url))
+
+  def test_truncate_url_with_spaces(self):
+    short_url = u"http://m m"
+    self.assertTrue(len(short_url)<URL_MAX_LENGTH)
+    escaped_url= "http://m%20m"
+    self.assertEqual((escaped_url,False),truncate_url(short_url))
+
+  def test_truncate_url_with_long_after_space_quote_url(self):
+    short_url = "http://m m"
+    short_url += ("u"*(URL_MAX_LENGTH-len(short_url)-1))
+    self.assertTrue(len(short_url)<URL_MAX_LENGTH)
+    truncated_url, did_truncate = truncate_url(short_url)
+    self.assertEqual(True,did_truncate)
+    self.assertGreaterEqual(URL_MAX_LENGTH,len(truncated_url))
+
 
 class ImportReferencesFromNSBookmarkListTaskTest(TestCase):
 
