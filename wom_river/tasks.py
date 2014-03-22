@@ -76,7 +76,7 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
       info = u"<WOM had to truncate the following URL: %s>" % url
       logger.warning("Found an url of length %d (>%d) \
 when importing references from feed." % (len(url),URL_MAX_LENGTH))
-      url = url_truncated
+    url = url_truncated
     # set the title only for new ref (should avoid weird behaviour
     # from the user point of view)
     title = truncate_reference_title(entry.get("title") or url)

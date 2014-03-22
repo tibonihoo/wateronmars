@@ -138,7 +138,7 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
       info = u"<WOM had to truncate the following URL: %s>" % u
       logger.warning("Found an url of length %d (>%d) \
 when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
-      u = u_truncated
+    u = u_truncated
     t = bmk_info.get("title") or build_reference_title_from_url(u)
     if "posix_timestamp" in bmk_info:
       d = datetime.datetime\
