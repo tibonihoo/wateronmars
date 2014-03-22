@@ -65,9 +65,13 @@ def truncate_reference_title(title):
     return title
 
 
-def truncate_url(url):
-  """Truncate a URL to make sure it enforces the URL_MAX_LENGTH constraint.
-  Returns a tuple: (new_url,did_truncate) where new_url is either the input url or its truncated version and did_truncate is True iff the url has to be truncated.
+def sanitize_url(url):
+  """Quote non-ascii characters and spaces and truncate a URL to make
+  sure it enforces the URL_MAX_LENGTH constraint.
+  
+  Returns a tuple: (new_url,did_truncate) where new_url is either the
+  input url or its truncated version and did_truncate is True iff the
+  url has to be truncated.
   """
   # Check encoding and make sure that URL are 
   url = iri_to_uri(url)
@@ -132,7 +136,7 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
       logger.warning("Skipping a bookmark that has an empty URL.")
       continue
     info = ""
-    u_truncated, did_truncate = truncate_url(u)
+    u_truncated, did_truncate = sanitize_url(u)
     if did_truncate:
       # Save the full url in info to limit the loss of information
       info = u"<WOM had to truncate the following URL: %s>" % u

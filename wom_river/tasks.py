@@ -33,7 +33,7 @@ from wom_river.utils.read_opml import parse_opml
 from wom_pebbles.models import URL_MAX_LENGTH
 
 from wom_pebbles.tasks import truncate_reference_title
-from wom_pebbles.tasks import truncate_url
+from wom_pebbles.tasks import sanitize_url
 
 
 import logging
@@ -70,7 +70,7 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   if entry.has_key("tags"):
     tags = set([t.term for t in entry.tags])
   if previous_ref is None:
-    url_truncated,did_truncate = truncate_url(url)
+    url_truncated,did_truncate = sanitize_url(url)
     if did_truncate:
       # Save the full url in info to limit the loss of information
       info = u"<WOM had to truncate the following URL: %s>" % url

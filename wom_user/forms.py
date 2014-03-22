@@ -33,7 +33,7 @@ from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import Reference
 from wom_pebbles.tasks import build_reference_title_from_url
 from wom_pebbles.tasks import build_source_url_from_reference_url
-from wom_pebbles.tasks import truncate_url
+from wom_pebbles.tasks import sanitize_url
 
 from wom_river.models import WebFeed
 
@@ -101,13 +101,13 @@ class UserBookmarkAdditionForm(forms.Form):
     (no commit options).
     Returns the bookmark.
     """
-    url,_ = truncate_url(self.cleaned_data["url"])
+    url,_ = sanitize_url(self.cleaned_data["url"])
     title = self.cleaned_data["title"] \
             or build_reference_title_from_url(url)
     comment = self.cleaned_data["comment"]
     pub_date = self.cleaned_data["pub_date"] \
                or datetime.now(timezone.utc)
-    src_url,_ = truncate_url(self.cleaned_data["source_url"] \
+    src_url,_ = sanitize_url(self.cleaned_data["source_url"] \
                              or build_source_url_from_reference_url(url))
     src_title = self.cleaned_data["source_title"] \
                or build_reference_title_from_url(src_url)
@@ -240,9 +240,9 @@ class UserSourceAdditionForm(forms.Form):
     (no commit options).
     Returns the source.
     """
-    form_url,_ = truncate_url(self.cleaned_data["url"])
+    form_url,_ = sanitize_url(self.cleaned_data["url"])
     form_title = self.cleaned_data["title"]
-    form_feed_url,_ = truncate_url(self.cleaned_data["feed_url"])
+    form_feed_url,_ = sanitize_url(self.cleaned_data["feed_url"])
     if self.user.userprofile.web_feeds.filter(source__url=form_url).exists():
       # nothing to do
       return
