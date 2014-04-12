@@ -9,10 +9,7 @@ install:
 
 # command to run tests
 script:
-  - coverage run manage.py test wom_classification
-  - coverage run -a manage.py test wom_pebbles
-  - coverage run -a manage.py test wom_river
-  - coverage run -a manage.py test wom_user
+  - coverage run manage.py test wom_classification wom_pebbles wom_river wom_user
 
 after_success:
   - coveralls
