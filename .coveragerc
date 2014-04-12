@@ -1,0 +1,8 @@
+[run]
+source = wateronmars
+omit = /tmp/*, _*,*/venv/*,*/migrations/*
+
+[report]
+exclude_lines =
+    raise AssertionError
+    raise NotImplementedError
