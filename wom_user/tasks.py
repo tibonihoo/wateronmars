@@ -139,11 +139,11 @@ class FakeReferenceUserStatus:
 
 
 def generate_reference_user_status(user,references):
-  """Generate reference user status instances for a given list of references.
+  """Generate reference user status instances for a given set of references.
   WARNING: the new instances are not saved in the database!
   """
   new_ref_status = []
-  for ref in references.exclude(referenceuserstatus__owner=user).all():
+  for ref in references:
     rust = ReferenceUserStatus()
     rust.owner = user
     rust.reference = ref
@@ -203,14 +203,20 @@ read %s, pub_date %s, reference %s, source %s." \
   
 @task()  
 def check_user_unread_feed_items(user):
-  """
-  Browse all feed sources registered by a given user and create as
+  """Browse all feed sources registered by a given user and create as
   many ReferenceUserStatus instances as there are unread items.
+
+  NOTE: will avoid creating 2 reference user statuses pointing to a
+  same reference.
   """
   clean_corrupted_rusts(user)
   new_ref_status = []
+  processed_references = set()
   for feed in user.userprofile.web_feeds.select_related("source").all():
-    new_ref_status += generate_reference_user_status(user,feed.source.productions)
+    # filter out rust that have the same reference
+    feed_references = set(feed.source.productions.exclude(referenceuserstatus__owner=user).all())
+    new_ref_status += generate_reference_user_status(user,feed_references-processed_references)
+    processed_references.update(feed_references)
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()
