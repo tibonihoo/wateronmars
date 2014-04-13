@@ -60,7 +60,8 @@ def truncate_reference_title(title):
   enforces the maimum length constraint for the Reference model.
   """
   if len(title)>REFERENCE_TITLE_MAX_LENGTH:
-    return title[:REFERENCE_TITLE_MAX_LENGTH-3] + "..." 
+    # use space aware cut recommended at http://stackoverflow.com/questions/250357/truncate-a-string-without-ending-in-the-middle-of-a-word
+    return title[:REFERENCE_TITLE_MAX_LENGTH-3].rsplit(' ',1)[0] + "..."
   else:
     return title
 

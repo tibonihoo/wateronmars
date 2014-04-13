@@ -133,7 +133,9 @@ class UtilityFunctionsTests(TestCase):
     self.assertEqual(ref_title,truncate_reference_title(ref_title))
     ref_title = "p" + "m"*REFERENCE_TITLE_MAX_LENGTH
     self.assertEqual("...",truncate_reference_title(ref_title)[-3:])
-
+    ref_title = "p " + "m"*(REFERENCE_TITLE_MAX_LENGTH-1)
+    self.assertEqual("p...",truncate_reference_title(ref_title))
+    
   def test_sanitize_url_on_short_ascii_url(self):
     short_url = "http://mouf"
     self.assertTrue(len(short_url)<URL_MAX_LENGTH)
