@@ -224,7 +224,7 @@ class AddReferencesFromFeedParserEntriesTask(TestCase):
     
   def test_references_are_added_with_correct_title(self):
     ref_title = Reference.objects.get(url="http://www.example.com").title
-    self.assertEqual("http://www.example.com",ref_title)
+    self.assertEqual("An example bookmark.",ref_title)
     ref_title = Reference.objects.get(url="http://mouf/a").title
     self.assertEqual("The mouf",ref_title)
     ref_title = Reference.objects.get(url__contains="uuu").title 

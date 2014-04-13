@@ -21,6 +21,8 @@
 import feedparser
 from datetime import datetime
 from django.utils import timezone
+from django.utils.html import strip_tags
+
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import MultipleObjectsReturned
@@ -61,6 +63,14 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   If the corresponding Reference already exists, it must be given as
   the previous_ref argument, and if previous_ref is None, it will be
   assumed that there is no matching Rerefence in the db.
+
+  Note: Enforce Dave Winer's recommendation for linkblog:
+  http://scripting.com/2014/04/07/howToDisplayTitlelessFeedItems.html
+  with a little twist: if a feed item has no title we will use the
+  (possibly truncated) description as a title and if there is no
+  description the link will be used. In any case the description of a
+  reference is set even if this description is also used for the
+  title.
   
   Return a tuple with the unsaved reference and a list of tag names.
   """
@@ -79,7 +89,9 @@ when importing references from feed." % (len(url),URL_MAX_LENGTH))
     url = url_truncated
     # set the title only for new ref (should avoid weird behaviour
     # from the user point of view)
-    title = truncate_reference_title(entry.get("title") or url)
+    title = truncate_reference_title(entry.get("title") \
+                                     or strip_tags(entry.get("description")) \
+                                     or url)
     ref = Reference(url=url,title=title)
   else:
     ref = previous_ref
