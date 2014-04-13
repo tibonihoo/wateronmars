@@ -1,3 +1,4 @@
 -r requirements.txt
+fabric
 coverage
 python-coveralls
