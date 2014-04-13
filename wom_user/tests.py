@@ -43,6 +43,7 @@ from wom_user.views import check_and_set_owner
 from wom_user.views import loggedin_and_owner_required
 from wom_user.tasks import import_user_feedsources_from_opml
 from wom_user.tasks import import_user_bookmarks_from_ns_list
+from wom_user.tasks import check_user_unread_feed_items
 
 from wom_classification.models import Tag
 from wom_classification.models import get_item_tag_names
@@ -1049,6 +1050,11 @@ class UserSieveViewTest(TestCase):
         f1 = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                     last_update_check=date,
                                     source=self.s1)
+        # Having a second feed for a same source caused a bug in
+        # ReferenceUserStatus creation when collecting new References
+        f1Category = WebFeed.objects.create(xmlURL="http://mouf/category/rss.xml",
+                                            last_update_check=date,
+                                            source=self.s1)
         self.s2 = Reference.objects.create(url="http://bla",title="bla",pub_date=date)
         f2 = WebFeed.objects.create(xmlURL="http://bla/rss.xml",
                                     last_update_check=date,
@@ -1058,13 +1064,14 @@ class UserSieveViewTest(TestCase):
                                     last_update_check=date,
                                     source=self.s3)
         user1_profile.web_feeds.add(f1)
+        user1_profile.web_feeds.add(f1Category)
         user1_profile.web_feeds.add(f3)
         user1_profile.sources.add(self.s1,self.s3)
         user2_profile.web_feeds.add(f2)
         user2_profile.web_feeds.add(f3)
         user2_profile.sources.add(self.s2,self.s3)
-        num_items = MAX_ITEMS_PER_PAGE+1
-        for i in range(num_items):
+        self.num_items_per_source = MAX_ITEMS_PER_PAGE+1
+        for i in range(self.num_items_per_source):
             date += timedelta(hours=1)
             if i==0:
               r = Reference.objects.create(url="http://r1",title="s1r%d" % i,
@@ -1087,6 +1094,16 @@ class UserSieveViewTest(TestCase):
                                            pub_date=date)#,source=s3
               r.sources.add(self.s3)
               
+
+    def test_check_user_unread_feed_items(self):
+      """Test that that unread items are correctly collected: just the
+      right number and correctly saved in DB.
+      """
+      count = check_user_unread_feed_items(self.user1)
+      self.assertEqual(2*self.num_items_per_source,count)
+      self.assertEqual(count,ReferenceUserStatus.objects\
+                       .filter(owner=self.user1).count())
+      
     def test_get_html_for_owner_returns_max_items_ordered_oldest_first(self):
         """
         Make sure a user can see its river properly ordered

@@ -220,4 +220,4 @@ def check_user_unread_feed_items(user):
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()
-
+  return len(new_ref_status)
