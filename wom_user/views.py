@@ -233,7 +233,7 @@ def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):
 
 
 def generate_source_add_bookmarklet(base_url_with_domain,owner_name):
-  return r"javascript:ref=location.href;t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&name='+encodeURIComponent(t);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_river_source_add',args=(owner_name,)))
+  return r"javascript:ref=location.href;t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_river_source_add',args=(owner_name,)))
 
 
 class CustomErrorList(ErrorList):
@@ -360,7 +360,7 @@ def user_upload_nsbmk(request,owner_name):
 def user_river_source_add(request,owner_name):
   """Handle bookmarlet and form-based addition of a syndication of source.
   The bookmarlet is formatted in the following way:
-  .../source/add/?url="..."&name="..."&feed_url="..."
+  .../source/add/?url="..."&title="..."&feed_url="..."
   """
   if settings.DEMO:
     return HttpResponseForbidden("Source addition is not possible in DEMO mode.")

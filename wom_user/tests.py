@@ -311,8 +311,8 @@ class UserBookmarkAddTestMixin:
       owner=self.other_user,
       reference=reference_b,
       saved_date=date,
-      is_public=True)
-  
+      is_public=True)  
+    
   def test_post_json_new_item_is_added(self):
     """
     Posting a bookmark will add it to the user's collection.
@@ -338,10 +338,18 @@ class UserBookmarkAddTestMixin:
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
-    self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
-    self.assertIn(u"mouf",[b.comment for b in items \
-                           if b.reference.url==u"http://new/mouf"])
-
+    new_b_candidates = [b for b in items \
+                        if b.reference.url==u"http://new/mouf"]
+    self.assertEqual(1, len(new_b_candidates))
+    new_b = new_b_candidates[0]
+    self.assertEqual(u"mouf",new_b.comment)
+    self.assertEqual(u"new title",new_b.reference.title)
+    self.assertEqual(1,len(new_b.reference.sources.all()))
+    new_b_src = new_b.reference.sources.all()[0]
+    self.assertEqual(u"http://glop",new_b_src.url)
+    self.assertEqual(u"new name",new_b_src.title)
+    
+    
   def test_post_json_new_item_is_added_without_source(self):
     """
     Posting a bookmark without providing a source will
@@ -366,12 +374,47 @@ class UserBookmarkAddTestMixin:
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
-    self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
-    self.assertIn(u"http://new",
-                  [b.reference.sources.get().url for b in items],
-                  "Unexpexted guess for the source URL !")
-    self.assertIn(u"mouf",[b.comment for b in items \
-                           if b.reference.url==u"http://new/mouf"])
+    new_b_candidates = [b for b in items \
+                        if b.reference.url==u"http://new/mouf"]
+    self.assertEqual(1, len(new_b_candidates))
+    new_b = new_b_candidates[0]
+    self.assertEqual(u"mouf",new_b.comment)
+    self.assertEqual(u"new title",new_b.reference.title)
+    self.assertEqual(1,len(new_b.reference.sources.all()))
+    new_b_src = new_b.reference.sources.all()[0]
+    self.assertEqual(u"http://new",new_b_src.url)
+    self.assertEqual(u"new",new_b_src.title)
+
+  def test_post_json_new_item_is_added_with_url_only(self):
+    """
+    Posting a bookmark without providing anything but a url
+    add the bookmark correctly anyway.
+    """
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    # check presence of r1 reference
+    resp = self.client.get(reverse("wom_user.views.user_collection",
+                     kwargs={"owner_name":"uA"}))
+    self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
+    # mark the first reference as read.
+    resp = self.add_request("uA", { "url": u"http://new/mouf"})
+    # resp_dic = simplejson.loads(resp.content)
+    # self.assertEqual("success",resp_dic["status"])
+    # check absence of r1 reference
+    resp = self.client.get(reverse("wom_user.views.user_collection",
+                     kwargs={"owner_name":"uA"}))
+    self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
+    items = resp.context["user_bookmarks"]
+    new_b_candidates = [b for b in items \
+                        if b.reference.url==u"http://new/mouf"]
+    self.assertEqual(1, len(new_b_candidates))
+    new_b = new_b_candidates[0]
+    self.assertEqual(u"",new_b.comment)
+    self.assertEqual(u"new/mouf",new_b.reference.title)
+    self.assertEqual(1,len(new_b.reference.sources.all()))
+    new_b_src = new_b.reference.sources.all()[0]
+    self.assertEqual(u"http://new",new_b_src.url)
+    self.assertEqual(u"new",new_b_src.title)
     
   def test_post_json_new_item_is_added_with_existing_source_url(self):
     """
@@ -615,7 +658,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
              list(resp.context["user_bookmarks"]))
 
 
-class UserCollectionViewAddTest(TestCase,UserBookmarkAddTestMixin):
+class UserCollectionAddTest(TestCase,UserBookmarkAddTestMixin):
   
   def setUp(self):
     UserBookmarkAddTestMixin.setUp(self)
@@ -688,14 +731,22 @@ class UserSourceAddTestMixin:
                       password="pA"))
     self.assertEqual(2,self.user_profile.sources.count())
     self.assertEqual(1,self.user_profile.web_feeds.count())
+    new_feed_url = u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"
     self.add_request("uA",
-             {"url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
-              "feed_url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
-              "name": u"a new"})
+                     {"url": new_feed_url,
+                      "feed_url": new_feed_url,
+                      "title": u"a new"})
     self.assertEqual(3,self.user_profile.sources.count())
     self.assertEqual(2,self.user_profile.web_feeds.count())
-    self.assertIn("http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
-            [s.url for s in self.user_profile.sources.all()])
+    new_s_candidates = [
+      s for s in self.user_profile.sources.all() \
+      if s.url==new_feed_url]
+    self.assertEqual(1, len(new_s_candidates))
+    new_s = new_s_candidates[0]
+    self.assertEqual(u"a new",new_s.title)
+    self.assertEqual(new_feed_url,new_s.url)
+    new_w = WebFeed.objects.get(source=new_s)
+    self.assertEqual(new_feed_url,new_w.xmlURL)
     
   def test_add_new_feed_source_to_other_user_fails(self):
     """
@@ -706,9 +757,10 @@ class UserSourceAddTestMixin:
                       password="pA"))
     self.assertEqual(2,self.user_profile.sources.count())
     self.assertEqual(1,self.user_profile.web_feeds.count())
+    new_feed_url = u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"
     self.add_request("uB",
-             {"url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
-              "feed_url": u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml",
+             {"url": new_feed_url,
+              "feed_url": new_feed_url,
               "name": u"a new"},
              expectedStatusCode=403)
     
