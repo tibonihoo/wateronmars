@@ -19,10 +19,10 @@ jQuery.ias({
 
 
 {% block content %}
-<p><i class="glyphicon glyphicon-book"></i><strong>{{ title_qualify }} sources</strong></p>
+<h4><i class="glyphicon glyphicon-book"></i>{{ title_qualify }} {{ num_sources }} sources</h4>
 <ul class="list-unstyled">
 {% if tagged_web_feeds %}
-  <li>Web Feeds
+  <li><h5>Web feed subscriptions</h5>
     <ul class="list-unstyled">
       {% for feed in tagged_web_feeds %}
       <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
@@ -39,7 +39,7 @@ jQuery.ias({
 {% endif %}
 
 {% if other_sources %}
-  <li>Bookmark sources
+  <li><h5>Bookmark sources</h5>
   <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
    <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.title }}</a></li>

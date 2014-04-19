@@ -360,8 +360,8 @@ def user_upload_nsbmk(request,owner_name):
 def user_river_source_add(request,owner_name):
   """Handle bookmarlet and form-based addition of a syndication of source.
   The bookmarlet is formatted in the following way:
-  .../source/add/?url="..."&title="..."&feed_url="..."
-  """
+  .../source/add/?{0}
+  """.format('="..."&'.join(UserSourceAdditionForm.base_fields.keys()))
   if settings.DEMO:
     return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
   if request.method == 'POST':
@@ -376,9 +376,10 @@ def user_river_source_add(request,owner_name):
     form.save()
     return HttpResponseRedirect(reverse('wom_user.views.user_river_sources',
                                         args=(request.user.username,)))
-  d = add_base_template_context_data({'form': form},
-                                     request.user.username,
-                                     request.user.username)
+  d = add_base_template_context_data(
+    {'form': form,
+     'REST_PARAMS': ','.join(UserSourceAdditionForm.base_fields.keys())},
+    request.user.username,request.user.username)
   return render_to_response('source_addition.html',d,
                             context_instance=RequestContext(request))
 
@@ -412,8 +413,8 @@ def user_river_source_remove(request,owner_name):
 def user_collection_add(request,owner_name):
   """Handle bookmarlet and form-based addition of a bookmark.
   The bookmarlet is formatted in the following way:
-  .../collection/add/?url="..."&title="..."&comment="..."&source_url="..."&source_title="..."&pub_date="..."
-  """
+  .../collection/add/?{0}
+  """.format('="..."&'.join(UserBookmarkAdditionForm.base_fields.keys()))
   if settings.DEMO:
     return HttpResponseForbidden("Bookmark addition is not possible in DEMO mode.")
   if request.method == 'POST':
@@ -427,7 +428,10 @@ def user_collection_add(request,owner_name):
     form.save()
     return HttpResponseRedirect(reverse('wom_user.views.user_collection',
                                         args=(request.user.username,)))
-  d = add_base_template_context_data({'form': form},request.user.username,request.user.username)
+  d = add_base_template_context_data(
+    {'form': form,
+     'REST_PARAMS': ','.join(UserBookmarkAdditionForm.base_fields.keys())},
+    request.user.username,request.user.username)
   return render_to_response('bookmark_addition.html',d,
                             context_instance=RequestContext(request))
   
@@ -629,6 +633,7 @@ def user_river_sources(request,owner_name):
         'tagged_web_feeds': web_feeds,
         'user_tags': get_user_tags(request.owner_user), 
         'other_sources': other_sources,
+        'num_sources' : len(web_feeds)+other_sources.count(),
         'source_add_bookmarklet': generate_source_add_bookmarklet(
           request.build_absolute_uri("/"),request.user.username),
         }, request.user.username, owner_name)

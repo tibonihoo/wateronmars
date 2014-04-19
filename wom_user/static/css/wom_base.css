@@ -34,3 +34,9 @@ a { color: #3465a4; }
 .footer { text-align: center; line-height: 60%; margin-top: 3em; }
 .footer ul li { display: inline; }
 .jumbotron {margin-top: 10px;}
+
+.form-control {
+    height: 30px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}

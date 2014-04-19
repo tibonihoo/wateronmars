@@ -7,9 +7,9 @@ Add a bookmark
 
 {% block content %}
 
-<h2>Add a bookmark to your collection, {{visitor_name}} !</h2>
+<h4>Add a bookmark to your collection</h4>
 
-<p class="lead">Enter below the information about the new resource you want to bookmark.</p>
+<p class="help-block">Enter below the information about the new resource you want to bookmark.</p>
 
 {% if form.errors %}
 <div class="alert alert-danger">
@@ -17,7 +17,7 @@ Add a bookmark
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form role="form" action="{% url wom_user.views.user_collection_add visitor_name %}" method="post">
+<form class="form-horizontal" role="form" action="{% url wom_user.views.user_collection_add visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}
@@ -25,12 +25,19 @@ Add a bookmark
   {%  else %}
   <div class="form-group">
   {% endif %}
-    {{ field.label_tag }}
-    {{ field }} {{ field.errors|safe }}
+  <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
+  <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
   </div>
   {% endfor %}
   <div class="form-group">
-    <input type="submit" value="Save this bookmark" class="btn btn-default" />
-    <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />   </div>
+    <span class="col-sm-offset-2">
+      <input type="submit" value="Save this bookmark" class="btn btn-default" />
+      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />   
+    </span>
+  </div>
 </form>
+
+<p class="help-block">If you want to add a bookmark using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{% url wom_user.views.user_collection visitor_name %}">the collection URL</a>: <code>{{ REST_PARAMS }}</code></p>
+
 {% endblock %}
+

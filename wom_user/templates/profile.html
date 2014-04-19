@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>Welcome {{visitor_name}} !</h1>
+<h3>Welcome {{visitor_name}} !</h3>
 
 <p>Feel free to browse through the following pages:</p>
 
@@ -32,25 +32,24 @@
 {% endif %}
 <div class="row show-grid">
 <div class="col-md-6">
-<h2>Add bookmarks</h2>
+<h4>Add bookmarks</h4>
 
-<p>Add bookmarks when visiting a web page thanks to the following <abbr title="drag'n'drop the button below on your browser's toolbar">bookmarlet</abbr>:</p>
+<p><a href="{% url wom_user.views.user_collection_add owner_name %}">Add a bookmark to your collection</a>. Also possible and quicker in your <a href="{% url wom_user.views.user_river_sieve owner_name %}" title="Your Sieve">sieve</a>.</p>
+<p>And when surfing on the web use the following <em>bookmarlet</em>:<br/>
+<a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-primary" title="Drag'n'drop me on your browser's toolbar">Bookmark!</a></p>
 
-<p><a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-lg btn-primary disabled" title="Add bookmark to WOM">Bookmark!</a></p>
+<p><strong>Import several bookmarks at once</strong> via the <a href="{% url wom_user.views.user_upload_nsbmk visitor_name %}">upload form</a>.</p>
 
-<p>Import <em>several bookmarks at once</em> via the <a href="{% url wom_user.views.user_upload_nsbmk visitor_name %}">upload form</a>.</p>
-
-<p>You can also add bookmarks via the <a href="{% url wom_user.views.user_river_sieve owner_name %}" title="Your Sieve">sieve</a></p>
 </div>
 
 <div class="col-md-6">
-<h2>Subscribe to news sources</h2>
+<h4>Subscribe to news sources</h4>
 
-<p>Subscribe to sources when visiting a web page thanks to the following <abbr title="drag'n'drop the button below on your browser's toolbar">bookmarlet</abbr>:</p>
-
-<p><a href="{{ source_add_bookmarklet|safe }}" class="btn btn-lg btn-primary disabled">Subscribe!</a></p>
-
-<p>Import <em>several sources at once</em> via the <a href="{% url wom_user.views.user_upload_opml visitor_name %}"> OPML upload form</a>.</p>
+<p><a href="{% url wom_user.views.user_river_source_add owner_name %}">Add a source of news</a>.
+<p>Also subscribe on the go, by using the following <em>bookmarlet</em> when you visit a web page:</br>
+<a href="{{ source_add_bookmarklet|safe }}" class="btn btn-primary" title="drag'n'drop me on your browser's toolbar">Subscribe!</a></p>
+</p>
+<p><strong>Import several sources at once</strong> via the <a href="{% url wom_user.views.user_upload_opml visitor_name %}"> OPML upload form</a>.</p>
 
 </div>
 </div>

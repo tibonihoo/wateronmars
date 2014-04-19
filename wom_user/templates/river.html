@@ -30,7 +30,7 @@ jQuery.ias({
 {% endblock %}
 
 {% block content %}
-<p><i class="glyphicon glyphicon-align-left"></i><strong>{{ title_qualify }} river</strong></p>
+<h4><i class="glyphicon glyphicon-align-left"></i>{{ title_qualify }} river</h4>
 <div id="news_list">
 {% regroup news_items by main_source.title as source_groups %}
 {% for source_refs in source_groups %}

@@ -7,9 +7,9 @@ OPML Import
 
 {% block content %}
 
-<h2>Share your sources {{visitor_name}} !</h2>
+<h4>Import your subscriptions</h4>
 
-<p class="lead">This page will help you import several feeds at once by uploading an <a href="http://opml.org">OPML</a> file.</p>
+<p class="help-block">This page will help you import several feeds at once by uploading an <a href="http://opml.org">OPML</a> file.</p>
 
 {% if form.errors %}
 <div class="alert alert-danger">
@@ -29,7 +29,7 @@ OPML Import
   <p class="help-block">Select the OPML file to upload</p>
   </div>
   <div class="form-group">
-    <input type="submit" value="Import these sources of news." class="btn btn-default" />
+    <input type="submit" value="Import these subscriptions" class="btn btn-default" />
     <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
   </div>
 </form>

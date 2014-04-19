@@ -82,8 +82,8 @@ class UserBookmarkAdditionForm(forms.Form):
                           widget=forms.TextInput(attrs={"class":"form-control"}))
   comment = forms.CharField(required=False,
                             widget=forms.Textarea(
-                              attrs={"class":"form-control"}))
-  pub_date = forms.DateTimeField(required=False)
+                              attrs={"class":"form-control","rows":"5"}))
+  pub_date = forms.DateTimeField(required=False,widget=forms.DateTimeInput(attrs={"class":"form-control"}))
   source_title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
                                  required=False,
                                  widget=forms.TextInput(

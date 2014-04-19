@@ -24,9 +24,9 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block content %}
-<p><i class="glyphicon glyphicon-filter"></i><strong>{{ title_qualify }} sieve</strong>
+<h4><i class="glyphicon glyphicon-filter"></i>{{ title_qualify }} sieve.
   <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_references }}</span> unread items <a href="./" id="view-switch"></a>.</small>
-</p>
+</h4>
 
 {# List the references #}
 <div class="carousel slide" id="sieve-carousel-frame">

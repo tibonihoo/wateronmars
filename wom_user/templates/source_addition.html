@@ -7,9 +7,9 @@ New subscription
 
 {% block content %}
 
-<h2>Subsribe to a new source, {{visitor_name}} !</h2>
+<h4>Subsribe to a news source</h4>
 
-<p class="lead">Enter below the information about a new source of news.</p>
+<p class="help-block">Enter below the information about a new source of news.</p>
 
 {% if form.errors %}
 <div class="alert alert-danger">
@@ -17,7 +17,7 @@ New subscription
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form role="form" action="{% url wom_user.views.user_river_source_add visitor_name %}" method="post">
+<form class="form-horizontal" role="form" action="{% url wom_user.views.user_river_source_add visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}
@@ -25,13 +25,17 @@ New subscription
   {%  else %}
   <div class="form-group">
   {% endif %}
-    {{ field.label_tag }}
-    {{ field }} {{ field.errors|safe }}
+    <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
+    <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
   </div>
   {% endfor %}
   <div class="form-group">
-    <input type="submit" value="Subscribe to this source" class="btn btn-default" />
-    <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
+    <span class="col-sm-offset-2">
+      <input type="submit" value="Subscribe to this source" class="btn btn-default" />
+      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
+    </span>
   </div>
 </form>
+
+<p class="help-block">If you want to subscribe to a source using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{% url wom_user.views.user_river_sources visitor_name %}">the sources URL</a>: <code>{{ REST_PARAMS }}</code></p>
 {% endblock %}
