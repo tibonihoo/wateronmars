@@ -62,7 +62,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
   // keybindings globals
   gCurrentlyExpandedItem = -1;
   gMouseTrapDisabled = false;   
-  gNumReferences = $(".wom.reference").length;
+  gNumReferences = $(".wom_reference").length;
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread;
@@ -80,8 +80,8 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
     $("#view-switch").attr("href",accordionURLQuery).text(switchToAccordionText);
     // make sure to disable the collapsible parts of the accordion
     $(".carousel .collapse").removeClass("collapse").addClass("carousel-fig");
-    $(".accordion-heading").addClass("carousel-capt");
-    $(".accordion-group").addClass("carousel-item-frame");
+    $(".panel-heading").addClass("carousel-capt");
+    $(".panel .panel-default").addClass("carousel-item-frame");
     if (gNumReferences==0)
     {
       $(".carousel-control").hide(); 
@@ -91,7 +91,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
     // show the right "switch" text taking into account that accordion
     // is the default view for non-touch devices
     // add event
-    $(".carousel").on('slid',  function () { onCarouselSlid()});
+    $(".carousel").on('slid.bs.carousel',  function () { onCarouselSlid()});
     $(".carousel").carousel("next");
     gCurrentlyExpandedItem = 0;
     $(".carousel-control.left").on('click',function (){carouselSlideToPrevious()});
@@ -120,8 +120,8 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
     for(idx=0;idx<gNumReferences;idx+=1)
     {
       currentId = 'collapse'+idx.toString()
-      $("#"+currentId).on('hidden', createHiddenCallback(idx) );
-      $("#"+currentId).on('shown', createShownCallback(idx) );
+      $("#"+currentId).on('hidden.bs.collapse', createHiddenCallback(idx) );
+      $("#"+currentId).on('shown.bs.collapse', createShownCallback(idx) );
     }
   }
 }

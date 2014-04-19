@@ -18,31 +18,31 @@ User authentication
 
 {% block body_below_nav %}  
 {% if form.errors %}
-<div class="alert alert-error">
+<div class="alert alert-danger">
   <p>Your username and password didn't match. Please try again.</p>
 </div>
 {% endif %}
 <div class="container-fluid">
   <h1>User authentication</h1>
-<form class="form-horizontal" 
+<form role="form" class="form-horizontal" 
       method="post" action="{% url django.contrib.auth.views.login %}">
   {% csrf_token %}
-  <div class="control-group">
-    <span class="control-label">{{ form.username.label_tag }}</span>
-    <div class="controls">
+  <div class="form-group">
+    <span class="col-sm-2 control-label">{{ form.username.label_tag }}</span>
+    <div class="col-sm-10">
       {{ form.username }}
     </div>
   </div>
-  <div class="control-group">
-    <span class="control-label">{{ form.password.label_tag }}</span>
-    <div class="controls">
+  <div class="form-group">
+    <span class="col-sm-2 control-label">{{ form.password.label_tag }}</span>
+    <div class="col-sm-10">
       {{ form.password }}
     </div>
   </div>
-  <div class="control-group">
-    <div class="controls">
-      <input type="submit" value="login" class="btn" />
-      <input type="hidden" name="next" value="{{ next }}" class="btn" />
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <input type="submit" value="login" class="btn btn-default" />
+      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
     </div>
   </div>
 </form>

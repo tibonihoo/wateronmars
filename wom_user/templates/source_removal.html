@@ -12,30 +12,26 @@ Stop subscriptions
 <p class="lead">Select the sources you don't want to hear about anymore.</p>
 
 {% if form.errors %}
-<div class="alert alert-error">
+<div class="alert alert-danger">
   <p>Please check the information below.</p>
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form action="{% url wom_user.views.user_river_source_remove visitor_name %}" method="post">
+<form role="form" action="{% url wom_user.views.user_river_source_remove visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}
-  <div class="control-group error">
+  <div class="form-group has-error">
   {%  else %}
-  <div class="control-group">
+  <div class="form-group">
   {% endif %}
     <span class="control-label">{{ field.label_tag }}</span>
-    <div class="controls">
-      {{ field }} {{ field.errors|safe }}
-    </div>
+    {{ field }} {{ field.errors|safe }}
   </div>
   {% endfor %}
   <div class="control-groups">
-    <div class="controls">
-    <input type="submit" value="Stop these subscriptions" class="btn" />
-    <input type="hidden" name="next" value="{{ next }}" class="btn" />
-    </div>
+    <input type="submit" value="Stop these subscriptions" class="btn btn-default" />
+    <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
   </div>
 </form>
 {% endblock %}

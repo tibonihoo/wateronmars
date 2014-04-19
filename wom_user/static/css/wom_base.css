@@ -5,13 +5,32 @@ Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYI
 Site: https://github.com/tibonihoo/wateronmars
 */
 
-.navbar .nav > li > a { border-right: none; border-left: none; }
-.navbar .nav > li > a:hover { border-right: none; border-left: none; }
+
+@media (max-width: 768px) {
+    .container > .navbar-header,
+    .container-fluid > .navbar-header,
+    .container > .navbar-collapse,
+    .container-fluid > .navbar-collapse {
+      margin-right: -15px;
+      margin-left: -13px;
+    }
+}
+.navbar-nav {
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+}
+
+.glyphicon {
+   margin-left: 3px;
+   margin-right: 3px;
+}
+
+.navbar-brand.navbar-nav a i { color: #ffffff; border-right: none; border-left: none; padding-left: 3px; font-size: 15px;}
+.navbar-brand.navbar-nav a:hover i { color: #ffffff; border-right: none; border-left: none; padding-left: 3px; font-size: 15px;}
+#wom-brand-name {font-weight: bold; color: #ffffff; font-size: 17px;}
+a#wom-brand-name:hover {text-decoration:none;}
 a { color: #3465a4; }
-.navbar .brand { margin-left: 0px; }
 .footer { text-align: center; line-height: 60%; margin-top: 3em; }
 .footer ul li { display: inline; }
-
-@media (min-width: 900px) {
-  #below-nav { padding-top: 60px; }
-}
+.jumbotron {margin-top: 10px;}

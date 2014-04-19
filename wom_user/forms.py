@@ -77,20 +77,20 @@ class UserBookmarkAdditionForm(forms.Form):
   """Collect all necessary data to add a new bookmark to a user's collection."""
   
   url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
-                        widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+                        widget=forms.TextInput(attrs={"class":"form-control"}))
   title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH, required=False,
-                          widget=forms.TextInput(attrs={"class":"input-xxlarge"}))
+                          widget=forms.TextInput(attrs={"class":"form-control"}))
   comment = forms.CharField(required=False,
                             widget=forms.Textarea(
-                              attrs={"class":"input-xxlarge"}))
+                              attrs={"class":"form-control"}))
   pub_date = forms.DateTimeField(required=False)
   source_title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
                                  required=False,
                                  widget=forms.TextInput(
-                                   attrs={"class":"input-xxlarge"}))
+                                   attrs={"class":"form-control"}))
   source_url = forms.CharField(max_length=URL_MAX_LENGTH,required=False,
                                widget=forms.TextInput(
-                                 attrs={"class":"input-xxlarge"}))
+                                 attrs={"class":"form-control"}))
   
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
@@ -170,14 +170,14 @@ class UserSourceAdditionForm(forms.Form):
 
   url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
                         widget=forms.TextInput(
-                          attrs={"class":"input-xxlarge"}))
+                          attrs={"class":"form-control"}))
   title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
                          required=False,
                          widget=forms.TextInput(
-                           attrs={"class":"input-large"}))
+                           attrs={"class":"form-control"}))
   feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
                              widget=forms.TextInput(
-                               attrs={"class":"input-xxlarge"}))
+                               attrs={"class":"form-control"}))
   
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
@@ -281,7 +281,7 @@ def CreateUserSourceRemovalForm(user,*args, **kwargs):
     """Gather a selection of syndication sources from which the user wants to un-subsribe."""   
     sources_to_remove = forms.ModelMultipleChoiceField(\
       user.userprofile.web_feeds,
-      widget=forms.SelectMultiple(attrs={"class":"input-xxlarge","size":"13"}))
+      widget=forms.SelectMultiple(attrs={"class":"form-control","size":"13"}))
     
     def __init__(self):
       forms.Form.__init__(self,*args,**kwargs)

@@ -6,24 +6,24 @@ Landing site
 
 {% block content %}
 
-<div class="hero-unit">
+<div class="jumbotron">
   <h1>Welcome to Water On Mars !</h1>
   <p>Where good old rivers (of news) have been discovered (again).</p>
   <p>
 {% if visitor_name %}
-<a class="btn btn-primary btn-large" href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River"><i class="icon-align-left icon-white"></i>&nbsp; Watch your personal river.</a>
+<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River"><i class="glyphicon glyphicon-align-left"></i>&nbsp; Watch your personal river.</a>
 <p>
 </p>
-<a class="btn btn-primary btn-large" href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve"><i class="icon-filter icon-white"></i>&nbsp; Filter the news with your sieve.</a>
+<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve"><i class="glyphicon glyphicon-filter"></i>&nbsp; Filter the news with your sieve.</a>
 </p>
 <p>
-  <a class="btn btn-primary btn-large" href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection"><i class="icon-bookmark icon-white"></i>&nbsp; Browse your bookmarks.</a>
+  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection"><i class="glyphicon glyphicon-bookmark"></i>&nbsp; Browse your bookmarks.</a>
 </p>
 <p>
-  <a class="btn btn-primary btn-large" href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources"><i class="icon-book icon-white"></i>&nbsp; Check your sources.</a>
+  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources"><i class="glyphicon glyphicon-book"></i>&nbsp; Check your sources.</a>
 </p>
 {% else %}
-<a class="btn btn-primary btn-large" href="{% url django.contrib.auth.views.login %}" title="Login"><i class="icon-user icon-white"></i>&nbsp; Login</a>
+<a class="btn btn-primary btn-lg" href="{% url django.contrib.auth.views.login %}" title="Login"><i class="glyphicon glyphicon-user"></i>&nbsp; Login</a>
 {% if demo_u_name and demo_u_password %}
   <p>You can login as the 'demo' user, with the username {{demo_u_name}} and the password {{demo_u_password}}.</p>  
 {% endif %}

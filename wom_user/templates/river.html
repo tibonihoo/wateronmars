@@ -30,7 +30,7 @@ jQuery.ias({
 {% endblock %}
 
 {% block content %}
-<p><i class="icon-align-left"></i><strong>{{ title_qualify }} river</strong></p>
+<p><i class="glyphicon glyphicon-align-left"></i><strong>{{ title_qualify }} river</strong></p>
 <div id="news_list">
 {% regroup news_items by main_source.title as source_groups %}
 {% for source_refs in source_groups %}
@@ -38,18 +38,18 @@ jQuery.ias({
     {% for rust in source_refs.list %}
     {% if forloop.first %}
     <small class="source_name"><a href="{{ rust.main_source.url }}">{{ rust.main_source.title }}</a> ({{ rust.reference_pub_date }})</small>
-    <ul class="unstyled source_ref_list"> 
+    <ul class="list-unstyled source_ref_list"> 
     {% endif %}
     <li id="page{{news_items.number}}-src{{forloop.parentloop.counter0}}-ref{{forloop.counter0}}-title" ><strong><a class="reference-title" href="{{rust.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ rust.reference_pub_date }} -- {{ rust.reference.description|striptags|truncatewords:30|safe }}">{{ rust.reference.title }}</a></strong></li>
     {% endfor %}
   </ul>
 </div>
 {% empty %}
-<div class="alert alert-success alert-block">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <p>No news so far, strange isn't it ?</p>
+<div class="alert alert-success alert-dismissable fade in">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <h4>No news so far, strange isn't it ?</h4>
 {% if visitor_name and owner_name == visitor_name and source_add_bookmarklet %}
-  <p>You can subscribe to news sources with the following bookmarklet: <a href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
+  <p>You can subscribe to news sources with the following bookmarklet: <a class="alert-link" href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
 {% endif %}
 </div>
 {% endfor %}

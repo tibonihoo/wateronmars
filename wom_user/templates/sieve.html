@@ -18,33 +18,35 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block head_notification %}{# Error messages #}
-<li><a id="news-loading" data-content="Fresh news are being downloaded from server." title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="News refresh !"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
-<li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Server synchronization problem"><i class="icon-warning-sign icon-white"></i></a></li>
-<li><a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="bottom" href="#" data-original-title="Bookmarking failed"><i class="icon-warning-sign icon-white"></i></a></li>
+<li><a id="news-loading" data-content="Fresh news are being downloaded from server." title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="News refresh !"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
+<li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="Server synchronization problem"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li><a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="Bookmarking failed"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 {% endblock %}
 
 {% block content %}
-<p><i class="icon-filter"></i><strong>{{ title_qualify }} sieve</strong>
+<p><i class="glyphicon glyphicon-filter"></i><strong>{{ title_qualify }} sieve</strong>
   <small>Press 'n' (next) or 'p' (previous) to browse through the <span id="num_unread">{{ num_unread_references }}</span> unread items <a href="./" id="view-switch"></a>.</small>
 </p>
 
 {# List the references #}
-<div class="carousel slide">
-<div class="accordion carousel-inner" id="sieve-frame">
+<div class="carousel slide" id="sieve-carousel-frame">
+<div class="panel-group carousel-inner" id="sieve-frame">
 {% for rust in oldest_unread_references %}
-  <div class="accordion-group item wom reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
-    <div class="accordion-heading accordion-toggle accordion-heading reference-short-description"  style="background-color:#eeeeec;padding:3px;">
-      <a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-frame" href="#collapse{{forloop.counter0}}">{{ rust.reference.title }}</a> <small> - {{ rust.reference_pub_date }} <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+  <div class="panel panel-default item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
+    <div class="panel-heading reference-short-description"  style="background-color:#eeeeec;padding:3px;">
+      <h4 class="panel-title">
+        <a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-frame" href="#collapse{{forloop.counter0}}">{{ rust.reference.title }}</a> <small> - {{ rust.reference_pub_date }} <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+      </h4>
     </div>
-    <div id="collapse{{forloop.counter0}}" class="accordion-body collapse reference-details">
-      <div class="accordion-inner">
+    <div id="collapse{{forloop.counter0}}" class="panel-collapse collapse reference-details">
+      <div class="panel-body">
         <div class="news-abstract">
         {{ rust.reference.description|safe|defang_html }}
         </div>
-        <div class="news-metadata" style="padding-top:0.5em;"> <a class="save-link" href="javascript:saveCurrentItem()" style="padding-right:0.5em;"><i class="icon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked icon-bookmark"></i> <a id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}" style="padding-right:0.5em;"><i class="icon-globe"></i>view on site (v)</a>
+        <div class="news-metadata" style="padding-top:0.5em;"> <a class="save-link" href="javascript:saveCurrentItem()" style="padding-right:0.5em;"><i class="glyphicon glyphicon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> <a id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}" style="padding-right:0.5em;"><i class="glyphicon glyphicon-globe"></i>view on site (v)</a>
           {% for tag in rust.get_tag_names %}
           {% if forloop.first %}
-          <i class="icon-tags" title="Tags"></i>
+          <i class="glyphicon glyphicon-tags" title="Tags"></i>
           {% endif %}          
           {{ tag }}
           {% if not forloop.last %}
@@ -56,32 +58,39 @@ prepareKeyBindings();
     </div>
   </div>
   {% empty %}
-  <div class="alert fade in">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <strong>No news is good news ?</strong> 
+  <div class="alert alert-info alert-dismissable fade in">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h4>No news is good news ?</h4> 
     <p>No new items were found since your last visit !</p> 
     {% if source_add_bookmarklet %}
-    <p>You can subscribe to news sources with the following bookmarklet: <a href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
+    <p>You can subscribe to news sources with the following bookmarklet: <a class="alert-link" href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
     {% endif %}
   </div>
   {% endfor %}
 </div>
-<a class="left carousel-control" title="previous">&nbsp;</a>
-<a class="right carousel-control" title="next">&nbsp;</a>
+<a class="left carousel-control" title="previous">
+  <span class="glyphicon glyphicon-chevron-left"></span>
+</a>
+<a class="right carousel-control" title="next">
+  <span class="glyphicon glyphicon-chevron-right"></span>
+</a>
 </div>
 
-<div class="modal hide fade" id="sieve-reload-message">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>No more news in sieve !</h3>
-  </div>
-  <div class="modal-body">
-    <p>You've emptied the sieve, press the button below to reload with more news (if any).</p>
-    <p><button id="sieve-reload" class="btn btn-large btn-primary" type="button">Reload the sieve.</button></p>
-    <p><small>You can also press 'r' to reload the sieve at any time.</small></p>
+<div class="modal fade" role="dialog" id="sieve-reload-message" aria-labelledby="sieve-reload-message-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 cloass="modal-title" id="sieve-reload-message-title">No more news in sieve !</h3>
+      </div>
+      <div class="modal-body">
+        <p>You've emptied the sieve, press the button below to reload with more news (if any).</p>
+        <p><button id="sieve-reload" class="btn btn-lg btn-primary" type="button">Reload the sieve.</button></p>
+        <p><small>You can also press 'r' to reload the sieve at any time.</small></p>
+      </div>
+    </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block extrascript %}

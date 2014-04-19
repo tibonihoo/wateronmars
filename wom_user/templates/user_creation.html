@@ -21,30 +21,26 @@ User authentication
 
 {% block body_below_nav %}  
 {% if form.errors %}
-<div class="alert alert-error">
+<div class="alert alert-danger">
   <p>Errors were detected. Please try again to fill in the form.</p>
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form class="form-horizontal" 
+<form role="form" class="form-horizontal" 
       method="post" action="{% url wom_user.views.user_creation %}">
   {% csrf_token %}  
   {% for field in form %}
   {% if field.errors %}
-  <div class="control-group error">
+  <div class="form-group has-error">
   {%  else %}
-  <div class="control-group">
+  <div class="form-group">
   {% endif %}  
     <span class="control-label">{{ field.label_tag }}</span>
-    <div class="controls">
-      {{ field }} {{ field.errors|safe }}
-    </div>
+    {{ field }} {{ field.errors|safe }}
   </div>
   {% endfor %}
   <div class="control-groups">
-    <div class="controls">
-    <input type="submit" value="Register new user" class="btn" />
-    </div>
+    <input type="submit" value="Register new user" class="btn btn-default" />
   </div>
 </form>
 {% endblock %}

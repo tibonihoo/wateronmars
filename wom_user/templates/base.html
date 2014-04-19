@@ -10,30 +10,13 @@
 {% endblock %}
 {% endblock%}
   
-{% block nav_items %}  
-{% block head_notification %}  
-{% endblock %}
-</ul>
-<ul class="nav pull-right">
-  {% if visitor_name %}
-  <li class="dropdown ">
-    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Welcome {{ visitor_name }} !&nbsp;<b class="caret"></b></a>
-    <ul class="dropdown-menu">
-      <li><a href="{% url wom_user.views.user_profile %}" accesskey="p">Check your profile.</a></li>
-      <li><a href="{% url wom_user.views.user_logout %}">Log out.</a></li>
-    </ul>
-  </li>
-  {% else %}
-  <li><a href="{% url django.contrib.auth.views.login %}"><i class="icon-user icon-white"></i>Login</a></li>
-  {% endif %}
-{% endblock %}  
 
 {% block body_below_nav %}
 {% if messages %}
 <div id="messages">
   {% for message in messages %}
-  <div class="alert alert-{{message.tag}}">
-    <a class="close" data-dismiss="alert">×</a>
+  <div class="alert alert-{{message.tag}} alert-dismissable">
+    <a class="close" data-dismiss="alert"  aria-hidden="true">×</a>
     {{message}}
   </div>
   {% endfor %}

@@ -5,8 +5,8 @@ Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYI
 Site: https://github.com/tibonihoo/wateronmars
 */
 
-.read .accordion-heading {color: gray; border: none}
-.read .accordion-heading a {color: gray; border: none}
+.read .panel-heading {color: gray; border: none}
+.read .panel-heading a {color: gray; border: none}
 .bookmarked {display: none;}
 .saved .save-link {display: none;}
 .saved .bookmarked {display: inline-block;}
@@ -22,35 +22,56 @@ Site: https://github.com/tibonihoo/wateronmars
 #news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
 .sourceURL { color: black; decoration: None; }
 .sourceFeedURL { color: black; decoration: None; }
-.carousel-control {
+.carousel-control, .carousel-control span {
   font-size: 20px;
   width: 20px;
   height: 75%;
   border: none;
   top: 20%;
   opacity: 1;
-  background-color: rgb(230, 230, 230);
+  -moz-border-radius: 5px;
+  border-radius: 5px;
 }
+.carousel-control.right {
+   left: auto;
+   right: 5px;
+   background-image: none;
+   background-color: rgb(230, 230, 230);
+}
+
+.carousel-control.right span {
+   top: 20px;
+   right: -8px;
+   font-size: 18px;
+}
+
+.carousel-control.left {
+   left: 5px;
+   right: auto;
+   background-image: none;
+   background-color: rgb(230, 230, 230);
+}
+
+.carousel-control.left span {
+   top: 20px;
+   left: 8px;
+   font-size: 18px;
+}
+
 .carousel-control:active {
   background-color: rgb(212, 68, 19);
   opacity: 1;
 }
+
 .carousel-control:focus {
   background-color: rgb(230, 230, 230);
   opacity: 1;
 }
-.carousel-control.right {
-   left: auto;
-   right: 8px;
-}
-.carousel-control.left {
-   left: 5px;
-   right: auto;
-}
+
 .carousel-item-frame {
   border-radius: 0px;
 }
-.carousel-fig .accordion-inner {
+.carousel-fig .panel-body {
   border-top: none;
 }
 .carousel-fig { 
@@ -69,10 +90,17 @@ box-shadow: 5px 5px 5px 5px #ddd;
 @media screen and (max-width: 699px) {
   body { padding-right: 1px; padding-left: 5px; }
   .carousel-control { font-size: 10px; width: 10px;}
-  .carousel-control.right { right: 6px; }
-  .carousel-control.left { left: 2px; }
+  .carousel-control.right { right: 2px; }
+  .carousel-control.left { left: 2px; }   
+  .carousel-control.right span {
+     font-size: 10px;
+  }
+  .carousel-control.left span {
+     left: -8px;
+     font-size: 10px;
+  }
   .carousel-fig { padding-left: 2px; padding-right: 2px; overflow: auto; }
-  .accordion-inner { padding: 12px; }
+  .panel-body { padding: 12px; }
 }
 @media screen and (min-width: 700px) {
   .carousel-capt { font-size: 150%; }

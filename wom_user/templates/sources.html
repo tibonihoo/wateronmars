@@ -19,11 +19,11 @@ jQuery.ias({
 
 
 {% block content %}
-<p><i class="icon-book"></i><strong>{{ title_qualify }} sources</strong></p>
-<ul class="unstyled">
+<p><i class="glyphicon glyphicon-book"></i><strong>{{ title_qualify }} sources</strong></p>
+<ul class="list-unstyled">
 {% if tagged_web_feeds %}
   <li>Web Feeds
-    <ul class="unstyled">
+    <ul class="list-unstyled">
       {% for feed in tagged_web_feeds %}
       <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
@@ -40,7 +40,7 @@ jQuery.ias({
 
 {% if other_sources %}
   <li>Bookmark sources
-  <ul id="sources_list" class=" unstyled">
+  <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
    <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.title }}</a></li>
    {% endfor %}
@@ -48,13 +48,13 @@ jQuery.ias({
 </ul>
 {% else %}
   {% if tagged_web_feeds %}
-  <div class="alert alert-success alert-block" style="margin-top:1em;">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <div class="alert alert-info alert-dismissable fade in" style="margin-top:1em;">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <p>No source apart from the feed subscriptions.</p>
   </div>
   {% else %}
-  <div class="alert alert-success alert-block" style="margin-top:1em;">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <div class="alert alert-info alert-dismissable fade in" style="margin-top:1em;">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <p>No source yet.</p>   
   </div>
   {% endif %}

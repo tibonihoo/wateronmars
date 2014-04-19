@@ -12,30 +12,25 @@ Add a bookmark
 <p class="lead">Enter below the information about the new resource you want to bookmark.</p>
 
 {% if form.errors %}
-<div class="alert alert-error">
+<div class="alert alert-danger">
   <p>Please check the information below.</p>
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form action="{% url wom_user.views.user_collection_add visitor_name %}" method="post">
+<form role="form" action="{% url wom_user.views.user_collection_add visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}
-  <div class="control-group error">
+  <div class="form-group  has-error">
   {%  else %}
-  <div class="control-group">
+  <div class="form-group">
   {% endif %}
-    <span class="control-label">{{ field.label_tag }}</span>
-    <div class="controls">
-      {{ field }} {{ field.errors|safe }}
-    </div>
+    {{ field.label_tag }}
+    {{ field }} {{ field.errors|safe }}
   </div>
   {% endfor %}
-  <div class="control-groups">
-    <div class="controls">
-    <input type="submit" value="Save this bookmark" class="btn" />
-    <input type="hidden" name="next" value="{{ next }}" class="btn" />
-    </div>
-  </div>
+  <div class="form-group">
+    <input type="submit" value="Save this bookmark" class="btn btn-default" />
+    <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />   </div>
 </form>
 {% endblock %}

@@ -2,45 +2,57 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Water on Mars | {% block title %}{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-    <link rel="icon" type="image/png" href="{{ STATIC_URL }}img/wom-logo-16.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="Your base camp to explore the web.">
+    <link href="{{ STATIC_URL }}bootstrap/css/bootswatch.min.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}bootstrap/css/bootswatch_united_bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" sizes="16x16" type="image/png" href="{{ STATIC_URL }}img/wom-logo-16.png">
+    <link rel="icon" sizes="152x152" type="image/png" href="{{ STATIC_URL }}img/wom-logo-152.png">
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/wom-logo-76.png">
     <link rel="apple-touch-icon" sizes="76x76" href="{{ STATIC_URL }}img/wom-logo-76.png">
     <link rel="apple-touch-icon" sizes="128x128" href="{{ STATIC_URL }}img/wom-logo-128.png">
     <link rel="apple-touch-icon" sizes="152x152" href="{{ STATIC_URL }}img/wom-logo-152.png">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="{{ STATIC_URL }}img/wom-logo-152-precomposed.png">
     <link href="{{ STATIC_URL }}css/wom_base.css" rel="stylesheet">
     {% block head_after_css %}
     {% endblock %}
   </head>
   <body>
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <a class="brand" href="{% url wom_user.views.home %}" accesskey="h">Water On Mars</a>
-        <div class="container">
-          <a class="btn btn-navbar collapsed" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <ul class="nav">
+    <div class="navbar navbar-default navbar-fixed-top" role="banner">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <span class="navbar-brand navbar-nav" role="navigation">
+            <a href="{% url wom_user.views.home %}" accesskey="h" title="Water On Mars" id="wom-brand-name">WoM</a>
             {% if visitor_name %}
-            <li><a href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River" accesskey="r"><i class="icon-align-left icon-white"></i></a></li>
-            <li><a href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve" accesskey="f"><i class="icon-filter icon-white"></i></a></li>
-            <li><a href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection" accesskey="c"><i class="icon-bookmark icon-white"></i></a></li>
-            <li><a href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources" accesskey="s"><i class="icon-book icon-white"></i></a></li>
+            <a href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River" accesskey="r"><i class="glyphicon glyphicon-align-left"></i></a>
+            <a href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve" accesskey="f"><i class="glyphicon glyphicon-filter"></i></a>
+            <a href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection" accesskey="c"><i class="glyphicon glyphicon-bookmark"></i></a>
+            <a href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources" accesskey="s"><i class="glyphicon glyphicon-book"></i></a>
+            {% endif %}
+          </span>
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#wom-navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div id="wom-navbar-collapse" class="collapse navbar-collapse" style="height: 0px;" >
+          <ul class="nav navbar-nav navbar-left">
+            {% block head_notification %}  
+            {% endblock %}
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            {% if visitor_name %}
+            <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Welcome {{ visitor_name }} !&nbsp;</a></li>
+            <li><a href="{% url wom_user.views.user_profile %}" accesskey="p">Check your profile.</a></li>
+            <li><a href="{% url wom_user.views.user_logout %}">Log out.</a></li>
+            {% else %}
+            <li><a href="{% url django.contrib.auth.views.login %}"><i class="glyphicon glyphicon-user"></i>Login</a></li>
             {% endif %}
           </ul>
-          <div style="height: 0px;" class="nav-collapse navbar-responsive-collapse collapse">
-            <ul class="nav">
-            {% block nav_items %}
-            {% endblock %}
-            </ul>
-          </div>
         </div>
       </div>
     </div>
