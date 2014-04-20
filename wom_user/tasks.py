@@ -212,12 +212,18 @@ def check_user_unread_feed_items(user):
   clean_corrupted_rusts(user)
   new_ref_status = []
   processed_references = set()
+  discarded_ref_count = 0
   for feed in user.userprofile.web_feeds.select_related("source").all():
     # filter out rust that have the same reference
     feed_references = set(feed.source.productions.exclude(referenceuserstatus__owner=user).all())
-    new_ref_status += generate_reference_user_status(user,feed_references-processed_references)
+    new_references = feed_references-processed_references
+    new_ref_status += generate_reference_user_status(user,new_references)
+    discarded_ref_count += len(feed_references)-len(new_references)
     processed_references.update(feed_references)
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()
+  # At least for some time, let's control the effect of the filtering
+  if discarded_ref_count:
+    logger.warning("Discarded {0} duplicate feed items from current news.".format(discarded_ref_count))
   return len(new_ref_status)
