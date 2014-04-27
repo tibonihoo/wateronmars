@@ -41,6 +41,11 @@ from wom_pebbles.tasks import sanitize_url
 import logging
 logger = logging.getLogger(__name__)
 
+from HTMLParser import HTMLParser
+
+def HTMLUnescape(s):
+  return HTMLParser().unescape(s)
+
 
 def get_date_from_feedparser_entry(entry):
   """
@@ -89,9 +94,10 @@ when importing references from feed." % (len(url),URL_MAX_LENGTH))
     url = url_truncated
     # set the title only for new ref (should avoid weird behaviour
     # from the user point of view)
-    title = truncate_reference_title(entry.get("title") \
-                                     or strip_tags(entry.get("description")) \
-                                     or url)
+    title = truncate_reference_title(
+      HTMLUnescape(entry.get("title") \
+                   or strip_tags(entry.get("description")) \
+                   or url))
     ref = Reference(url=url,title=title)
   else:
     ref = previous_ref
@@ -189,7 +195,7 @@ def import_feedsources_from_opml(opml_txt):
       try:
         ref = Reference.objects.get(url=url_id)
       except ObjectDoesNotExist:
-        ref = Reference(url=url_id,title=current_feed.title,
+        ref = Reference(url=url_id,title=HTMLUnescape(current_feed.title),
                         pub_date=datetime.now(timezone.utc))
         ref.save()
       feed_source = WebFeed(source=ref,xmlURL=current_feed.xmlUrl)
