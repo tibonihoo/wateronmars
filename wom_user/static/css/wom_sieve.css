@@ -71,9 +71,11 @@ Site: https://github.com/tibonihoo/wateronmars
 .carousel-item-frame {
   border-radius: 0px;
 }
-.carousel-fig .panel-body {
+
+.panel-group .panel-heading + .panel-collapse.carousel-fig .panel-body {
   border-top: none;
 }
+
 .carousel-fig { 
   padding-left: 20px; 
   padding-right: 20px; 
