@@ -143,7 +143,7 @@ def add_base_template_context_data(d,visitor_name, owner_name):
     def __unicode__(self):
       return self.message
   if settings.DEMO:
-    m = Message("warning","WaterOnMars is running in demo mode, many features are disabled (like marking news as read or subscribing to new feeds) !")
+    m = Message("warning","For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks.")
     messages.append(m)
   d.update({
     'visitor_name' : visitor_name,
@@ -162,15 +162,9 @@ def home(request):
   """
   if request.method != 'GET':
     return HttpResponseNotAllowed(['GET'])
-  if settings.DEMO:
-    demo_u_name = settings.DEMO_USER_NAME
-    demo_u_password = settings.DEMO_USER_PASSWD
-  else:
-    demo_u_name = None
-    demo_u_password = None
-  d = add_base_template_context_data(
-    {"demo_u_name":demo_u_name,"demo_u_password":demo_u_password},
-    request.user.username,request.user.username)
+  d = add_base_template_context_data({},
+                                     request.user.username,
+                                     request.user.username)
   return render_to_response('home.html',d,
                             context_instance=RequestContext(request))
 

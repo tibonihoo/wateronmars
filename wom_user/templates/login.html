@@ -1,5 +1,6 @@
 {% extends "base_nojs.html" %}
 
+{% load demo_info %}
 
 {% block title %}
 User authentication
@@ -17,6 +18,9 @@ User authentication
 
 
 {% block body_below_nav %}  
+
+{% demo_info %}
+
 {% if form.errors %}
 <div class="alert alert-danger">
   <p>Your username and password didn't match. Please try again.</p>

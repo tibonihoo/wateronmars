@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load demo_info %}
+
 {% block title %}
 Landing site
 {% endblock %}
@@ -24,9 +26,7 @@ Landing site
 </p>
 {% else %}
 <a class="btn btn-primary btn-lg" href="{% url django.contrib.auth.views.login %}" title="Login"><i class="glyphicon glyphicon-user"></i>&nbsp; Login</a>
-{% if demo_u_name and demo_u_password %}
-  <p>You can login as the 'demo' user, with the username {{demo_u_name}} and the password {{demo_u_password}}.</p>  
-{% endif %}
+{% demo_info %}
 {% endif %}
 </div>
 
