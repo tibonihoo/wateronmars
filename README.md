@@ -6,7 +6,7 @@ Water On Mars!
 [![Build Status](https://travis-ci.org/tibonihoo/wateronmars.png?branch=master)](https://travis-ci.org/tibonihoo/wateronmars) [![Coverage Status](https://coveralls.io/repos/tibonihoo/wateronmars/badge.png?branch=master)](https://coveralls.io/r/tibonihoo/wateronmars?branch=master)
 
 This project intends to provide a free (as in freedom) alternative to
-web news readers and bookmark collection apps.
+web news readers and bookmarking apps.
 
 As such Water On Mars intends to be a news reading platform built around the following analogies:
 
@@ -14,21 +14,21 @@ As such Water On Mars intends to be a news reading platform built around the fol
 
 > You can then use a sieve to filter out and collect the most interesting links.
 
-An demo website is up and running thanks to Heroku at: http://wateronmars-demo.herokuapp.com.
+A demo website is up and running thanks to Heroku at: http://wateronmars-demo.herokuapp.com.
 
 Feature list:
 
 - Read news from web feeds
 - List your collection of bookmarks
 - Bookmarklets let you add bookmarks and feeds
-- A tablet-friendly carousel view lets you swipe among the news
+- A tablet-friendly view lets you swipe among the news
 - A mailbox-view (plus keyboard shortcut) lets you browse the news efficiently
-- Import bookmarks from Netscape-style bookmark list (as exported by delicious.com)
-- Import subscriptions from OPML file (as exported by most feed readers)
+- Import bookmarks from Netscape-style bookmark list files (as exported by delicious.com)
+- Import subscriptions from OPML files (as exported by most feed readers)
 
 
 For the curious developers the aim is also to provide the base
-mechanics for news and bookmarks manipulation. For instance, there is
+mechanics for news and bookmarks manipulations. For instance, there is
 now a "good enough" database scheme, a RESTful API and a "not too
 ridiculous" UX.
 
