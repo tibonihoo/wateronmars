@@ -31,10 +31,15 @@ Site: https://github.com/tibonihoo/wateronmars
 #wom-brand-name {font-weight: bold; color: #ffffff; font-size: 17px;}
 a#wom-brand-name:hover {text-decoration:none;}
 a { color: #3465a4; }
-.footer { text-align: center; font-size: 11px; line-height: 1; margin-top: 3em; }
+.footer { text-align: center; font-size: 11px; line-height: 1; margin-top: 5px; }
 .footer p { margin-bottom: 3px; }
 .footer ul li { display: inline; }
-.jumbotron {margin-top: 10px;}
+.jumbotron {
+  margin-top: 10px;
+  margin-bottom: 0px;
+  padding-bottom: 5px;
+}
+
 
 .form-control {
     height: 30px;
