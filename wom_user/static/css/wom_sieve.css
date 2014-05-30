@@ -5,6 +5,23 @@ Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYI
 Site: https://github.com/tibonihoo/wateronmars
 */
 
+.container-fluid {
+  padding: 0px;
+}
+
+.alert {
+  margin-bottom: 0px;
+}
+
+.panel-title {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.news-abstract h1 {
+  margin-top: -.2em;
+}
+
 .read .panel-heading {color: gray; border: none}
 .read .panel-heading a {color: gray; border: none}
 .bookmarked {display: none;}
@@ -25,37 +42,47 @@ Site: https://github.com/tibonihoo/wateronmars
 .carousel-control, .carousel-control span {
   font-size: 20px;
   width: 20px;
-  height: 75%;
+  height: 60%;
   border: none;
   top: 20%;
   opacity: 1;
   -moz-border-radius: 5px;
   border-radius: 5px;
 }
-.carousel-control.right {
-   left: auto;
-   right: 5px;
-   background-image: none;
-   background-color: rgb(230, 230, 230);
+
+
+.carousel-control span {
+  opacity: .5;
+}
+
+.carousel-control.left span {
+    display: none;
+    padding-left: 3px;
 }
 
 .carousel-control.right span {
-   top: 20px;
-   right: -8px;
-   font-size: 18px;
+    padding-left: 12px;
+    display: none;
+}
+
+
+.carousel-control.right {
+   left: auto;
+   right: 5px;
+   background-image: linear-gradient(to left, rgba(212, 68, 19,1) 0px, rgba(212, 68, 19,0) 60%);
+   opacity: .5;
 }
 
 .carousel-control.left {
    left: 5px;
    right: auto;
-   background-image: none;
-   background-color: rgb(230, 230, 230);
+   background-image: linear-gradient(to right, rgba(212, 68, 19,1) 0px, rgba(212, 68, 19,0) 60%);
+   opacity: .5;
 }
 
-.carousel-control.left span {
-   top: 20px;
-   left: 8px;
-   font-size: 18px;
+
+.carousel-control:hover {
+  opacity: .8;
 }
 
 .carousel-control:active {
@@ -70,6 +97,19 @@ Site: https://github.com/tibonihoo/wateronmars
 
 .carousel-item-frame {
   border-radius: 0px;
+}
+
+.panel-group {
+    margin-bottom: 0px;
+}
+
+.panel-group .panel + .panel {
+    margin-top: 0px;
+}
+
+.panel-group .panel, .panel-heading {
+  border-radius: 0px;
+  border: none;
 }
 
 .panel-group .panel-heading + .panel-collapse.carousel-fig .panel-body {
@@ -110,37 +150,37 @@ box-shadow: 5px 5px 5px 5px #ddd;
 }
 
 @media screen and (max-height: 499px) {
-.carousel-fig  .news-abstract { height: 200px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 350px; overflow: auto; }
 }
 
 @media screen and (min-height: 500px) and (max-height: 599px) {
-.carousel-fig  .news-abstract { height: 375px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 410px; overflow: auto; }
 }
 
 @media screen and (min-height: 600px) and (max-height: 699px) {
-.carousel-fig  .news-abstract { height: 390px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 470px; overflow: auto; }
 }
 
 @media screen and (min-height: 700px) and (max-height: 799px) {
-.carousel-fig  .news-abstract { height: 525px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 595px; overflow: auto; }
 }
 
 @media screen and (min-height: 800px) and (max-height: 899px) {
-.carousel-fig  .news-abstract { height: 600px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 670px; overflow: auto; }
 }
 
 @media screen and (min-height: 900px) and (max-height: 999px) {
-.carousel-fig  .news-abstract { height: 675px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 770px; overflow: auto; }
 }
 
 @media screen and (min-height: 1000px) and (max-height: 1099px) {
-.carousel-fig  .news-abstract { height: 750px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 890px; overflow: auto; }
 }
 
 @media screen and (min-height: 1100px) and (max-height: 1199px) {
-.carousel-fig  .news-abstract { height: 825px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 895px; overflow: auto; }
 }
 
 @media screen and (min-height: 1200px) {
-.carousel-fig  .news-abstract { height: 900px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 1150px; overflow: auto; }
 }

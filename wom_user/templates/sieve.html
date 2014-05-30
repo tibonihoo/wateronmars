@@ -24,9 +24,9 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block content %}
-<h4><i class="glyphicon glyphicon-filter"></i>{{ title_qualify }} sieve.
-  <small><span class="hidden-xs">Press 'n' (next) or 'p' (previous) to browse through the </span><span id="num_unread">{{ num_unread_references }}</span> unread items<span class="hidden-xs"> <a href="./" id="view-switch"></a></span>.</small>
-</h4>
+<!-- <h4><i class="glyphicon glyphicon-filter"></i>{{ title_qualify }} sieve. -->
+<!--   <small><span class="hidden-xs">Press 'n' (next) or 'p' (previous) to browse through the </span><span id="num_unread">{{ num_unread_references }}</span> unread items<span class="hidden-xs"> <a href="./" id="view-switch"></a></span>.</small> -->
+<!-- </h4> -->
 
 {# List the references #}
 <div class="carousel slide" id="sieve-carousel-frame">
@@ -35,12 +35,13 @@ prepareKeyBindings();
   <div class="panel panel-default item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
     <div class="panel-heading reference-short-description"  style="background-color:#eeeeec;padding:3px;">
       <h4 class="panel-title">
-        <a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-frame" href="#collapse{{forloop.counter0}}">{{ rust.reference.title }}</a> <small> - {{ rust.reference_pub_date }} <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-frame" href="#collapse{{forloop.counter0}}">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
     <div id="collapse{{forloop.counter0}}" class="panel-collapse collapse reference-details">
       <div class="panel-body">
         <div class="news-abstract">
+          <h1>{{ rust.reference.title }}</h1>
         {{ rust.reference.description|safe|defang_html }}
         </div>
         <div class="news-metadata" style="padding-top:0.5em;"> <a class="save-link" href="javascript:saveCurrentItem()" style="padding-right:0.5em;"><i class="glyphicon glyphicon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> <a id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}" style="padding-right:0.5em;"><i class="glyphicon glyphicon-globe"></i>view on site (v)</a>
