@@ -129,6 +129,31 @@ Site: https://github.com/tibonihoo/wateronmars
 box-shadow: 5px 5px 5px 5px #ddd;
 }
 
+.news-list { 
+  padding-top: 10px; 
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.news-list li { 
+  background-color: white;
+  padding-left: 2px;
+  padding-right: 2px;
+  border-bottom: 2px solid rgb(225, 232, 237);
+}
+
+.news-list li.shown a { 
+  color: #BF3E11;
+}
+
+.news-list li.read { 
+  background-color: rgb(245,248,250);
+}
+
+#sieve-nav {
+  overflow: scroll;
+}
+
 @media screen and (max-width: 699px) {
   body { padding-right: 1px; padding-left: 5px; }
   .carousel-control { font-size: 10px; width: 10px;}
@@ -151,36 +176,45 @@ box-shadow: 5px 5px 5px 5px #ddd;
 
 @media screen and (max-height: 499px) {
 .carousel-fig  .news-abstract { height: 350px; overflow: auto; }
+#sieve-nav {height: 350px;}
 }
 
 @media screen and (min-height: 500px) and (max-height: 599px) {
 .carousel-fig  .news-abstract { height: 410px; overflow: auto; }
+#sieve-nav {height: 410px;}
 }
 
 @media screen and (min-height: 600px) and (max-height: 699px) {
-.carousel-fig  .news-abstract { height: 470px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 490px; overflow: auto; }
+#sieve-nav {height: 490px;}
 }
 
 @media screen and (min-height: 700px) and (max-height: 799px) {
-.carousel-fig  .news-abstract { height: 595px; overflow: auto; }
+.carousel-fig  .news-abstract { height: 640px; overflow: auto; }
+#sieve-nav {height: 640px;}
 }
 
 @media screen and (min-height: 800px) and (max-height: 899px) {
 .carousel-fig  .news-abstract { height: 670px; overflow: auto; }
+#sieve-nav {height: 670px;}
 }
 
 @media screen and (min-height: 900px) and (max-height: 999px) {
 .carousel-fig  .news-abstract { height: 770px; overflow: auto; }
+#sieve-nav {height: 770px;}
 }
 
 @media screen and (min-height: 1000px) and (max-height: 1099px) {
 .carousel-fig  .news-abstract { height: 890px; overflow: auto; }
+#sieve-nav {height: 890px;}
 }
 
 @media screen and (min-height: 1100px) and (max-height: 1199px) {
 .carousel-fig  .news-abstract { height: 895px; overflow: auto; }
+#sieve-nav {height: 895px;}
 }
 
 @media screen and (min-height: 1200px) {
 .carousel-fig  .news-abstract { height: 1150px; overflow: auto; }
+#sieve-nav {height: 1150px;}
 }

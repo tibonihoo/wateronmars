@@ -28,8 +28,16 @@ prepareKeyBindings();
 <!--   <small><span class="hidden-xs">Press 'n' (next) or 'p' (previous) to browse through the </span><span id="num_unread">{{ num_unread_references }}</span> unread items<span class="hidden-xs"> <a href="./" id="view-switch"></a></span>.</small> -->
 <!-- </h4> -->
 
+
 {# List the references #}
-<div class="carousel slide" id="sieve-carousel-frame">
+<div class="news-list col-md-2" id="sieve-nav">
+  <ul class="list-unstyled source_ref_list">
+{% for rust in oldest_unread_references %}
+    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="reference-title" href="#collapse{{forloop.counter0}}" data-target="#sieve-carousel-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
+{% endfor %}
+  </ul>
+</div>
+<div class="carousel slide col-md-10" id="sieve-carousel-frame">
 <div class="panel-group carousel-inner" id="sieve-frame">
 {% for rust in oldest_unread_references %}
   <div class="panel panel-default item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">

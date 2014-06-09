@@ -47,9 +47,14 @@ function onCarouselSlid() {
   var previouslyShownItemIdx = gCurrentlyExpandedItem;
   if (previouslyShownItemIdx>=0) {
     var referenceId = '#ref'+previouslyShownItemIdx;
+    var prevNavItem = "#ref-nav-"+previouslyShownItemIdx.toString();
+    $(prevNavItem).removeClass("shown");
     markAsRead($(referenceId),previouslyShownItemIdx);  
   }
   gCurrentlyExpandedItem  = newlyShownItemIdx;
+  var navItem = "#ref-nav-"+newlyShownItemIdx.toString();
+  $(navItem).addClass("shown");
+  ensureCorrectVisibility(navItem,"#sieve-nav");
 }
 
 // Activation that needs to be called once the page is fully generated
@@ -146,20 +151,17 @@ function hideWarning(warningId) {
 // Make sure that an element is visible by scrolling the page if
 // necessary to make it appear at a comfortable place on the page.
 // Note: adapted from http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling 
-function ensureCorrectVisibility(elem)
+function ensureCorrectVisibility(elem,view)
 {
-  var windowHeight = $(window).height();
-  var windowTop = $(window).scrollTop();
-  var docViewTopThreshold = windowTop + windowHeight/4;
-  var docViewBottomThreshold = windowTop + (windowHeight/2);
-  var elemTop = $(elem).offset().top;
-  if (elemTop <= docViewTopThreshold)
+  var viewHeight = $(view).height();
+  var viewTop = $(view).offset().top;
+  var visibilityTopThreshold = viewHeight/4;
+  var visibilityBottomThreshold = viewHeight/2;
+  var elemTop = $(elem).offset().top - viewTop;
+  if ( (elemTop <= visibilityTopThreshold) || (elemTop >= visibilityBottomThreshold) )
   {
-    $('body,html').animate({scrollTop: elemTop-windowHeight/4}, 400); 
-  }
-  else if (elemTop >= docViewBottomThreshold)
-  {
-    $('body,html').animate({scrollTop: elemTop-windowHeight/4}, 400); 
+    var scrollNewTop = elemTop-(viewHeight/4)+$(view).scrollTop();
+    $(view).animate({scrollTop: scrollNewTop}, 400); 
   }
 }
 
@@ -179,7 +181,6 @@ function collapseCurrentlyExpandedItem() {
 function expandItem(idx) {
   var itemToExpand = 'collapse'+idx.toString();
   $('#'+itemToExpand).collapse('show');
-  gCurrentlyExpandedItem = idx;
 }
 
 // Generate the callback that will be called when the content of
@@ -295,7 +296,8 @@ function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
 // in #ref{refIdx}
 function markAsRead(refElement,refIdx) {
   if ( gNumReferences>0 && !refElement.hasClass('read') ) { 
-    refElement.addClass("read") 
+    refElement.addClass("read");
+    $("#ref-nav-"+refIdx.toString()).addClass('read');
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
     rollingUpdateReadStatusOnServer(true);
     gNumUnread -= 1;
