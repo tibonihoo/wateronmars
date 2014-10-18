@@ -15,10 +15,15 @@ Site: https://github.com/tibonihoo/wateronmars
       margin-left: -13px;
     }
 }
+
 .navbar-nav {
     margin-top: 0px;
-    margin-right: 0px;
     margin-bottom: 0px;
+    margin-right: 0px;
+}
+
+.navbar-right  {
+    padding-right: 12px;
 }
 
 .glyphicon {
@@ -28,7 +33,7 @@ Site: https://github.com/tibonihoo/wateronmars
 
 .navbar-brand.navbar-nav a i { color: #ffffff; border-right: none; border-left: none; padding-left: 3px; font-size: 15px;}
 .navbar-brand.navbar-nav a:hover i { color: #ffffff; border-right: none; border-left: none; padding-left: 3px; font-size: 15px;}
-#wom-brand-name {font-weight: bold; color: #ffffff; font-size: 17px;}
+#wom-brand-name {font-weight: bold; color: #ffffff; font-size: 17px; padding-left: 3px; }
 a#wom-brand-name:hover {text-decoration:none;}
 a { color: #3465a4; }
 .footer { text-align: center; font-size: 11px; line-height: 1; margin-top: 5px; }
