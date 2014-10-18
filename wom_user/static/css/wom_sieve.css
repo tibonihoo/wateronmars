@@ -5,6 +5,11 @@ Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYI
 Site: https://github.com/tibonihoo/wateronmars
 */
 
+body {
+   height: auto;
+   overflow: hidden;
+}
+
 .container-fluid {
   padding: 0px;
 }
@@ -39,6 +44,11 @@ Site: https://github.com/tibonihoo/wateronmars
 #news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
 .sourceURL { color: black; decoration: None; }
 .sourceFeedURL { color: black; decoration: None; }
+
+.carousel {
+    padding:  0px;
+}
+
 .carousel-control, .carousel-control span {
   font-size: 20px;
   width: 20px;
@@ -112,8 +122,13 @@ Site: https://github.com/tibonihoo/wateronmars
   border: none;
 }
 
-.panel-group .panel-heading + .panel-collapse.carousel-fig .panel-body {
+.panel-group .panel-heading + .reference-details.carousel-fig .panel-body {
   border-top: none;
+}
+
+.panel-body {
+  padding: 0;
+  padding-top: 15px;
 }
 
 .carousel-fig { 
@@ -139,7 +154,9 @@ box-shadow: 5px 5px 5px 5px #ddd;
   background-color: white;
   padding-left: 2px;
   padding-right: 2px;
-  border-bottom: 2px solid rgb(225, 232, 237);
+  border-bottom: 1px solid rgb(225, 232, 237);
+  font-weight: bold;
+  font-variant: small-caps;
 }
 
 .news-list li.shown a { 
@@ -147,12 +164,14 @@ box-shadow: 5px 5px 5px 5px #ddd;
 }
 
 .news-list li.read { 
+  font-weight: normal;
   background-color: rgb(245,248,250);
 }
 
 #sieve-nav {
   overflow: scroll;
 }
+
 
 @media screen and (max-width: 699px) {
   body { padding-right: 1px; padding-left: 5px; }
@@ -167,7 +186,7 @@ box-shadow: 5px 5px 5px 5px #ddd;
      font-size: 10px;
   }
   .carousel-fig { padding-left: 2px; padding-right: 2px; overflow: auto; }
-  .panel-body { padding: 12px; }
+  .panel-body { padding-top: 12px; }
 }
 @media screen and (min-width: 700px) {
   .carousel-capt { font-size: 150%; }
@@ -180,41 +199,41 @@ box-shadow: 5px 5px 5px 5px #ddd;
 }
 
 @media screen and (min-height: 500px) and (max-height: 599px) {
-.carousel-fig  .news-abstract { height: 410px; overflow: auto; }
-#sieve-nav {height: 410px;}
+.carousel-fig  .news-abstract { height: 430px; overflow: auto; }
+#sieve-nav {height: 500px;}
 }
 
 @media screen and (min-height: 600px) and (max-height: 699px) {
-.carousel-fig  .news-abstract { height: 490px; overflow: auto; }
-#sieve-nav {height: 490px;}
+.carousel-fig  .news-abstract { height: 510px; overflow: auto; }
+#sieve-nav {height: 600px;}
 }
 
 @media screen and (min-height: 700px) and (max-height: 799px) {
 .carousel-fig  .news-abstract { height: 640px; overflow: auto; }
-#sieve-nav {height: 640px;}
+#sieve-nav {height: 700px;}
 }
 
 @media screen and (min-height: 800px) and (max-height: 899px) {
 .carousel-fig  .news-abstract { height: 670px; overflow: auto; }
-#sieve-nav {height: 670px;}
+#sieve-nav {height: 800px;}
 }
 
 @media screen and (min-height: 900px) and (max-height: 999px) {
 .carousel-fig  .news-abstract { height: 770px; overflow: auto; }
-#sieve-nav {height: 770px;}
+#sieve-nav {height: 900px;}
 }
 
 @media screen and (min-height: 1000px) and (max-height: 1099px) {
 .carousel-fig  .news-abstract { height: 890px; overflow: auto; }
-#sieve-nav {height: 890px;}
+#sieve-nav {height: 1000px;}
 }
 
 @media screen and (min-height: 1100px) and (max-height: 1199px) {
 .carousel-fig  .news-abstract { height: 895px; overflow: auto; }
-#sieve-nav {height: 895px;}
+#sieve-nav {height: 1100px;}
 }
 
 @media screen and (min-height: 1200px) {
 .carousel-fig  .news-abstract { height: 1150px; overflow: auto; }
-#sieve-nav {height: 1150px;}
+#sieve-nav {height: 1190px;}
 }
