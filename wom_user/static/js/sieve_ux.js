@@ -120,11 +120,7 @@ function showTitleList()
 // @param userCollectionURL the url to which new bookmarks should be posted
 // @param numUnread the total number of unread items
 // should be synced with the server.
-// @param showTitleListText text to display on the control that makes
-// the title list visible
-// @param hideTitleListText text to display on the control that makes
-// the title list hidden
-function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,showTitleListText,hideTitleListText)
+function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 {
   // keybindings globals
   gCurrentlyExpandedItem = -1;
@@ -141,19 +137,9 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,showTitl
   var isExpliticHideTitleListURL = window.location.href.match("\\?view=hide-title-list(#|$)");
   var isExpliticShowTitleListURL = window.location.href.match("\\?view=show-title-list(#|$)");
   if ( isExpliticHideTitleListURL || (isTouch && !isExpliticShowTitleListURL))
-  {
     hideTitleList();
-    var showTitleListURLQuery = "./";
-    if (isTouch) { showTitleListURLQuery = "./?view=show-title-list"; }
-    $("#view-switch").attr("href",showTitleListURLQuery).text(showTitleListText);
-  }
   else
-  {
     showTitleList();
-    var hideTitleListURLQuery = "./";
-    if (isTouch) { hideTitleListURLQuery = "./?view=hide-title-list"; }
-    $("#view-switch").attr("href",hideTitleListURLQuery).text(hideTitleListText);    
-  }
 }
 
 

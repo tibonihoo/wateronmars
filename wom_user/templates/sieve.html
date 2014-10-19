@@ -47,7 +47,7 @@ prepareKeyBindings();
   <div class="panel panel-default carousel-item-frame item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
     <div class="panel-heading carousel-capt reference-short-description"  style="background-color:#eeeeec;padding:3px;">
       <h4 class="panel-title">
-        <small><a class="title-list-switch disabled" href="javascript:switchTitleListDisplay()">[H]</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a class="title-list-switch disabled" href="javascript:switchTitleListDisplay()" title="Switch headlines display">[H]</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
     <div id="collapse{{forloop.counter0}}" class="carousel-fig reference-details">
