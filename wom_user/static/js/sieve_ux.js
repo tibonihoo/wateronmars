@@ -298,6 +298,13 @@ function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
 }
 
 
+function updateReadingProgress() 
+{
+  progress = Math.round((100*gNumReferences-100*gNumUnread)/gNumReferences);
+  elt = $("#reading-progress")
+  elt.attr("aria-valuenow",progress.toString());
+  elt.attr("style","width: "+progress.toString()+"%;height:3px;");
+}
 
 // Perform all necessary stuff to indicate that a reference should be
 // considered as read.
@@ -313,7 +320,7 @@ function markAsRead(refElement,refIdx) {
     gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
     rollingUpdateReadStatusOnServer(true);
     gNumUnread -= 1;
-    $("#num_unread").text(gNumUnread.toString());
+    updateReadingProgress();
   }
 }
 

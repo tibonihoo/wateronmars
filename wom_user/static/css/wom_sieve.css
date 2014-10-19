@@ -187,6 +187,15 @@ box-shadow: 5px 5px 5px 5px #ddd;
   opacity: .2;
 }
 
+.progress {
+  height:3px;
+  margin:0px;
+}
+
+.progess-bar {
+  height: 3px;
+}
+
 
 #sieve-nav {
   overflow: scroll;

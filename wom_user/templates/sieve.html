@@ -24,10 +24,6 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block content %}
-<!-- <h4><i class="glyphicon glyphicon-filter"></i>{{ title_qualify }} sieve. -->
-<!--   <small><span class="hidden-xs">Press 'n' (next) or 'p' (previous) to browse through the </span><span id="num_unread">{{ num_unread_references }}</span> unread items<span class="hidden-xs"> <a href="./" id="view-switch"></a></span>.</small> -->
-<!-- </h4> -->
-
 
 {# List the references #}
 <div class="title-list col-md-2" id="sieve-nav">
@@ -42,10 +38,15 @@ prepareKeyBindings();
   </ul>
 </div>
 <div class="carousel slide col-md-10" id="sieve-carousel-frame">
+<div class="progress">
+  <div class="progress-bar progress-bar-info" id="reading-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+    <span class="sr-only">60% Complete</span>
+  </div>
+</div>
 <div class="panel-group carousel-inner" id="sieve-frame">
 {% for rust in oldest_unread_references %}
   <div class="panel panel-default carousel-item-frame item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
-    <div class="panel-heading carousel-capt reference-short-description"  style="background-color:#eeeeec;padding:3px;">
+    <div class="panel-heading carousel-capt reference-short-description" style="background-color:#eeeeec;padding:3px;">
       <h4 class="panel-title">
         <small><a class="title-list-switch disabled" href="javascript:switchTitleListDisplay()" title="Switch headlines display">[H]</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
@@ -81,10 +82,10 @@ prepareKeyBindings();
   </div>
   {% endfor %}
 </div>
-<a class="left carousel-control" title="previous">
+<a class="left carousel-control" title="Previous article (p)">
   <span class="glyphicon glyphicon-chevron-left"></span>
 </a>
-<a class="right carousel-control" title="next">
+<a class="right carousel-control" title="Next article (n)">
   <span class="glyphicon glyphicon-chevron-right"></span>
 </a>
 </div>
