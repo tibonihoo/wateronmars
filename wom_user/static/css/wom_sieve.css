@@ -23,8 +23,18 @@ body {
   padding-right: 15px;
 }
 
+
 .news-abstract h1 {
   margin-top: -.2em;
+}
+
+.reference-short-description {
+  background-color:#eeeeec;
+  padding:3px;
+}
+
+.action-link {
+  padding-right:0.5em;
 }
 
 .read .panel-heading {color: gray; border: none}
@@ -131,7 +141,10 @@ body {
   border-top: 1px solid rgb(229, 229, 229);
 }
 .carousel-fig .news-abstract { overflow: auto; }
-.news-metadata { margin-top: 3px; }
+.news-metadata { 
+  margin-top: 3px; 
+  padding-top:0.5em;
+}
 .carousel-item-frame {
 -webkit-box-shadow: 5px 5px 5px 5px #ddd;
 -moz-box-shadow: 5px 5px 5px 5px #ddd;

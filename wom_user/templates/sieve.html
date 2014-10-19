@@ -46,7 +46,7 @@ prepareKeyBindings();
 <div class="panel-group carousel-inner" id="sieve-frame">
 {% for rust in oldest_unread_references %}
   <div class="panel panel-default carousel-item-frame item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
-    <div class="panel-heading carousel-capt reference-short-description" style="background-color:#eeeeec;padding:3px;">
+    <div class="panel-heading carousel-capt reference-short-description">
       <h4 class="panel-title">
         <small><a class="title-list-switch disabled" href="javascript:switchTitleListDisplay()" title="Switch headlines display">[H]</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
@@ -57,7 +57,7 @@ prepareKeyBindings();
           <h1>{{ rust.reference.title }}</h1>
         {{ rust.reference.description|safe|defang_html }}
         </div>
-        <div class="news-metadata" style="padding-top:0.5em;"> <a class="save-link" href="javascript:saveCurrentItem()" style="padding-right:0.5em;"><i class="glyphicon glyphicon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> <a id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}" style="padding-right:0.5em;"><i class="glyphicon glyphicon-globe"></i>view on site (v)</a>
+        <div class="news-metadata"> <a class="action-link save-link" href="javascript:saveCurrentItem()"><i class="glyphicon glyphicon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> <a class="action-link" id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}"><i class="glyphicon glyphicon-globe"></i>view on site (v)</a>
           {% for tag in rust.get_tag_names %}
           {% if forloop.first %}
           <i class="glyphicon glyphicon-tags" title="Tags"></i>
