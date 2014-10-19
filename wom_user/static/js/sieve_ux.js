@@ -86,6 +86,34 @@ function initializeCarousel()
   });
 }
 
+function switchTitleListDisplay() 
+{
+  if ($(".title-list-switch.disabled").length) 
+    hideTitleList();
+  else 
+    showTitleList();
+}
+
+
+
+function hideTitleList() 
+{
+  $(".title-list").removeClass("col-md-2");
+  $(".carousel").removeClass("col-md-10");
+  $(".title-list").addClass("hidden");
+  $(".carousel").addClass("col-md-12");  
+  $(".title-list-switch").removeClass("disabled");  
+}
+
+function showTitleList() 
+{
+  $(".title-list").removeClass("hidden");
+  $(".carousel").removeClass("col-md-12");
+  $(".title-list").addClass("col-md-2");
+  $(".carousel").addClass("col-md-10");
+  $(".title-list-switch").addClass("disabled");  
+}
+
 
 // Activation that needs to be called once the page is fully generated
 // @param syncWithServer a boolean telling whether the read status
@@ -110,26 +138,18 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,showTitl
   // check if viewed in a touch device (and if so activate the
   // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
   var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-  var isExpliticHideTitleListURL = window.location.href.match("\\?view=hide-title-list(#|$)"); 
+  var isExpliticHideTitleListURL = window.location.href.match("\\?view=hide-title-list(#|$)");
   var isExpliticShowTitleListURL = window.location.href.match("\\?view=show-title-list(#|$)");
   if ( isExpliticHideTitleListURL || (isTouch && !isExpliticShowTitleListURL))
   {
-    // hide thte title list and extend the carousel
-    $(".title-list").removeClass("col-md-2");
-    $(".carousel").removeClass("col-md-10");
-    $(".title-list").addClass("hidden");
-    $(".carousel").addClass("col-md-12");
+    hideTitleList();
     var showTitleListURLQuery = "./";
     if (isTouch) { showTitleListURLQuery = "./?view=show-title-list"; }
     $("#view-switch").attr("href",showTitleListURLQuery).text(showTitleListText);
   }
   else
   {
-    // hide thte title list and extend the carousel
-    $(".title-list").removeClass("hidden");
-    $(".carousel").removeClass("col-md-12");
-    $(".title-list").addClass("col-md-2");
-    $(".carousel").addClass("col-md-10");
+    showTitleList();
     var hideTitleListURLQuery = "./";
     if (isTouch) { hideTitleListURLQuery = "./?view=hide-title-list"; }
     $("#view-switch").attr("href",hideTitleListURLQuery).text(hideTitleListText);    

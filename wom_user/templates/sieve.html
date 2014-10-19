@@ -31,6 +31,10 @@ prepareKeyBindings();
 
 {# List the references #}
 <div class="title-list col-md-2" id="sieve-nav">
+  <div>
+    <span id="title-list-header">Headlines</span>
+    <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">Hide title list</span></button>
+  </div>
   <ul class="list-unstyled source_ref_list">
 {% for rust in oldest_unread_references %}
     <li id="ref-nav-{{forloop.counter0}}" ><small><a class="reference-title" href="#collapse{{forloop.counter0}}" data-target="#sieve-carousel-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
@@ -43,7 +47,7 @@ prepareKeyBindings();
   <div class="panel panel-default carousel-item-frame item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
     <div class="panel-heading carousel-capt reference-short-description"  style="background-color:#eeeeec;padding:3px;">
       <h4 class="panel-title">
-        <small><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a class="title-list-switch disabled" href="javascript:switchTitleListDisplay()">[H]</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
     <div id="collapse{{forloop.counter0}}" class="carousel-fig reference-details">

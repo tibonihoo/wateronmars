@@ -144,6 +144,19 @@ box-shadow: 5px 5px 5px 5px #ddd;
   padding-right: 0;
 }
 
+#title-list-header {
+  background-color: white;
+  padding-left: 2px;
+  padding-right: 2px;
+  border-bottom: 1px solid rgb(225, 232, 237);
+  font-weight: bold;
+  font-variant: small-caps;
+}
+
+#title-list-header .close{
+  margin-right: 3px;
+}
+
 .title-list li { 
   background-color: white;
   padding-left: 2px;
@@ -161,6 +174,19 @@ box-shadow: 5px 5px 5px 5px #ddd;
   font-weight: normal;
   background-color: rgb(245,248,250);
 }
+
+.title-list-switch {
+  font-weight: bold;
+  font-variant: small-caps;
+  margin-right: 2px;
+  margin-left: -3px;
+  opacity: 1;
+}
+
+.title-list-switch.disabled {
+  opacity: .2;
+}
+
 
 #sieve-nav {
   overflow: scroll;
