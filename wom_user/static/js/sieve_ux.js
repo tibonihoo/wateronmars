@@ -38,9 +38,10 @@ function prepareKeyBindings()
   gReadURLs = [];
   gUserCollectionURL = "";
   gNumUnread = 0;
-  gInCarousel = false;
 }
 
+// Make sure that the item being slid out is marked as read and that
+// the next item and its title are displayed correctly.
 function onCarouselSlid() {  
   var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(3));
   $(".carousel").carousel("pause");
@@ -57,12 +58,45 @@ function onCarouselSlid() {
   ensureCorrectVisibility(navItem,"#sieve-nav");
 }
 
+
+// Initialize the carousel, activate its controls and plug the right callbacks.
+function initializeCarousel()
+{
+  if (gNumReferences==0)
+  {
+    $(".carousel-control").hide(); 
+    return;
+  }
+  $(".carousel-control").show(); 
+  // show the right "switch" text taking into account that accordion
+  // is the default view for non-touch devices
+  // add event
+  $(".carousel").on('slid.bs.carousel',  function () { onCarouselSlid()});
+  $(".carousel").carousel("next");
+  gCurrentlyExpandedItem = 0;
+  $(".carousel-control.left").on('click',function (){carouselSlideToPrevious()});
+  $(".carousel-control.right").on('click',function (){carouselSlideToNext()});
+  $(".carousel").swipe({
+    swipeLeft:function(event, direction, distance, duration, fingerCount) {
+        carouselSlideToNext();
+    },
+    swipeRight:function(event, direction, distance, duration, fingerCount) {
+      carouselSlideToPrevious();
+    }
+  });
+}
+
+
 // Activation that needs to be called once the page is fully generated
 // @param syncWithServer a boolean telling whether the read status
 // @param userCollectionURL the url to which new bookmarks should be posted
 // @param numUnread the total number of unread items
 // should be synced with the server.
-function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchToAccordionText,switchToCarouselText)
+// @param showTitleListText text to display on the control that makes
+// the title list visible
+// @param hideTitleListText text to display on the control that makes
+// the title list hidden
+function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,showTitleListText,hideTitleListText)
 {
   // keybindings globals
   gCurrentlyExpandedItem = -1;
@@ -72,64 +106,36 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread,switchTo
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread;
   $("#sieve-reload").on('click',function (){reloadSieve();});
+  initializeCarousel();
   // check if viewed in a touch device (and if so activate the
   // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
   var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-  var isExpliticCarouselURL = window.location.href.match("\\?view=carousel(#|$)"); 
-  var isExpliticAccordionURL = window.location.href.match("\\?view=accordion(#|$)");
-  if ( isExpliticCarouselURL || (isTouch && !isExpliticAccordionURL))
+  var isExpliticHideTitleListURL = window.location.href.match("\\?view=hide-title-list(#|$)"); 
+  var isExpliticShowTitleListURL = window.location.href.match("\\?view=show-title-list(#|$)");
+  if ( isExpliticHideTitleListURL || (isTouch && !isExpliticShowTitleListURL))
   {
-    gInCarousel = true;
-    var accordionURLQuery = "./";
-    if (isTouch) { accordionURLQuery = "./?view=accordion"; }
-    $("#view-switch").attr("href",accordionURLQuery).text(switchToAccordionText);
-    // make sure to disable the collapsible parts of the accordion
-    $(".carousel .collapse").removeClass("collapse").addClass("carousel-fig");
-    $(".panel-heading").addClass("carousel-capt");
-    $(".panel .panel-default").addClass("carousel-item-frame");
-    if (gNumReferences==0)
-    {
-      $(".carousel-control").hide(); 
-      return true;
-    }
-    $(".carousel-control").show(); 
-    // show the right "switch" text taking into account that accordion
-    // is the default view for non-touch devices
-    // add event
-    $(".carousel").on('slid.bs.carousel',  function () { onCarouselSlid()});
-    $(".carousel").carousel("next");
-    gCurrentlyExpandedItem = 0;
-    $(".carousel-control.left").on('click',function (){carouselSlideToPrevious()});
-    $(".carousel-control.right").on('click',function (){carouselSlideToNext()});
-    $(".carousel").swipe({
-      swipeLeft:function(event, direction, distance, duration, fingerCount) {
-        carouselSlideToNext();
-      },
-      swipeRight:function(event, direction, distance, duration, fingerCount) {
-        carouselSlideToPrevious();
-      }
-    });
+    // hide thte title list and extend the carousel
+    $(".title-list").removeClass("col-md-2");
+    $(".carousel").removeClass("col-md-10");
+    $(".title-list").addClass("hidden");
+    $(".carousel").addClass("col-md-12");
+    var showTitleListURLQuery = "./";
+    if (isTouch) { showTitleListURLQuery = "./?view=show-title-list"; }
+    $("#view-switch").attr("href",showTitleListURLQuery).text(showTitleListText);
   }
-  else 
+  else
   {
-    // make sure the carousel won't be activated by bootstrap
-    $("#sieve-frame").removeClass("carousel-inner");
-    // cleanup display from useless buttons
-    $(".carousel-control").hide();
-    // show the right "switch" text taking into account that carousel
-    // is the default view for touch devices
-    var carouselURLQuery = "./?view=carousel";
-    if (isTouch) { carouselURLQuery = "./"; }
-    $("#view-switch").attr("href",carouselURLQuery).text(switchToCarouselText);
-    // hook the hide/show calbacks in the feed items
-    for(idx=0;idx<gNumReferences;idx+=1)
-    {
-      currentId = 'collapse'+idx.toString()
-      $("#"+currentId).on('hidden.bs.collapse', createHiddenCallback(idx) );
-      $("#"+currentId).on('shown.bs.collapse', createShownCallback(idx) );
-    }
+    // hide thte title list and extend the carousel
+    $(".title-list").removeClass("hidden");
+    $(".carousel").removeClass("col-md-12");
+    $(".title-list").addClass("col-md-2");
+    $(".carousel").addClass("col-md-10");
+    var hideTitleListURLQuery = "./";
+    if (isTouch) { hideTitleListURLQuery = "./?view=hide-title-list"; }
+    $("#view-switch").attr("href",hideTitleListURLQuery).text(hideTitleListText);    
   }
 }
+
 
 // Show one of the warning that are written but hidden by default on
 // the page, and that are identified via their HTML id.
@@ -353,7 +359,7 @@ function carouselSlideToPrevious()
 
 // Expand previous item
 Mousetrap.bind('p', function() { 
-  if (gInCarousel) { carouselSlideToPrevious(); }
+  carouselSlideToPrevious();
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var collapsedItemIdx = collapseCurrentlyExpandedItem();
@@ -388,7 +394,7 @@ function carouselSlideToNext()
 
 // Expand next item
 Mousetrap.bind('n', function() { 
-  if (gInCarousel) { carouselSlideToNext(); }
+  carouselSlideToNext();
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
   var collapsedItemIdx = collapseCurrentlyExpandedItem();

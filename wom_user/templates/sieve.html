@@ -30,7 +30,7 @@ prepareKeyBindings();
 
 
 {# List the references #}
-<div class="news-list col-md-2" id="sieve-nav">
+<div class="title-list col-md-2" id="sieve-nav">
   <ul class="list-unstyled source_ref_list">
 {% for rust in oldest_unread_references %}
     <li id="ref-nav-{{forloop.counter0}}" ><small><a class="reference-title" href="#collapse{{forloop.counter0}}" data-target="#sieve-carousel-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
@@ -40,13 +40,13 @@ prepareKeyBindings();
 <div class="carousel slide col-md-10" id="sieve-carousel-frame">
 <div class="panel-group carousel-inner" id="sieve-frame">
 {% for rust in oldest_unread_references %}
-  <div class="panel panel-default item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
-    <div class="panel-heading reference-short-description"  style="background-color:#eeeeec;padding:3px;">
+  <div class="panel panel-default carousel-item-frame item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
+    <div class="panel-heading carousel-capt reference-short-description"  style="background-color:#eeeeec;padding:3px;">
       <h4 class="panel-title">
-        <small><a id="ref{{forloop.counter0}}-title"  data-toggle="collapse" data-parent="#sieve-frame" href="#collapse{{forloop.counter0}}">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
-    <div id="collapse{{forloop.counter0}}" class="panel-collapse collapse reference-details">
+    <div id="collapse{{forloop.counter0}}" class="carousel-fig reference-details">
       <div class="panel-body">
         <div class="news-abstract">
           <h1>{{ rust.reference.title }}</h1>
@@ -104,7 +104,7 @@ prepareKeyBindings();
 
 {% block extrascript %}
 <script>
-activateKeyBindings(true, "{{ user_collection_url }}", {{ num_unread_references }},"(switch to accordion view)","(switch to carousel view)");
+activateKeyBindings(true, "{{ user_collection_url }}", {{ num_unread_references }},"(show title list)","(hide title list)");
 </script>
 
 {% endblock %}
