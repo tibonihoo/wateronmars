@@ -34,7 +34,7 @@ body {
 }
 
 .action-link {
-  padding-right:0.5em;
+  padding-left:1em;
 }
 
 .read .panel-heading {color: gray; border: none}
@@ -56,13 +56,14 @@ body {
 
 .carousel-control, .carousel-control span {
   font-size: 20px;
-  width: 20px;
-  height: 60%;
+  width: 30px;
+  height: 30px;
   border: none;
-  top: 20%;
   opacity: 1;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+  top: auto;
+  bottom: -6px;
 }
 
 
