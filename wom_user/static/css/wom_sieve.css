@@ -10,7 +10,7 @@ body {
    overflow: hidden;
 }
 
-.container-fluid {
+#below-nav .container-fluid {
   padding: 0px;
 }
 
@@ -24,17 +24,32 @@ body {
 }
 
 
-.news-abstract h1 {
+.reference .panel-body h1 {
   margin-top: -.2em;
 }
 
-.reference-short-description {
+.reference .panel-heading {
   background-color:#eeeeec;
   padding:3px;
 }
 
-.action-link {
-  padding-left:1em;
+.reference-metadata {
+  padding-left: 1em;
+}
+
+.reference-metadata a {
+  padding-left: 1em;
+}
+
+.reference-keywords {
+  display: inline;
+  padding-left: 1em;
+}
+
+.reference-keywords li {
+  list-style:none;  
+  padding:0; 
+  display: inline;
 }
 
 .read .panel-heading {color: gray; border: none}
@@ -50,7 +65,11 @@ body {
 .sourceURL { color: black; decoration: None; }
 .sourceFeedURL { color: black; decoration: None; }
 
-.carousel {
+#sieve-frame {
+    padding:  0px;
+}
+
+#sieve-frame .carousel-inner {
     padding:  0px;
 }
 
@@ -110,8 +129,9 @@ body {
   opacity: 1;
 }
 
-.carousel-item-frame {
+.reference.panel {
   border-radius: 0px;
+  margin-bottom: 0px;
 }
 
 .panel-group {
@@ -127,7 +147,7 @@ body {
   border: none;
 }
 
-.panel-group .panel-heading + .reference-details.carousel-fig .panel-body {
+.panel-group .panel-heading + .panel-body {
   border-top: none;
 }
 
@@ -136,29 +156,36 @@ body {
   padding-top: 15px;
 }
 
-.carousel-fig { 
+.panel {
+  border-bottom: 0px;
+}
+
+.reference .panel-body { 
   padding-left: 20px; 
   padding-right: 20px; 
   border-top: 1px solid rgb(229, 229, 229);
+  overflow: auto;
 }
-.carousel-fig .news-abstract { overflow: auto; }
-.news-metadata { 
+
+.reference-metadata { 
   margin-top: 3px; 
   padding-top:0.5em;
 }
-.carousel-item-frame {
--webkit-box-shadow: 5px 5px 5px 5px #ddd;
--moz-box-shadow: 5px 5px 5px 5px #ddd;
-box-shadow: 5px 5px 5px 5px #ddd;
+
+.reference.panel {
+  -webkit-box-shadow: 5px 5px 5px 5px #ddd;
+  -moz-box-shadow: 5px 5px 5px 5px #ddd;
+  box-shadow: 5px 5px 5px 5px #ddd;
 }
 
-.title-list { 
+#title-list { 
   padding-top: 10px; 
   padding-left: 0;
   padding-right: 0;
+  overflow: scroll;
 }
 
-#title-list-header {
+#title-list-header-name {
   background-color: white;
   padding-left: 2px;
   padding-right: 2px;
@@ -171,7 +198,7 @@ box-shadow: 5px 5px 5px 5px #ddd;
   margin-right: 3px;
 }
 
-.title-list li { 
+#title-list li { 
   background-color: white;
   padding-left: 2px;
   padding-right: 2px;
@@ -180,45 +207,33 @@ box-shadow: 5px 5px 5px 5px #ddd;
   font-variant: small-caps;
 }
 
-.title-list li.shown a { 
+#title-list li.shown a { 
   color: #BF3E11;
 }
 
-.title-list li.read { 
+#title-list li.read { 
   font-weight: normal;
   background-color: rgb(245,248,250);
 }
 
 .title-list-switch {
-  font-weight: bold;
   font-variant: small-caps;
-  margin-right: 2px;
-  margin-left: -3px;
-  opacity: 1;
+  margin-right: 5px;
+  margin-left: -10px;
 }
 
-.title-list-switch.disabled {
-  opacity: .2;
-}
-
-.progress {
+#reading-progress {
   height:3px;
   margin:0px;
 }
 
-.progess-bar {
+#reading-progress .progress-bar {
   height: 3px;
 }
 
 
-#sieve-nav {
-  overflow: scroll;
-}
-
 
 @media screen and (max-width: 699px) {
-  body { padding-right: 1px; padding-left: 5px; }
-  .carousel-control { font-size: 10px; width: 10px;}
   .carousel-control.right { right: 2px; }
   .carousel-control.left { left: 2px; }   
   .carousel-control.right span {
@@ -228,55 +243,57 @@ box-shadow: 5px 5px 5px 5px #ddd;
      left: -8px;
      font-size: 10px;
   }
-  .carousel-fig { padding-left: 2px; padding-right: 2px; overflow: auto; }
+  .reference .panel-body { padding-left: 2px; padding-right: 2px; overflow: auto; }
   .panel-body { padding-top: 12px; }
 }
 @media screen and (min-width: 700px) {
-  .carousel-capt { font-size: 150%; }
-  .carousel-fig .news-abstract { font-size: 150%; overflow: auto; }
+  .panel-heading { font-size: 150%; }
+  .reference .panel-body { font-size: 150%; overflow: auto; }
 }
 
 @media screen and (max-height: 499px) {
-.carousel-fig  .news-abstract { height: 350px; overflow: auto; }
-#sieve-nav {height: 350px;}
+    .reference .panel-body { height: 350px; overflow: auto; }
+  .reference-metadata a { padding-left: 3px;}
+  .reference-keywords { padding-left: 3px; }
+  #title-list {height: 350px;}
 }
 
 @media screen and (min-height: 500px) and (max-height: 599px) {
-.carousel-fig  .news-abstract { height: 430px; overflow: auto; }
-#sieve-nav {height: 500px;}
+  .reference .panel-body { height: 450px; overflow: auto; }
+  #title-list {height: 500px;}
 }
 
 @media screen and (min-height: 600px) and (max-height: 699px) {
-.carousel-fig  .news-abstract { height: 510px; overflow: auto; }
-#sieve-nav {height: 600px;}
+  .reference .panel-body { height: 530px; overflow: auto; }
+  #title-list {height: 600px;}
 }
 
 @media screen and (min-height: 700px) and (max-height: 799px) {
-.carousel-fig  .news-abstract { height: 640px; overflow: auto; }
-#sieve-nav {height: 700px;}
+  .reference .panel-body { height: 650px; overflow: auto; }
+  #title-list {height: 700px;}
 }
 
 @media screen and (min-height: 800px) and (max-height: 899px) {
-.carousel-fig  .news-abstract { height: 670px; overflow: auto; }
-#sieve-nav {height: 800px;}
+  .reference .panel-body { height: 690px; overflow: auto; }
+  #title-list {height: 800px;}
 }
 
 @media screen and (min-height: 900px) and (max-height: 999px) {
-.carousel-fig  .news-abstract { height: 770px; overflow: auto; }
-#sieve-nav {height: 900px;}
+  .reference .panel-body { height: 790px; overflow: auto; }
+  #title-list {height: 900px;}
 }
 
 @media screen and (min-height: 1000px) and (max-height: 1099px) {
-.carousel-fig  .news-abstract { height: 890px; overflow: auto; }
-#sieve-nav {height: 1000px;}
+  .reference .panel-body { height: 910px; overflow: auto; }
+  #title-list {height: 1000px;}
 }
 
 @media screen and (min-height: 1100px) and (max-height: 1199px) {
-.carousel-fig  .news-abstract { height: 895px; overflow: auto; }
-#sieve-nav {height: 1100px;}
+  .reference .panel-body { height: 915px; overflow: auto; }
+  #title-list {height: 1100px;}
 }
 
 @media screen and (min-height: 1200px) {
-.carousel-fig  .news-abstract { height: 1150px; overflow: auto; }
-#sieve-nav {height: 1190px;}
+  .reference .panel-body { height: 1170px; overflow: auto; }
+  #title-list {height: 1190px;}
 }

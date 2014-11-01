@@ -31,7 +31,7 @@ function prepareKeyBindings()
 {
   // keybindings globals
   gMouseTrapDisabled = true;
-  gCurrentlyExpandedItem = -1;
+  gCurrentlyFocusedItem = -1;
   gNumReferences = 0;
   gSyncWithServer = false;
   gWaitingForServerAnswer = false;
@@ -45,17 +45,17 @@ function prepareKeyBindings()
 function onCarouselSlid() {  
   var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(3));
   $(".carousel").carousel("pause");
-  var previouslyShownItemIdx = gCurrentlyExpandedItem;
+  var previouslyShownItemIdx = gCurrentlyFocusedItem;
   if (previouslyShownItemIdx>=0) {
     var referenceId = '#ref'+previouslyShownItemIdx;
     var prevNavItem = "#ref-nav-"+previouslyShownItemIdx.toString();
     $(prevNavItem).removeClass("shown");
     markAsRead($(referenceId),previouslyShownItemIdx);  
   }
-  gCurrentlyExpandedItem  = newlyShownItemIdx;
+  gCurrentlyFocusedItem  = newlyShownItemIdx;
   var navItem = "#ref-nav-"+newlyShownItemIdx.toString();
   $(navItem).addClass("shown");
-  ensureCorrectVisibility(navItem,"#sieve-nav");
+  ensureCorrectVisibility(navItem,"#title-list");
 }
 
 
@@ -73,7 +73,7 @@ function initializeCarousel()
   // add event
   $(".carousel").on('slid.bs.carousel',  function () { onCarouselSlid()});
   $(".carousel").carousel("next");
-  gCurrentlyExpandedItem = 0;
+  gCurrentlyFocusedItem = 0;
   $(".carousel-control.left").on('click',function (){carouselSlideToPrevious()});
   $(".carousel-control.right").on('click',function (){carouselSlideToNext()});
   $(".carousel").swipe({
@@ -88,7 +88,7 @@ function initializeCarousel()
 
 function switchTitleListDisplay() 
 {
-  if ($(".title-list-switch.disabled").length) 
+  if ($(".title-list-switch.active").length) 
     hideTitleList();
   else 
     showTitleList();
@@ -98,20 +98,20 @@ function switchTitleListDisplay()
 
 function hideTitleList() 
 {
-  $(".title-list").removeClass("col-md-2");
+  $("#title-list").removeClass("col-md-2");
   $(".carousel").removeClass("col-md-10");
-  $(".title-list").addClass("hidden");
+  $("#title-list").addClass("hidden");
   $(".carousel").addClass("col-md-12");  
-  $(".title-list-switch").removeClass("disabled");  
+  $(".title-list-switch").removeClass("active");  
 }
 
 function showTitleList() 
 {
-  $(".title-list").removeClass("hidden");
+  $("#title-list").removeClass("hidden");
   $(".carousel").removeClass("col-md-12");
-  $(".title-list").addClass("col-md-2");
+  $("#title-list").addClass("col-md-2");
   $(".carousel").addClass("col-md-10");
-  $(".title-list-switch").addClass("disabled");  
+  $(".title-list-switch").addClass("active");  
 }
 
 
@@ -123,9 +123,9 @@ function showTitleList()
 function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 {
   // keybindings globals
-  gCurrentlyExpandedItem = -1;
+  gCurrentlyFocusedItem = -1;
   gMouseTrapDisabled = false;   
-  gNumReferences = $(".wom_reference").length;
+  gNumReferences = $(".reference").length;
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread;
@@ -172,53 +172,6 @@ function ensureCorrectVisibility(elem,view)
   {
     var scrollNewTop = elemTop-(viewHeight/4)+$(view).scrollTop();
     $(view).animate({scrollTop: scrollNewTop}, 400); 
-  }
-}
-
-// Collapse the currently expanded item if any.
-function collapseCurrentlyExpandedItem() {
-  var currentIdx = gCurrentlyExpandedItem;
-  if (currentIdx >= 0) {
-    var currentIdxStr = currentIdx.toString();
-    var itemToCollapse = 'collapse'+currentIdxStr;
-    $('#'+itemToCollapse).collapse('hide');
-  }
-  return currentIdx;
-}
-
-// Expand the item corresponding to the given index
-// Note: Take care of the global index tracking mechanics too.
-function expandItem(idx) {
-  var itemToExpand = 'collapse'+idx.toString();
-  $('#'+itemToExpand).collapse('show');
-}
-
-// Generate the callback that will be called when the content of
-// reference#i will be collapsed.
-function createShownCallback(i) {
-  return function () {
-    if (!gMouseTrapDisabled) 
-    {
-      gCurrentlyExpandedItem = i;
-    }
-    else
-    {
-      gMouseTrapDisabled = false;
-    }
-    ensureCorrectVisibility("#collapse"+i.toString());
-  }
-}
-
-
-// Generate the callback that will be called when the content of
-// reference#i will be collapsed.
-// Note: adapted from http://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example
-// WARNING: doesn't reset gCurrentlyExpandedItem (to allow restarting
-// to browse item from where it stopped)
-function createHiddenCallback(i) {
-  return function () {
-    var referenceId = '#ref'+i;
-    markAsRead($(referenceId),i);
   }
 }
 
@@ -299,9 +252,9 @@ function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
 function updateReadingProgress() 
 {
   progress = Math.round((100*gNumReferences-100*gNumUnread)/gNumReferences);
-  elt = $("#reading-progress")
+  elt = $("#reading-progress .progress-bar")
   elt.attr("aria-valuenow",progress.toString());
-  elt.attr("style","width: "+progress.toString()+"%;height:3px;");
+  elt.attr("style","width: "+progress.toString()+"%;");
 }
 
 // Perform all necessary stuff to indicate that a reference should be
@@ -361,7 +314,7 @@ function markAsSaved(refIdx) {
 
 function carouselSlideToPrevious() 
 {
-  if (gCurrentlyExpandedItem>0) 
+  if (gCurrentlyFocusedItem>0) 
   {
     $(".carousel").carousel("prev");
   }
@@ -373,23 +326,19 @@ Mousetrap.bind('p', function() {
   carouselSlideToPrevious();
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
-  var collapsedItemIdx = collapseCurrentlyExpandedItem();
-  if (collapsedItemIdx <= 0)
+  var unfocusedItemIdx = gCurrentlyFocusedItem;
+  if (unfocusedItemIdx <= 0)
   {
     // special case: we're at the begining of the list, and we want to
     // make sure that the browsing will restart with the first item.
-    gCurrentlyExpandedItem = -1;
+    gCurrentlyFocusedItem = -1;
     gMouseTrapDisabled = false;
-  }
-  else
-  {
-    expandItem(collapsedItemIdx-1);
   }
 });
 
 function carouselSlideToNext() 
 {
-  if (gCurrentlyExpandedItem>=gNumReferences-1) 
+  if (gCurrentlyFocusedItem>=gNumReferences-1) 
   {
     var idx = (gNumReferences-1);
     var referenceId = '#ref' + idx.toString();
@@ -408,25 +357,21 @@ Mousetrap.bind('n', function() {
   carouselSlideToNext();
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
-  var collapsedItemIdx = collapseCurrentlyExpandedItem();
-  if (collapsedItemIdx >= gNumReferences - 1)
+  var unfocusedItemIdx = gCurrentlyFocusedItem;
+  if (unfocusedItemIdx >= gNumReferences - 1)
   {
     // special case: we're at the end of the list, and we have to set
-    // gCurrentlyExpandedItem in such a way that looking at the
+    // gCurrentlyFocusedItem in such a way that looking at the
     // "previous" item will start by expanding the last one.
-    gCurrentlyExpandedItem = gNumReferences;
+    gCurrentlyFocusedItem = gNumReferences;
     gMouseTrapDisabled = false;
     $('#sieve-reload-message').modal('show')
-  }
-  else
-  {
-    expandItem(collapsedItemIdx+1);
   }
 });
 
 // open the currently expanded items' linked page in the browser
 Mousetrap.bind('v', function() { 
-  var itemToShow = 'ref'+gCurrentlyExpandedItem.toString()+"-URL";
+  var itemToShow = 'ref'+gCurrentlyFocusedItem.toString()+"-URL";
   window.open(document.getElementById(itemToShow).href);
 });
 
@@ -453,6 +398,6 @@ Mousetrap.bind('r', function() {
 
 // save the ref corresponding to the currently expanded items
 function saveCurrentItem() {
-  markAsSaved(gCurrentlyExpandedItem);
+  markAsSaved(gCurrentlyFocusedItem);
 }
 Mousetrap.bind('b', saveCurrentItem);

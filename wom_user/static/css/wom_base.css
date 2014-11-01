@@ -5,6 +5,11 @@ Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYI
 Site: https://github.com/tibonihoo/wateronmars
 */
 
+/*
+TODO:
+- avertissement du sieve en popup modal
+- mieux caller les liens en bas du panel (sieve)
+*/
 
 @media (max-width: 768px) {
     .container > .navbar-header,

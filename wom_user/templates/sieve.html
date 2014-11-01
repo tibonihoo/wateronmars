@@ -26,52 +26,45 @@ prepareKeyBindings();
 {% block content %}
 
 {# List the references #}
-<div class="title-list col-md-2" id="sieve-nav">
-  <div>
-    <span id="title-list-header">Headlines</span>
+<div class="col-md-2" id="title-list">
+  <div id="title-list-header">
+    <span id="title-list-header-name">Headlines</span>
     <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">Hide title list</span></button>
   </div>
-  <ul class="list-unstyled source_ref_list">
+  <ul class="list-unstyled">
 {% for rust in oldest_unread_references %}
-    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="reference-title" href="#collapse{{forloop.counter0}}" data-target="#sieve-carousel-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
+    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="reference-title" href="#ref{{forloop.counter0}}-content" data-target="#sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
 {% endfor %}
   </ul>
 </div>
-<div class="carousel slide col-md-10" id="sieve-carousel-frame">
-<div class="progress">
-  <div class="progress-bar progress-bar-info" id="reading-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-    <span class="sr-only">60% Complete</span>
+<div class="carousel slide col-md-10" id="sieve-frame">
+  <div class="progress" id="reading-progress" >
+    <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+    </div>
   </div>
-</div>
-<div class="panel-group carousel-inner" id="sieve-frame">
+<div class="carousel-inner">
 {% for rust in oldest_unread_references %}
-  <div class="panel panel-default carousel-item-frame item wom_reference {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
-    <div class="panel-heading carousel-capt reference-short-description">
+  <div class="reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
+    <div class="panel-heading">
       <h4 class="panel-title">
-        <small><a class="title-list-switch disabled" href="javascript:switchTitleListDisplay()" title="Switch headlines display">[H]</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a class="title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="Switch headlines display">H</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
-    <div id="collapse{{forloop.counter0}}" class="carousel-fig reference-details">
-      <div class="panel-body">
-        <div class="news-abstract">
-          <h1>{{ rust.reference.title }}</h1>
-        {{ rust.reference.description|safe|defang_html }}
-        </div>
-        <div class="news-metadata"> <a class="action-link save-link" href="javascript:saveCurrentItem()"><i class="glyphicon glyphicon-hand-up"></i>bookmark (b)</a><i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> <a class="action-link" id="ref{{forloop.counter0}}-URL" title="{{ rust.reference.title }}" href="{{ rust.reference.url }}"><i class="glyphicon glyphicon-globe"></i>view on site (v)</a>
-          {% for tag in rust.get_tag_names %}
-          {% if forloop.first %}
-          <i class="glyphicon glyphicon-tags" title="Tags"></i>
-          {% endif %}          
-          {{ tag }}
-          {% if not forloop.last %}
-          ,
-          {% endif %}
-          {% endfor %}
-        </div>
-      </div>
+    <div id="ref{{forloop.counter0}}-content" class="panel-body carousel-fig" role="article">
+      <h1>{{ rust.reference.title }}</h1>
+      {{ rust.reference.description|safe|defang_html }}
     </div>
+    {% spaceless %}
+    <div class="reference-metadata"> 
+      <a class="save-link" href="javascript:saveCurrentItem()" title="(b) Save it as a bookmark.">
+        <i class="glyphicon glyphicon-hand-up"></i>Bookmark</a>
+      <i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> 
+      <a id="ref{{forloop.counter0}}-URL" title="(v) View on site: {{ rust.reference.title }}" href="{{ rust.reference.url }}">
+        <i class="glyphicon glyphicon-globe"></i>visit (v)</a>
+    </div>
+    {% endspaceless %}
   </div>
-  {% empty %}
+{% empty %}
   <div class="alert alert-info alert-dismissable fade in">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <h4>No news is good news ?</h4> 
@@ -80,12 +73,12 @@ prepareKeyBindings();
     <p>You can subscribe to news sources with the following bookmarklet: <a class="alert-link" href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
     {% endif %}
   </div>
-  {% endfor %}
+{% endfor %}
 </div>
-<a class="left carousel-control" title="Previous article (p)">
+<a class="left carousel-control" title="Previous article (p)" href="#sieve-frame">
   <span class="glyphicon glyphicon-chevron-left"></span>
 </a>
-<a class="right carousel-control" title="Next article (n)">
+<a class="right carousel-control" title="Next article (n)" href="#sieve-frame">
   <span class="glyphicon glyphicon-chevron-right"></span>
 </a>
 </div>
