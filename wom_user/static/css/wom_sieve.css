@@ -251,49 +251,60 @@ body {
   .reference .panel-body { font-size: 150%; overflow: auto; }
 }
 
-@media screen and (max-height: 499px) {
-    .reference .panel-body { height: 350px; overflow: auto; }
+@media screen and (max-width: 400px) {
   .reference-metadata a { padding-left: 3px;}
   .reference-keywords { padding-left: 3px; }
-  #title-list {height: 350px;}
+}
+
+@media screen and (max-height: 499px) {
+    .reference .panel-body { height: 350px; overflow: auto; }
+  #title-list {height: 430px;}
 }
 
 @media screen and (min-height: 500px) and (max-height: 599px) {
-  .reference .panel-body { height: 450px; overflow: auto; }
-  #title-list {height: 500px;}
+  .reference .panel-body { height: 400px; overflow: auto; }
+  #title-list {height: 460px;}
 }
 
 @media screen and (min-height: 600px) and (max-height: 699px) {
-  .reference .panel-body { height: 530px; overflow: auto; }
-  #title-list {height: 600px;}
+  .reference .panel-body { height: 525px; overflow: auto; }
+  #title-list {height: 590px;}
 }
 
 @media screen and (min-height: 700px) and (max-height: 799px) {
   .reference .panel-body { height: 650px; overflow: auto; }
-  #title-list {height: 700px;}
+  #title-list {height: 720px;}
 }
 
 @media screen and (min-height: 800px) and (max-height: 899px) {
   .reference .panel-body { height: 690px; overflow: auto; }
-  #title-list {height: 800px;}
+  #title-list {height: 750px;}
 }
 
 @media screen and (min-height: 900px) and (max-height: 999px) {
-  .reference .panel-body { height: 790px; overflow: auto; }
-  #title-list {height: 900px;}
+  .reference .panel-body { height: 780px; overflow: auto; }
+  #title-list {height: 850px;}
 }
 
 @media screen and (min-height: 1000px) and (max-height: 1099px) {
   .reference .panel-body { height: 910px; overflow: auto; }
-  #title-list {height: 1000px;}
+  #title-list {height: 980px;}
 }
 
 @media screen and (min-height: 1100px) and (max-height: 1199px) {
-  .reference .panel-body { height: 915px; overflow: auto; }
-  #title-list {height: 1100px;}
+  .reference .panel-body { height: 990px; overflow: auto; }
+  #title-list {height: 1060px;}
 }
 
-@media screen and (min-height: 1200px) {
-  .reference .panel-body { height: 1170px; overflow: auto; }
-  #title-list {height: 1190px;}
+@media screen and (min-height: 1200px) and (max-height: 1899px) {
+  .reference .panel-body { height: 1080px; overflow: auto; }
+  #title-list {height: 1150px;}
 }
+
+@media screen and (min-height: 1900px) {
+  .reference .panel-body { height: 1800px; overflow: auto; }
+  #title-list {height: 1870px;}
+}
+
+// TODO: retina sizes: 1334, 1536, 1600, 1800, 2048, 2880
+// or find a better way ...
