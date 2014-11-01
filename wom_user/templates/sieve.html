@@ -16,11 +16,14 @@
 prepareKeyBindings();
 </script>
 {% endblock %}
-
 {% block head_notification %}{# Error messages #}
 <li><a id="news-loading" data-content="Fresh news are being downloaded from server." title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="News refresh !"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
-<li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="Server synchronization problem"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
-<li><a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="Bookmarking failed"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% if demo %}
+<li><a id="sieve-demo-warning" data-content="For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." title="Partial demo: synchronization disabled" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% else %}
+<li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="Server synchronization problem" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li><a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="Bookmarking failed" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% endif %}
 {% endblock %}
 
 {% block content %}

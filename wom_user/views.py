@@ -142,9 +142,6 @@ def add_base_template_context_data(d,visitor_name, owner_name):
       self.tag = tag
     def __unicode__(self):
       return self.message
-  if settings.DEMO:
-    m = Message("warning","For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks.")
-    messages.append(m)
   d.update({
     'visitor_name' : visitor_name,
     'owner_name' : owner_name,

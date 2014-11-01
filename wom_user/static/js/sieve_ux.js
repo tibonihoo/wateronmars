@@ -84,6 +84,7 @@ function initializeCarousel()
       carouselSlideToPrevious();
     }
   });
+  showWarning("sieve-demo-warning");
 }
 
 function switchTitleListDisplay() 
