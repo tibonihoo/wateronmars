@@ -38,6 +38,7 @@ function prepareKeyBindings()
   gReadURLs = [];
   gUserCollectionURL = "";
   gNumUnread = 0;
+  gInitialNumUnread = 0;
 }
 
 // Make sure that the item being slid out is marked as read and that
@@ -130,6 +131,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread;
+  gInitialNumUnread = numUnread;
   $("#sieve-reload").on('click',function (){reloadSieve();});
   initializeCarousel();
   // check if viewed in a touch device (and if so activate the
@@ -252,7 +254,7 @@ function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
 
 function updateReadingProgress() 
 {
-  progress = Math.round((100*gNumReferences-100*gNumUnread)/gNumReferences);
+  progress = Math.round(100*(gInitialNumUnread-gNumUnread)/gInitialNumUnread);
   elt = $("#reading-progress .progress-bar")
   elt.attr("aria-valuenow",progress.toString());
   elt.attr("style","width: "+progress.toString()+"%;");
