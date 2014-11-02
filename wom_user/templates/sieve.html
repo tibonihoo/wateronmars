@@ -32,7 +32,7 @@ prepareKeyBindings();
 <div class="col-md-2" id="title-list">
   <div id="title-list-header">
     <span id="title-list-header-name">Headlines</span>
-    <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">Hide title list</span></button>
+    <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">Hide title list</span></a>
   </div>
   <ul class="list-unstyled">
 {% for rust in oldest_unread_references %}
@@ -73,7 +73,7 @@ prepareKeyBindings();
     <h4>No news is good news ?</h4> 
     <p>No new items were found since your last visit !</p> 
     {% if source_add_bookmarklet %}
-    <p>You can subscribe to news sources with the following bookmarklet: <a class="alert-link" href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
+    <p>You can subscribe to news sources with the following bookmarklet: <a class="alert-link" href="{{ source_add_bookmarklet }}">Subscribe !</a></p>
     {% endif %}
   </div>
 {% endfor %}
