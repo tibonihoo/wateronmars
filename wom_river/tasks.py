@@ -1,6 +1,6 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 #
-# Copyright 2013 Thibauld Nion
+# Copyright 2013-2014 Thibauld Nion
 #
 # This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
 #
@@ -51,10 +51,12 @@ def get_date_from_feedparser_entry(entry):
   """
   Extract the date from the 'parsed date' fields of a feedparser generated entry.
   """
-  if entry.has_key("updated_parsed"):
+  if entry.get("updated_parsed",None):
     updated_date_utc = entry.updated_parsed[:6]
-  elif entry.has_key("published_parsed"):
+  elif entry.get("published_parsed",None):
     updated_date_utc = entry.published_parsed[:6]
+  elif entry.get("created_parsed",None):
+    updated_date_utc = entry.created_parsed[:6]
   else:
     logger.debug("Using 'now' as date for item %s" % entry.link)
     updated_date_utc = datetime.now(timezone.utc).utctimetuple()[:6]
@@ -82,7 +84,7 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   url = entry.link
   info = ""
   tags = set()
-  if entry.has_key("tags"):
+  if entry.get("tags",None):
     tags = set([t.term for t in entry.tags])
   if previous_ref is None:
     url_truncated,did_truncate = sanitize_url(url)
@@ -121,11 +123,11 @@ def add_new_references_from_feedparser_entries(feed,entries):
   entries_with_dates = [(e,get_date_from_feedparser_entry(e)) for e in entries]
   new_entries = [(e,d) for e,d in entries_with_dates \
                  if d>feed_last_update_check]
-  entries_url = [e.link for e,_ in new_entries if e.has_key("link")]
+  entries_url = [e.link for e,_ in new_entries if e.get("link",None)]
   existing_references = list(Reference.objects.filter(url__in=entries_url).all())
   existing_references_by_url = dict([(r.url,r) for r in existing_references])
   for entry,date in new_entries:
-    if not entry.has_key("link") or not entry.link:
+    if entry.get("link",None) is None:
       logger.warning("Skipping a feed entry without 'link' : %s." % entry)
       continue
     previous_ref = existing_references_by_url.get(entry.link,None)
