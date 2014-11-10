@@ -220,10 +220,11 @@ def check_user_unread_feed_items(user):
     new_ref_status += generate_reference_user_status(user,new_references)
     discarded_ref_count += len(feed_references)-len(new_references)
     processed_references.update(feed_references)
+    # At least for some time, let's control the effect of the filtering
+    if discarded_ref_count:
+      logger.debug("Discarded {0} duplicate feed items from news feed {1}."\
+                   .format(discarded_ref_count,feed.xmlURL))
   with transaction.commit_on_success():
     for r in new_ref_status:
       r.save()
-  # At least for some time, let's control the effect of the filtering
-  if discarded_ref_count:
-    logger.warning("Discarded {0} duplicate feed items from current news.".format(discarded_ref_count))
   return len(new_ref_status)
