@@ -44,16 +44,16 @@ function prepareKeyBindings()
 // Make sure that the item being slid out is marked as read and that
 // the next item and its title are displayed correctly.
 function onCarouselSlid() {  
-  var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(3));
   $(".carousel").carousel("pause");
+  var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(3));
   var previouslyShownItemIdx = gCurrentlyFocusedItem;
+  gCurrentlyFocusedItem  = newlyShownItemIdx;
   if (previouslyShownItemIdx>=0) {
     var referenceId = '#ref'+previouslyShownItemIdx;
     var prevNavItem = "#ref-nav-"+previouslyShownItemIdx.toString();
     $(prevNavItem).removeClass("shown");
     markAsRead($(referenceId),previouslyShownItemIdx);  
   }
-  gCurrentlyFocusedItem  = newlyShownItemIdx;
   var navItem = "#ref-nav-"+newlyShownItemIdx.toString();
   $(navItem).addClass("shown");
   ensureCorrectVisibility(navItem,"#title-list");
