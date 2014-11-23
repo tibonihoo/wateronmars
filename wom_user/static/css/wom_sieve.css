@@ -47,10 +47,10 @@ body {
 .wom-reference.saved .wom-save {display: none;}
 .wom-reference.saved .wom-bookmarked {display: inline-block;}
 
-#server-sync-problem {display : none;}
-#server-save-failed  {display : none;}
-#news-loading  { display : none;}
-#news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
+#wom-server-sync-problem {display : none;}
+#wom-server-save-failed  {display : none;}
+#wom-sieve-news-loading  { display : none;}
+#wom-sieve-news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
 .wom-source-url { color: black; decoration: None; }
 
 #wom-sieve-frame {
@@ -210,12 +210,12 @@ body {
   margin-left: -10px;
 }
 
-#reading-progress {
+#wom-sieve-reading-progress {
   height:3px;
   margin:0px;
 }
 
-#reading-progress .progress-bar {
+#wom-sieve-reading-progress .progress-bar {
   height: 3px;
 }
 

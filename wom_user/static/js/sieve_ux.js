@@ -225,7 +225,7 @@ function updateReadStatusOnServer(read_items_urls, callback) {
     url: currentURL,
     data: jsonStr,
     dataType: "json",
-  }).done(callback).fail(function () {showWarning("server-sync-problem");});
+  }).done(callback).fail(function () {showWarning("wom-server-sync-problem");});
 }
 
 // Send a reference's info to add it to the user's collection
@@ -249,14 +249,14 @@ function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
     url: gUserCollectionURL,
     data: jsonStr,
     dataType: "json",
-  }).done(callback).fail(function () {showWarning("server-save-failed");});
+  }).done(callback).fail(function () {showWarning("wom-server-save-failed");});
 }
 
 
 function updateReadingProgress() 
 {
   progress = Math.round(100*(gInitialNumUnread-gNumUnread)/gInitialNumUnread);
-  elt = $("#reading-progress .progress-bar")
+  elt = $("#wom-sieve-reading-progress .progress-bar")
   elt.attr("aria-valuenow",progress.toString());
   elt.attr("style","width: "+progress.toString()+"%;");
 }
@@ -291,7 +291,7 @@ function rollingUpdateReadStatusOnServer(check_lock) {
     // there's more than one it probably means that something went
     // wrong with the latest update)
     updateReadStatusOnServer(syncedReadURLS,function (data) {         
-      hideWarning("server-sync-problem");
+      hideWarning("wom-server-sync-problem");
       if (gReadURLs.length>0) {rollingUpdateReadStatusOnServer(false)} 
       else {gWaitingForServerAnswer=false;} });
   }
@@ -386,7 +386,7 @@ function reloadSieve()
   $('#wom-sieve-reload-message').modal('hide');
   var window_location = window.location;
   if (gReadURLs.length>0) {
-    showWarning("news-loading");
+    showWarning("wom-sieve-news-loading");
     updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; window_location.reload();});
   }
   else {
