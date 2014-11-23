@@ -63,6 +63,13 @@ function onCarouselSlid() {
 }
 
 
+// Make sure the carousel correctly fills the height of the window
+function adjustCarouselHeight() 
+{
+  $(".wom-reference-content").css("height",window.innerHeight-120);
+  $("#wom-title-list").css("height",window.innerHeight-40);
+}
+
 // Initialize the carousel, activate its controls and plug the right callbacks.
 function initializeCarousel()
 {
@@ -71,6 +78,10 @@ function initializeCarousel()
     $(".carousel-control").hide(); 
     return;
   }
+  // first adjustment of the carousel height and make sure that at the
+  // next resize the adjusted size is updated
+  adjustCarouselHeight();
+  window.onresize = function  (event) {adjustCarouselHeight();}
   $(".carousel-control").show(); 
   // show the right "switch" text taking into account that accordion
   // is the default view for non-touch devices
