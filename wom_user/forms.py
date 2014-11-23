@@ -126,11 +126,14 @@ class UserBookmarkAdditionForm(forms.Form):
       except ObjectDoesNotExist:
         ref_src = Reference(url=src_url,title=src_title,pub_date=pub_date)
         ref_src.save()
-      bookmarked_ref = Reference(url=url,
-                                 title=title,
-                                 pub_date=pub_date)
-      bookmarked_ref.save()
-      bookmarked_ref.sources.add(ref_src)
+      if src_url == url:
+        bookmarked_ref = ref_src
+      else:
+        bookmarked_ref = Reference(url=url,
+                                   title=title,
+                                   pub_date=pub_date)
+        bookmarked_ref.save()
+        bookmarked_ref.sources.add(ref_src)
     with transaction.commit_on_success():
       try:
         bmk = UserBookmark.objects.get(owner=self.user,reference=bookmarked_ref)

@@ -580,6 +580,28 @@ class UserBookmarkAddTestMixin:
                },
              expectedStatusCode=403)
     
+  def test_post_json_new_item_with_same_url_as_its_sources_succeeds(self):
+    """Posting a bookmark by giving the same url for the source and for
+    the bookmark should succeed anyway.
+    """
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    # mark the first reference as read.
+    self.add_request("uA",
+             { "url": u"http://samesame",
+               "title": u"same title",
+               "comment": u"same",
+               "source_url": u"http://samesame",
+               "source_title": u"same title",
+               })
+    resp = self.client.get(reverse("wom_user.views.user_collection",
+                     kwargs={"owner_name":"uA"}))
+    new_item_candidates = [b.reference for b in resp.context["user_bookmarks"] \
+                           if b.reference.url == u"http://samesame"]
+    self.assertEqual(1,len(new_item_candidates))
+    new_item_reference = new_item_candidates[0]
+    self.assertEqual(0,len(new_item_reference.sources.all()))
+    
 
 class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
 
