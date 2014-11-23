@@ -24,29 +24,29 @@ body {
 }
 
 
-.reference .panel-body h1 {
+.wom-reference .panel-body h1 {
   margin-top: -.2em;
 }
 
-.reference .panel-heading {
+.wom-reference .panel-heading {
   background-color:#eeeeec;
   padding:3px;
 }
 
-.reference-metadata {
+.wom-reference-metadata {
   padding-left: 1em;
 }
 
-.reference-metadata a {
+.wom-reference-metadata a {
   padding-left: 1em;
 }
 
-.reference-keywords {
+.wom-reference-keywords {
   display: inline;
   padding-left: 1em;
 }
 
-.reference-keywords li {
+.wom-reference-keywords li {
   list-style:none;  
   padding:0; 
   display: inline;
@@ -129,7 +129,7 @@ body {
   opacity: 1;
 }
 
-.reference.panel {
+.wom-reference.panel {
   border-radius: 0px;
   margin-bottom: 0px;
 }
@@ -160,19 +160,19 @@ body {
   border-bottom: 0px;
 }
 
-.reference .panel-body { 
+.wom-reference .panel-body { 
   padding-left: 20px; 
   padding-right: 20px; 
   border-top: 1px solid rgb(229, 229, 229);
   overflow: auto;
 }
 
-.reference-metadata { 
+.wom-reference-metadata { 
   margin-top: 3px; 
   padding-top:0.5em;
 }
 
-.reference.panel {
+.wom-reference.panel {
   -webkit-box-shadow: 5px 5px 5px 5px #ddd;
   -moz-box-shadow: 5px 5px 5px 5px #ddd;
   box-shadow: 5px 5px 5px 5px #ddd;
@@ -243,66 +243,66 @@ body {
      left: -8px;
      font-size: 10px;
   }
-  .reference .panel-body { padding-left: 2px; padding-right: 2px; overflow: auto; }
+  .wom-reference .panel-body { padding-left: 2px; padding-right: 2px; overflow: auto; }
   .panel-body { padding-top: 12px; }
 }
 @media screen and (min-width: 700px) {
   .panel-heading { font-size: 150%; }
-  .reference .panel-body { font-size: 150%; overflow: auto; }
+  .wom-reference .panel-body { font-size: 150%; overflow: auto; }
 }
 
 @media screen and (max-width: 400px) {
-  .reference-metadata a { padding-left: 3px;}
-  .reference-keywords { padding-left: 3px; }
+  .wom-reference-metadata a { padding-left: 3px;}
+  .wom-reference-keywords { padding-left: 3px; }
 }
 
 @media screen and (max-height: 499px) {
-    .reference .panel-body { height: 350px; overflow: auto; }
+  .wom-reference .panel-body { height: 350px; overflow: auto; }
   #title-list {height: 430px;}
 }
 
 @media screen and (min-height: 500px) and (max-height: 599px) {
-  .reference .panel-body { height: 400px; overflow: auto; }
+  .wom-reference .panel-body { height: 400px; overflow: auto; }
   #title-list {height: 460px;}
 }
 
 @media screen and (min-height: 600px) and (max-height: 699px) {
-  .reference .panel-body { height: 525px; overflow: auto; }
+  .wom-reference .panel-body { height: 525px; overflow: auto; }
   #title-list {height: 590px;}
 }
 
 @media screen and (min-height: 700px) and (max-height: 799px) {
-  .reference .panel-body { height: 650px; overflow: auto; }
+  .wom-reference .panel-body { height: 650px; overflow: auto; }
   #title-list {height: 720px;}
 }
 
 @media screen and (min-height: 800px) and (max-height: 899px) {
-  .reference .panel-body { height: 690px; overflow: auto; }
+  .wom-reference .panel-body { height: 690px; overflow: auto; }
   #title-list {height: 750px;}
 }
 
 @media screen and (min-height: 900px) and (max-height: 999px) {
-  .reference .panel-body { height: 780px; overflow: auto; }
+  .wom-reference .panel-body { height: 780px; overflow: auto; }
   #title-list {height: 850px;}
 }
 
 @media screen and (min-height: 1000px) and (max-height: 1099px) {
-  .reference .panel-body { height: 910px; overflow: auto; }
+  .wom-reference .panel-body { height: 910px; overflow: auto; }
   #title-list {height: 980px;}
 }
 
 @media screen and (min-height: 1100px) and (max-height: 1199px) {
-  .reference .panel-body { height: 990px; overflow: auto; }
+  .wom-reference .panel-body { height: 990px; overflow: auto; }
   #title-list {height: 1060px;}
 }
 
 @media screen and (min-height: 1200px) and (max-height: 1899px) {
-  .reference .panel-body { height: 1080px; overflow: auto; }
+  .wom-reference .panel-body { height: 1080px; overflow: auto; }
   #title-list {height: 1150px;}
 }
 
 @media screen and (min-height: 1900px) {
-  .reference .panel-body { height: 1800px; overflow: auto; }
+  .wom-reference .panel-body { height: 1800px; overflow: auto; }
   #title-list {height: 1870px;}
 }
 

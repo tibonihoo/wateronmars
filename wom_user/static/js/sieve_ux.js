@@ -1,5 +1,5 @@
 // sieve_ux.js 
-// Copyright 2013 Thibauld Nion
+// Copyright 2013-2014 Thibauld Nion
 //
 // This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars).
 //
@@ -127,7 +127,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
   // keybindings globals
   gCurrentlyFocusedItem = -1;
   gMouseTrapDisabled = false;   
-  gNumReferences = $(".reference").length;
+  gNumReferences = $(".wom-reference").length;
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread;

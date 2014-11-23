@@ -36,7 +36,7 @@ prepareKeyBindings();
   </div>
   <ul class="list-unstyled">
 {% for rust in oldest_unread_references %}
-    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="reference-title" href="#ref{{forloop.counter0}}-content" data-target="#sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
+    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="wom-reference-title" href="#ref{{forloop.counter0}}-content" data-target="#sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
 {% endfor %}
   </ul>
 </div>
@@ -47,7 +47,7 @@ prepareKeyBindings();
   </div>
 <div class="carousel-inner">
 {% for rust in oldest_unread_references %}
-  <div class="reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
+  <div class="wom-reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
     <div class="panel-heading">
       <h4 class="panel-title">
         <small><a class="title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="Switch headlines display">H</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
@@ -58,7 +58,7 @@ prepareKeyBindings();
       {{ rust.reference.description|safe|defang_html }}
     </div>
     {% spaceless %}
-    <div class="reference-metadata"> 
+    <div class="wom-reference-metadata"> 
       <a class="save-link" href="javascript:saveCurrentItem()" title="(b) Save it as a bookmark.">
         <i class="glyphicon glyphicon-hand-up"></i>Bookmark</a>
       <i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> 
