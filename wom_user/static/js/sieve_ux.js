@@ -45,16 +45,17 @@ function prepareKeyBindings()
 // the next item and its title are displayed correctly.
 function onCarouselSlid() {  
   $(".carousel").carousel("pause");
-  var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(3));
+  // get the index by slicing the "wom-refXXX" id after a len(wom-ref) offset
+  var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(7));
   var previouslyShownItemIdx = gCurrentlyFocusedItem;
   gCurrentlyFocusedItem  = newlyShownItemIdx;
   if (previouslyShownItemIdx>=0) {
-    var referenceId = '#ref'+previouslyShownItemIdx;
-    var prevNavItem = "#ref-nav-"+previouslyShownItemIdx.toString();
+    var referenceId = '#wom-ref'+previouslyShownItemIdx;
+    var prevNavItem = "#wom-ref-nav-"+previouslyShownItemIdx.toString();
     $(prevNavItem).removeClass("shown");
     markAsRead($(referenceId),previouslyShownItemIdx);  
   }
-  var navItem = "#ref-nav-"+newlyShownItemIdx.toString();
+  var navItem = "#wom-ref-nav-"+newlyShownItemIdx.toString();
   $(navItem).addClass("shown");
   ensureCorrectVisibility(navItem,"#wom-title-list");
 }
@@ -266,12 +267,12 @@ function updateReadingProgress()
 // @param refElement the element representing the reference that must
 // be marked as read
 // @param refIdx the index of this reference (typically as indicated
-// in #ref{refIdx}
+// in #wom-ref{refIdx}
 function markAsRead(refElement,refIdx) {
   if ( gNumReferences>0 && !refElement.hasClass('read') ) { 
     refElement.addClass("read");
-    $("#ref-nav-"+refIdx.toString()).addClass('read');
-    gReadURLs.push(document.getElementById('ref'+refIdx.toString()+"-URL").href);
+    $("#wom-ref-nav-"+refIdx.toString()).addClass('read');
+    gReadURLs.push(document.getElementById('wom-ref'+refIdx.toString()+"-url").href);
     rollingUpdateReadStatusOnServer(true);
     gNumUnread -= 1;
     updateReadingProgress();
@@ -299,15 +300,15 @@ function rollingUpdateReadStatusOnServer(check_lock) {
 // Make sure that the user gets a visual feedback indicating that the
 // reference has been saved.
 // @param refIdx the index of this reference (typically as indicated
-// in #ref{refIdx}
+// in #wom-ref{refIdx}
 function markAsSaved(refIdx) {
   var refIdxStr = refIdx.toString();
-  var refElement = $('#ref'+refIdxStr);
+  var refElement = $('#wom-ref'+refIdxStr);
   if ( !refElement.hasClass('saved') ) { 
-    var url = document.getElementById('ref'+refIdxStr+'-URL').href;
-    var title = document.getElementById('ref'+refIdxStr+'-URL').title;
-    var sourceURL = document.getElementById('ref'+refIdxStr+'-sourceURL').href;
-    var sourceTitle = document.getElementById('ref'+refIdxStr+'-sourceURL').title;
+    var url = document.getElementById('wom-ref'+refIdxStr+'-url').href;
+    var title = document.getElementById('wom-ref'+refIdxStr+'-url').title;
+    var sourceURL = document.getElementById('wom-ref'+refIdxStr+'-source-url').href;
+    var sourceTitle = document.getElementById('wom-ref'+refIdxStr+'-source-url').title;
     saveBookmarkOnServer(url,title,sourceURL,sourceTitle, function(data) {refElement.addClass("saved");});
   };
 }
@@ -344,7 +345,7 @@ function carouselSlideToNext()
   if (gCurrentlyFocusedItem>=gNumReferences-1) 
   {
     var idx = (gNumReferences-1);
-    var referenceId = '#ref' + idx.toString();
+    var referenceId = '#wom-ref' + idx.toString();
     markAsRead($(referenceId),idx);
     $('#wom-sieve-reload-message').modal('show')
   }
@@ -374,7 +375,7 @@ Mousetrap.bind('n', function() {
 
 // open the currently expanded items' linked page in the browser
 Mousetrap.bind('v', function() { 
-  var itemToShow = 'ref'+gCurrentlyFocusedItem.toString()+"-URL";
+  var itemToShow = 'wom-ref'+gCurrentlyFocusedItem.toString()+"-url";
   window.open(document.getElementById(itemToShow).href);
 });
 

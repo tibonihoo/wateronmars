@@ -36,7 +36,7 @@ prepareKeyBindings();
   </div>
   <ul class="list-unstyled">
 {% for rust in oldest_unread_references %}
-    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="wom-reference-title" href="#ref{{forloop.counter0}}-content" data-target="#wom-sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
+    <li id="wom-ref-nav-{{forloop.counter0}}" ><small><a class="wom-reference-title" href="#wom-ref{{forloop.counter0}}-content" data-target="#wom-sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
 {% endfor %}
   </ul>
 </div>
@@ -47,22 +47,22 @@ prepareKeyBindings();
   </div>
 <div class="carousel-inner">
 {% for rust in oldest_unread_references %}
-  <div class="wom-reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
+  <div class="wom-reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="wom-ref{{forloop.counter0}}">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <small><a class="wom-title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="Switch headlines display">H</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a class="wom-title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="Switch headlines display">H</a><a id="wom-ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
-    <div id="ref{{forloop.counter0}}-content" class="panel-body carousel-fig" role="article">
+    <div id="wom-ref{{forloop.counter0}}-content" class="wom-reference-content panel-body carousel-fig" role="article">
       <h1>{{ rust.reference.title }}</h1>
       {{ rust.reference.description|safe|defang_html }}
     </div>
     {% spaceless %}
-    <div class="wom-reference-metadata"> 
-      <a class="save-link" href="javascript:saveCurrentItem()" title="(b) Save it as a bookmark.">
+    <div class="wom-metadata"> 
+      <a class="wom-save" href="javascript:saveCurrentItem()" title="(b) Save it as a bookmark.">
         <i class="glyphicon glyphicon-hand-up"></i>Bookmark</a>
-      <i title="Bookmarked !" class="bookmarked glyphicon glyphicon-bookmark"></i> 
-      <a id="ref{{forloop.counter0}}-URL" title="(v) View on site: {{ rust.reference.title }}" href="{{ rust.reference.url }}">
+      <i title="Bookmarked !" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
+      <a id="wom-ref{{forloop.counter0}}-url" title="(v) View on site: {{ rust.reference.title }}" href="{{ rust.reference.url }}">
         <i class="glyphicon glyphicon-globe"></i>visit (v)</a>
     </div>
     {% endspaceless %}
