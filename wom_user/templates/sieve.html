@@ -29,9 +29,9 @@ prepareKeyBindings();
 {% block content %}
 
 {# List the references #}
-<div class="col-md-2" id="title-list">
-  <div id="title-list-header">
-    <span id="title-list-header-name">Headlines</span>
+<div class="col-md-2" id="wom-title-list">
+  <div id="wom-title-list-header">
+    <span id="wom-title-list-header-name">Headlines</span>
     <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">Hide title list</span></a>
   </div>
   <ul class="list-unstyled">
@@ -50,7 +50,7 @@ prepareKeyBindings();
   <div class="wom-reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="ref{{forloop.counter0}}">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <small><a class="title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="Switch headlines display">H</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a class="wom-title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="Switch headlines display">H</a><a id="ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="sourceURL" id="ref{{forloop.counter0}}-sourceURL" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
     <div id="ref{{forloop.counter0}}-content" class="panel-body carousel-fig" role="article">

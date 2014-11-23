@@ -56,7 +56,7 @@ function onCarouselSlid() {
   }
   var navItem = "#ref-nav-"+newlyShownItemIdx.toString();
   $(navItem).addClass("shown");
-  ensureCorrectVisibility(navItem,"#title-list");
+  ensureCorrectVisibility(navItem,"#wom-title-list");
 }
 
 
@@ -90,7 +90,7 @@ function initializeCarousel()
 
 function switchTitleListDisplay() 
 {
-  if ($(".title-list-switch.active").length) 
+  if ($(".wom-title-list-switch.active").length) 
     hideTitleList();
   else 
     showTitleList();
@@ -100,20 +100,20 @@ function switchTitleListDisplay()
 
 function hideTitleList() 
 {
-  $("#title-list").removeClass("col-md-2");
+  $("#wom-title-list").removeClass("col-md-2");
   $(".carousel").removeClass("col-md-10");
-  $("#title-list").addClass("hidden");
+  $("#wom-title-list").addClass("hidden");
   $(".carousel").addClass("col-md-12");  
-  $(".title-list-switch").removeClass("active");  
+  $(".wom-title-list-switch").removeClass("active");  
 }
 
 function showTitleList() 
 {
-  $("#title-list").removeClass("hidden");
+  $("#wom-title-list").removeClass("hidden");
   $(".carousel").removeClass("col-md-12");
-  $("#title-list").addClass("col-md-2");
+  $("#wom-title-list").addClass("col-md-2");
   $(".carousel").addClass("col-md-10");
-  $(".title-list-switch").addClass("active");  
+  $(".wom-title-list-switch").addClass("active");  
 }
 
 
