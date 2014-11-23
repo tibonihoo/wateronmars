@@ -85,7 +85,7 @@ function initializeCarousel()
       carouselSlideToPrevious();
     }
   });
-  showWarning("sieve-demo-warning");
+  showWarning("wom-sieve-demo-warning");
 }
 
 function switchTitleListDisplay() 
@@ -132,7 +132,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
   gUserCollectionURL = userCollectionURL;
   gNumUnread = numUnread;
   gInitialNumUnread = numUnread;
-  $("#sieve-reload").on('click',function (){reloadSieve();});
+  $("#wom-sieve-reload").on('click',function (){reloadSieve();});
   initializeCarousel();
   // check if viewed in a touch device (and if so activate the
   // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
@@ -346,7 +346,7 @@ function carouselSlideToNext()
     var idx = (gNumReferences-1);
     var referenceId = '#ref' + idx.toString();
     markAsRead($(referenceId),idx);
-    $('#sieve-reload-message').modal('show')
+    $('#wom-sieve-reload-message').modal('show')
   }
   else 
   {
@@ -368,7 +368,7 @@ Mousetrap.bind('n', function() {
     // "previous" item will start by expanding the last one.
     gCurrentlyFocusedItem = gNumReferences;
     gMouseTrapDisabled = false;
-    $('#sieve-reload-message').modal('show')
+    $('#wom-sieve-reload-message').modal('show')
   }
 });
 
@@ -382,7 +382,7 @@ Mousetrap.bind('v', function() {
 // items on the server before quitting page.
 function reloadSieve() 
 {
-  $('#sieve-reload-message').modal('hide');
+  $('#wom-sieve-reload-message').modal('hide');
   var window_location = window.location;
   if (gReadURLs.length>0) {
     showWarning("news-loading");

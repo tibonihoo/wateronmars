@@ -65,11 +65,11 @@ body {
 .sourceURL { color: black; decoration: None; }
 .sourceFeedURL { color: black; decoration: None; }
 
-#sieve-frame {
+#wom-sieve-frame {
     padding:  0px;
 }
 
-#sieve-frame .carousel-inner {
+#wom-sieve-frame .carousel-inner {
     padding:  0px;
 }
 

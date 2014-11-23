@@ -19,7 +19,7 @@ prepareKeyBindings();
 {% block head_notification %}{# Error messages #}
 <li><a id="news-loading" data-content="Fresh news are being downloaded from server." title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="News refresh !"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
 {% if demo %}
-<li><a id="sieve-demo-warning" data-content="For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." title="Partial demo: synchronization disabled" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li><a id="wom-sieve-demo-warning" data-content="For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." title="Partial demo: synchronization disabled" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 {% else %}
 <li><a id="server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="Server synchronization problem" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 <li><a id="server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="Bookmarking failed" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
@@ -36,11 +36,11 @@ prepareKeyBindings();
   </div>
   <ul class="list-unstyled">
 {% for rust in oldest_unread_references %}
-    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="wom-reference-title" href="#ref{{forloop.counter0}}-content" data-target="#sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
+    <li id="ref-nav-{{forloop.counter0}}" ><small><a class="wom-reference-title" href="#ref{{forloop.counter0}}-content" data-target="#wom-sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
 {% endfor %}
   </ul>
 </div>
-<div class="carousel slide col-md-10" id="sieve-frame">
+<div class="carousel slide col-md-10" id="wom-sieve-frame">
   <div class="progress" id="reading-progress" >
     <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
     </div>
@@ -78,24 +78,24 @@ prepareKeyBindings();
   </div>
 {% endfor %}
 </div>
-<a class="left carousel-control" title="Previous article (p)" href="#sieve-frame">
+<a class="left carousel-control" title="Previous article (p)" href="#wom-sieve-frame">
   <span class="glyphicon glyphicon-chevron-left"></span>
 </a>
-<a class="right carousel-control" title="Next article (n)" href="#sieve-frame">
+<a class="right carousel-control" title="Next article (n)" href="#wom-sieve-frame">
   <span class="glyphicon glyphicon-chevron-right"></span>
 </a>
 </div>
 
-<div class="modal fade" role="dialog" id="sieve-reload-message" aria-labelledby="sieve-reload-message-title" aria-hidden="true">
+<div class="modal fade" role="dialog" id="wom-sieve-reload-message" aria-labelledby="wom-sieve-reload-message-title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 cloass="modal-title" id="sieve-reload-message-title">No more news in sieve !</h3>
+        <h3 cloass="modal-title" id="wom-sieve-reload-message-title">No more news in sieve !</h3>
       </div>
       <div class="modal-body">
         <p>You've emptied the sieve, press the button below to reload with more news (if any).</p>
-        <p><button id="sieve-reload" class="btn btn-lg btn-primary" type="button">Reload the sieve.</button></p>
+        <p><button id="wom-sieve-reload" class="btn btn-lg btn-primary" type="button">Reload the sieve.</button></p>
         <p><small>You can also press 'r' to reload the sieve at any time.</small></p>
       </div>
     </div>
