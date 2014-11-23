@@ -313,7 +313,7 @@ class UserBookmarkAddTestMixin:
       saved_date=date,
       is_public=True)  
     
-  def test_post_json_new_item_is_added(self):
+  def test_add_new_item_is_added(self):
     """
     Posting a bookmark will add it to the user's collection.
     """
@@ -350,7 +350,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(u"new name",new_b_src.title)
     
     
-  def test_post_json_new_item_is_added_without_source(self):
+  def test_add_new_item_is_added_without_source(self):
     """
     Posting a bookmark without providing a source will
     add the bookmark correctly anyway.
@@ -385,7 +385,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(u"http://new",new_b_src.url)
     self.assertEqual(u"new",new_b_src.title)
 
-  def test_post_json_new_item_is_added_with_url_only(self):
+  def test_add_new_item_is_added_with_url_only(self):
     """
     Posting a bookmark without providing anything but a url
     add the bookmark correctly anyway.
@@ -416,7 +416,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(u"http://new",new_b_src.url)
     self.assertEqual(u"new",new_b_src.title)
     
-  def test_post_json_new_item_is_added_with_existing_source_url(self):
+  def test_add_new_item_is_added_with_existing_source_url(self):
     """
     Posting a bookmark with a source url that matches an
     exiting one, will associate the new bookmark with the existing
@@ -449,7 +449,7 @@ class UserBookmarkAddTestMixin:
                      Reference\
                      .objects.get(url=u"http://new/mouf").sources.get())
 
-  def test_post_json_new_item_is_added_with_existing_url(self):
+  def test_add_new_item_is_added_with_existing_url(self):
     """
     Posting a bookmark with a url for which a bookmark already
     exists will update the bookmark's title and description.
@@ -485,7 +485,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(u"new title: mouf",
                      UserBookmark.objects.get(reference=r).comment)
     
-  def test_post_json_new_item_is_added_with_existing_url_other_source(self):
+  def test_add_new_item_is_added_with_existing_url_other_source(self):
     """
     Posting a bookmark with a url for which a bookmark already
     exists will update the bookmark's title, description and source.
@@ -523,7 +523,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(u"new title: mouf",
                      UserBookmark.objects.get(reference=r).comment)
     
-  def test_post_json_new_item_is_added_with_existing_url_same_source(self):
+  def test_add_new_item_is_added_with_existing_url_same_source(self):
     """
     Posting a bookmark with a url for which a bookmark already
     exists will update the bookmark's title, description and
@@ -564,7 +564,7 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(u"new title: mouf",
                      UserBookmark.objects.get(reference=r).comment)
   
-  def test_post_json_new_item_to_other_user_fails(self):
+  def test_add_new_item_to_other_user_fails(self):
     """
     Posting a bookmark to another user's collection fails.
     """
@@ -580,7 +580,7 @@ class UserBookmarkAddTestMixin:
                },
              expectedStatusCode=403)
     
-  def test_post_json_new_item_with_same_url_as_its_sources_succeeds(self):
+  def test_add_new_item_with_same_url_as_its_sources_succeeds(self):
     """Posting a bookmark by giving the same url for the source and for
     the bookmark should succeed anyway.
     """
