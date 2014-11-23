@@ -50,10 +50,12 @@ function onCarouselSlid() {
   var previouslyShownItemIdx = gCurrentlyFocusedItem;
   gCurrentlyFocusedItem  = newlyShownItemIdx;
   if (previouslyShownItemIdx>=0) {
-    var referenceId = '#wom-ref'+previouslyShownItemIdx;
+    var referenceId = '#wom-ref'+previouslyShownItemIdx.toString();
     var prevNavItem = "#wom-ref-nav-"+previouslyShownItemIdx.toString();
     $(prevNavItem).removeClass("shown");
-    markAsRead($(referenceId),previouslyShownItemIdx);  
+    if (newlyShownItemIdx>previouslyShownItemIdx) {
+      markAsRead($(referenceId),previouslyShownItemIdx);      
+    }
   }
   var navItem = "#wom-ref-nav-"+newlyShownItemIdx.toString();
   $(navItem).addClass("shown");
@@ -121,7 +123,7 @@ function showTitleList()
 // Activation that needs to be called once the page is fully generated
 // @param syncWithServer a boolean telling whether the read status
 // @param userCollectionURL the url to which new bookmarks should be posted
-// @param numUnread the total number of unread items
+// @param numUnread the total number of unread items (currently ignored)
 // should be synced with the server.
 function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 {
@@ -131,7 +133,9 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
   gNumReferences = $(".wom-reference").length;
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
-  gNumUnread = numUnread;
+  // only count the numbe of unread items directly accessible by the
+  // user (anything else feels weirder)
+  gNumUnread = gNumReferences;
   gInitialNumUnread = numUnread;
   $("#wom-sieve-reload").on('click',function (){reloadSieve();});
   initializeCarousel();
