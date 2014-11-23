@@ -329,7 +329,7 @@ function carouselSlideToPrevious()
   return true;
 }
 
-// Expand previous item
+// Show previous item
 Mousetrap.bind('p', function() { 
   carouselSlideToPrevious();
   if(gMouseTrapDisabled) {return false;}
@@ -360,7 +360,7 @@ function carouselSlideToNext()
   return true;
 }
 
-// Expand next item
+// Show next item
 Mousetrap.bind('n', function() { 
   carouselSlideToNext();
   if(gMouseTrapDisabled) {return false;}
@@ -398,10 +398,7 @@ function reloadSieve()
   }
 }
 
-// open the currently expanded items' linked page in the browser
-Mousetrap.bind('r', function() { 
-  reloadSieve();
-});
+Mousetrap.bind('r', reloadSieve);
 
 
 // save the ref corresponding to the currently expanded items
@@ -409,3 +406,6 @@ function saveCurrentItem() {
   markAsSaved(gCurrentlyFocusedItem);
 }
 Mousetrap.bind('b', saveCurrentItem);
+
+
+Mousetrap.bind('h', switchTitleListDisplay);
