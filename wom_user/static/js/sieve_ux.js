@@ -147,7 +147,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
   // only count the numbe of unread items directly accessible by the
   // user (anything else feels weirder)
   gNumUnread = gNumReferences;
-  gInitialNumUnread = numUnread;
+  gInitialNumUnread = gNumUnread;
   $("#wom-sieve-reload").on('click',function (){reloadSieve();});
   initializeCarousel();
   // check if viewed in a touch device (and if so activate the
