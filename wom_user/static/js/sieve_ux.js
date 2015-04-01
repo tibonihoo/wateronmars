@@ -20,6 +20,7 @@
 // Requirements:
 // - jquery v1.8.2
 // - mousetrap.js v1.1.3
+// - wom_base.js
 //
 // Usage:
 // Call prepareKeyBindings() in the head of the page.
@@ -160,22 +161,6 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 }
 
 
-// Show one of the warning that are written but hidden by default on
-// the page, and that are identified via their HTML id.
-// WARNING: if there are several warnings, they may overlap (TODO: in
-// such case use a warning counter + a shift computed accordingly)
-function showWarning(warningId) {
-  var warningElt = $("#"+warningId);
-  warningElt.popover();
-  warningElt.css({ 
-    "display": "block",
-  });
-}
-
-// Hide a specific warning.
-function hideWarning(warningId) {
-  $("#"+warningId).css("display", "none");
-}
 
 // Make sure that an element is visible by scrolling the page if
 // necessary to make it appear at a comfortable place on the page.
@@ -195,53 +180,21 @@ function ensureCorrectVisibility(elem,view)
 }
 
 
-// using jQuery to get a cookie 
-// (from https://docs.djangoproject.com/en/dev/ref/contrib/csrf/)
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-// Django-specific method to distinguish which request needs to take
-// care of the crsf protection
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
 
 // Make sure the server will know that certain items have been read
 // @param read_items_urls a list of urls identifying the references
 // that must be considered as read.
 // @param callback function to be called when the server's answer is received
-function updateReadStatusOnServer(read_items_urls, callback) {
+function updateReadStatusOnServer(read_items_urls, callback) 
+{
   if (!gSyncWithServer) return;
   var jsonStr = JSON.stringify({"action": "read","references":read_items_urls})
-  var csrftoken = getCookie('csrftoken');
   var currentURL = window.location.href;
-  $.ajax({
-    crossDomain: false, // obviates need for sameOrigin test
-    beforeSend: function(xhr, settings) {
-      if (!csrfSafeMethod(settings.type)) {
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      }
-    },
-    type: "POST",
-    url: currentURL,
-    data: jsonStr,
-    dataType: "json",
-  }).done(callback).fail(function () {showWarning("wom-server-sync-problem");});
+  womRequest("POST", currentURL, "json", jsonStr)
+    .done(callback)
+    .fail(function () {showWarning("wom-server-sync-problem");});
 }
+
 
 // Send a reference's info to add it to the user's collection
 // @param url reference's URL
@@ -249,24 +202,14 @@ function updateReadStatusOnServer(read_items_urls, callback) {
 // @param sourceURL URL of the reference's source
 // @param sourceTitle name of the reference's source
 // @param callback function to be called when the server's answer is received
-function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) {
+function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) 
+{
   if (gUserCollectionURL=="") return;
   var jsonStr = JSON.stringify({"url": url, "title" : title, "source_url" : sourceURL, "source_title" : sourceTitle });
-  var csrftoken = getCookie('csrftoken');
-  $.ajax({
-    crossDomain: false, // obviates need for sameOrigin test
-    beforeSend: function(xhr, settings) {
-      if (!csrfSafeMethod(settings.type)) {
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      }
-    },
-    type: "POST",
-    url: gUserCollectionURL,
-    data: jsonStr,
-    dataType: "json",
-  }).done(callback).fail(function () {showWarning("wom-server-save-failed");});
+  womRequest("POST", gUserCollectionURL, "json", jsonStr)
+    .done(callback)
+    .fail(function () {showWarning("wom-server-save-failed");});
 }
-
 
 function updateReadingProgress() 
 {
