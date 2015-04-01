@@ -1289,6 +1289,34 @@ class UserSieveViewTest(TestCase):
         self.assertEqual(0,[r.reference.url for r in items].count("http://r1"))
         self.assertEqual(0,[r.reference.url for r in items].count("http://r3"))        
 
+    def test_post_json_drop_sieve_content(self):
+        """
+        Make sure posting an item as read will remove it from the sieve.
+        """
+        # login as uA and make sure it succeeds
+        self.assertTrue(self.client.login(username="uA",password="pA"))
+        # check presence of r1 reference
+        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+                                       kwargs={"owner_name":"uA"}))
+        items = resp.context["oldest_unread_references"]
+        num_refs = len(items)
+        self.assertGreaterEqual(num_refs, 1)
+        # mark the first reference as read.
+        resp = self.client.post(reverse("wom_user.views.user_river_sieve",
+                                        kwargs={"owner_name":"uA"}),
+                                simplejson.dumps({"action":"drop"}),
+                                content_type="application/json")
+        self.assertEqual(200,resp.status_code)
+        resp_dic = simplejson.loads(resp.content)
+        self.assertEqual("drop",resp_dic["action"])
+        self.assertEqual("success",resp_dic["status"])
+        self.assertLessEqual(num_refs,resp_dic["count"])
+        # check emptyness of sieve
+        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+                                       kwargs={"owner_name":"uA"}))
+        items = resp.context["oldest_unread_references"]
+        self.assertEqual(0,len(items))
+        
     def test_post_malformed_json_returns_error(self):
         """
         Make sure when the json is malformed an error that is not a server error is returned.

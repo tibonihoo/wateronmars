@@ -570,23 +570,27 @@ def apply_to_user_sieve(request,owner_name):
     action_dict = simplejson.loads(request.body)
   except:
     action_dict = {}
-  if action_dict.get(u"action") != u"read":
-    return HttpResponseBadRequest("Only a JSON formatted 'read' action is supported.")
-  target_urls = action_dict.get(u"references",[])
+  action_name = action_dict.get(u"action")
+  if action_name not in (u"read", u"drop"):
+    return HttpResponseBadRequest("Only a JSON formatted 'read' and 'drop' actions are supported.")
   modified_rust = []
-  for rust in ReferenceUserStatus.objects\
-                                 .filter(has_been_read=False,
-                                         owner=request.owner_user,
-                                         reference__url__in=target_urls):
+  rust_iterator = ReferenceUserStatus.objects\
+                                      .filter(has_been_read=False,
+                                              owner=request.owner_user)
+  if action_name == u"read":
+    target_urls = action_dict.get(u"references",[])
+    rust_iterator = rust_iterator.filter(reference__url__in=target_urls)
+  for rust in rust_iterator:
     rust.has_been_read = True
     modified_rust.append(rust)
   with transaction.commit_on_success():
     for r in modified_rust:
       r.save()
   count = len(modified_rust)
-  response_dict = {u"action": u"read", u"status": u"success", u"count": count}
+  response_dict = {u"action": action_name, u"status": u"success", u"count": count}
   return HttpResponse(simplejson.dumps(response_dict), mimetype='application/json')
 
+  
 
 @loggedin_and_owner_required
 def user_river_sieve(request,owner_name):
