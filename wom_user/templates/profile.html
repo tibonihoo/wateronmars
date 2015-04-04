@@ -18,15 +18,32 @@
 
 <p>Feel free to browse through the following pages:</p>
 
-<dl>
-<dt><a href="{% url wom_user.views.user_river_view owner_name %}" title="{{title_qualify}} River"><i class="glyphicon glyphicon-align-left"></i>Your river</a></dt>
-<dd>A streamlined view of the most recent news comming from your own selection of sources.</dd>
-<dt><a href="{% url wom_user.views.user_river_sieve owner_name %}" title="{{title_qualify}} Sieve"><i class="glyphicon glyphicon-filter"></i>Your sieve</a><small>(<a href="javascript:dropSieveContent('{% url wom_user.views.user_river_sieve owner_name %}')">drop all unread items</a>)</small></dt>
-<dd>An inbox-like view to help you filter the news and make sure you don't miss anything.</dd>
-<dt><a href="{% url wom_user.views.user_collection owner_name %}" title="{{title_qualify}} Collection"><i class="glyphicon glyphicon-bookmark"></i>Your collection</a> <small>(<a href="{% url wom_user.views.user_collection owner_name %}?format=ns-bmk-list">export as Netscape Bookmarks</a>)</small></dt>
-<dd>All the links you've picked up from your river and from the web, in a word: your bookmarks :)</dd>
-<dt><a href="{% url wom_user.views.user_river_sources owner_name %}" title="{{title_qualify}} Sources"><i class="glyphicon glyphicon-book"></i>Your sources</a> <small>(<a href="{% url wom_user.views.user_river_sources owner_name %}?format=opml">export as OPML</a>)</small></dt>
-<dd>A list of where you take your information from: the news sources to which you've suscribed as well as the sites referenced by your bookmarks.</dd>
+<dl class="dl-horizontal">
+  <dt><a href="{% url wom_user.views.user_river_view owner_name %}">
+      <abbr title="A stream of fresh news comming from your selection of sources.">Your river</abbr>
+      &nbsp;<i class="glyphicon glyphicon-align-left"></i></a></dt>
+  <dd>Read or <em>contemplate ...</em></dd>
+  <dt><a href="{% url wom_user.views.user_river_sieve owner_name %}">
+      <abbr title="An inbox-like view of your river to make sure you don't miss anything.">Your sieve</abbr>
+      &nbsp;<i class="glyphicon glyphicon-filter"></i></a></dt>
+  <dd>Read or <a href="javascript:dropSieveContent('{% url wom_user.views.user_river_sieve owner_name %}')" 
+                 title="Empty your sieve by forgetting all currently unread items.">drop all unread items</a></dd>
+  <dt><a href="{% url wom_user.views.user_collection owner_name %}">
+      <abbr title="All the links you've picked up from your river and the web">Your collection</abbr>
+      &nbsp;<i class="glyphicon glyphicon-bookmark"></i></a></dt>
+  <dd>Read or <a href="{% url wom_user.views.user_collection_add owner_name %}" 
+                 title="Add an URL to your collection.">add a bookmark</a>, 
+    or <a href="{% url wom_user.views.user_upload_nsbmk visitor_name %}" 
+          title="Add a batch of bookmarks at once, from your former bookmark lists.">import several</a>
+    or <a href="{% url wom_user.views.user_collection owner_name %}?format=ns-bmk-list" 
+          title="Export as Netscape's bookmarks xml file.">export all</a>.</dd>
+  <dt><a href="{% url wom_user.views.user_river_sources owner_name %}" title="{{title_qualify}} Sources">
+      <abbr title="The sources you're following and the sites referenced by your bookmarks.">Your sources</abbr>
+      &nbsp;<i class="glyphicon glyphicon-book"></i></a></dt>
+  <dd>Read or <a href="{% url wom_user.views.user_upload_opml visitor_name %}" 
+                 title="Add a batch of sources from a former subscription list.">import several</a> 
+    or <a href="{% url wom_user.views.user_river_sources owner_name %}?format=opml" 
+          title="Export your sources as OPML">export all</a>.</dd>
 </dl>
 
 
@@ -41,25 +58,11 @@
 {% endif %}
 <div class="row show-grid">
 <div class="col-md-6">
-<h4>Add bookmarks</h4>
-
-<p><a href="{% url wom_user.views.user_collection_add owner_name %}">Add a bookmark to your collection</a>. Also possible and quicker in your <a href="{% url wom_user.views.user_river_sieve owner_name %}" title="Your Sieve">sieve</a>.</p>
-<p>And when surfing on the web use the following <em>bookmarlet</em>:<br/>
-<a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-primary" title="Drag'n'drop me on your browser's toolbar">Bookmark!</a></p>
-
-<p><strong>Import several bookmarks at once</strong> via the <a href="{% url wom_user.views.user_upload_nsbmk visitor_name %}">upload form</a>.</p>
-
-</div>
-
-<div class="col-md-6">
-<h4>Subscribe to news sources</h4>
-
-<p><a href="{% url wom_user.views.user_river_source_add owner_name %}">Add a source of news</a>.
-<p>Also subscribe on the go, by using the following <em>bookmarlet</em> when you visit a web page:</br>
-<a href="{{ source_add_bookmarklet|safe }}" class="btn btn-primary" title="drag'n'drop me on your browser's toolbar">Subscribe!</a></p>
-</p>
-<p><strong>Import several sources at once</strong> via the <a href="{% url wom_user.views.user_upload_opml visitor_name %}"> OPML upload form</a>.</p>
-
+<h4>Bookmarklets</h4>
+<p>Another thing of the past, bookmarklets let you interact with <abbr title="wateronmars">WoM</abbr> when you're browsing the web.</p>
+<p>Drag'n'drop them on your browser's toolbar:</p>
+<p><a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-primary" title="Add current page to your bookmarks.">Bookmark!</a>
+<a href="{{ source_add_bookmarklet|safe }}" class="btn btn-primary" title="Follow this site through your river.">Subscribe!</a></p>
 </div>
 </div>
 </div>
