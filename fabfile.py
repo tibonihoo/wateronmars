@@ -40,7 +40,7 @@ def serve():
     local("python manage.py runserver")
 
 
-def validate():
+def test():
     local("coverage run manage.py test {0}".format(" ".join(DJANGO_APPS)))
 
 def deploy_demo():
@@ -70,7 +70,7 @@ def db_reset():
     print("Cleanup past migrations")
     for app_name in DJANGO_APPS:
         migration_dir = os.path.join("./",app_name,"migrations")
-        if os.path.isidir(migration_dir):
+        if os.path.isdir(migration_dir):
             shutil.rmtree(migration_dir)
     print("Initialize the migration data")
     for app_name in DJANGO_APPS:
