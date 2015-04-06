@@ -40,7 +40,9 @@
   <dt><a href="{% url wom_user.views.user_river_sources owner_name %}" title="{{title_qualify}} Sources">
       <abbr title="The sources you're following and the sites referenced by your bookmarks.">Your sources</abbr>
       &nbsp;<i class="glyphicon glyphicon-book"></i></a></dt>
-  <dd>Read or <a href="{% url wom_user.views.user_upload_opml visitor_name %}" 
+  <dd>Read or <a href="{% url wom_user.views.user_river_source_add visitor_name %}" 
+                 title="Subscribe to a new source.">add</a> 
+    or <a href="{% url wom_user.views.user_upload_opml visitor_name %}" 
                  title="Add a batch of sources from a former subscription list.">import several</a> 
     or <a href="{% url wom_user.views.user_river_sources owner_name %}?format=opml" 
           title="Export your sources as OPML">export all</a>.</dd>
