@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}
+Source: {{ source_name }}
+{% endblock %}
+
+{% block content %}
+
+<h4><img src="http://plus.google.com/_/favicon?domain={{ source_url }}" style="padding-right:.5em;"/>{{ source_name }}</h4>
+
+<p><a href="{{ source_url }}">View on site.</a></p>
+
+<p class="help-block">Feel free to change or complement the information about this source.</p>
+
+{% if form.errors %}
+<div class="alert alert-danger">
+  <p>Please check the information below.</p>
+  {{ form.non_field_errors|safe }}
+</div>
+{% endif %}
+<form class="form-horizontal" role="form" action="{% url wom_user.views.user_river_source_item visitor_name source_url %}" method="post">
+  {% csrf_token %}
+  {% for field in form %}
+  {% if field.errors %}
+  <div class="form-group has-error">
+  {%  else %}
+  <div class="form-group">
+  {% endif %}
+    <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
+    <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
+  </div>
+  {% endfor %}
+  <div class="form-group">
+    <span class="col-sm-offset-2">
+      <input type="submit" value="Save changes" class="btn btn-default" />
+      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
+    </span>
+  </div>
+</form>
+
+{% endblock %}

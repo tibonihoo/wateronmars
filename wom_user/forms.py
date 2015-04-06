@@ -22,6 +22,7 @@ from datetime import datetime
 from django.utils import timezone
 
 from django import forms
+from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
@@ -278,28 +279,11 @@ class UserSourceAdditionForm(forms.Form):
     return new_feed
 
 
-def CreateUserSourceRemovalForm(user,*args, **kwargs):
-      
-  class UserSourceRemovalForm(forms.Form):
-    """Gather a selection of syndication sources from which the user wants to un-subsribe."""   
-    sources_to_remove = forms.ModelMultipleChoiceField(\
-      user.userprofile.web_feeds,
-      widget=forms.SelectMultiple(attrs={"class":"form-control","size":"13"}))
-    
-    def __init__(self):
-      forms.Form.__init__(self,*args,**kwargs)
-      self.user = user
-   
-    def save(self,commit=True):
-      """Unsubscribe the user from the selected sources and returns
-      the list of un-subscribed sources.
-
-      If commit is set to False, the changes to the UserProfile object
-      are not commited.
-      """
-      sources_to_remove = self.cleaned_data["sources_to_remove"] 
-      for feed_source in sources_to_remove:
-        self.user.userprofile.web_feeds.remove(feed_source)
-      return sources_to_remove
+class SourceEditForm(ModelForm):
+  """Designed to modify an existing reference, assumed to be one of a user's sources."""
   
-  return UserSourceRemovalForm()
+  class Meta:
+    model = Reference
+    # exclude = ("url", "save_count", "sources")
+    fields = ("title", "description", "pub_date")
+    

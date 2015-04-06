@@ -60,7 +60,7 @@ from wom_user.forms import NSBookmarkFileUploadForm
 from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
-from wom_user.forms import CreateUserSourceRemovalForm
+from wom_user.forms import SourceEditForm
 
 
 from wom_user.tasks import import_user_feedsources_from_opml
@@ -374,28 +374,55 @@ def user_river_source_add(request,owner_name):
   return render_to_response('source_addition.html',d,
                             context_instance=RequestContext(request))
 
-
 @loggedin_and_owner_required
 @csrf_protect
-@require_http_methods(["GET","POST"])
-def user_river_source_remove(request,owner_name):
-  """Stop subscriptions to sources via a form only !"""
-  if settings.DEMO:
-    return HttpResponseForbidden("Source removal is not possible in DEMO mode.")
-  if request.method == 'POST':
-    src_info = request.POST
-  elif request.GET: # GET
-    src_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
-  else:
-    src_info = None
-  form = CreateUserSourceRemovalForm(request.user, src_info, error_class=CustomErrorList)
-  if src_info and form.is_valid():
-    form.save()
-    return HttpResponseRedirect(reverse('wom_user.views.user_river_sources',
-                                        args=(request.user.username,)))
-  d = add_base_template_context_data({'form': form},request.user.username,request.user.username)
-  return render_to_response('source_removal.html',d,
-                            context_instance=RequestContext(request))
+@require_http_methods(["GET","POST","DELETE"])
+def user_river_source_item(request, owner_name, source_url):
+  """Generate an editable view of a given source identified by its url."""
+  owner_profile = request.owner_user.userprofile
+  if request.method == "DELETE":
+    if settings.DEMO:
+      return HttpResponseForbidden("Source removal is not possible in DEMO mode.")
+    target_feeds = owner_profile.web_feeds.filter(source__url=source_url)
+    num_deleted_feeds = target_feeds.count()
+    target_feeds.delete()
+    other_sources = owner_profile.sources.filter(url=source_url)\
+                                         .exclude(webfeed__userprofile=owner_profile)
+    num_deleted_sources = other_sources.count()
+    other_sources.delete()
+    response_dict = {
+      "status": u"success",
+      "num_stopped_subscriptions": num_deleted_feeds,
+      "num_deleted_sources": num_deleted_sources,
+    }    
+    return HttpResponse(simplejson.dumps(response_dict),
+                        mimetype='application/json')
+  elif request.method in ('GET', 'POST'):
+    try:
+      reference = owner_profile.sources.get(url=source_url)
+    except Reference.DoesNotExist:
+      return HttpResponseNotFound()
+    if request.method == 'POST' :
+      # if settings.DEMO:
+      #   return HttpResponseForbidden("Source editting is not possible in DEMO mode.")
+      form = SourceEditForm(request.POST, instance=reference,
+                            error_class = CustomErrorList)
+      if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('wom_user.views.user_river_sources',
+                                            args=(request.user.username,)))
+    else:
+      form = SourceEditForm(instance=reference,
+                            error_class = CustomErrorList)
+    d = add_base_template_context_data(
+      { 
+        'form': form,
+        'source_url': source_url,
+        'source_name': reference.title,
+      },
+      request.user.username,request.user.username)
+    return render_to_response('source_edit.html',d,
+                              context_instance=RequestContext(request))
 
 
 @loggedin_and_owner_required
@@ -655,7 +682,6 @@ def user_river_sources(request,owner_name):
     return user_river_source_add(request, owner_name)
   # TODO
   # elif request.method == 'DELETE':
-  #   request.method = "POST"
-  #   return user_river_source_remove(request, owner_name)
+  #   return user_river_source_stop_following(request, owner_name)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
