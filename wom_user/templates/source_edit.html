@@ -12,14 +12,14 @@ Source: {{ source_name }}
 
 <p class="help-block">Feel free to change or complement the information about this source.</p>
 
-{% if form.errors %}
-<div class="alert alert-danger">
-  <p>Please check the information below.</p>
-  {{ form.non_field_errors|safe }}
-</div>
-{% endif %}
-<form class="form-horizontal" role="form" action="{% url wom_user.views.user_river_source_item visitor_name source_url %}" method="post">
+<form class="form-horizontal" role="form" action="" method="post">
   {% csrf_token %}
+  {% if form.errors %}
+  <div class="alert alert-danger">
+    <p>Please check the information below.</p>
+    {{ form.non_field_errors|safe }}
+  </div>
+  {% endif %}
   {% for field in form %}
   {% if field.errors %}
   <div class="form-group has-error">
@@ -29,6 +29,38 @@ Source: {{ source_name }}
     <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
     <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
   </div>
+  {% endfor %}
+  {{ feedForms.management_form }}
+  {% for form in feedForms %}
+  {{ form.id }}
+  {% if forloop.first %}
+  <div class="form-group">
+    <span class="col-sm-2 control-label"><label>Feeds:</label></span>
+  </div>
+  {% if feedForms.errors %}
+  <div class="alert alert-danger">
+    <p>Please check the information below.</p>
+    {{ feedForms.non_field_errors|safe }}
+  </div>
+  {% endif %}
+  {% endif %}
+  {% for field in form %}
+  {% if field.label == "XmlURL" %}
+  {% if field.errors %}
+  <div class="form-group has-error">
+  {%  else %}
+  <div class="form-group">
+  {% endif %}
+  <span class="col-sm-2 control-label"><label>#{{ forloop.counter }}</label></span>
+    <span class="col-sm-10 input-group">
+        {{ field }} {{ field.errors|safe }} 
+          <label>
+            {{ form.DELETE }} Stop following
+          </label>
+    </span>
+  </div>
+  {% endif %}
+  {% endfor %}
   {% endfor %}
   <div class="form-group">
     <span class="col-sm-offset-2">
