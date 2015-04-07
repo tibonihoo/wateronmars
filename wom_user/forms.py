@@ -284,6 +284,5 @@ class SourceEditForm(ModelForm):
   
   class Meta:
     model = Reference
-    # exclude = ("url", "save_count", "sources")
     fields = ("title", "description", "pub_date")
-    
+
