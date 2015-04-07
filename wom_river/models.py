@@ -28,7 +28,7 @@ class WebFeed(models.Model):
   """Represent a web feed (typically RSS or Atom) associated to a
   reference to be considered as a source of news items.
   """
-  # Reference consdiered as the source
+  # Reference considered as the source
   source = models.ForeignKey(Reference)
   # The URL where to get updated list of References from
   xmlURL = models.CharField(max_length=URL_MAX_LENGTH)
