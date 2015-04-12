@@ -59,11 +59,11 @@ function toggleEditMode()
 
 {% block content %}
 <h4><i class="glyphicon glyphicon-book"></i>{{ title_qualify }} {{ num_sources }} sources
-  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="Modify the source list."><i class="glyphicon glyphicon-edit"></i></a>
+  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="Edit your sources !"><i class="glyphicon glyphicon-edit"></i></a>
 </h4>
 <ul class="list-unstyled">
 {% if tagged_web_feeds %}
-  <li><h5>Web feed subscriptions
+  <li><h5>Syndicated sources
     <a href="{% url wom_user.views.user_river_source_add visitor_name %}" title="Subscribe to a new source." class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a>
     </h5>
     <ul class="list-unstyled">
@@ -71,8 +71,7 @@ function toggleEditMode()
       <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
           <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
-          <a href="{% url wom_user.views.user_river_source_item visitor_name feed.source.url %}" title="Edit source information." class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
-          <a href="javascript:stopFollowing({{ feed.source.url }});" title="Stop following" class="edit-tool"><i class="glyphicon glyphicon-minus-sign"></i></a>
+          <a href="{% url wom_user.views.user_river_source_item visitor_name feed.source.url %}" title="Edit source information or subscription." class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
       </li>
       {% endfor %}
     </ul>
@@ -87,8 +86,10 @@ function toggleEditMode()
   <li><h5>Bookmark sources</h5>
   <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
+   {% if source.url != "#internal-bookmark-import" %}
    <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.title }}</a>
-    <a href="" title="Edit source information." class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+    <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="Edit source information." class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+    {% endif %}
    </li>
    {% endfor %}
   </li>
