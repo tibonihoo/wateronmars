@@ -279,10 +279,27 @@ class UserSourceAdditionForm(forms.Form):
     return new_feed
 
 
-class SourceEditForm(ModelForm):
-  """Designed to modify an existing reference, assumed to be one of a user's sources."""
+class ReferenceEditForm(ModelForm):
+  """Designed to modify an existing reference."""
   
   class Meta:
     model = Reference
     fields = ("title", "description", "pub_date")
 
+
+class WebFeedOptInOutForm(forms.Form):
+  """Designed to allow unsubscribing to a given feed."""
+  follow = forms.BooleanField(required=False)
+  
+  def __init__(self,user, feed, *args, **kwargs):
+    forms.Form.__init__(self,*args,**kwargs)
+    self.user = user
+    self.feed = feed
+
+  def save(self):
+    """Note: this save can have only one effect: removing a feed from the user's feed list."""
+    if self.cleaned_data["follow"]:
+      self.user.userprofile.web_feeds.add(self.feed)
+    else:
+      self.user.userprofile.web_feeds.remove(self.feed)
+    

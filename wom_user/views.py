@@ -44,7 +44,6 @@ from django.http import QueryDict
 from django.shortcuts import render_to_response
 from django.utils import simplejson
 from django.forms.util import ErrorList
-from django.forms.models import inlineformset_factory
 from django.db import transaction
 
 from django.views.decorators.http import require_http_methods
@@ -62,7 +61,8 @@ from wom_user.forms import NSBookmarkFileUploadForm
 from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
-from wom_user.forms import SourceEditForm
+from wom_user.forms import ReferenceEditForm
+from wom_user.forms import WebFeedOptInOutForm
 
 
 from wom_user.tasks import import_user_feedsources_from_opml
@@ -378,64 +378,67 @@ def user_river_source_add(request,owner_name):
 
 @loggedin_and_owner_required
 @csrf_protect
-@require_http_methods(["GET","POST","DELETE"])
+@require_http_methods(["GET","POST"])
 def user_river_source_item(request, owner_name, source_url):
   """Generate an editable view of a given source identified by its url."""
+  formData = []
+  if request.POST:
+    if u"next" in request.POST:
+      formData.append(request.POST)
+    else:
+      try:
+        src_info = simplejson.loads(request.body)
+      except Exception:
+        src_info = {}
+      if not src_info:
+        return HttpResponseBadRequest("Only a JSON formatted non-empty request is accepted.")
+      formData.append(src_info)
   owner_profile = request.owner_user.userprofile
-  if request.method == "DELETE":
+  try:
+    reference = owner_profile.sources.get(url=source_url)
+  except Reference.DoesNotExist:
+    return HttpResponseNotFound()
+  if formData and "ref-pub_date" not in formData[0]:
+    formData[0]["ref-pub_date"] = reference.pub_date
+  if formData and "ref-description" not in formData[0]:
+    formData[0]["ref-description"] = reference.description or "..."
+  if formData and "ref-title" not in formData[0]:
+    formData[0]["ref-title"] = reference.title
+  form = ReferenceEditForm(*formData, instance=reference,
+                           error_class = CustomErrorList,
+                           prefix = "ref")
+  feedForms = {}
+  for idx,feed in enumerate(WebFeed.objects.filter(source__url=source_url)):
+    currentPrefix = "feed{}".format(idx)
+    initial = {"follow": feed in owner_profile.web_feeds.all()}
+    followFieldName = currentPrefix+"-follow"
+    if formData and followFieldName not in formData[0]:
+      formData[0][followFieldName] = initial["follow"]
+    feedForms[feed.xmlURL] = WebFeedOptInOutForm(request.owner_user,feed,
+                                                 *formData, error_class = CustomErrorList,
+                                                 prefix=currentPrefix, initial=initial)
+  def optOutFormsAreValid():
+    return reduce(lambda currentValidity, nextForm: currentValidity and nextForm.is_valid(), feedForms.values(), True)
+  def optOutFormsSave():
+    return [f.save() for f in feedForms.values()]
+  if request.POST:
     if settings.DEMO:
-      return HttpResponseForbidden("Source removal is not possible in DEMO mode.")
-    target_feeds = owner_profile.web_feeds.filter(source__url=source_url)
-    num_deleted_feeds = target_feeds.count()
-    target_feeds.delete()
-    other_sources = owner_profile.sources.filter(url=source_url)\
-                                         .exclude(webfeed__userprofile=owner_profile)
-    num_deleted_sources = other_sources.count()
-    other_sources.delete()
-    response_dict = {
-      "status": u"success",
-      "num_stopped_subscriptions": num_deleted_feeds,
-      "num_deleted_sources": num_deleted_sources,
-    }    
-    return HttpResponse(simplejson.dumps(response_dict),
-                        mimetype='application/json')
-  elif request.method in ('GET', 'POST'):
-    try:
-      reference = owner_profile.sources.get(url=source_url)
-    except Reference.DoesNotExist:
-      return HttpResponseNotFound()
-    if request.method in ('POST', 'GET') :
-      formData = [request.POST] if request.method == 'POST' else []
-      form = SourceEditForm(*formData, instance=reference,
-                            error_class = CustomErrorList,
-                            prefix = "source")
-      FeedFormSet = inlineformset_factory(Reference, WebFeed, fields = ("xmlURL",), extra=0)
-      feedForms = FeedFormSet(
-        *formData,
-        instance=reference,
-        error_class = CustomErrorList, prefix = "feed"
-      )
-      
-      if request.method == 'POST':
-        # if settings.DEMO:
-        #   return HttpResponseForbidden("Source editting is not possible in DEMO mode.")
-        if form.is_valid() and feedForms.is_valid():
-          form.save()
-          feedForms.save()
-          return HttpResponseRedirect(reverse('wom_user.views.user_river_source_item',
-                                              args=(request.user.username, source_url)))
-          
-      d = add_base_template_context_data(
-        { 
-          'form': form,
-          'feedForms': feedForms,
-          'source_url': source_url,
-          'source_name': reference.title,
-        },
-        request.user.username,request.user.username)
-      return render_to_response('source_edit.html',d,
-                              context_instance=RequestContext(request))
-
+      return HttpResponseForbidden("Source editting is not possible in DEMO mode.")
+    if form.is_valid() and optOutFormsAreValid():
+      form.save()
+      optOutFormsSave()
+      return HttpResponseRedirect(reverse('wom_user.views.user_river_source_item',
+                                          args=(request.user.username, source_url)))
+  d = add_base_template_context_data(
+    { 
+      'ref_form': form,
+      'feed_forms': feedForms,
+      'ref_url': source_url,
+      'ref_name': reference.title,
+    },
+    request.user.username,request.user.username)
+  return render_to_response('source_edit.html',d,
+                            context_instance=RequestContext(request))
 
 @loggedin_and_owner_required
 @csrf_protect

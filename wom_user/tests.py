@@ -710,12 +710,6 @@ class UserSourceAddTestMixin:
     """
     raise NotImplementedError("This method should be reimplemented")
 
-  def del_request(self,url,optionsDict):
-    """
-    Returns the response that can be received from the input url.
-    """
-    raise NotImplementedError("This method should be reimplemented")
-  
   def setUp(self):
     self.date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
@@ -785,22 +779,8 @@ class UserSourceAddTestMixin:
               "feed_url": new_feed_url,
               "name": u"a new"},
              expectedStatusCode=403)
-    
-  # def test_remove_source(self):
-  #   # login as uA and make sure it succeeds
-  #   self.assertTrue(self.client.login(username="uA",
-  #                     password="pA"))
-  #   self.assertEqual(2,self.user_profile.sources.count())
-  #   self.assertEqual(1,self.user_profile.feed_sources.count())
-  #   self.remove_request("uA",
-  #             {"url": u"http://barf",
-  #              "feed_url": u"http://barf/bla.xml",
-  #              "name": u"a new"})
-  #   self.assertEqual(1,self.user_profile.sources.count())
-  #   self.assertEqual(0,self.user_profile.feed_sources.count())
-  #   self.assertNotIn("http://barf",
-  #            [s.url for s in self.user_profile.sources.all()])
-  
+
+
 class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
 
   def setUp(self):
@@ -1535,3 +1515,100 @@ class ReferenceUserStatusModelTest(TestCase):
     Reference.objects.filter(title="other").delete()
     self.assertFalse(Reference.objects.filter(title="other").exists())
     self.assertFalse(ReferenceUserStatus.objects.filter(main_source=src).exists())
+
+
+class UserSourceItemViewTest(TestCase):
+  """Test the sngle source view."""
+  
+  def setUp(self):
+    self.date = datetime.now(timezone.utc)
+    self.source = Reference.objects.create(
+      url=u"http://mouf",
+      title=u"a mouf",
+      pub_date=self.date)
+    self.user = User.objects.create_user(username="uA",
+                          password="pA")
+    self.feed_source = Reference.objects.create(url="http://barf",
+                                                title="a barf",
+                                                pub_date=self.date)
+    self.web_feed = WebFeed.objects.create(
+      xmlURL="http://barf/bla.xml",
+      last_update_check=self.date,
+      source=self.feed_source)
+    self.user_profile = UserProfile.objects.create(owner=self.user)
+    self.user_profile.sources.add(self.source)
+    self.user_profile.sources.add(self.feed_source)
+    self.user_profile.web_feeds.add(self.web_feed)
+    self.other_user = User.objects.create_user(username="uB",
+                                               password="pB")
+
+  def change_request(self,username,source_url,optionsDict,expectedStatusCode=200):
+    """
+    Send the request as a JSON loaded POST.
+    """
+    resp = self.client.post(reverse("wom_user.views.user_river_source_item",
+                                    kwargs={"owner_name":username,
+                                            "source_url": source_url}),
+                simplejson.dumps(optionsDict),
+                content_type="application/json")
+    self.assertEqual(expectedStatusCode,resp.status_code)
+    return resp
+    
+  def test_get_html_user_source(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    resp = self.client.get(reverse("wom_user.views.user_river_source_item",
+                                   kwargs={"owner_name":"uA","source_url":self.source.url}))
+    self.assertEqual(200,resp.status_code)
+    self.assertIn("source_edit.html",[t.name for t in resp.templates])
+    self.assertIn("ref_form", resp.context)
+    self.assertIn("feed_forms", resp.context)
+    self.assertEqual(0, len(resp.context["feed_forms"]))
+    self.assertIn("ref_url", resp.context)
+    self.assertEqual(self.source.url, resp.context["ref_url"])
+    self.assertIn("ref_name", resp.context)
+    self.assertEqual(self.source.title, resp.context["ref_name"])
+
+  def test_get_html_other_user_source_is_forbidden(self):
+    self.assertTrue(self.client.login(username="uB",password="pB"))
+    resp = self.client.get(reverse("wom_user.views.user_river_source_item",
+                                   kwargs={"owner_name":"uA","source_url":self.source.url}))
+    self.assertEqual(403,resp.status_code)
+    
+  def test_get_html_user_source_with_feed_has_feed_forms_filled(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    resp = self.client.get(reverse("wom_user.views.user_river_source_item",
+                                   kwargs={"owner_name":"uA",
+                                           "source_url":self.feed_source.url}))
+    self.assertEqual(200,resp.status_code)
+    self.assertIn("feed_forms", resp.context)
+    self.assertEqual(1, len(resp.context["feed_forms"]))
+    self.assertEqual(self.web_feed.xmlURL,resp.context["feed_forms"].keys()[0])
+
+  def test_change_user_source_title_updates_title_in_db(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    newTitle = self.source.title + "MOUF"
+    self.change_request("uA",self.source.url,
+                        {"ref-title": newTitle,
+                         "ref-description": u"blah"}, 302)
+    self.assertEqual(newTitle, Reference.objects.get(url=self.source.url).title)
+    
+  def test_change_user_source_title_updates_dont_mess_subscriptions(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    formerFeedCount = self.user_profile.web_feeds.count()
+    self.change_request("uA",self.feed_source.url,
+                        {"ref-title": self.feed_source.title+"MOUF",
+                         "ref-description": u"blah"}, 302)
+    self.assertEqual(formerFeedCount, self.user_profile.web_feeds.count())
+    
+  def test_unsubscribe_from_feed(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    self.assertEqual(1,self.user_profile.web_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-follow": False}, 302)
+    self.assertEqual(0, self.user_profile.web_feeds.count())
+    self.assertEqual(1, WebFeed.objects.filter(xmlURL=self.web_feed.xmlURL).count())
