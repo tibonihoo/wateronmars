@@ -43,6 +43,7 @@ urlpatterns = patterns('',
                        url(r'^u/(?P<owner_name>[^/]*)/river/$', 'wom_user.views.user_river_view'),
                        url(r'^u/(?P<owner_name>[^/]*)/sieve/$', 'wom_user.views.user_river_sieve'),
                        url(r'^u/(?P<owner_name>[^/]*)/collection/add/$','wom_user.views.user_collection_add'),
+                       url(r'^u/(?P<owner_name>[^/]*)/collection/item/(?P<reference_url>.*)$','wom_user.views.user_collection_item'),
                        # access to static files
                        url(r'^static/(?P<path>.*)$',
                            'django.views.static.serve',

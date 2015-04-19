@@ -376,46 +376,61 @@ def user_river_source_add(request,owner_name):
   return render_to_response('source_addition.html',d,
                             context_instance=RequestContext(request))
 
-@loggedin_and_owner_required
-@csrf_protect
-@require_http_methods(["GET","POST"])
-def user_river_source_item(request, owner_name, source_url):
-  """Generate an editable view of a given source identified by its url."""
-  formData = []
+
+def prepare_reference_form(request, reference_url, reference_query_set):
+  """Return a tuple: (reference.title, form) with the form showing all
+  editable fields of a reference identified by its url.
+
+  May raise Reference.DoesNotExist if no reference with the given url
+  could be found or ValueError if the request is a POST with a badly
+  formatted body.
+  """
+  form_data = []
   if request.POST:
     if u"next" in request.POST:
-      formData.append(request.POST)
+      form_data.append(request.POST)
     else:
       try:
         src_info = simplejson.loads(request.body)
       except Exception:
         src_info = {}
       if not src_info:
-        return HttpResponseBadRequest("Only a JSON formatted non-empty request is accepted.")
-      formData.append(src_info)
+        raise ValueError("Only a JSON formatted non-empty request is accepted.")
+      form_data.append(src_info)
+  reference = reference_query_set.get(url=reference_url)
+  if form_data and "ref-pub_date" not in form_data[0]:
+    form_data[0]["ref-pub_date"] = reference.pub_date
+  if form_data and "ref-description" not in form_data[0]:
+    form_data[0]["ref-description"] = reference.description or "..."
+  if form_data and "ref-title" not in form_data[0]:
+    form_data[0]["ref-title"] = reference.title
+  return reference.title, ReferenceEditForm(*form_data, instance=reference,
+                                            error_class = CustomErrorList,
+                                            prefix = "ref"), form_data
+
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET","POST"])
+def user_river_source_item(request, owner_name, source_url):
+  """Generate an editable view of a given source identified by its url."""
+  form_data = []
   owner_profile = request.owner_user.userprofile
   try:
-    reference = owner_profile.sources.get(url=source_url)
+    ref_title, form, form_data = prepare_reference_form(request, source_url,
+                                                        owner_profile.sources)
   except Reference.DoesNotExist:
     return HttpResponseNotFound()
-  if formData and "ref-pub_date" not in formData[0]:
-    formData[0]["ref-pub_date"] = reference.pub_date
-  if formData and "ref-description" not in formData[0]:
-    formData[0]["ref-description"] = reference.description or "..."
-  if formData and "ref-title" not in formData[0]:
-    formData[0]["ref-title"] = reference.title
-  form = ReferenceEditForm(*formData, instance=reference,
-                           error_class = CustomErrorList,
-                           prefix = "ref")
+  except ValueError, e:
+    return HttpResponseBadRequest(str(e))
   feedForms = {}
   for idx,feed in enumerate(WebFeed.objects.filter(source__url=source_url)):
     currentPrefix = "feed{}".format(idx)
     initial = {"follow": feed in owner_profile.web_feeds.all()}
     followFieldName = currentPrefix+"-follow"
-    if formData and followFieldName not in formData[0]:
-      formData[0][followFieldName] = initial["follow"]
+    if form_data and followFieldName not in form_data[0]:
+      form_data[0][followFieldName] = initial["follow"]
     feedForms[feed.xmlURL] = WebFeedOptInOutForm(request.owner_user,feed,
-                                                 *formData, error_class = CustomErrorList,
+                                                 *form_data, error_class = CustomErrorList,
                                                  prefix=currentPrefix, initial=initial)
   def optOutFormsAreValid():
     return reduce(lambda currentValidity, nextForm: currentValidity and nextForm.is_valid(), feedForms.values(), True)
@@ -434,7 +449,7 @@ def user_river_source_item(request, owner_name, source_url):
       'ref_form': form,
       'feed_forms': feedForms,
       'ref_url': source_url,
-      'ref_name': reference.title,
+      'ref_name': ref_title,
     },
     request.user.username,request.user.username)
   return render_to_response('source_edit.html',d,
@@ -548,6 +563,43 @@ def user_collection(request,owner_name):
   else:
     return HttpResponseNotAllowed(['GET','POST'])
 
+
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET","POST"])
+def user_collection_item(request, owner_name, reference_url):
+  """Generate an editable view of a given reference identified by its url."""
+  try:
+    ref_title, form, form_data = prepare_reference_form(request, reference_url,
+                                                        Reference.objects\
+                                                        .filter(userbookmark__owner\
+                                                                =request.user))
+  except Reference.DoesNotExist:
+    return HttpResponseNotFound()
+  except ValueError, e:
+    return HttpResponseBadRequest(str(e))
+  bookmark = UserBookmark.objects.get(owner=request.owner_user, reference__url=reference_url)
+  # TODO build an edit form allowing to customize the user specific
+  # comment of a bookmark (to be displayed first on the page ?)
+  # also sources with their url pointing to the sources/item/url.
+  if request.POST:
+    if settings.DEMO:
+      return HttpResponseForbidden("Reference editting is not possible in DEMO mode.")
+    if form.is_valid():
+      form.save()
+      return HttpResponseRedirect(reverse('wom_user.views.user_collection_item',
+                                          args=(request.user.username, reference_url)))
+  d = add_base_template_context_data(
+    { 
+      'ref_form': form,
+      'ref_url': reference_url,
+      'ref_name': ref_title,
+      'ref_sources': sorted(bookmark.get_sources()),
+      'ref_tags': sorted(bookmark.get_tag_names())
+    },
+    request.user.username,request.user.username)
+  return render_to_response('reference_edit.html',d,
+                            context_instance=RequestContext(request))
 
 @check_and_set_owner
 def user_river_view(request,owner_name):
