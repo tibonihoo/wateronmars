@@ -8,9 +8,9 @@ Source: {{ ref_name }}
 
 <h4><img src="http://plus.google.com/_/favicon?domain={{ ref_url }}" style="padding-right:.5em;"/>{{ ref_name }}</h4>
 
-<p><a href="{{ ref_url }}">View on site.</a></p>
+<p><a href="{{ ref_url }}"class="btn btn-default btn-sm"><i class="glyphicon glyphicon-globe"></i>View on site.</a></p>
 
-<p class="help-block">Improve the description of this source.</p>
+<p class="help-block">Improve this source's description:</p>
 <p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>Please note that all users sharing this source will see your edits.</p>
 
 <form class="form-horizontal" role="form" action="" method="post">
@@ -33,7 +33,7 @@ Source: {{ ref_name }}
   {% endfor %}
   {% for feed_url, form in feed_forms.items %}
   {% if forloop.first %}
-  <p class="help-block">Check the feeds you want to follow (uncheck others).</p>
+  <p class="help-block">Check the feeds you want to follow (uncheck others):</p>
   {% endif %}
   {% if form.errors %}
   <div class="alert alert-danger">
@@ -42,25 +42,22 @@ Source: {{ ref_name }}
   </div>
   {% endif %}
   {% for field in form %}
-  <div class="form-group">
-   </div>    
   {% if field.errors %}
   <div class="form-group has-error">
   {%  else %}
   <div class="form-group">
   {% endif %}
     <span class="col-sm-2 control-label">
-      <label>Feed #{{ forloop.counter}}</label>
+      <label><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.2em"/></label><br/>
+      <i class="glyphicon glyphicon-filter" style="padding-top:.4em"></i>
     </span>
-    <p class="form-control-static">
-      {{ feed_url }}
-    </p>    
-  <span class="input-group">
-    <div class="checkbox">
-      <label> {{ field }}  Following</label>
-      {{ field.errors|safe }}
-    </div>
-  </span>
+  <p class="form-control-static"><a href="{{ feed_url }}">{{ feed_url }}</a></p>
+    <span class="input-group">
+      <div class="checkbox">
+        <label> {{ field }}  Following</label>
+        {{ field.errors|safe }}
+      </div>
+    </span>
   </div>
   {% endfor %}
   {% endfor %}
