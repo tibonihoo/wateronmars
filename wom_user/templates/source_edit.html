@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 
 {% block title %}
-Source: {{ ref_name }}
+Source: {{ ref_title }}
 {% endblock %}
 
 {% block content %}
 
-<h4><img src="http://plus.google.com/_/favicon?domain={{ ref_url }}" style="padding-right:.5em;"/>{{ ref_name }}</h4>
+<h4><img src="http://plus.google.com/_/favicon?domain={{ ref_url }}" style="padding-right:.5em;"/>{{ ref_title }}</h4>
 
 <p><a href="{{ ref_url }}"class="btn btn-default btn-sm"><i class="glyphicon glyphicon-globe"></i>View on site.</a></p>
 
 <p class="help-block">Improve this source's description:</p>
-<p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>Please note that all users sharing this source will see your edits.</p>
-
+<div class="row">
+  <span class="col-sm-4 col-sm-offset-2">
+    <p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>Please note that all users sharing this source will see your edits.</p>
+  </span>
+</div>
 <form class="form-horizontal" role="form" action="" method="post">
   {% csrf_token %}
   {% if ref_form.errors %}

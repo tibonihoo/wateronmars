@@ -280,13 +280,21 @@ class UserSourceAdditionForm(forms.Form):
 
 
 class ReferenceEditForm(ModelForm):
-  """Designed to modify an existing reference."""
+  """Designed to modify a reference."""
   
   class Meta:
     model = Reference
     fields = ("title", "description", "pub_date")
 
 
+class UserBookmarkEditForm(ModelForm):
+  """Designed to modify a bookmark."""
+  
+  class Meta:
+    model = UserBookmark
+    fields = ("comment", "is_public")
+
+    
 class WebFeedOptInOutForm(forms.Form):
   """Designed to allow unsubscribing to a given feed."""
   follow = forms.BooleanField(required=False)

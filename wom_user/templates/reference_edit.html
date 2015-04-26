@@ -1,20 +1,77 @@
 {% extends "base.html" %}
 
 {% block title %}
-Reference: {{ ref_name }}
+Reference: {{ ref_title }}
 {% endblock %}
 
 {% block content %}
 
-<h4><img src="http://plus.google.com/_/favicon?domain={{ ref_url }}" style="padding-right:.5em;"/>{{ ref_name }}</h4>
+<h4><img src="http://plus.google.com/_/favicon?domain={{ ref_url }}" style="padding-right:.5em;"/>{{ ref_title }}</h4>
 
-<p><a href="{{ ref_url }}">View on site.</a></p>
-
-<p class="help-block">Reference description</p>
-<p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>Please note that all users sharing this reference will see your edits.</p>
+<p><a href="{{ ref_url }}"class="btn btn-default btn-sm"><i class="glyphicon glyphicon-globe"></i>View on site.</a></p>
 
 <form class="form-horizontal" role="form" action="" method="post">
   {% csrf_token %}
+  {% if bmk_form.errors %}
+  <div class="alert alert-danger">
+    <p>Please check the information below.</p>
+    {{ bmk_form.non_field_errors|safe }}
+  </div>
+  {% endif %}
+  {% for field in bmk_form %}
+  {% if field.errors %}
+  <div class="form-group has-error">
+  {%  else %}
+  <div class="form-group">
+  {% endif %}
+  {% if field.label == "Is public" %}
+  <span class="col-sm-10 col-sm-offset-2"><div class="checkbox"><label>{{ field }} Share publicly</label></div> {{ field.errors|safe }}</span>
+  {% else %}  
+    <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
+    <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
+  {% endif %}
+  </div>
+  {% endfor %}
+  <div class="form-group">
+    <span class="col-sm-offset-2">
+      <input type="submit" value="Save changes" class="btn btn-default" />
+      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
+    </span>
+  </div>
+
+
+  <div class="form-group">
+  <span class="col-sm-2 control-label"><label>Tags</label></span>
+  <span class="col-sm-10">
+    <ul class="form-control-static list-inline">
+      {% for tag in ref_tags %}
+      <li>{{ tag }}</li>
+      {% endfor %}
+    </ul>
+  </span>
+  </div>
+
+  <div class="form-group">
+  <span class="col-sm-2 control-label"><label>Sources</label></span>
+  <span class="col-sm-10">
+    <ul class="form-control-static list-unstyled">
+      {% for source in ref_sources %}
+      {% if source.url == "#internal-bookmark-import" %}
+      <li><i class="glyphicon glyphicon-floppy-save"></i>{{ source.title }}</li>
+      {% else %}
+      <li><i class="glyphicon glyphicon-book"></i><a href="{{ source.url }}" title="View on site">{{ source.title }}</a> <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="Edit source information or subscription." class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a></li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </span>
+  </div>
+
+
+<p class="help-block">Community edits</p>
+<div class="row">
+  <span class="col-sm-4 col-sm-offset-2">
+    <p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>Please note that all users sharing this reference will see your edits.</p></span>
+</div>
   {% if ref_form.errors %}
   <div class="alert alert-danger">
     <p>Please check the information below.</p>
@@ -31,6 +88,9 @@ Reference: {{ ref_name }}
     <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
   </div>
   {% endfor %}
+
+
+
   <div class="form-group">
     <span class="col-sm-offset-2">
       <input type="submit" value="Save changes" class="btn btn-default" />
@@ -39,21 +99,4 @@ Reference: {{ ref_name }}
   </div>
 </form>
 
-<p class="help-block">Tags:</p>
-<ul class="list-inline">
-{% for tag in ref_tags %}
-  <li>{{ tag }}</li>
-{% endfor %}
-</ul>
-
-<p class="help-block">Sources:</p>
-<ul class="list-unstyled">
-{% for source in ref_sources %}
-  {% if source.url == "#internal-bookmark-import" %}
-  <li><i class="glyphicon glyphicon-floppy-save"></i>{{ source.title }}</li>
-  {% else %}
-  <li><a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}">{{ source.title }}</a></li>
-  {% endif %}
-{% endfor %}
-</ul>
 {% endblock %}

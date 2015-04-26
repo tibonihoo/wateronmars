@@ -62,6 +62,7 @@ from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
 from wom_user.forms import ReferenceEditForm
+from wom_user.forms import UserBookmarkEditForm
 from wom_user.forms import WebFeedOptInOutForm
 
 
@@ -378,7 +379,7 @@ def user_river_source_add(request,owner_name):
 
 
 def prepare_reference_form(request, reference_url, reference_query_set):
-  """Return a tuple: (reference.title, form) with the form showing all
+  """Return a tuple: (reference, form) with the form showing all
   editable fields of a reference identified by its url.
 
   May raise Reference.DoesNotExist if no reference with the given url
@@ -401,10 +402,10 @@ def prepare_reference_form(request, reference_url, reference_query_set):
   if form_data and "ref-pub_date" not in form_data[0]:
     form_data[0]["ref-pub_date"] = reference.pub_date
   if form_data and "ref-description" not in form_data[0]:
-    form_data[0]["ref-description"] = reference.description or "..."
+    form_data[0]["ref-description"] = reference.description or " "
   if form_data and "ref-title" not in form_data[0]:
     form_data[0]["ref-title"] = reference.title
-  return reference.title, ReferenceEditForm(*form_data, instance=reference,
+  return reference, ReferenceEditForm(*form_data, instance=reference,
                                             error_class = CustomErrorList,
                                             prefix = "ref"), form_data
 
@@ -416,7 +417,7 @@ def user_river_source_item(request, owner_name, source_url):
   form_data = []
   owner_profile = request.owner_user.userprofile
   try:
-    ref_title, form, form_data = prepare_reference_form(request, source_url,
+    reference, form, form_data = prepare_reference_form(request, source_url,
                                                         owner_profile.sources)
   except Reference.DoesNotExist:
     return HttpResponseNotFound()
@@ -449,7 +450,7 @@ def user_river_source_item(request, owner_name, source_url):
       'ref_form': form,
       'feed_forms': feedForms,
       'ref_url': source_url,
-      'ref_name': ref_title,
+      'ref_title': reference.title,
     },
     request.user.username,request.user.username)
   return render_to_response('source_edit.html',d,
@@ -570,7 +571,7 @@ def user_collection(request,owner_name):
 def user_collection_item(request, owner_name, reference_url):
   """Generate an editable view of a given reference identified by its url."""
   try:
-    ref_title, form, form_data = prepare_reference_form(request, reference_url,
+    reference, form, form_data = prepare_reference_form(request, reference_url,
                                                         Reference.objects\
                                                         .filter(userbookmark__owner\
                                                                 =request.user))
@@ -579,27 +580,32 @@ def user_collection_item(request, owner_name, reference_url):
   except ValueError, e:
     return HttpResponseBadRequest(str(e))
   bookmark = UserBookmark.objects.get(owner=request.owner_user, reference__url=reference_url)
-  # TODO build an edit form allowing to customize the user specific
-  # comment of a bookmark (to be displayed first on the page ?)
-  # also sources with their url pointing to the sources/item/url.
+  if form_data and "bmk-comment" not in form_data[0]:
+    form_data[0]["bmk-comment"] = bookmark.comment or " "
+  bmk_form = UserBookmarkEditForm(*form_data, instance=bookmark,
+                                  error_class = CustomErrorList,
+                                  prefix = "ref")
   if request.POST:
     if settings.DEMO:
       return HttpResponseForbidden("Reference editting is not possible in DEMO mode.")
-    if form.is_valid():
+    if form.is_valid() and bmk_form.is_valid():
       form.save()
+      bmk_form.save()
       return HttpResponseRedirect(reverse('wom_user.views.user_collection_item',
                                           args=(request.user.username, reference_url)))
   d = add_base_template_context_data(
     { 
+      'bmk_form': bmk_form,
       'ref_form': form,
       'ref_url': reference_url,
-      'ref_name': ref_title,
+      'ref_title': reference.title,
       'ref_sources': sorted(bookmark.get_sources()),
       'ref_tags': sorted(bookmark.get_tag_names())
     },
     request.user.username,request.user.username)
   return render_to_response('reference_edit.html',d,
                             context_instance=RequestContext(request))
+
 
 @check_and_set_owner
 def user_river_view(request,owner_name):
