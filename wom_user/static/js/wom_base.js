@@ -64,6 +64,7 @@ function hideWarning(warningId) {
 }
 
 
+// Perform a REST request to one of wom's resources
 function womRequest(verb, url, dataType, data)
 {
   var csrftoken = getCookie('csrftoken');
@@ -89,4 +90,23 @@ function dropSieveContent(sieveURL)
              "json", JSON.stringify({"action": "drop"}))
     .done(function () {window.location.href = sieveURL})
     .fail(function () {showWarning("wom-server-sync-problem")});
+}
+
+// For pages that have an "edit-mode"
+// Assumes:
+// 1/ that the page has a "toggle" element with id="edit-toggle"
+// 2/ that items that must be acivated only in edit mode have the
+// "edit-tool" class
+// 3/ that the css properties for these id and class are correct (as
+// provided by wom_base.css)
+function toggleEditMode()
+{
+  if ($("#edit-toggle").hasClass("edit-on"))
+  {
+    $(".edit-tool").removeClass("edit-on")    
+  }
+  else
+  {
+    $(".edit-tool").addClass("edit-on")
+  }
 }

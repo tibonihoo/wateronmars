@@ -51,3 +51,28 @@ a { color: #3465a4; }
     padding-top: 1px;
     padding-bottom: 1px;
 }
+
+.edit-tool {
+  color: black;
+  text-decoration: none;
+  display: none;
+}
+
+#edit-toggle {
+  display: inline;
+  opacity: .2;
+}
+
+#edit-toggle:hover {
+  opacity: .8;
+}
+
+.edit-on {
+  display: inline;
+  opacity: .4;
+}
+
+#edit-toggle.edit-on {
+  display: inline;
+  opacity: 1;
+}
