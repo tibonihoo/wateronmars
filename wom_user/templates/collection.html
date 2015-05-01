@@ -29,11 +29,20 @@ jQuery.ias({
 {% endblock %}
 
 {% block content %}
-<h4><i class="glyphicon glyphicon-bookmark"></i>{{ title_qualify }} collection of {{ user_bookmarks.paginator.count }} bookmarks.</h4>
+<h4><i class="glyphicon glyphicon-bookmark"></i>{{ title_qualify }} collection of {{ user_bookmarks.paginator.count }} bookmarks.
+  {% if visitor_name == owner_name  %}
+  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="Edit your bookmarks !"><i class="glyphicon glyphicon-edit"></i></a>
+  <small><a href="{% url wom_user.views.user_collection_add owner_name %}" title="Add a bookmark." class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a></small>
+  {% endif %}
+</h4>
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
-  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> </dt>
+  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
+    {% if visitor_name == owner_name  %}
+    <a href="{% url wom_user.views.user_collection_item visitor_name bookmark.reference.url %}" title="Edit" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+    {% endif  %}
+  </dt>
   <dd class="in_bookmark_def">
       <small><em>{% spaceless %}
           {% if bookmark.get_sources %}@
@@ -61,8 +70,8 @@ jQuery.ias({
 <div class="alert alert-info alert-dismissable">
   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
   <h4>Your collection is empty !</h4>
-  <p>You can add a link to your collection either by bookmarking or sharing an item found in your <a class="alert-link" href="../river">river of news</a> or <a class="alert-link" href="../sieve">sieve</a> or by sending a link with the following bookmarklet: <a class="alert-link" href="{{ collection_add_bookmarklet }}">Bookmark !</a></p>.
-    
+  <p>You can add a link to your collection either by bookmarking or sharing an item found in your <a class="alert-link" href="{% url wom_user.views.user_river_view owner_name %}">river of news</a> or <a class="alert-link" href="{% url wom_user.views.user_river_sieve %}">sieve</a> or by sending a link with the following bookmarklet: <a class="alert-link" href="{{ collection_add_bookmarklet }}">Bookmark !</a></p>.
+
 </div>
 {% endif %}
 
