@@ -603,7 +603,7 @@ def user_collection_item(request, owner_name, reference_url):
       'ref_tags': sorted(bookmark.get_tag_names())
     },
     request.user.username,request.user.username)
-  return render_to_response('reference_edit.html',d,
+  return render_to_response('bookmark_edit.html',d,
                             context_instance=RequestContext(request))
 
 
