@@ -47,6 +47,7 @@ from wom_user.tasks import check_user_unread_feed_items
 
 from wom_classification.models import Tag
 from wom_classification.models import get_item_tag_names
+from wom_classification.models import set_item_tag_names
 
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser
@@ -1518,7 +1519,7 @@ class ReferenceUserStatusModelTest(TestCase):
 
 
 class UserSourceItemViewTest(TestCase):
-  """Test the sngle source view."""
+  """Test the single source view."""
   
   def setUp(self):
     self.date = datetime.now(timezone.utc)
@@ -1566,8 +1567,8 @@ class UserSourceItemViewTest(TestCase):
     self.assertEqual(0, len(resp.context["feed_forms"]))
     self.assertIn("ref_url", resp.context)
     self.assertEqual(self.source.url, resp.context["ref_url"])
-    self.assertIn("ref_name", resp.context)
-    self.assertEqual(self.source.title, resp.context["ref_name"])
+    self.assertIn("ref_title", resp.context)
+    self.assertEqual(self.source.title, resp.context["ref_title"])
 
   def test_get_html_other_user_source_is_forbidden(self):
     self.assertTrue(self.client.login(username="uB",password="pB"))
@@ -1612,3 +1613,103 @@ class UserSourceItemViewTest(TestCase):
                         {"feed0-follow": False}, 302)
     self.assertEqual(0, self.user_profile.web_feeds.count())
     self.assertEqual(1, WebFeed.objects.filter(xmlURL=self.web_feed.xmlURL).count())
+
+
+class UserBookmarkViewTest(TestCase):
+  """Test the bookmark view."""
+  
+  def setUp(self):
+    self.date = datetime.now(timezone.utc)
+    self.reference = Reference.objects.create(
+      url=u"http://bla",
+      title=u"a bla",
+      pub_date=self.date)
+    self.source1 = Reference.objects.create(
+      url=u"http://blaSrc1",
+      title=u"a source",
+      pub_date=self.date)
+    self.source2 = Reference.objects.create(
+      url=u"http://blaSrc2",
+      title=u"a source2",
+      pub_date=self.date)
+    self.reference.sources.add(self.source1)
+    self.reference.sources.add(self.source2)
+    self.user = User.objects.create_user(username="uA",
+                                         password="pA")
+    self.user_profile = UserProfile.objects.create(owner=self.user)
+    self.bkm = UserBookmark.objects.create(
+      owner=self.user,
+      reference=self.reference,
+      saved_date=self.date,
+      is_public=True)
+    set_item_tag_names(self.user, self.reference, ["T1","T2"])
+    self.other_user = User.objects.create_user(username="uB",
+                                               password="pB")
+
+  def change_request(self,username,reference_url,optionsDict,expectedStatusCode=200):
+    """
+    Send the request as a JSON loaded POST.
+    """
+    resp = self.client.post(reverse("wom_user.views.user_collection_item",
+                                    kwargs={"owner_name":username,
+                                            "reference_url": reference_url}),
+                simplejson.dumps(optionsDict),
+                content_type="application/json")
+    self.assertEqual(expectedStatusCode,resp.status_code)
+    return resp
+    
+  def test_get_html_user_bookmark(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    resp = self.client.get(reverse("wom_user.views.user_collection_item",
+                                   kwargs={"owner_name":"uA",
+                                           "reference_url":self.reference.url}))
+    self.assertEqual(200,resp.status_code)
+    self.assertIn("bookmark_edit.html",[t.name for t in resp.templates])
+    self.assertIn("ref_form", resp.context)
+    self.assertIn("bmk_form", resp.context)
+    self.assertIn("ref_url", resp.context)
+    self.assertEqual(self.reference.url, resp.context["ref_url"])
+    self.assertIn("ref_title", resp.context)
+    self.assertEqual(self.reference.title, resp.context["ref_title"])
+    self.assertIn("ref_sources", resp.context)
+    self.assertEqual([s for s in self.bkm.get_sources()],
+                     [s for s in resp.context["ref_sources"]])
+    self.assertIn("ref_tags", resp.context)
+    self.assertEqual([n for n in self.bkm.get_tag_names()],
+                     [n for n in resp.context["ref_tags"]])
+
+  def test_get_html_other_user_bookmark_is_forbidden(self):
+    self.assertTrue(self.client.login(username="uB",password="pB"))
+    resp = self.client.get(reverse("wom_user.views.user_collection_item",
+                                   kwargs={"owner_name":"uA",
+                                           "reference_url":self.reference.url}))
+    self.assertEqual(403,resp.status_code)
+    
+  def test_change_user_bookmark_title_updates_title_in_db(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    newTitle = self.reference.title + "MOUF"
+    self.change_request("uA",self.reference.url,
+                        {"ref-title": newTitle,
+                         "ref-description": u"blah"}, 302)
+    self.assertEqual(newTitle,
+                     Reference.objects.get(url=self.reference.url).title)
+    
+  def test_change_user_bookmark_comment_updates_comment_in_db(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    newComment = self.bkm.comment + " NEW"
+    self.change_request("uA",self.reference.url,
+                        {"bmk-comment": newComment}, 302)
+    self.assertEqual(newComment,
+                     UserBookmark.objects.get(reference=self.reference).comment)
+
+  def test_change_user_bookmark_privacy_updates_privacy_in_db(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    newPrivacy = not self.bkm.is_public
+    self.change_request("uA",self.reference.url,
+                        {"bmk-is_public": newPrivacy}, 302)
+    self.assertEqual(newPrivacy,
+                     UserBookmark.objects.get(reference=self.reference).is_public)

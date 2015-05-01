@@ -584,7 +584,7 @@ def user_collection_item(request, owner_name, reference_url):
     form_data[0]["bmk-comment"] = bookmark.comment or " "
   bmk_form = UserBookmarkEditForm(*form_data, instance=bookmark,
                                   error_class = CustomErrorList,
-                                  prefix = "ref")
+                                  prefix = "bmk")
   if request.POST:
     if settings.DEMO:
       return HttpResponseForbidden("Reference editting is not possible in DEMO mode.")
