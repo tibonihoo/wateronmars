@@ -425,7 +425,7 @@ def user_river_source_item(request, owner_name, source_url):
     return HttpResponseBadRequest(str(e))
   feedForms = {}
   for idx,feed in enumerate(WebFeed.objects.filter(source__url=source_url)):
-    currentPrefix = "feed{}".format(idx)
+    currentPrefix = "feed{0}".format(idx)
     initial = {"follow": feed in owner_profile.web_feeds.all()}
     followFieldName = currentPrefix+"-follow"
     if form_data and followFieldName not in form_data[0]:
