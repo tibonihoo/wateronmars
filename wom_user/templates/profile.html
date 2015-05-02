@@ -5,11 +5,16 @@
 {% endblock %}
 
 {% block extrahead %}
+<style type="text/css">#wom-drop-sieve-content-failed {display : none;}</style>
 <script src="{{ STATIC_URL }}js/wom_base.js"></script>
 {% endblock %}
 
 {% block head_notification %}{# Error messages #}
-<li><a id="wom-server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="Server synchronization problem" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% if demo %}
+<li><a id="wom-sieve-demo-warning" data-content="For this demo some features are disabled, like adding or removing bookmarks and feeds or dropping the sieve content." title="Partial demo: no change allowed" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
+{% else %}
+<li><a id="wom-drop-sieve-content-failed" data-content="The content of sieve couldn't be dropped, which may be due to a server communication problem." title="Failed to drop sieve content." data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% endif %}
 {% endblock %}
 
 
@@ -69,4 +74,8 @@
 </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extrascript %}
+<script type="text/javascript">showWarning("wom-sieve-demo-warning");</script>
 {% endblock %}

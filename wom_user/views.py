@@ -139,12 +139,6 @@ def add_base_template_context_data(d,visitor_name, owner_name):
   else:
     tq = "%s's" % owner_name
   messages = []
-  class Message(object):
-    def __init__(self,tag,message):
-      self.message = message
-      self.tag = tag
-    def __unicode__(self):
-      return self.message
   d.update({
     'visitor_name' : visitor_name,
     'owner_name' : owner_name,
@@ -657,12 +651,16 @@ def apply_to_user_sieve(request,owner_name):
   """
   Act on the items passing through the sieve.
   
-  The only accepted action for now is to mark items as read, with the
+  The accepted actions are to mark items as read, with the
   following JSON payload::
   
     { "action" = "read",
       "references" = [ "<url1>", "<url2>", ...],
     }
+
+  or to mark all items as read:
+  
+    { "action" = "drop" }
   """
   if settings.DEMO:
     return HttpResponseForbidden("Changing the sieve's state is not possible in DEMO mode.")

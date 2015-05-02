@@ -89,7 +89,7 @@ function dropSieveContent(sieveURL)
   womRequest("POST", sieveURL,
              "json", JSON.stringify({"action": "drop"}))
     .done(function () {window.location.href = sieveURL})
-    .fail(function () {showWarning("wom-server-sync-problem")});
+    .fail(function () {showWarning("wom-drop-sieve-content-failed")});
 }
 
 // For pages that have an "edit-mode"
