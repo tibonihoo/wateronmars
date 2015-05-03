@@ -149,8 +149,29 @@ def add_base_template_context_data(d,visitor_name, owner_name):
   })
   return d
 
+def is_request_a_form_POST(request):
+  """Guesses whether the request comes from a form's POST action.
+  Assumes the form is built with Django's conventions."""
+  return request.POST and u"next" in request.POST
 
+def clean_checkbox_value(request, post_data, checkbox_name, current_value):
+  """Chose between leaving the current_value untouched or considering it
+  changed to False for a checkbox field, handling the case when is it
+  not present in a form's POST data."""
+  if checkbox_name not in post_data:
+    if is_request_a_form_POST(request):
+      # For a form's POST, the unchecked checkbox won't appear in
+      # the request
+      post_data[checkbox_name] = False
+    else:
+      # In other kind of posts, the absence of value means to keep
+      # the original one unchanged.
+      post_data[checkbox_name] = current_value
+
+  
+  
 def home(request):
+
   """
   Return the home page of the site.
   """
@@ -382,7 +403,7 @@ def prepare_reference_form(request, reference_url, reference_query_set):
   """
   form_data = []
   if request.POST:
-    if u"next" in request.POST:
+    if is_request_a_form_POST(request):
       form_data.append(request.POST.copy())
     else:
       try:
@@ -421,8 +442,8 @@ def user_river_source_item(request, owner_name, source_url):
     currentPrefix = "feed{0}".format(idx)
     initial = {"follow": feed in owner_profile.web_feeds.all()}
     followFieldName = currentPrefix+"-follow"
-    if form_data and followFieldName not in form_data[0]:
-      form_data[0][followFieldName] = initial["follow"]
+    if form_data:
+      clean_checkbox_value(request, form_data[0], followFieldName, initial["follow"])
     feedForms[feed.xmlURL] = WebFeedOptInOutForm(request.owner_user,feed,
                                                  *form_data, error_class = CustomErrorList,
                                                  prefix=currentPrefix, initial=initial)
@@ -573,8 +594,10 @@ def user_collection_item(request, owner_name, reference_url):
   except ValueError, e:
     return HttpResponseBadRequest(str(e))
   bookmark = UserBookmark.objects.get(owner=request.owner_user, reference__url=reference_url)
-  if form_data and "bmk-comment" not in form_data[0]:
-    form_data[0]["bmk-comment"] = bookmark.comment or " "
+  if form_data:
+    if "bmk-comment" not in form_data[0]:
+      form_data[0]["bmk-comment"] = bookmark.comment or " "
+    clean_checkbox_value(request, form_data[0], "bmk-is_public", bookmark.is_public)
   bmk_form = UserBookmarkEditForm(*form_data, instance=bookmark,
                                   error_class = CustomErrorList,
                                   prefix = "bmk")

@@ -55,11 +55,11 @@ Source: {{ ref_title }}
       <i class="glyphicon glyphicon-filter" style="padding-top:.4em"></i>
     </span>
   <p class="form-control-static"><a href="{{ feed_url }}">{{ feed_url }}</a></p>
-    <span class="input-group">
-      <div class="checkbox">
-        <label> {{ field }}  Following</label>
+    <span class="input-group checkbox">
+      <!-- <div class="checkbox "> -->
+         {{ field }} <label>Following</label>
         {{ field.errors|safe }}
-      </div>
+      <!-- </div> -->
     </span>
   </div>
   {% endfor %}
