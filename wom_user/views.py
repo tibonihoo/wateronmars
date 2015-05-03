@@ -383,7 +383,7 @@ def prepare_reference_form(request, reference_url, reference_query_set):
   form_data = []
   if request.POST:
     if u"next" in request.POST:
-      form_data.append(dict(request.POST))
+      form_data.append(request.POST.copy())
     else:
       try:
         src_info = simplejson.loads(request.body)
@@ -400,8 +400,8 @@ def prepare_reference_form(request, reference_url, reference_query_set):
   if form_data and "ref-title" not in form_data[0]:
     form_data[0]["ref-title"] = reference.title
   return reference, ReferenceEditForm(*form_data, instance=reference,
-                                            error_class = CustomErrorList,
-                                            prefix = "ref"), form_data
+                                      error_class = CustomErrorList,
+                                      prefix = "ref"), form_data
 
 @loggedin_and_owner_required
 @csrf_protect
