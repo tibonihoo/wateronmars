@@ -383,7 +383,7 @@ def prepare_reference_form(request, reference_url, reference_query_set):
   form_data = []
   if request.POST:
     if u"next" in request.POST:
-      form_data.append(request.POST)
+      form_data.append(dict(request.POST))
     else:
       try:
         src_info = simplejson.loads(request.body)
@@ -408,7 +408,6 @@ def prepare_reference_form(request, reference_url, reference_query_set):
 @require_http_methods(["GET","POST"])
 def user_river_source_item(request, owner_name, source_url):
   """Generate an editable view of a given source identified by its url."""
-  form_data = []
   owner_profile = request.owner_user.userprofile
   try:
     reference, form, form_data = prepare_reference_form(request, source_url,
