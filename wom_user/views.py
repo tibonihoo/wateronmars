@@ -130,18 +130,12 @@ def add_base_template_context_data(d,visitor_name, owner_name):
   'd': the dictionary of custom data for the context.
   'visitor_name': the username of the visitor ("None" if anonymous).
   'owner_name': the username of the owner.
-  'title_qualify': the property qualifier adapted to wether the user is the owner or not.
   'demo': flag indicating whether the demo mode is activated
   'auto_update': flag indicating whether updating news is automatic or not.
   """
-  if visitor_name == owner_name:
-    tq = "Your"
-  else:
-    tq = "%s's" % owner_name
   d.update({
     'visitor_name' : visitor_name,
     'owner_name' : owner_name,
-    'title_qualify': tq,
     'demo': settings.DEMO,
     'auto_update': settings.USE_CELERY,
   })
