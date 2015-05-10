@@ -39,7 +39,6 @@ def serve():
     local("python manage.py collectstatic")
     local("python manage.py runserver")
 
-
 def test():
     local("coverage run manage.py test {0}".format(" ".join(DJANGO_APPS)))
 
@@ -91,3 +90,18 @@ WARNING: Make sure to clean any db used by Django before the reset !""")
 def db_update():
     local("python manage.py syncdb")
     local("python manage.py migrate")
+
+def trans_gen(lang):
+    os.chdir("wom_user")
+    try:
+        local("python ../manage.py makemessages -l {0}".format(lang))
+    finally:
+        os.chdir("..")
+
+def trans_compile(lang):
+    os.chdir("wom_user")
+    try:
+        local("python ../manage.py compilemessages -l {0}".format(lang))
+    finally:
+        os.chdir("..")
+
