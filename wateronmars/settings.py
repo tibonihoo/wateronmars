@@ -122,11 +122,12 @@ TIME_ZONE = 'America/Chicago'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+
 SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = False
+USE_I18N = True
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale.
@@ -179,13 +180,14 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+  'django.contrib.sessions.middleware.SessionMiddleware',
+  'django.middleware.locale.LocaleMiddleware',
+  'django.middleware.common.CommonMiddleware',
+  'django.middleware.csrf.CsrfViewMiddleware',
+  'django.contrib.auth.middleware.AuthenticationMiddleware',
+  'django.contrib.messages.middleware.MessageMiddleware',
+  # Uncomment the next line for simple clickjacking protection:
+  # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'wateronmars.urls'
@@ -278,3 +280,17 @@ LOGGING = {
         },
     }
 }
+
+# Translation support.
+# Note: translation set-up thanks to the following tutorial:
+# http://www.marinamele.com/taskbuster-django-tutorial/internationalization-localization-languages-time-zones
+from django.utils.translation import ugettext_lazy as _
+
+LANGUAGES = (
+  ("en", _("English")),
+  ("fr", _("French")),
+)
+
+LOCALE_PATHS = (
+  os.path.join(APP_BASE_DIR, "..", "wom_user", "locale"),
+)
