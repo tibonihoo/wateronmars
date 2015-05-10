@@ -5,7 +5,8 @@
 {% if visitor_name == owner_name %}
 {% trans "Your profile" %}
 {% else %}
-{% blocktrans %}"{{ owner_name}}'s profile" {% endblocktrans %}
+{% blocktrans %}{{ owner_name}}'s profile{% endblocktrans %}
+{% endif %}
 {% endblock %}
 
 {% block extrahead %}
@@ -41,7 +42,7 @@
     {% blocktrans %}Read or <a href="javascript:dropSieveContent('{{ sieve_url }}')" title="Empty your sieve by forgetting all currently unread items.">drop all unread items</a>{% endblocktrans %}
     {% else %}
     {% trans "Read." %}
-    {%endif}
+    {% endif %}
   </dd>
   {% url wom_user.views.user_collection_add owner_name as collection_add_url %}
   {% url wom_user.views.user_upload_nsbmk visitor_name as upload_nsbmk_url %}
