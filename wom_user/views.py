@@ -765,8 +765,5 @@ def user_river_sources(request,owner_name):
     q.update(src_info)
     request.POST = q
     return user_river_source_add(request, owner_name)
-  # TODO
-  # elif request.method == 'DELETE':
-  #   return user_river_source_stop_following(request, owner_name)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
