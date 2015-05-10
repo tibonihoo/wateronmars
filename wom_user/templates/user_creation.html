@@ -1,8 +1,8 @@
 {% extends "base_nojs.html" %}
-
+{% load i18n %}
 
 {% block title %}
-User authentication
+{% trans "User authentication" %}
 {% endblock %}
 
 {% block head_after_css %}
@@ -16,10 +16,10 @@ User authentication
 {% endblock %}
 
 {% block body_below_nav %}  
-<h4>New User Registration</h4>
+<h4>{% trans "New User Registration" %}</h4>
 {% if form.errors %}
 <div class="alert alert-danger">
-  <p>Errors were detected. Please try again to fill in the form.</p>
+  <p>{% trans "Errors were detected. Please try again to fill in the form." %}</p>
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
@@ -37,7 +37,7 @@ User authentication
   </div>
   {% endfor %}
   <div class="control-groups">
-    <input type="submit" value="Register new user" class="btn btn-default" />
+    <input type="submit" value="{% trans "Register new user" %}" class="btn btn-default" />
   </div>
 </form>
 {% endblock %}

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 
 {% block title %}
-{{ title_qualify }} Collection
+{% trans "Collection" %}
 {% endblock %}
 
 
@@ -29,18 +29,23 @@ jQuery.ias({
 {% endblock %}
 
 {% block content %}
-<h4><i class="glyphicon glyphicon-bookmark"></i>{{ title_qualify }} collection of {{ user_bookmarks.paginator.count }} bookmarks.
+<h4>
   {% if visitor_name == owner_name  %}
-  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="Edit your bookmarks !"><i class="glyphicon glyphicon-edit"></i></a>
-  <small><a href="{% url wom_user.views.user_collection_add owner_name %}" title="Add a bookmark." class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a></small>
+  <i class="glyphicon glyphicon-bookmark"></i>
+  {% blocktrans with num_items=user_bookmarks.paginator.count %}Your collection of {{ num_items }} bookmarks.{% endblocktrans %}
+  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="{% trans "Edit your bookmarks !" %}"><i class="glyphicon glyphicon-edit"></i></a>
+  <small><a href="{% url wom_user.views.user_collection_add owner_name %}" title="{% trans "Add a bookmark." %}" class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a></small>
+  {% else %}
+  <i class="glyphicon glyphicon-bookmark"></i>
+  {% blocktrans with num_items=user_bookmarks.paginator.count name=owner_name %}{{ name }}'s collection of {{ num_items }} bookmarks.{% endblocktrans %}
   {% endif %}
 </h4>
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
-  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ Bookmarked since {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
+  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ {% trans "Bookmarked since" %} {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
     {% if visitor_name == owner_name  %}
-    <a href="{% url wom_user.views.user_collection_item visitor_name bookmark.reference.url %}" title="Edit" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+    <a href="{% url wom_user.views.user_collection_item visitor_name bookmark.reference.url %}" title="{% trans "Edit" %}" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
     {% endif  %}
   </dt>
   <dd class="in_bookmark_def">
@@ -55,7 +60,7 @@ jQuery.ias({
           {% endif %}
       </em></small>
       {% if bookmark.get_tag_names %}
-      <i class="glyphicon glyphicon-tags" title="Tags"></i>
+      <i class="glyphicon glyphicon-tags" title="{% trans "Tags" %}"></i>
       {% for tag in bookmark.get_tag_names %}
       {{ tag }}
       {% if not forloop.last %}
@@ -69,8 +74,10 @@ jQuery.ias({
 {% else %}
 <div class="alert alert-info alert-dismissable">
   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-  <h4>Your collection is empty !</h4>
-  <p>You can add a link to your collection either by bookmarking or sharing an item found in your <a class="alert-link" href="{% url wom_user.views.user_river_view owner_name %}">river of news</a> or <a class="alert-link" href="{% url wom_user.views.user_river_sieve %}">sieve</a> or by sending a link with the following bookmarklet: <a class="alert-link" href="{{ collection_add_bookmarklet }}">Bookmark !</a></p>.
+  <h4>{% trans "Your collection is empty !" %}</h4>
+  {% url wom_user.views.user_river_view owner_name as river_url %}
+  {% url wom_user.views.user_river_sieve owner_name as sieve_url%}
+  <p>{% blocktrans %}You can add a link to your collection either by bookmarking or sharing an item found in your <a class="alert-link" href="{{ river_url }}">river of news</a> or <a class="alert-link" href="{{ sieve_url }}">sieve</a> or by sending a link with the following bookmarklet: <a class="alert-link" href="{{ collection_add_bookmarklet }}">Bookmark !</a>.{% endblocktrans %}</p>
 
 </div>
 {% endif %}
@@ -84,12 +91,12 @@ jQuery.ias({
         {% else %}
         class = "previous disabled" > <a>
         {% endif %}
-        Previous
+        {% trans "Previous" %}
         </a>
     </li>
     
     <li class="disabled">
-        <a> Page {{ user_bookmarks.number }} of {{ user_bookmarks.paginator.num_pages }}.</a>
+        <a>{% blocktrans with page_idx=user_bookmarks.number page_total=user_bookmarks.paginator.num_pages %}Page {{ page_idx }} of {{ page_total }}.{% endblocktrans %}</a>
     </li>
 
     <li
@@ -98,7 +105,7 @@ jQuery.ias({
         {% else %}
         class = "next disabled" > <a>
         {% endif %}
-        Next
+        {% trans "Next" %}
         </a>
     </li>
     </ul>

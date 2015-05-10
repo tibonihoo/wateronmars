@@ -1,26 +1,27 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-Source: {{ ref_title }}
+{% trans "Source:" %} {{ ref_title }}
 {% endblock %}
 
 {% block content %}
 
 <h4><img src="http://plus.google.com/_/favicon?domain={{ ref_url }}" style="padding-right:.5em;"/>{{ ref_title }}</h4>
 
-<p><a href="{{ ref_url }}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-globe"></i>View on site.</a></p>
+<p><a href="{{ ref_url }}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-globe"></i>{% trans "View on site." %}</a></p>
 
-<p class="help-block">Improve this source's description:</p>
+<p class="help-block">{% trans "Improve this source's description:" %}</p>
 <div class="row">
   <span class="col-sm-4 col-sm-offset-2">
-    <p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>Please note that all users sharing this source will see your edits.</p>
+    <p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>{% trans "Please note that all users sharing this source will see your edits." %}</p>
   </span>
 </div>
 <form class="form-horizontal" role="form" action="" method="post">
   {% csrf_token %}
   {% if ref_form.errors %}
   <div class="alert alert-danger">
-    <p>Please check the information below.</p>
+    <p>{% trans "Please check the information below." %}</p>
     {{ ref_form.non_field_errors|safe }}
   </div>
   {% endif %}
@@ -36,11 +37,11 @@ Source: {{ ref_title }}
   {% endfor %}
   {% for feed_url, form in feed_forms.items %}
   {% if forloop.first %}
-  <p class="help-block">Check the feeds you want to follow (uncheck others):</p>
+  <p class="help-block">{% trans "Check the feeds you want to follow (uncheck others):" %}</p>
   {% endif %}
   {% if form.errors %}
   <div class="alert alert-danger">
-    <p>Please check the information below.</p>
+    <p>{% trans "Please check the information below." %}</p>
     {{ feedForms.non_field_errors|safe }}
   </div>
   {% endif %}
@@ -56,17 +57,15 @@ Source: {{ ref_title }}
     </span>
   <p class="form-control-static"><a href="{{ feed_url }}">{{ feed_url }}</a></p>
     <span class="input-group checkbox">
-      <!-- <div class="checkbox "> -->
-         {{ field }} <label>Following</label>
+         {{ field }} <label>{% trans "Following" %}</label>
         {{ field.errors|safe }}
-      <!-- </div> -->
     </span>
   </div>
   {% endfor %}
   {% endfor %}
   <div class="form-group">
     <span class="col-sm-offset-2">
-      <input type="submit" value="Save changes" class="btn btn-default" />
+      <input type="submit" value="{% trans "Save changes" %}" class="btn btn-default" />
       <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
     </span>
   </div>

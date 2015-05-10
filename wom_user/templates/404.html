@@ -1,16 +1,17 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
-    <title>WOM | Lost in space</title>
+    <title>{% trans "WOM | Lost in space" %}</title>
   </head>
   <body>
-    <h1>Looking for water on Mars ?</h1>
-    <p>Chances are you are lost... You might as well take the occasion to browse the following links:</p>
+    <h1>{% trans "Looking for water on Mars ?" %}</h1>
+    <p>{% trans "Chances are you are lost... You might as well take the occasion to browse the following links:" %}</p>
     <ul>
-      <li><a href="/">the landing page</a></li>
-      <li><a href="https://en.wikipedia.org/wiki/Water_on_Mars">the real water on mars</a></li>
-      <li><a href="http://tabs.mediahackers.org/?panel=world">closer to earth, THE river and somehow THE source too :)</a></li>
+      <li><a href="/">{% trans "the landing page" %}</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Water_on_Mars">{% trans "the real water on mars" %}</a></li>
+      <li><a href="http://tabs.mediahackers.org/?panel=world">{% trans "closer to earth, THE river and somehow THE source too :)" %}</a></li>
     </ul>
   </body>
 </html>

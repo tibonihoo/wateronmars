@@ -1,7 +1,8 @@
+{% load i18n %}
 <?xml version="1.0" encoding="UTF-8"?>
 <opml version="1.0">
   <head>
-    <title>WaterOnMars sources for {{ owner_name }}.</title>
+    <title>{% blocktrans %}WaterOnMars sources for {{ owner_name }}.{% endblocktrans %}</title>
   </head>
   <body>
 {% regroup tagged_web_feeds by main_tag_name as tag_groups %}

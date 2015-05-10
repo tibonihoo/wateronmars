@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-{{ title_qualify }} Sources
+{% trans "Sources" %}
 {% endblock %}
 
 {% block extrahead %}
@@ -19,16 +20,19 @@ jQuery.ias({
 
 
 {% block content %}
-<h4><i class="glyphicon glyphicon-book"></i>{{ title_qualify }} {{ num_sources }} sources
+<h4><i class="glyphicon glyphicon-book"></i>
   {% if visitor_name == owner_name  %}
-  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="Edit your sources !"><i class="glyphicon glyphicon-edit"></i></a>
+  {% blocktrans %}Your {{ num_sources }} sources{% endblocktrans %}
+  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="{% trans "Edit your sources !" %}"><i class="glyphicon glyphicon-edit"></i></a>
+  {% else %}
+  {% blocktrans %}{{ owner_name}}'s {{ num_sources }} sources{% endblocktrans %}
   {% endif  %}
 </h4>
 <ul class="list-unstyled">
 {% if tagged_web_feeds %}
-  <li><h5>Syndicated sources
+  <li><h5>{% trans "Syndicated sources" %}
     {% if visitor_name == owner_name  %}
-    <a href="{% url wom_user.views.user_river_source_add visitor_name %}" title="Subscribe to a new source." class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a>
+    <a href="{% url wom_user.views.user_river_source_add visitor_name %}" title="{% trans "Subscribe to a new source." %}" class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a>
     {% endif  %}
     </h5>
     <ul class="list-unstyled">
@@ -37,7 +41,7 @@ jQuery.ias({
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
           <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
 {% if visitor_name == owner_name  %}
-          <a href="{% url wom_user.views.user_river_source_item visitor_name feed.source.url %}" title="Edit source information or subscription." class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+          <a href="{% url wom_user.views.user_river_source_item visitor_name feed.source.url %}" title="{% trans "Edit source information or subscription." %}" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
 {% endif  %}
       </li>
       {% endfor %}
@@ -45,18 +49,18 @@ jQuery.ias({
   </li>
 {% else %}
   {% if visitor_name == owner_name and source_add_bookmarklet %}
-  <p>You can subscribe to news sources with the following bookmarklet: <a href="{{ source_add_bookmarklet }}">Subscribe !</a></p>
+  <p>{% trans "You can subscribe to news sources with the following bookmarklet:" %} <a href="{{ source_add_bookmarklet }}">{% trans "Subscribe !" %}</a></p>
   {% endif %}
 {% endif %}
 
 {% if other_sources %}
-  <li><h5>Bookmark sources</h5>
+  <li><h5>{% trans "Bookmark sources" %}</h5>
   <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
    {% if source.url != "#internal-bookmark-import" %}
    <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.title }}</a>
     {% if visitor_name == owner_name  %}
-    <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="Edit source information." class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+    <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="{% trans "Edit source information." %}" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
     {% endif %}
     {% endif %}
    </li>
@@ -67,12 +71,12 @@ jQuery.ias({
   {% if tagged_web_feeds %}
   <div class="alert alert-info alert-dismissable fade in" style="margin-top:1em;">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-    <p>No source apart from the feed subscriptions.</p>
+    <p>{% trans "No source apart from the feed subscriptions." %}</p>
   </div>
   {% else %}
   <div class="alert alert-info alert-dismissable fade in" style="margin-top:1em;">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-    <p>No source yet.</p>   
+    <p>{% trans "No source yet." %}</p>   
   </div>
   {% endif %}
 {% endif %}
@@ -86,12 +90,12 @@ jQuery.ias({
     {% else %}
     class = "previous disabled" > <a>
     {% endif %}
-    Previous
+    {% trans "Previous" %}
     </a>
   </li>
   
   <li class="disabled">
-    <a> Page {{ sources_list.number }} of {{ sources_list.paginator.num_pages }}.</a>
+    <a>{% blocktrans with page_idx=sources_list.number page_total=sources_list.paginator.num_pages %}Page {{ page_idx }} of {{ page_total }}.{% endblocktrans %}</a>
   </li>
 
   <li
@@ -100,7 +104,7 @@ jQuery.ias({
     {% else %}
     class = "next disabled" > <a>
     {% endif %}
-    Next
+    {% trans "Next" %}
     </a>
   </li>
   </ul>

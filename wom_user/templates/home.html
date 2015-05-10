@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 {% load demo_info %}
 
 {% block title %}
-Landing site
+{% trans "Landing site" %}
 {% endblock %}
 
 {% block content %}
 
 <div class="jumbotron">
-  <h1>Welcome to Water On Mars !</h1>
-  <p>Where good old rivers (of news) have been discovered (again).</p>
+  <h1>{% trans "Welcome to Water On Mars !" %}</h1>
+  <p>{% trans "Where good old rivers (of news) have been discovered (again)." %}</p>
   <p>
 {% if visitor_name %}
-<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River"><i class="glyphicon glyphicon-align-left"></i>&nbsp; Watch your personal river.</a>
+<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_view visitor_name %}" title="{% trans "Your River" %}"><i class="glyphicon glyphicon-align-left" style="margin-right: 1em"></i>{% trans "Watch your personal river." %}</a>
 <p>
 </p>
-<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve"><i class="glyphicon glyphicon-filter"></i>&nbsp; Filter the news with your sieve.</a>
+<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sieve visitor_name %}" title="{% trans "Your Sieve" %}"><i class="glyphicon glyphicon-filter" style="margin-right: 1em"></i>{% trans "Filter the news with your sieve." %}</a>
 </p>
 <p>
-  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection"><i class="glyphicon glyphicon-bookmark"></i>&nbsp; Browse your bookmarks.</a>
+  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_collection visitor_name %}" title="{% trans "Your Collection" %}"><i class="glyphicon glyphicon-bookmark" style="margin-right: 1em"></i>{% trans "Browse your bookmarks." %}</a>
 </p>
 <p>
-  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources"><i class="glyphicon glyphicon-book"></i>&nbsp; Check your sources.</a>
+  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sources visitor_name %}" title="{% trans "Your Sources" %}"><i class="glyphicon glyphicon-book" style="margin-right: 1em"></i>{% trans "Check your sources." %}</a>
 </p>
 {% else %}
-<a class="btn btn-primary btn-lg" href="{% url django.contrib.auth.views.login %}" title="Login"><i class="glyphicon glyphicon-user"></i>&nbsp; Login</a>
+<a class="btn btn-primary btn-lg" href="{% url django.contrib.auth.views.login %}" title="{% trans "Login" %}"><i class="glyphicon glyphicon-user" style="margin-right: 1em"></i>{% trans "Login" %}</a>
 {% demo_info %}
 {% endif %}
 </div>
@@ -35,10 +35,10 @@ Landing site
 {% block footer %}
 <div class="footer">
   <div class="container">
-    <p>Code licensed under <a href="http://www.gnu.org/licenses/agpl-3.0.html" target="_blank">GNU Affero GPL v3.0</a> and available on <a href="https://github.com/tibonihoo/wateronmars">GitHub</a>.</p>
-    <p>Icons by <a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
-    <p>Built on <a href="http://getbootstrap.com">Bootstrap</a>, <a href="http://bootswatch.com/united/">United theme</a>, and <a href="http://djangoproject.com/">Django</a>. 
-    <p>WaterOnMars is a project initiated by <a href="http://tibonihoo.net">Thibauld Nion</a>.</p>
+    <p>{% blocktrans %}Code licensed under <a href="http://www.gnu.org/licenses/agpl-3.0.html" target="_blank">GNU Affero GPL v3.0</a> and available on <a href="https://github.com/tibonihoo/wateronmars">GitHub</a>.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Icons by <a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Built on <a href="http://getbootstrap.com">Bootstrap</a>, <a href="http://bootswatch.com/united/">United theme</a>, and <a href="http://djangoproject.com/">Django</a>.{% endblocktrans %}</p>
+    <p>{% blocktrans %}WaterOnMars is a project initiated by <a href="http://tibonihoo.net">Thibauld Nion</a>.{% endblocktrans %}</p>
   </div>
 </div>    
 {% endblock %}

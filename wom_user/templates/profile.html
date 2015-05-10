@@ -1,7 +1,11 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-{{title_qualify}} Profile
+{% if visitor_name == owner_name %}
+{% trans "Your profile" %}
+{% else %}
+{% blocktrans %}"{{ owner_name}}'s profile" {% endblocktrans %}
 {% endblock %}
 
 {% block extrahead %}
@@ -11,46 +15,64 @@
 
 {% block head_notification %}{# Error messages #}
 {% if demo %}
-<li><a id="wom-sieve-demo-warning" data-content="For this demo some features are disabled, like adding or removing bookmarks and feeds or dropping the sieve content." title="Partial demo: no change allowed" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
+<li><a id="wom-sieve-demo-warning" data-content="{% trans "For this demo some features are disabled, like adding or removing bookmarks and feeds or dropping the sieve content." %}" title="{% trans "Partial demo: no change allowed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
 {% else %}
-<li><a id="wom-drop-sieve-content-failed" data-content="The content of sieve couldn't be dropped, which may be due to a server communication problem." title="Failed to drop sieve content." data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li><a id="wom-drop-sieve-content-failed" data-content="{% trans "The content of sieve couldn't be dropped, which may be due to a server communication problem." %}" title="{% trans "Failed to drop sieve content." %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 {% endif %}
 {% endblock %}
 
 
 {% block content %}
-<h3>Welcome {{visitor_name}} !</h3>
+<h3>{% blocktrans %}Welcome {{visitor_name}} !{% endblocktrans %}</h3>
 
-<p>Feel free to browse through the following pages:</p>
+<p>{% trans "Feel free to browse through the following pages:" %}</p>
+
 
 <dl class="dl-horizontal">
   <dt><a href="{% url wom_user.views.user_river_view owner_name %}">
-      <abbr title="A stream of fresh news comming from your selection of sources.">Your river</abbr>
+      <abbr title="{% trans "A stream of fresh news." %}">River</abbr>
       &nbsp;<i class="glyphicon glyphicon-align-left"></i></a></dt>
-  <dd>Read or <em title="The river page refreshes itself regularly.">contemplate ...</em></dd>
-  <dt><a href="{% url wom_user.views.user_river_sieve owner_name %}">
-      <abbr title="An inbox-like view of your river to make sure you don't miss anything.">Your sieve</abbr>
+  <dd>{% blocktrans %}Browse or <em title="The river page refreshes itself regularly.">contemplate ...</em>{% endblocktrans %}</dd>
+  {% url wom_user.views.user_river_sieve owner_name as sieve_url %}
+  <dt><a href="{{ sieve_url }}">
+      <abbr title="{% trans "An inbox-like view of the river's news to make sure you don't miss anything." %}">{% trans "Sieve" %}</abbr>
       &nbsp;<i class="glyphicon glyphicon-filter"></i></a></dt>
-  <dd>Read or <a href="javascript:dropSieveContent('{% url wom_user.views.user_river_sieve owner_name %}')" 
-                 title="Empty your sieve by forgetting all currently unread items.">drop all unread items</a></dd>
-  <dt><a href="{% url wom_user.views.user_collection owner_name %}">
-      <abbr title="All the links you've picked up from your river and the web">Your collection</abbr>
+  <dd>{% if visitor_name == owner_name %}
+    {% blocktrans %}Read or <a href="javascript:dropSieveContent('{{ sieve_url }}')" title="Empty your sieve by forgetting all currently unread items.">drop all unread items</a>{% endblocktrans %}
+    {% else %}
+    {% trans "Read." %}
+    {%endif}
+  </dd>
+  {% url wom_user.views.user_collection_add owner_name as collection_add_url %}
+  {% url wom_user.views.user_upload_nsbmk visitor_name as upload_nsbmk_url %}
+  {% url wom_user.views.user_collection owner_name as collection_url %}
+  <dt><a href="{{ collection_url }}">
+      <abbr title="{% trans "The gems picked up from the river and the web" %}">{% trans "Collection" %}</abbr>
       &nbsp;<i class="glyphicon glyphicon-bookmark"></i></a></dt>
-  <dd>Read or <a href="{% url wom_user.views.user_collection_add owner_name %}" 
-                 title="Add an URL to your collection.">add a bookmark</a>, 
-    or <a href="{% url wom_user.views.user_upload_nsbmk visitor_name %}" 
-          title="Add a batch of bookmarks at once, from your former bookmark lists.">import several</a>
-    or <a href="{% url wom_user.views.user_collection owner_name %}?format=ns-bmk-list" 
-          title="Export as Netscape's bookmarks xml file.">export all</a>.</dd>
-  <dt><a href="{% url wom_user.views.user_river_sources owner_name %}" title="{{title_qualify}} Sources">
-      <abbr title="The sources you're following and the sites referenced by your bookmarks.">Your sources</abbr>
+  <dd>
+    {% if visitor_name == owner_name %}
+    {% blocktrans %}Search or <a href="{{ collection_add_url }}" title="Add an URL to your collection.">add a bookmark</a>,
+    or <a href="{{ upload_nsbmk_url }}" title="Add a batch of bookmarks at once, from your former bookmark lists.">import several</a>
+    or <a href="{{ collection_url }}?format=ns-bmk-list" title="Export as Netscape's bookmarks xml file.">export all</a>.{% endblocktrans %}
+    {% else %}
+    {% trans "Search." %}
+    {% endif %}
+  </dd>
+  {% url wom_user.views.user_river_source_add visitor_name as source_add_url %}
+  {% url wom_user.views.user_upload_opml visitor_name as upload_opml_url %}
+  {% url wom_user.views.user_river_sources owner_name as sources_url %}
+  <dt><a href="{{ source_url }}">
+      <abbr title="{% trans "Subscriptions and sites referenced by bookmarks." %}">{% trans "Sources" %}</abbr>
       &nbsp;<i class="glyphicon glyphicon-book"></i></a></dt>
-  <dd>Read or <a href="{% url wom_user.views.user_river_source_add visitor_name %}" 
-                 title="Subscribe to a new source.">add</a> 
-    or <a href="{% url wom_user.views.user_upload_opml visitor_name %}" 
-                 title="Add a batch of sources from a former subscription list.">import several</a> 
-    or <a href="{% url wom_user.views.user_river_sources owner_name %}?format=opml" 
-          title="Export your sources as OPML">export all</a>.</dd>
+  <dd>
+    {% if visitor_name == owner_name %}
+    {% blocktrans %}Check or <a href="{{ source_add_url }}" title="Subscribe to a new source.">add</a> 
+    or <a href="{{ upload_opml_url }}" title="Add a batch of sources from a former subscription list.">import several</a> 
+    or <a href="{{ sources_url }}?format=opml" title="Export your sources as OPML">export all</a>.{% endblocktrans %}
+    {% else %}
+    {% trans "Check." %}
+    {% endif %}
+  </dd>
 </dl>
 
 
@@ -59,17 +81,17 @@
 {% if is_superuser %}
 <div class="row show-grid">
   <div class="col-md-6">
-  <p><a href="{% url wom_user.views.user_creation %}" class="btn btn-default">Create a new user</a></p>
+  <p><a href="{% url wom_user.views.user_creation %}" class="btn btn-default">{% trans "Create a new user" %}</a></p>
   </div>
 </div>
 {% endif %}
 <div class="row show-grid">
 <div class="col-md-6">
-<h4>Bookmarklets</h4>
-<p>Another thing of the past, bookmarklets let you interact with <abbr title="wateronmars">WoM</abbr> when you're browsing the web.</p>
-<p>Drag'n'drop them on your browser's toolbar:</p>
-<p><a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-primary" title="Add current page to your bookmarks.">Bookmark!</a>
-<a href="{{ source_add_bookmarklet|safe }}" class="btn btn-primary" title="Follow this site through your river.">Subscribe!</a></p>
+<h4>{% trans "Bookmarklets" %}</h4>
+<p>{% blocktrans %}Another thing of the past, bookmarklets let you interact with <abbr title="wateronmars">WoM</abbr> when you're browsing the web.{% endblocktrans %}</p>
+<p>{% trans "Drag'n'drop them on your browser's toolbar:" %}</p>
+<p><a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-primary" title="{% trans "Add current page to your bookmarks." %}">{% trans "Bookmark!" %}</a>
+<a href="{{ source_add_bookmarklet|safe }}" class="btn btn-primary" title="{% trans "Follow this site through your river." %}">{% trans "Subscribe!" %}</a></p>
 </div>
 </div>
 </div>

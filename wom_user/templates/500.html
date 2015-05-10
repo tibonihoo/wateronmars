@@ -1,14 +1,15 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
-    <title>WOM | Technical glitch</title>
+    <title>{% trans "WOM | Technical glitch" %}</title>
   </head>
   <body>
-    <h1>We've got a problem !</h1>
-    <p>Think about being lost in space and running out of oxygen...</p>
-    <p>Indeed, this 500 internal error is nothing in comparison :)</p>
-    <p>Feel free to <a href="https://en.wikipedia.org/wiki/Water_on_Mars">browse elsewhere</a> and back again.</p>
-    <p><b>Sorry for the inconvenience !</b></p>
+    <h1>{% trans "We've got a problem !" %}</h1>
+    <p>{% trans "Think about being lost in space and running out of oxygen..." %}</p>
+    <p>{% trans "Indeed, this 500 internal error is nothing in comparison :)" %}</p>
+    <p>{% blocktrans %}Feel free to <a href="https://en.wikipedia.org/wiki/Water_on_Mars">browse elsewhere</a> and back again.{% endblocktrans %}</p>
+    <p><b>{% trans "Sorry for the inconvenience !" %}</b></p>
   </body>
 </html>

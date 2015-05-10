@@ -1,9 +1,10 @@
 {% extends "base_nojs.html" %}
 
+{% load i18n %}
 {% load demo_info %}
 
 {% block title %}
-User authentication
+{% trans "User authentication" %}
 {% endblock %}
 
 {% block head_after_css %}
@@ -23,11 +24,11 @@ User authentication
 
 {% if form.errors %}
 <div class="alert alert-danger">
-  <p>Your username and password didn't match. Please try again.</p>
+  <p>{% trans "Your username and password didn't match. Please try again." %}</p>
 </div>
 {% endif %}
 <div class="container-fluid">
-  <h4>User authentication</h4>
+  <h4>{% trans "User authentication" %}</h4>
 <form role="form" class="form-horizontal" 
       method="post" action="{% url django.contrib.auth.views.login %}">
   {% csrf_token %}
@@ -45,7 +46,7 @@ User authentication
   </div>
   <div class="form-group">
     <div class="col-sm-offset-1">
-      <input type="submit" value="login" class="btn btn-default" />
+      <input type="submit" value="{% trans "Login" %}" class="btn btn-default" />
       <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
     </div>
   </div>

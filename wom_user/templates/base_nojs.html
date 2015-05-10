@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Water on Mars | {% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="Your base camp to explore the web.">
+    <meta name="description" content="{% trans "Your base camp to explore the web." %}">
     <link href="{{ STATIC_URL }}bootstrap/css/bootswatch.min.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}bootstrap/css/bootswatch_united_bootstrap.min.css" rel="stylesheet">
     <link rel="icon" sizes="16x16" type="image/png" href="{{ STATIC_URL }}img/wom-logo-16.png">
@@ -24,16 +25,16 @@
       <div class="container-fluid">
         <div class="navbar-header">
           <span class="navbar-brand navbar-nav" role="navigation">
-            <a href="{% url wom_user.views.home %}" title="Water On Mars landing zone [H]" accesskey="H" id="wom-brand-name">WoM</a>
+            <a href="{% url wom_user.views.home %}" title="{% trans "Water On Mars landing zone" %} [H]" accesskey="H" id="wom-brand-name">WoM</a>
             {% if visitor_name %}
-            <a href="{% url wom_user.views.user_river_view visitor_name %}" title="Your River [R]" accesskey="R"><i class="glyphicon glyphicon-align-left"></i></a>
-            <a href="{% url wom_user.views.user_river_sieve visitor_name %}" title="Your Sieve [F]" accesskey="F"><i class="glyphicon glyphicon-filter"></i></a>
-            <a href="{% url wom_user.views.user_collection visitor_name %}" title="Your Collection [C]" accesskey="C"><i class="glyphicon glyphicon-bookmark"></i></a>
-            <a href="{% url wom_user.views.user_river_sources visitor_name %}" title="Your Sources [S]" accesskey="S"><i class="glyphicon glyphicon-book"></i></a>
+            <a href="{% url wom_user.views.user_river_view visitor_name %}" title="{% trans "Your River" %} [R]" accesskey="R"><i class="glyphicon glyphicon-align-left"></i></a>
+            <a href="{% url wom_user.views.user_river_sieve visitor_name %}" title="{% trans "Your Sieve" %} [F]" accesskey="F"><i class="glyphicon glyphicon-filter"></i></a>
+            <a href="{% url wom_user.views.user_collection visitor_name %}" title="{% trans "Your Collection" %} [C]" accesskey="C"><i class="glyphicon glyphicon-bookmark"></i></a>
+            <a href="{% url wom_user.views.user_river_sources visitor_name %}" title="{% trans "Your Sources" %} [S]" accesskey="S"><i class="glyphicon glyphicon-book"></i></a>
             {% endif %}
           </span>
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#wom-navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
+            <span class="sr-only">{% trans "Toggle navigation" %}</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -46,10 +47,10 @@
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if visitor_name %}
-            <li><a href="{% url wom_user.views.user_profile %}" title="Want to check your profile ? [P]" accesskey="P">Welcome {{ visitor_name }} !</a></li>
-            <li><a href="{% url wom_user.views.user_logout %}" title="Blast off ! [Q]" accesskey="Q">Log out</a></li>
+            <li><a href="{% url wom_user.views.user_profile %}" title="{% trans "Want to check your profile ?" %} [P]" accesskey="P">{% blocktrans %}Welcome {{ visitor_name }} !{% endblocktrans %}</a></li>
+            <li><a href="{% url wom_user.views.user_logout %}" title="{% trans "Blast off !" %} [Q]" accesskey="Q">{% trans "Log out" %}</a></li>
             {% else %}
-            <li><a href="{% url django.contrib.auth.views.login %}"><i class="glyphicon glyphicon-user"></i>Log in</a></li>
+            <li><a href="{% url django.contrib.auth.views.login %}"><i class="glyphicon glyphicon-user"></i>{% trans "Log in" %}</a></li>
             {% endif %}
           </ul>
         </div>

@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 
 {% block title %}
-New subscription
+{% trans "New subscription" %}
 {% endblock %}
 
 {% block content %}
 
-<h4>Subsribe to a news source</h4>
+<h4>{% trans "Subsribe to a news source" %}</h4>
 
-<p class="help-block">Enter below the information about a new source of news.</p>
+<p class="help-block">{% trans "Enter below the information about a new source of news." %}</p>
 
 {% if form.errors %}
 <div class="alert alert-danger">
-  <p>Please check the information below.</p>
+  <p>{% trans "Please check the information below." %}</p>
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
@@ -31,11 +31,12 @@ New subscription
   {% endfor %}
   <div class="form-group">
     <span class="col-sm-offset-2">
-      <input type="submit" value="Subscribe to this source" class="btn btn-default" />
+      <input type="submit" value="{% trans "Subscribe to this source" %}" class="btn btn-default" />
       <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
     </span>
   </div>
 </form>
 
-<p class="help-block">If you want to subscribe to a source using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{% url wom_user.views.user_river_sources visitor_name %}">the sources URL</a>: <code>{{ REST_PARAMS }}</code></p>
+{% url wom_user.views.user_river_sources visitor_name as river_url %}
+<p class="help-block">{% blocktrans %}If you want to subscribe to a source using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{{ river_url }}">the sources URL</a>:{% endblocktrans %} <code>{{ REST_PARAMS }}</code></p>
 {% endblock %}

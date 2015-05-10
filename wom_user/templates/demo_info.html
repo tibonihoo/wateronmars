@@ -1,11 +1,12 @@
+{% load i18n %}
 {% if is_in_demo %}
 <div class="alert alert-warning">
-  <p><strong>It's just a demo !</strong>
-  <p>You can log in and try it with the username '{{demo_u_name}}' and the password '{{demo_u_password}}'.</p>  
-  <p class="help-block"><small>WaterOnMars is currently running in
-      demo mode, to use it for real feel free
-      to <a href="https://github.com/tibonihoo/wateronmars"> fork it on
-        github</a> and install your own!</small>
+  <p><strong>{% trans "It's just a demo !" %}</strong>
+  <p>{% blocktrans %}You can log in and try it with the username '{{demo_u_name}}' and the password '{{demo_u_password}}'.{% endblocktrans %}</p>  
+  <p class="help-block"><small>{% blocktrans %}WaterOnMars is
+      currently running in demo mode, to use it for real feel free
+      to <a href="https://github.com/tibonihoo/wateronmars"> fork it
+      on github</a> and install your own!{% endblocktrans %}</small>
   </p>
 </div>
 {% endif %}

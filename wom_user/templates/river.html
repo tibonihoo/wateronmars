@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 
 {% block title %}
-{{ title_qualify }} River
+{% trans "River" %}
 {% endblock %}
 
 
@@ -30,7 +30,13 @@ jQuery.ias({
 {% endblock %}
 
 {% block content %}
-<h4><i class="glyphicon glyphicon-align-left"></i>{{ title_qualify }} river</h4>
+<h4><i class="glyphicon glyphicon-align-left"></i>
+  {% if visitor_name == owner_name  %}
+  {% trans "Your river" %}
+  {% else %}
+  {% blocktrans %}{{ owner_name}}'s river{% endblocktrans %}
+  {% endif %}
+</h4>
 <div id="news_list">
 {% regroup news_items by main_source.title as source_groups %}
 {% for source_refs in source_groups %}
@@ -47,9 +53,9 @@ jQuery.ias({
 {% empty %}
 <div class="alert alert-success alert-dismissable fade in">
   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-  <h4>No news so far, strange isn't it ?</h4>
+  <h4>{% trans "No news so far, strange isn't it ?" %}</h4>
 {% if visitor_name and owner_name == visitor_name and source_add_bookmarklet %}
-  <p>You can subscribe to news sources with the following bookmarklet: <a class="alert-link" href="{{ source_add_bookmarklet }}">Subscribe !</a></p>.
+  <p>{% trans "You can subscribe to news sources with the following bookmarklet:" %} <a class="alert-link" href="{{ source_add_bookmarklet }}">{% trans "Subscribe !" %}</a></p>.
 {% endif %}
 </div>
 {% endfor %}
@@ -63,12 +69,12 @@ jQuery.ias({
     {% else %}
     class = "previous disabled" > <a>
     {% endif %}
-    Previous
+    {% trans "Previous" %}
     </a>
   </li>
   
   <li class="disabled">
-    <a> Page {{ news_items.number }} of {{ news_items.paginator.num_pages }}.</a>
+    <a>{% blocktrans with page_idx=news_items.number page_total=news_items.paginator.num_pages %}Page {{ page_idx }} of {{ page_total }}.{% endblocktrans %}</a>
   </li>
 
   <li
@@ -77,7 +83,7 @@ jQuery.ias({
     {% else %}
     class = "next disabled" > <a>
     {% endif %}
-    Next
+    {% trans "Next" %}
     </a>
   </li>
   </ul>

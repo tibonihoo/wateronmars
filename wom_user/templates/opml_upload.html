@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 
 {% block title %}
-OPML Import
+{% trans "OPML Import" %}
 {% endblock %}
 
 {% block content %}
 
-<h4>Import your subscriptions</h4>
+<h4>{% trans "Import your subscriptions" %}</h4>
 
-<p class="help-block">This page will help you import several feeds at once by uploading an <a href="http://opml.org">OPML</a> file.</p>
+<p class="help-block">{% blocktrans %}This page will help you import several feeds at once by uploading an <a href="http://opml.org">OPML</a> file.{% endblocktrans %}</p>
 
 {% if form.errors %}
 <div class="alert alert-danger">
-  <p>There was an error uploading your file. Please try again.</p>
+  <p>{% trans "There was an error uploading your file. Please try again." %}</p>
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
@@ -26,10 +26,10 @@ OPML Import
   {% endif %}  
     {{ form.opml_file.label_tag }}
     {{ form.opml_file }} {{ form.opml_file.errors|safe }}
-  <p class="help-block">Select the OPML file to upload</p>
+  <p class="help-block">{% trans "Select the OPML file to upload" %}</p>
   </div>
   <div class="form-group">
-    <input type="submit" value="Import these subscriptions" class="btn btn-default" />
+    <input type="submit" value="{% trans "Import these subscriptions" %}" class="btn btn-default" />
     <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
   </div>
 </form>

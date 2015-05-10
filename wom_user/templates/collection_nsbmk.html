@@ -1,10 +1,11 @@
+{% load i18n %}
 <!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
 <!-- This is an automatically generated file.
 It will be read and overwritten.
 Do Not Edit! -->
-<TITLE>Bookmarks</TITLE>
-<H1>WaterOnMars pebbles collected by {{owner_name}}</H1>
+<TITLE>{% trans "Bookmarks" %}</TITLE>
+<H1>{% blocktrans %}WaterOnMars pebbles collected by {{owner_name}}{% endblocktrans %}</H1>
 <DL><p>
 {% for bookmark in user_bookmarks %}
 <DT><A HREF="{{bookmark.reference.url}}" PRIVATE="{{ bookmark.is_public|yesno:'0,1' }}" TAGS="{% for tag in bookmark.get_tag_names %}{{tag}}{% if not forloop.last %},{%endif%}{%endfor%}" ADD_DATE="{{ bookmark.saved_date|date:'U' }}">{{ bookmark.reference.title }}</A>

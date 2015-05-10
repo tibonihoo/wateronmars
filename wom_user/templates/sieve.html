@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 {% load html_sanitizers %}
 
 {% block title %}
@@ -18,12 +18,12 @@ prepareKeyBindings();
 </script>
 {% endblock %}
 {% block head_notification %}{# Error messages #}
-<li><a id="wom-sieve-news-loading" data-content="Fresh news are being downloaded from server." title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="News refresh !"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
+<li><a id="wom-sieve-news-loading" data-content="{% trans "Fresh news are being downloaded from server." %}" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="{% trans "News refresh !" %}"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
 {% if demo %}
-<li><a id="wom-sieve-demo-warning" data-content="For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." title="Partial demo: no change allowed" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
+<li><a id="wom-sieve-demo-warning" data-content="{% trans "For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "Partial demo: no change allowed !" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
 {% else %}
-<li><a id="wom-server-sync-problem" data-content="A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" title="Server synchronization problem" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
-<li><a id="wom-server-save-failed" data-content="A problem occured while saving a bookmark, please retry bookmarking !" title="Bookmarking failed" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li><a id="wom-server-sync-problem" data-content="{% trans "A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" %}" title="{% trans "Server synchronization problem" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li><a id="wom-server-save-failed" data-content="{% trans "A problem occured while saving a bookmark, please retry bookmarking !" %}" title="{% trans "Bookmarking failed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 {% endif %}
 {% endblock %}
 
@@ -32,8 +32,8 @@ prepareKeyBindings();
 {# List the references #}
 <div class="col-md-2" id="wom-title-list">
   <div id="wom-title-list-header">
-    <span id="wom-title-list-header-name">Headlines</span>
-    <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">Hide title list</span></a>
+    <span id="wom-title-list-header-name">{% trans "Headlines" %}</span>
+    <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">{% trans "Hide title list" %}</span></a>
   </div>
   <ul class="list-unstyled">
 {% for rust in oldest_unread_references %}
@@ -51,7 +51,7 @@ prepareKeyBindings();
   <div class="wom-reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="wom-ref{{forloop.counter0}}">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <small><a class="wom-title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="Switch headlines display">H</a><a id="wom-ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a class="wom-title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="{% trans "Switch headlines display" %}">H</a><a id="wom-ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
     <div id="wom-ref{{forloop.counter0}}-content" class="wom-reference-content panel-body carousel-fig" role="article">
@@ -60,30 +60,30 @@ prepareKeyBindings();
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 
-      <a class="wom-save" href="javascript:saveCurrentItem()" title="(b) Save it as a bookmark.">
-        <i class="glyphicon glyphicon-hand-up"></i>Bookmark</a>
-      <i title="Bookmarked !" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
-      <a id="wom-ref{{forloop.counter0}}-url" title="(v) View on site: {{ rust.reference.title }}" href="{{ rust.reference.url }}">
-        <i class="glyphicon glyphicon-globe"></i>visit (v)</a>
+      <a class="wom-save" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
+        <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</a>
+      <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
+      <a id="wom-ref{{forloop.counter0}}-url" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url }}">
+        <i class="glyphicon glyphicon-globe"></i>{% trans "visit" %}</a>
     </div>
     {% endspaceless %}
   </div>
 {% empty %}
   <div class="alert alert-info alert-dismissable fade in">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-    <h4>No news is good news ?</h4> 
-    <p>No new items were found since your last visit !</p> 
+    <h4>{% trans "No news is good news ?" %}</h4> 
+    <p>{% trans "No new items were found since your last visit !" %}</p> 
     {% if source_add_bookmarklet %}
-    <p>You can subscribe to news sources with the following bookmarklet: <a class="alert-link" href="{{ source_add_bookmarklet }}">Subscribe !</a></p>
+    <p>{% trans "You can subscribe to news sources with the following bookmarklet:" %} <a class="alert-link" href="{{ source_add_bookmarklet }}">{% trans "Subscribe !" %}</a></p>
     {% endif %}
-    <p><a class="alert-link" href="{% url wom_user.views.user_river_view visitor_name %}">Old news are still visible in  your river</a></p> 
+    <p><a class="alert-link" href="{% url wom_user.views.user_river_view visitor_name %}">{% trans "Old news are still visible in your river." %}</a></p> 
   </div>
 {% endfor %}
 </div>
-<a class="left carousel-control" title="Previous article (p)" href="#wom-sieve-frame">
+<a class="left carousel-control" title="{% trans "Previous article" %} (p)" href="#wom-sieve-frame">
   <span class="glyphicon glyphicon-chevron-left"></span>
 </a>
-<a class="right carousel-control" title="Next article (n)" href="#wom-sieve-frame">
+<a class="right carousel-control" title="{% trans "Next article" %} (n)" href="#wom-sieve-frame">
   <span class="glyphicon glyphicon-chevron-right"></span>
 </a>
 </div>
@@ -93,12 +93,12 @@ prepareKeyBindings();
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 cloass="modal-title" id="wom-sieve-reload-message-title">No more news in sieve !</h3>
+        <h3 cloass="modal-title" id="wom-sieve-reload-message-title">{% trans "No more news in sieve !" %}</h3>
       </div>
       <div class="modal-body">
-        <p>You've emptied the sieve, press the button below to reload with more news (if any).</p>
-        <p><button id="wom-sieve-reload" class="btn btn-lg btn-primary" type="button">Reload the sieve.</button></p>
-        <p><small>Press 'r' to reload the sieve at any time.</small></p>
+        <p>{% trans "You've emptied the sieve, press the button below to reload with more news (if any)." %}</p>
+        <p><button id="wom-sieve-reload" class="btn btn-lg btn-primary" type="button">{% trans "Reload the sieve." %}</button></p>
+        <p><small>{% trans "Press 'r' to reload the sieve at any time." %}</small></p>
       </div>
     </div>
   </div>
