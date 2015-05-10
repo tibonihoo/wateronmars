@@ -138,14 +138,12 @@ def add_base_template_context_data(d,visitor_name, owner_name):
     tq = "Your"
   else:
     tq = "%s's" % owner_name
-  messages = []
   d.update({
     'visitor_name' : visitor_name,
     'owner_name' : owner_name,
     'title_qualify': tq,
     'demo': settings.DEMO,
     'auto_update': settings.USE_CELERY,
-    'messages': messages,
   })
   return d
 
