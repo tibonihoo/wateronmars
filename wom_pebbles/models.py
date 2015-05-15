@@ -50,7 +50,7 @@ class Reference(models.Model): # A pebble !
   # WARNING: this is for a description provided by the author of the
   # reference, visible to everybody. User-specific description should
   # better be stored in another "model".
-  description = models.TextField(default="")
+  description = models.TextField(default="", blank=True)
   # Tells when the reference was first published, as a timezone-aware
   # datetime object.
   pub_date = models.DateTimeField('date published')

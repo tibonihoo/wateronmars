@@ -63,7 +63,7 @@ class UserBookmark(models.Model):
   # Flag telling if the User accepts the bookmark to be public
   is_public = models.BooleanField(default=False)
   # User-specific note about the reference
-  comment = models.TextField(default="")
+  comment = models.TextField(default="", blank=True)
   
   def __unicode__(self):
     return "%s%s>%s" % (self.owner,"" if self.is_public else "<private",
