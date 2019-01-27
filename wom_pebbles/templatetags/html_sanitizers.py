@@ -29,7 +29,7 @@ def defang_html(text, autoescape=None):
   """
   Remove tags mentionned in the space separated list 'tags' given as input.
   """
-  soup = BeautifulSoup(auto_esc(text,autoescape))
+  soup = BeautifulSoup(auto_esc(text,autoescape), "html.parser")
   for tag in soup.find_all("script"):
     tag.replace_with('')
   html = unicode(soup)
