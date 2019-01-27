@@ -28,6 +28,7 @@ from wom_river.models import WebFeed
 
 from wom_classification.models import get_item_tag_names
 
+from wom_tributary.models import GeneratedFeed
 
 class UserProfile(models.Model):
   """
@@ -41,6 +42,8 @@ class UserProfile(models.Model):
   sources = models.ManyToManyField(Reference,related_name="userprofile")
   # Public sources of a user bookmarks and web_feeds
   public_sources = models.ManyToManyField(Reference,related_name="publicly_related_userprofile")
+  # Feeds providing anything else than the plain content of "simple" web feed
+  generated_feeds = models.ManyToManyField(GeneratedFeed,related_name="userprofile")
   
   def __unicode__(self):
     return "%s>Profile" % self.owner

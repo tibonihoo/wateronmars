@@ -61,6 +61,7 @@ from wom_user.forms import NSBookmarkFileUploadForm
 from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
+from wom_user.forms import UserTwitterSourceAdditionForm
 from wom_user.forms import ReferenceEditForm
 from wom_user.forms import UserBookmarkEditForm
 from wom_user.forms import WebFeedOptInOutForm
@@ -385,6 +386,49 @@ def user_river_source_add(request,owner_name):
                             context_instance=RequestContext(request))
 
 
+@loggedin_and_owner_required
+@require_http_methods(["GET"])
+def user_tributary(request, owner_name):
+  # FUTURE: if there is more than twitter plugged in, display a list of possible tributaries
+  return HttpResponseRedirect(reverse('wom_user.views.user_twitter_source_add', args=(request.user.username,)))
+
+@loggedin_and_owner_required
+@require_http_methods(["GET"])
+def user_tributary_twitter(request, owner_name):
+  # TODO: make this the landing page of oauth and a place to check that we can correctly get the timelines
+  return HttpResponseRedirect(reverse('wom_user.views.user_twitter_source_add', args=(request.user.username,)))
+
+    
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET","POST"])
+def user_tributary_twitter_add(request,owner_name):
+  """Handle bookmarlet and form-based addition of a twitter feed as a source.
+  The bookmarlet is formatted in the following way:
+  .../add?{0}
+  """.format('="..."&'.join(UserTwitterSourceAdditionForm.base_fields.keys()))
+  if settings.DEMO:
+    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
+  if request.method == 'POST':
+    src_info = request.POST
+  elif request.GET: # GET
+    src_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+  else:
+    src_info = None
+  form = UserTwitterSourceAdditionForm(
+    request.user, src_info,
+    error_class=CustomErrorList)
+  if src_info and form.is_valid():
+    form.save()
+    # TODO: Consider redirecting to twitter auth here !
+    return HttpResponseRedirect(reverse('wom_user.views.user_river_sources', args=(request.user.username,)))
+  d = add_base_template_context_data(
+    {'form': form,
+     'REST_PARAMS': ','.join(UserTwitterSourceAdditionForm.base_fields.keys())},
+    request.user.username,request.user.username)
+  return render_to_response('twitter_source_addition.html',d,
+                            context_instance=RequestContext(request))
+
 def prepare_reference_form(request, reference_url, reference_query_set):
   """Return a tuple: (reference, form) with the form showing all
   editable fields of a reference identified by its url.
@@ -439,6 +483,7 @@ def user_river_source_item(request, owner_name, source_url):
     feedForms[feed.xmlURL] = WebFeedOptInOutForm(request.owner_user,feed,
                                                  *form_data, error_class = CustomErrorList,
                                                  prefix=currentPrefix, initial=initial)
+  # TODO: add forms of generated_feeds if any
   def optOutFormsAreValid():
     return reduce(lambda currentValidity, nextForm: currentValidity and nextForm.is_valid(), feedForms.values(), True)
   def optOutFormsSave():
@@ -767,3 +812,4 @@ def user_river_sources(request,owner_name):
     return user_river_source_add(request, owner_name)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
+

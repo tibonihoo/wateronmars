@@ -1,6 +1,6 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 #
-# Copyright 2013 Thibauld Nion
+# Copyright 2013-2019 Thibauld Nion
 #
 # This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
 #
@@ -76,12 +76,12 @@ else:
 
 
 # Set to True to activate the DEMO mode
-DEMO = True
+DEMO = False
 DEMO_USER_NAME = "demo"
 DEMO_USER_PASSWD = "redh2o"
 
 # DEBUG or not DEBUG
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 
@@ -116,7 +116,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -220,6 +220,7 @@ INSTALLED_APPS = (
     'wom_river',
     'wom_classification',
     'wom_user',
+    'wom_tributary'
     )
 
 

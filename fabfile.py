@@ -6,7 +6,7 @@ from fabric.api import local
 from fabric.api import run, cd
 from fabric.api import env
 
-DJANGO_APPS = ["wom_classification", "wom_pebbles", "wom_river", "wom_user"]
+DJANGO_APPS = ["wom_classification", "wom_pebbles", "wom_river", "wom_user", "wom_tributary"]
 
 """This fabfile.py will work with an additional configuration file
 where the info about deployment hosts setup is described.

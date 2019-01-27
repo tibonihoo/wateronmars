@@ -311,3 +311,75 @@ class WebFeedOptInOutForm(forms.Form):
     else:
       self.user.userprofile.web_feeds.remove(self.feed)
     
+
+from wom_tributary.models import TwitterTimeline
+from wom_tributary.models import GeneratedFeed
+
+class UserTwitterSourceAdditionForm(forms.Form):
+  """Collect all necessary data to subscribe to a new twitter source."""
+
+  title = forms.CharField(
+    max_length=GeneratedFeed.TITLE_MAX_LENGTH,
+    required=True,
+    widget=forms.TextInput(attrs={"class":"form-control"}))
+  
+  kind = forms.ChoiceField(
+    choices=TwitterTimeline.KIND_CHOICES,
+    required=True,
+    widget=forms.Select(attrs={"class":"form-control"}))
+  
+  username = forms.CharField(
+    max_length=TwitterTimeline.USERNAME_MAX_LENGTH,
+    required=True,
+    widget=forms.TextInput(attrs={"class":"form-control"}))
+  
+  def __init__(self, user, *args, **kwargs):
+    forms.Form.__init__(self,*args,**kwargs)
+    self.user = user
+
+  # TODO: maybe 'clean()' could actually be where we test the connection and token ?
+   
+  def save(self):
+    """Warning: the source will be saved as well as the related objects
+    (no commit options).
+    Returns the source.
+    """
+    form_kind = self.cleaned_data['kind']
+    form_title = self.cleaned_data['title']
+    form_username = self.cleaned_data['username']
+    source_url = TwitterTimeline.SOURCE_URL
+    source_name = "Twitter"
+    source_pub_date = datetime.now(timezone.utc)
+    provider = GeneratedFeed.TWITTER
+    
+    # try a bigger look-up anyway
+    same_twitter = TwitterTimeline.objects.filter(
+      kind=form_kind,
+      username=form_username).all()
+    # url are unique for sources
+    if same_twitter:
+      return same_twitter[0].generated_feed.source    
+    any_twitter_sources = Reference.objects.filter(
+      url = source_url,
+      ).all()
+    if any_twitter_sources:
+      twitter_source = any_twitter_sources[0]
+    else:
+      twitter_source = Reference(url=source_url, title=source_name, pub_date=source_pub_date)
+      twitter_source.save()
+    new_feed = GeneratedFeed(provider=provider, source=twitter_source, title=form_title)
+    new_feed.last_update_check = (
+      datetime
+      .utcfromtimestamp(0)
+      .replace(tzinfo=timezone.utc)
+      )
+    new_feed.save()
+    new_twitter = TwitterTimeline(
+      kind=form_kind,
+      username=form_username,
+      generated_feed=new_feed)
+    new_twitter.save()
+    if twitter_source not in self.user.userprofile.sources.all():
+      self.user.userprofile.sources.add(twitter_source)
+    self.user.userprofile.generated_feeds.add(new_feed)
+    return twitter_source

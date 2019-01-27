@@ -53,8 +53,13 @@ jQuery.ias({
   {% endif %}
 {% endif %}
 
+    
 {% if other_sources %}
-  <li><h5>{% trans "Bookmark sources" %}</h5>
+<li><h5>{% trans "Sources of bookmarks and 'generated' feeds" %}
+      {% if visitor_name == owner_name  %}
+    <a href="{% url wom_user.views.user_tributary_twitter_add visitor_name %}" title="{% trans "Create a new generated feed." %}" class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a>
+    {% endif  %}
+</h5>
   <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
    {% if source.url != "#internal-bookmark-import" %}
@@ -68,7 +73,7 @@ jQuery.ias({
   </li>
 </ul>
 {% else %}
-  {% if tagged_web_feeds %}
+  {% if tagged_web_feeds or generated_sources %}
   <div class="alert alert-info alert-dismissable fade in" style="margin-top:1em;">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <p>{% trans "No source apart from the feed subscriptions." %}</p>
