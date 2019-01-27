@@ -1,4 +1,4 @@
 -r requirements.txt
-fabric
+fabric>=1.0,<2.0
 coverage
 python-coveralls
