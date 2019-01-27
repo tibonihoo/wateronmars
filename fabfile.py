@@ -36,6 +36,7 @@ USER_CONF.read("./fabhosts.cfg")
 env.hosts = USER_CONF.sections()
 
 def serve():
+    local("python manage.py migrate")
     local("python manage.py collectstatic")
     local("python manage.py runserver")
 
@@ -52,6 +53,7 @@ def deploy():
         venv_dir = user_host_conf("virtual_env_dir")
         run("git pull origin master")
         run("source {0}/bin/activate && pip install -r requirements.txt".format(venv_dir))
+        run("source {0}/bin/activate && python manage.py migrate".format(venv_dir))
         run("source {0}/bin/activate && python manage.py collectstatic".format(venv_dir))
         try:
             run(user_host_conf("final_deploy_action"))
@@ -65,15 +67,24 @@ def fab8():
 def cov_report():
     local('coverage report --omit "/tmp/*,_*,*/venv/*,*/migrations/*"')
 
+def reset_schema(app_name):
+    migration_dir = os.path.join("./",app_name,"migrations")
+    if os.path.isdir(migration_dir):
+        print("Cleanup past migrations for {0}".format(app_name))
+        shutil.rmtree(migration_dir)
+    print("Initialize the migration data for {0}".format(app_name))
+    local("python manage.py schemamigration {0} --initial".format(app_name))
+    print("""Don't forget that to cancel previous migrations of the actual db (if any) with:
+  python manage.py migrate {0} zero""".format(app_name))
+
+def update_schema(app_name=None):
+    app_selection = [app_name] if app_name else DJANGO_APPS
+    for app in app_selection: 
+        local("python manage.py schemamigration {0} --auto".format(app))
+
 def db_reset():
-    print("Cleanup past migrations")
     for app_name in DJANGO_APPS:
-        migration_dir = os.path.join("./",app_name,"migrations")
-        if os.path.isdir(migration_dir):
-            shutil.rmtree(migration_dir)
-    print("Initialize the migration data")
-    for app_name in DJANGO_APPS:
-        local("python manage.py schemamigration {0} --initial".format(app_name))
+        reset_schema(app_name)
     # Just in case we're using a local sql3 db, remove it for
     # proper reset (in other cases, cleaning out the db must be
     # done before calling this script)
