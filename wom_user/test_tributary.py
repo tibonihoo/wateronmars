@@ -50,7 +50,7 @@ class UserTwitterSourceAddTest(TestCase):
     Send the request as a JSON loaded POST (a redirect is expected
     in case of success).
     """
-    resp = self.client.post(reverse("wom_user.views.user_twitter_source_add",
+    resp = self.client.post(reverse("wom_user.views.user_tributary_twitter_add",
                                       kwargs={"owner_name":username}),
                               optionsDict)
     self.assertEqual(expectedStatusCode,resp.status_code, resp.content)

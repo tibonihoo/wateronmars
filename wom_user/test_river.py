@@ -136,7 +136,6 @@ class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
     Send the request as a JSON loaded POST (a redirect is expected
     in case of success).
     """
-    print(optionsDict)
     resp = self.client.post(reverse("wom_user.views.user_river_sources",
                     kwargs={"owner_name":username}),
                 simplejson.dumps(optionsDict),
