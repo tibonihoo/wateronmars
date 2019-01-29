@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% trans "Twitter tributary" %}
+{% endblock %}
+
+
+{% block content %}
+<h4>Twitter timelines subscription summary</h4>
+{% if twitter_timelines_summary %}
+<ul class="list-unstyled">
+  {% for timeline_info in twitter_timelines_summary %}
+  <li> <i class="glyphicon glyphicon-paperclip"
+          style="padding-right:.5em;"></i>{{timeline_info.feed.title}} - {{timeline_info.num_items_last_hour}}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="alert alert-info alert-dismissable">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <h4>{% trans "Your are not subscribed to any twitter timeline !" %}</h4>
+  {% url wom_user.views.user_tributary_twitter_add owner_name as add_url %}
+  <p><a class="alert-link" href="{{ add_url }}">{% blocktrans %}Subscribe to one now!{% endblocktrans %}</a></p>
+
+</div>
+{% endif %}
+{% endblock %}

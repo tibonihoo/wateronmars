@@ -1,6 +1,6 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 #
-# Copyright 2013 Thibauld Nion
+# Copyright 2013-2019 Thibauld Nion
 #
 # This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
 #
@@ -53,6 +53,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout
 
 from wom_river.models import WebFeed
+
+from wom_tributary.models import GeneratedFeed
+
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
 
@@ -390,15 +393,38 @@ def user_river_source_add(request,owner_name):
 @require_http_methods(["GET"])
 def user_tributary(request, owner_name):
   # FUTURE: if there is more than twitter plugged in, display a list of possible tributaries
-  return HttpResponseRedirect(reverse('wom_user.views.user_twitter_source_add', args=(request.user.username,)))
+  return HttpResponseRedirect(reverse('wom_user.views.user_tributary_twitter', args=(request.user.username,)))
 
 @loggedin_and_owner_required
 @require_http_methods(["GET"])
 def user_tributary_twitter(request, owner_name):
-  # TODO: make this the landing page of oauth and a place to check that we can correctly get the timelines
-  return HttpResponseRedirect(reverse('wom_user.views.user_twitter_source_add', args=(request.user.username,)))
+  if request.user != request.owner_user:
+    return HttpResponseForbidden()
+  owner_profile = request.owner_user.userprofile
+  twitter_feeds = (GeneratedFeed.objects
+    .filter(userprofile=owner_profile, twittertimeline__isnull=False)
+    .select_related("twittertimeline")
+    .order_by('-last_update_check', 'title')
+  )
 
+  class TwitterTimelineInfo:
+    def __init__(self, feed, timeline, num_items_last_hour):
+      self.feed = feed
+      self.timeline = timeline
+      self.num_items_last_hour = num_items_last_hour
     
+  def get_twitter_timelines_info(feeds):
+    [f.twittertimeline for f in feeds.all()]
+    for idx,f in enumerate(feeds):
+      yield TwitterTimelineInfo(f, f.twittertimeline, idx*10)
+  twitter_timelines_summary = get_twitter_timelines_info(twitter_feeds.all())
+  d = add_base_template_context_data({
+    'twitter_timelines_summary': twitter_timelines_summary,
+    'twitter_consent_link': "https://mouf"
+  }, request.user.username, owner_name)
+  return render_to_response('tributary_twitter.html',d,
+                            context_instance=RequestContext(request))
+
 @loggedin_and_owner_required
 @csrf_protect
 @require_http_methods(["GET","POST"])
