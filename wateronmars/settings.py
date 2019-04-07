@@ -99,6 +99,8 @@ if DEPLOYMENT_PLATFORM == "heroku":
   # Activate Django-Heroku.
   # (following: https://devcenter.heroku.com/articles/django-app-configuration)
   django_heroku.settings(locals())
+  import dj_database_url
+  DATABASES = {'default': dj_database_url.config()}
 else:
   # use a local sqlite
   DATABASES = {
