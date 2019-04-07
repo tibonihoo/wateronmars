@@ -1,11 +1,4 @@
-Django==1.4.20 # rq.filter: >=1.4,<1.5
-South==0.7.5
-feedparser==5.1.3
-beautifulsoup4
-dj-database-url==0.2.1
-granary==1.14
-python-dateutil
-# for Heroku:
-gunicorn==0.14.6
-psycopg2==2.4.5
-wsgiref==0.1.2
+-r requirements_base.txt
+# for Heroku-like deployment:
+gunicorn==19.9.0
+psycopg2==2.8.1
