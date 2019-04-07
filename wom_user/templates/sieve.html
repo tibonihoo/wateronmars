@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load html_sanitizers %}
+{% load wom_protocol %}
 
 {% block title %}
 Sieve
@@ -19,8 +20,8 @@ prepareKeyBindings();
 {% endblock %}
 {% block head_notification %}{# Error messages #}
 <li><a id="wom-sieve-news-loading" data-content="{% trans "Fresh news are being downloaded from server." %}" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="{% trans "News refresh !" %}"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
-{% if demo %}
-<li><a id="wom-sieve-demo-warning" data-content="{% trans "For this demo some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "Partial demo: no change allowed !" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
+{% if read_only %}
+<li><a id="wom-sieve-readonly-warning" data-content="{% trans "Please note some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "READ_ONLY: no change allowed !" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
 {% else %}
 <li><a id="wom-server-sync-problem" data-content="{% trans "A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" %}" title="{% trans "Server synchronization problem" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 <li><a id="wom-server-save-failed" data-content="{% trans "A problem occured while saving a bookmark, please retry bookmarking !" %}" title="{% trans "Bookmarking failed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
@@ -51,11 +52,14 @@ prepareKeyBindings();
   <div class="wom-reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="wom-ref{{forloop.counter0}}">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <small><a class="wom-title-list-switch btn btn-default btn-xs" href="javascript:switchTitleListDisplay()" title="{% trans "Switch headlines display" %}">H</a><a id="wom-ref{{forloop.counter0}}-title">{{ rust.reference_pub_date }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        <small><a class="wom-title-list-switch btn btn-default btn-xs"
+        href="javascript:switchTitleListDisplay()" title="{% trans
+        "Switch headlines display"
+        %}">H</a><a id="wom-ref{{forloop.counter0}}-url" href="{{ rust.reference.url }}">{{ rust.reference_pub_date }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
     <div id="wom-ref{{forloop.counter0}}-content" class="wom-reference-content panel-body carousel-fig" role="article">
-      <h1>{{ rust.reference.title }}</h1>
+      <h1 id="wom-ref{{forloop.counter0}}-title">{{ rust.reference.title }}</h1>
       {{ rust.reference.description|safe|defang_html }}
     </div>
     {% spaceless %}
@@ -63,7 +67,7 @@ prepareKeyBindings();
       <a class="wom-save" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
         <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</a>
       <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
-      <a id="wom-ref{{forloop.counter0}}-url" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url }}">
+      <a title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
         <i class="glyphicon glyphicon-globe"></i>{% trans "visit" %}</a>
     </div>
     {% endspaceless %}
