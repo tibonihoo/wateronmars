@@ -61,6 +61,8 @@ from wom_user.models import ReferenceUserStatus
 from wom_classification.models import TAG_NAME_MAX_LENGTH
 from wom_classification.models import set_item_tag_names
 
+from wom_tributary.tasks import collect_news_from_tweeter_feeds
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -72,6 +74,9 @@ logger = logging.getLogger(__name__)
 def collect_all_new_references_regularly():
   collect_news_from_feeds()
 
+@periodic_task(run_every=crontab(hour="*/1", day_of_week="*"))
+def collect_all_new_twitter_references_regularly():
+  collect_news_from_tweeter_feeds(1)
 
 @periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
 def delete_old_references_regularly():
@@ -214,6 +219,20 @@ def check_user_unread_feed_items(user):
   processed_references = set()
   discarded_ref_count = 0
   for feed in user.userprofile.web_feeds.select_related("source").all():
+    # filter out rust that have the same reference
+    feed_references = set(feed.source.productions.exclude(referenceuserstatus__owner=user).all())
+    new_references = feed_references-processed_references
+    new_ref_status += generate_reference_user_status(user,new_references)
+    discarded_ref_count += len(feed_references)-len(new_references)
+    processed_references.update(feed_references)
+    # At least for some time, let's control the effect of the filtering
+    if discarded_ref_count:
+      logger.debug("Discarded {0} duplicate feed items from news feed {1}."\
+                   .format(discarded_ref_count,feed.xmlURL))
+  with transaction.commit_on_success():
+    for r in new_ref_status:
+      r.save()
+  for feed in user.userprofile.generated_feeds.select_related("source").all():
     # filter out rust that have the same reference
     feed_references = set(feed.source.productions.exclude(referenceuserstatus__owner=user).all())
     new_references = feed_references-processed_references
