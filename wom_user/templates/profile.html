@@ -15,8 +15,8 @@
 {% endblock %}
 
 {% block head_notification %}{# Error messages #}
-{% if demo %}
-<li><a id="wom-sieve-demo-warning" data-content="{% trans "For this demo some features are disabled, like adding or removing bookmarks and feeds or dropping the sieve content." %}" title="{% trans "Partial demo: no change allowed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
+{% if read_only %}
+<li><a id="wom-sieve-readonly-warning" data-content="{% trans "Please note that some features are disabled, like adding or removing bookmarks and feeds or dropping the sieve content." %}" title="{% trans "READ_ONLY: no change allowed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
 {% else %}
 <li><a id="wom-drop-sieve-content-failed" data-content="{% trans "The content of sieve couldn't be dropped, which may be due to a server communication problem." %}" title="{% trans "Failed to drop sieve content." %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 {% endif %}
@@ -62,7 +62,7 @@
   {% url wom_user.views.user_river_source_add visitor_name as source_add_url %}
   {% url wom_user.views.user_upload_opml visitor_name as upload_opml_url %}
   {% url wom_user.views.user_river_sources owner_name as sources_url %}
-  <dt><a href="{{ source_url }}">
+  <dt><a href="{{ sources_url }}">
       <abbr title="{% trans "Subscriptions and sites referenced by bookmarks." %}">{% trans "Sources" %}</abbr>
       &nbsp;<i class="glyphicon glyphicon-book"></i></a></dt>
   <dd>
@@ -100,5 +100,5 @@
 {% endblock %}
 
 {% block extrascript %}
-<script type="text/javascript">showWarning("wom-sieve-demo-warning");</script>
+<script type="text/javascript">showWarning("wom-sieve-readonly-warning");</script>
 {% endblock %}

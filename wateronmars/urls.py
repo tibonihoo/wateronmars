@@ -63,7 +63,7 @@ if not settings.USE_CELERY:
                            'wom_user.views.request_for_cleanup'),
                         )
 
-if not settings.DEMO:
+if not settings.READ_ONLY:
   urlpatterns += patterns('',
                           url(r'^accounts/new/$',
                               'wom_user.views.user_creation'),

@@ -10,3 +10,9 @@
   </p>
 </div>
 {% endif %}
+{% if is_read_only %}
+  <p class="help-block"><small>{% blocktrans %}WaterOnMars is
+      currently running in READ ONLY mode, no change will be allowed
+      nor saved anyway.</small>
+  </p>
+{% endif %}

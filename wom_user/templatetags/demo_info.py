@@ -15,6 +15,7 @@ def demo_info():
   """
   return {
     'is_in_demo': settings.DEMO,
+    'is_read_only': settings.READ_ONLY,
     'demo_u_name': settings.DEMO_USER_NAME,
     'demo_u_password': settings.DEMO_USER_PASSWD,
   }

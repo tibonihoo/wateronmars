@@ -134,13 +134,13 @@ def add_base_template_context_data(d,visitor_name, owner_name):
   'd': the dictionary of custom data for the context.
   'visitor_name': the username of the visitor ("None" if anonymous).
   'owner_name': the username of the owner.
-  'demo': flag indicating whether the demo mode is activated
+  'read_only': flag indicating whether the read_only mode is activated
   'auto_update': flag indicating whether updating news is automatic or not.
   """
   d.update({
     'visitor_name' : visitor_name,
     'owner_name' : owner_name,
-    'demo': settings.DEMO,
+    'read_only': settings.READ_ONLY,
     'auto_update': settings.USE_CELERY,
   })
   return d
@@ -307,8 +307,8 @@ def handle_uploaded_opml(opmlUploadedFile,user):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_upload_opml(request,owner_name):
-  if settings.DEMO:
-    return HttpResponseForbidden("Uploading sources from OPML is disabled in DEMO mode.")
+  if settings.read_only:
+    return HttpResponseForbidden("Uploading sources from OPML is disabled in READ_ONLY mode.")
   if request.method == 'POST':
     form = OPMLFileUploadForm(request.POST, request.FILES,
                               error_class=CustomErrorList)
@@ -341,8 +341,8 @@ def handle_uploaded_nsbmk(nsbmkUploadedFile,user):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_upload_nsbmk(request,owner_name):
-  if settings.DEMO:
-    return HttpResponseForbidden("Uploading bookmarks from NS bookmark list is disabled in DEMO mode.")
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Uploading bookmarks from NS bookmark list is disabled in READ_ONLY mode.")
   if request.method == 'POST':
     form = NSBookmarkFileUploadForm(request.POST, request.FILES,
                                     error_class=CustomErrorList)
@@ -367,8 +367,8 @@ def user_river_source_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../source/add/?{0}
   """.format('="..."&'.join(UserSourceAdditionForm.base_fields.keys()))
-  if settings.DEMO:
-    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Source addition is not possible in READ_ONLY mode.")
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
@@ -433,8 +433,8 @@ def user_tributary_twitter_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../add?{0}
   """.format('="..."&'.join(UserTwitterSourceAdditionForm.base_fields.keys()))
-  if settings.DEMO:
-    return HttpResponseForbidden("Source addition is not possible in DEMO mode.")
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Source addition is not possible in READ_ONLY mode.")
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
@@ -515,8 +515,8 @@ def user_river_source_item(request, owner_name, source_url):
   def optOutFormsSave():
     return [f.save() for f in feedForms.values()]
   if request.POST:
-    if settings.DEMO:
-      return HttpResponseForbidden("Source editting is not possible in DEMO mode.")
+    if settings.READ_ONLY:
+      return HttpResponseForbidden("Source editting is not possible in READ_ONLY mode.")
     if form.is_valid() and optOutFormsAreValid():
       form.save()
       optOutFormsSave()
@@ -541,8 +541,8 @@ def user_collection_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../collection/add/?{0}
   """.format('="..."&'.join(UserBookmarkAdditionForm.base_fields.keys()))
-  if settings.DEMO:
-    return HttpResponseForbidden("Bookmark addition is not possible in DEMO mode.")
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Bookmark addition is not possible in READ_ONLY mode.")
   if request.method == 'POST':
     bmk_info = request.POST
   elif request.GET: # GET
@@ -574,8 +574,8 @@ def post_to_user_collection(request,owner_name):
       "source_title": "the name", // optional
     }
   """
-  if settings.DEMO:
-    return HttpResponseForbidden("Bookmark addition is not possible in DEMO mode.")
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Bookmark addition is not possible in READ_ONLY mode.")
   try:
     bmk_info = simplejson.loads(request.body)
   except Exception:
@@ -665,8 +665,8 @@ def user_collection_item(request, owner_name, reference_url):
                                   error_class = CustomErrorList,
                                   prefix = "bmk")
   if request.POST:
-    if settings.DEMO:
-      return HttpResponseForbidden("Reference editting is not possible in DEMO mode.")
+    if settings.READ_ONLY:
+      return HttpResponseForbidden("Reference editting is not possible in READ_ONLY mode.")
     if form.is_valid() and bmk_form.is_valid():
       form.save()
       bmk_form.save()
@@ -747,8 +747,8 @@ def apply_to_user_sieve(request,owner_name):
   
     { "action" = "drop" }
   """
-  if settings.DEMO:
-    return HttpResponseForbidden("Changing the sieve's state is not possible in DEMO mode.")
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Changing the sieve's state is not possible in READ_ONLY mode.")
   try:
     action_dict = simplejson.loads(request.body)
   except:

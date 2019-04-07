@@ -79,6 +79,14 @@ else:
 DEMO = True
 DEMO_USER_NAME = "demo"
 DEMO_USER_PASSWD = "redh2o"
+# DEMO mode is safest if READ ONLY (typically the DEMO user credentials may be
+# displayed publicly for convenience, and you don't want a random visiter
+# filling up you db with radom feeds).
+#
+# You may still allow a DEMO run with READ_ONLY=True if you want to demo/test
+# edition features of course, on a local or protected network (but releasing
+# DEMO=True and READ_ONLY=False to the open web is almost surely a bad idea)
+READ_ONLY = True
 
 # DEBUG or not DEBUG
 DEBUG = False
