@@ -74,6 +74,7 @@ try:
   DEPLOYMENT_PLATFORM = "heroku"
 except:
   DEPLOYMENT_PLATFORM = os.environ.get("DEPLOYMENT_PLATFORM","")
+print("Setting DEPLOYMENT_PLATFORM to {}".format(DEPLOYMENT_PLATFORM))
 
 
 # Set to True to activate the DEMO mode
