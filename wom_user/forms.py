@@ -362,29 +362,32 @@ class UserTwitterSourceAdditionForm(forms.Form):
     any_twitter_sources = Reference.objects.filter(
       url = source_url,
       ).all()
-    if any_twitter_sources:
-      twitter_source = any_twitter_sources[0]
-    else:
-      twitter_source = Reference(
-        url=source_url, title=source_name,
-        pub_date=source_pub_date)
-      twitter_source.save()
-    new_feed = GeneratedFeed(
-      provider=provider,
-      source=twitter_source, title=form_title)
-    new_feed.last_update_check = (
-      datetime
-      .utcfromtimestamp(0)
-      .replace(tzinfo=timezone.utc)
-      )
-    new_feed.save()
-    new_twitter = TwitterTimeline(
-      username=form_username,
-      generated_feed=new_feed,
-      twitter_user_access_info = same_twitter_info)
-    new_twitter.save()
-    if twitter_source not in self.user.userprofile.sources.all():
-      self.user.userprofile.sources.add(twitter_source)
-    self.user.userprofile.generated_feeds.add(new_feed)
-    self.user.userprofile.save()
+    with transaction.commit_on_success():
+      if any_twitter_sources:
+        twitter_source = any_twitter_sources[0]
+      else:
+        twitter_source = Reference(
+          url=source_url, title=source_name,
+          pub_date=source_pub_date)
+        twitter_source.save()
+    with transaction.commit_on_success():
+      new_feed = GeneratedFeed(
+        provider=provider,
+        source=twitter_source, title=form_title)
+      new_feed.last_update_check = (
+        datetime
+        .utcfromtimestamp(0)
+        .replace(tzinfo=timezone.utc)
+        )
+      new_feed.save()
+    with transaction.commit_on_success():
+      new_twitter = TwitterTimeline(
+        username=form_username,
+        generated_feed=new_feed,
+        twitter_user_access_info = same_twitter_info)
+      new_twitter.save()
+      if twitter_source not in self.user.userprofile.sources.all():
+        self.user.userprofile.sources.add(twitter_source)
+      self.user.userprofile.generated_feeds.add(new_feed)
+      self.user.userprofile.save()
     return twitter_source
