@@ -2,18 +2,18 @@
 #
 # Copyright 2013 Thibauld Nion
 #
-# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
+# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars)
 #
 # WaterOnMars is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # WaterOnMars is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -49,17 +49,17 @@ feedfinder.setUserAgent(settings.USER_AGENT)
 class OPMLFileUploadForm(forms.Form):
   """From used to upload an OPML file."""
   opml_file  = forms.FileField("OPML file")
-  
+
 class NSBookmarkFileUploadForm(forms.Form):
   """From used to upload an Netscape-style bookmarks file."""
   bookmarks_file  = forms.FileField("Bookmarks file")
 
-  
+
 class UserProfileCreationForm(UserCreationForm):
   """Customized form to require an email and create a profile at the same time as creating a user."""
 
   email = forms.EmailField(required=True)
-  
+
   def save(self, commit=True):
     """
     Warning: the User instance will be saved whether commit is True or False.
@@ -76,7 +76,7 @@ class UserProfileCreationForm(UserCreationForm):
 
 class UserBookmarkAdditionForm(forms.Form):
   """Collect all necessary data to add a new bookmark to a user's collection."""
-  
+
   url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
                         widget=forms.TextInput(attrs={"class":"form-control"}))
   title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH, required=False,
@@ -92,11 +92,11 @@ class UserBookmarkAdditionForm(forms.Form):
   source_url = forms.CharField(max_length=URL_MAX_LENGTH,required=False,
                                widget=forms.TextInput(
                                  attrs={"class":"form-control"}))
-  
+
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
     self.user = user
-  
+
   def save(self):
     """Warning: the bookmark will be saved as well as the related objects
     (no commit options).
@@ -182,7 +182,7 @@ class UserSourceAdditionForm(forms.Form):
   feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
                              widget=forms.TextInput(
                                attrs={"class":"form-control"}))
-  
+
   def __init__(self,user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
     self.user = user
@@ -238,7 +238,7 @@ class UserSourceAdditionForm(forms.Form):
     cleaned_data["feed_url"] = best_guess_url
     return cleaned_data
 
-  
+
   def save(self):
     """Warning: the source will be saved as well as the related objects
     (no commit options).
@@ -281,7 +281,7 @@ class UserSourceAdditionForm(forms.Form):
 
 class ReferenceEditForm(ModelForm):
   """Designed to modify a reference."""
-  
+
   class Meta:
     model = Reference
     fields = ("title", "description", "pub_date")
@@ -289,16 +289,16 @@ class ReferenceEditForm(ModelForm):
 
 class UserBookmarkEditForm(ModelForm):
   """Designed to modify a bookmark."""
-  
+
   class Meta:
     model = UserBookmark
     fields = ("comment", "is_public")
 
-    
+
 class WebFeedOptInOutForm(forms.Form):
   """Designed to allow unsubscribing to a given feed."""
   follow = forms.BooleanField(required=False)
-  
+
   def __init__(self,user, feed, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
     self.user = user
@@ -310,9 +310,10 @@ class WebFeedOptInOutForm(forms.Form):
       self.user.userprofile.web_feeds.add(self.feed)
     else:
       self.user.userprofile.web_feeds.remove(self.feed)
-    
+
 
 from wom_tributary.models import TwitterTimeline
+from wom_tributary.models import TwitterUserInfo
 from wom_tributary.models import GeneratedFeed
 
 class UserTwitterSourceAdditionForm(forms.Form):
@@ -322,52 +323,55 @@ class UserTwitterSourceAdditionForm(forms.Form):
     max_length=GeneratedFeed.TITLE_MAX_LENGTH,
     required=True,
     widget=forms.TextInput(attrs={"class":"form-control"}))
-  
-  kind = forms.ChoiceField(
-    choices=TwitterTimeline.KIND_CHOICES,
-    required=True,
-    widget=forms.Select(attrs={"class":"form-control"}))
-  
+
   username = forms.CharField(
-    max_length=TwitterTimeline.USERNAME_MAX_LENGTH,
+    max_length=TwitterUserInfo.USERNAME_MAX_LENGTH,
     required=True,
     widget=forms.TextInput(attrs={"class":"form-control"}))
-  
+
   def __init__(self, user, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
     self.user = user
 
-  # TODO: maybe 'clean()' could actually be where we test the connection and token ?
-   
   def save(self):
     """Warning: the source will be saved as well as the related objects
     (no commit options).
     Returns the source.
     """
-    form_kind = self.cleaned_data['kind']
     form_title = self.cleaned_data['title']
     form_username = self.cleaned_data['username']
     source_url = TwitterTimeline.SOURCE_URL
     source_name = "Twitter"
     source_pub_date = datetime.now(timezone.utc)
     provider = GeneratedFeed.TWITTER
-    
-    # try a bigger look-up anyway
+    # Make sure that this specific user profile has a
+    # corresponding user info to be sure it doesn't share
+    # credentials with another's user profile just
+    # by writting down this other's user's twitter username !
+    same_twitter_info = self.user.userprofile.twitter_info
     same_twitter = TwitterTimeline.objects.filter(
-      kind=form_kind,
       username=form_username).all()
     # url are unique for sources
-    if same_twitter:
-      return same_twitter[0].generated_feed.source    
+    if same_twitter_info and same_twitter:
+      return same_twitter[0].generated_feed.source
+    if not same_twitter_info:
+      new_twitter_user = TwitterUserInfo(username=form_username)
+      new_twitter_user.save()
+      self.user.userprofile.twitter_info = new_twitter_user
+      same_twitter_info = new_twitter_user
     any_twitter_sources = Reference.objects.filter(
       url = source_url,
       ).all()
     if any_twitter_sources:
       twitter_source = any_twitter_sources[0]
     else:
-      twitter_source = Reference(url=source_url, title=source_name, pub_date=source_pub_date)
+      twitter_source = Reference(
+        url=source_url, title=source_name,
+        pub_date=source_pub_date)
       twitter_source.save()
-    new_feed = GeneratedFeed(provider=provider, source=twitter_source, title=form_title)
+    new_feed = GeneratedFeed(
+      provider=provider,
+      source=twitter_source, title=form_title)
     new_feed.last_update_check = (
       datetime
       .utcfromtimestamp(0)
@@ -375,11 +379,12 @@ class UserTwitterSourceAdditionForm(forms.Form):
       )
     new_feed.save()
     new_twitter = TwitterTimeline(
-      kind=form_kind,
       username=form_username,
-      generated_feed=new_feed)
+      generated_feed=new_feed,
+      twitter_user_access_info = same_twitter_info)
     new_twitter.save()
     if twitter_source not in self.user.userprofile.sources.all():
       self.user.userprofile.sources.add(twitter_source)
     self.user.userprofile.generated_feeds.add(new_feed)
+    self.user.userprofile.save()
     return twitter_source

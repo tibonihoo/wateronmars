@@ -8,11 +8,30 @@
 
 {% block content %}
 <h4>Twitter timelines subscription summary</h4>
-{% if twitter_timelines_summary %}
+{% if twitter_timelines_recap %}
+
+{% if twitter_oauth_status %}
+{% if twitter_oauth_status.is_auth %}
+<p>{% trans "The connection to twitter is ok" %}</p>
+{% else %}
+<div class="alert alert-warning">
+  <p><strong>{% trans "The connection to twitter requires your authorization !"%}</strong></p>
+  <p><a href="{{ twitter_oauth_status.auth_url }}">
+      {% trans "Please click here to grant it." %}</a></p>
+</div>
+{% endif %}
+{% endif %}
+
 <ul class="list-unstyled">
-  {% for timeline_info in twitter_timelines_summary %}
+  {% for timeline_info in twitter_timelines_recap %}
   <li> <i class="glyphicon glyphicon-paperclip"
-          style="padding-right:.5em;"></i>{{timeline_info.feed.title}} - {{timeline_info.num_items_last_hour}}
+          style="padding-right:.5em;"></i>
+    {{timeline_info.feed.title}}
+    {% if timeline_info.fetchable %}
+    &#x2713;
+    {% else %}
+    &#x2205;
+    {% endif %}
   </li>
   {% endfor %}
 </ul>

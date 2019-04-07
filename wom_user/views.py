@@ -32,6 +32,7 @@ from wom_classification.models import get_item_tag_names
 from wom_classification.models import get_user_tags
 from wom_pebbles.tasks import delete_old_references
 from wom_river.tasks import collect_news_from_feeds
+from wom_tributary.tasks import collect_news_from_tweeter_feeds
 
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
@@ -53,8 +54,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout
 
 from wom_river.models import WebFeed
-
 from wom_tributary.models import GeneratedFeed
+
+from wom_tributary.tasks import fetch_timeline_data
+from wom_tributary.tasks import get_twitter_auth_status
 
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
@@ -187,8 +190,10 @@ def request_for_update(request):
   """
   delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
   collect_news_from_feeds()
+  collect_news_from_tweeter_feeds(1)
   if settings.DEMO:
-    # keep only a short number of refs (the most recent) to avoid bloating the demo
+    # keep only a short number of refs (the most recent)
+    # to avoid bloating the demo
     with transaction.commit_on_success():
       for ref in list(Reference.objects\
                       .filter(save_count=0)\
@@ -395,35 +400,55 @@ def user_tributary(request, owner_name):
   # FUTURE: if there is more than twitter plugged in, display a list of possible tributaries
   return HttpResponseRedirect(reverse('wom_user.views.user_tributary_twitter', args=(request.user.username,)))
 
+
+class TwitterTimelineInfo:
+  def __init__(self, feed, timeline, fetchable):
+    self.feed = feed
+    self.timeline = timeline
+    self.fetchable = fetchable
+    
+  @staticmethod
+  def from_feed(f, twitter_status):
+    d = fetch_timeline_data(
+      f.twittertimeline, twitter_status, 1)
+    t = TwitterTimelineInfo(f, f.twittertimeline, len(d)>0)
+    # s = tweet_summarizers.generate_basic_html_summary(d) 
+    # t.tmp_content_summary = "\n".join(s)
+    return t
+
+    
 @loggedin_and_owner_required
 @require_http_methods(["GET"])
 def user_tributary_twitter(request, owner_name):
   if request.user != request.owner_user:
     return HttpResponseForbidden()
   owner_profile = request.owner_user.userprofile
-  twitter_feeds = (GeneratedFeed.objects
-    .filter(userprofile=owner_profile, twittertimeline__isnull=False)
-    .select_related("twittertimeline")
-    .order_by('-last_update_check', 'title')
-  )
-
-  class TwitterTimelineInfo:
-    def __init__(self, feed, timeline, num_items_last_hour):
-      self.feed = feed
-      self.timeline = timeline
-      self.num_items_last_hour = num_items_last_hour
-    
-  def get_twitter_timelines_info(feeds):
-    [f.twittertimeline for f in feeds.all()]
-    for idx,f in enumerate(feeds):
-      yield TwitterTimelineInfo(f, f.twittertimeline, idx*10)
-  twitter_timelines_summary = get_twitter_timelines_info(twitter_feeds.all())
+  twitter_info = owner_profile.twitter_info
+  if twitter_info:
+    twitter_status = get_twitter_auth_status(
+      twitter_info, request
+      )
+    twitter_feeds = (GeneratedFeed.objects
+      .filter(userprofile=owner_profile,
+              twittertimeline__isnull=False)
+      .select_related("twittertimeline")
+      .order_by('-last_update_check', 'title')
+    ).all()    
+    twitter_timelines_recap = [
+      TwitterTimelineInfo
+      .from_feed(f, twitter_status)
+      for f in twitter_feeds
+      ]
+  else:
+    twitter_status = None
+    twitter_timelines_recap = None  
   d = add_base_template_context_data({
-    'twitter_timelines_summary': twitter_timelines_summary,
-    'twitter_consent_link': "https://mouf"
+    'twitter_oauth_status': twitter_status,
+    'twitter_timelines_recap': twitter_timelines_recap,
   }, request.user.username, owner_name)
-  return render_to_response('tributary_twitter.html',d,
-                            context_instance=RequestContext(request))
+  return render_to_response(
+    'tributary_twitter.html',d,
+    context_instance=RequestContext(request))
 
 @loggedin_and_owner_required
 @csrf_protect
@@ -446,8 +471,7 @@ def user_tributary_twitter_add(request,owner_name):
     error_class=CustomErrorList)
   if src_info and form.is_valid():
     form.save()
-    # TODO: Consider redirecting to twitter auth here !
-    return HttpResponseRedirect(reverse('wom_user.views.user_river_sources', args=(request.user.username,)))
+    return HttpResponseRedirect(reverse('wom_user.views.user_tributary_twitter', args=(request.user.username,)))
   d = add_base_template_context_data(
     {'form': form,
      'REST_PARAMS': ','.join(UserTwitterSourceAdditionForm.base_fields.keys())},
