@@ -6,6 +6,6 @@ dj-database-url==0.2.1
 granary==1.14
 python-dateutil
 # for Heroku:
-#gunicorn==0.14.6
-#psycopg2==2.4.5
-#wsgiref==0.1.2
+gunicorn==0.14.6
+psycopg2==2.4.5
+wsgiref==0.1.2
