@@ -51,7 +51,7 @@ def deploy():
     local("git push origin master")
     with cd(user_host_conf("site_dir")):
         venv_dir = user_host_conf("virtual_env_dir")
-        run("git pull origin master")
+        run("git pull --rebase origin master")
         run("source {0}/bin/activate && pip install -r requirements_base.txt".format(venv_dir))
         run("source {0}/bin/activate && python manage.py migrate".format(venv_dir))
         run("source {0}/bin/activate && python manage.py collectstatic".format(venv_dir))
