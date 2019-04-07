@@ -72,7 +72,8 @@ DEPLOYMENT_PLATFORM = None
 try:
   import django_heroku
   DEPLOYMENT_PLATFORM = "heroku"
-except:
+except Exception, e:
+  print(e)
   DEPLOYMENT_PLATFORM = os.environ.get("DEPLOYMENT_PLATFORM","")
 print("Setting DEPLOYMENT_PLATFORM to {}".format(DEPLOYMENT_PLATFORM))
 
