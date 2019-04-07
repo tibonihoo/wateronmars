@@ -412,8 +412,6 @@ class TwitterTimelineInfo:
     d = fetch_timeline_data(
       f.twittertimeline, twitter_status, 1)
     t = TwitterTimelineInfo(f, f.twittertimeline, len(d)>0)
-    # s = tweet_summarizers.generate_basic_html_summary(d) 
-    # t.tmp_content_summary = "\n".join(s)
     return t
 
     

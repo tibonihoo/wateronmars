@@ -181,11 +181,11 @@ class TwitterAuthPageTest(TestCase):
         self.assertEqual(200, resp.status_code)
         oauth_status = resp.context["twitter_oauth_status"]
         self.assertEqual(None, oauth_status)
-        summary = resp.context["twitter_timelines_summary"]
-        self.assertEqual(0, len(summary))
+        summary = resp.context["twitter_timelines_recap"]
+        self.assertEqual(None, summary)
 
-    @mock.patch('wom_user.views.twitter_oauth.try_get_authorized_client')
-    @mock.patch('wom_user.views.twitter_oauth.generate_authorization_url')
+    @mock.patch('wom_tributary.utils.twitter_oauth.try_get_authorized_client')
+    @mock.patch('wom_tributary.utils.twitter_oauth.generate_authorization_url')
     def test_with_twitter_info_but_no_auth_context_has_auth_link(self,
             mocked_generate_auth_url,
             mocked_try_get_auth_client):        
@@ -204,8 +204,8 @@ class TwitterAuthPageTest(TestCase):
         self.assertEqual(mocked_generate_auth_url.return_value,
                              oauth_status.auth_url)
 
-    @mock.patch('wom_user.views.twitter_oauth.try_get_authorized_client')
-    @mock.patch('wom_user.views.twitter_oauth.generate_authorization_url')
+    @mock.patch('wom_tributary.utils.twitter_oauth.try_get_authorized_client')
+    @mock.patch('wom_tributary.utils.twitter_oauth.generate_authorization_url')
     def test_when_authorized_context_has_no_auth_link(self,
             mocked_generate_auth_url,
             mocked_try_get_auth_client):
@@ -221,8 +221,8 @@ class TwitterAuthPageTest(TestCase):
         self.assertEqual(True, oauth_status.is_auth)
         self.assertEqual(None, oauth_status.auth_url)
         
-    @mock.patch('wom_user.views.twitter_oauth.try_get_authorized_client')
-    @mock.patch('wom_user.views.twitter_oauth.generate_authorization_url')
+    @mock.patch('wom_tributary.utils.twitter_oauth.try_get_authorized_client')
+    @mock.patch('wom_tributary.utils.twitter_oauth.generate_authorization_url')
     def test_with_timelines_when_authorized_context_has_no_auth_link(self,
             mocked_generate_auth_url,
             mocked_try_get_auth_client):
@@ -238,13 +238,13 @@ class TwitterAuthPageTest(TestCase):
         oauth_status = resp.context["twitter_oauth_status"]
         self.assertEqual(True, oauth_status.is_auth)
         self.assertEqual(None, oauth_status.auth_url)
-        summary = resp.context["twitter_timelines_summary"]
+        summary = resp.context["twitter_timelines_recap"]
         self.assertEqual(2, len(summary))
-        self.assertEqual(3, summary[0].num_item_retrieved)
-        self.assertEqual(3, summary[1].num_item_retrieved)
+        self.assertTrue(summary[0].fetchable)
+        self.assertTrue(summary[1].fetchable)
         
-    @mock.patch('wom_user.views.twitter_oauth.try_get_authorized_client')
-    @mock.patch('wom_user.views.twitter_oauth.generate_authorization_url')
+    @mock.patch('wom_tributary.utils.twitter_oauth.try_get_authorized_client')
+    @mock.patch('wom_tributary.utils.twitter_oauth.generate_authorization_url')
     def test_with_timelines_when_get_has_oauth_token_it_is_passed_to_try_get_authorized_client(self,
             mocked_generate_auth_url,
             mocked_try_get_auth_client):

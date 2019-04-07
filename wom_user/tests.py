@@ -18,6 +18,9 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from django.conf import settings
+settings.READ_ONLY = False
+
 from test_view_decorators import *
 from test_userprofile import *
 from test_collection import *
