@@ -678,6 +678,8 @@ def user_collection_item(request, owner_name, reference_url):
       'ref_form': form,
       'ref_url': reference_url,
       'ref_title': reference.title,
+      'ref_description': reference.description,
+      'bmk_comment': bookmark.comment,
       'ref_sources': sorted(bookmark.get_sources()),
       'ref_tags': sorted(bookmark.get_tag_names())
     },

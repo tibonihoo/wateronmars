@@ -58,8 +58,12 @@ a { color: #3465a4; }
   display: none;
 }
 
-#edit-toggle {
+.edit-tool.edit-on {
   display: inline;
+  opacity: 1;
+}
+
+#edit-toggle {
   opacity: .2;
 }
 
@@ -67,12 +71,12 @@ a { color: #3465a4; }
   opacity: .8;
 }
 
-.edit-on {
-  display: inline;
-  opacity: .4;
+#edit-toggle.edit-on {
+  opacity: 1;
 }
 
 #edit-toggle.edit-on {
-  display: inline;
   opacity: 1;
 }
+
+

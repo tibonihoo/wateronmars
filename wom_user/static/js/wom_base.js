@@ -103,10 +103,12 @@ function toggleEditMode()
 {
   if ($("#edit-toggle").hasClass("edit-on"))
   {
-    $(".edit-tool").removeClass("edit-on")    
+      $(".edit-tool").removeClass("edit-on")
+      $("#edit-toggle").removeClass("edit-on")
   }
   else
   {
     $(".edit-tool").addClass("edit-on")
+    $("#edit-toggle").addClass("edit-on")
   }
 }

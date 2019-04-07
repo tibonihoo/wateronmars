@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load wom_protocol %}
 
 {% block title %}
 {% trans "Collection" %}
@@ -43,16 +44,14 @@ jQuery.ias({
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
-  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ {% trans "Bookmarked since" %} {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
-    {% if visitor_name == owner_name  %}
-    <a href="{% url wom_user.views.user_collection_item visitor_name bookmark.reference.url %}" title="{% trans "Edit" %}" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
-    {% endif  %}
+  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url|normalize_wom_protocol_url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ {% trans "Bookmarked since" %} {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
   </dt>
   <dd class="in_bookmark_def">
+    <a href="{% url wom_user.views.user_collection_item visitor_name bookmark.reference.url %}"><i class="glyphicon glyphicon-info-sign" title="{% trans "Details" %}"></i></a>
       <small><em>{% spaceless %}
           {% if bookmark.get_sources %}@
           {% for source in bookmark.get_sources %}
-          <a class="sourceURL" id="page{{user_bookmarks.number}}-bmk{{forloop.parentloop.counter0}}-source{{forloop.counter0}}-URL" style="padding-right:0.5em;" href="{{ source.url }}" title="{{ source.title }}">{{ source.title }}</a>
+          <a class="sourceURL" id="page{{user_bookmarks.number}}-bmk{{forloop.parentloop.counter0}}-source{{forloop.counter0}}-URL" style="padding-right:0.5em;" href="{{ source.url|normalize_wom_protocol_url }}" title="{{ source.title }}">{{ source.title }}</a>
           {% if not forloop.last %}
           ,
           {% endif %}
