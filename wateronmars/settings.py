@@ -69,9 +69,10 @@ USE_CELERY = False
 
 # Test if we're on heroku environment
 DEPLOYMENT_PLATFORM = None
-if os.environ.get("PYTHONHOME","").startswith("/app/.heroku"):
+try:
+  import django_heroku
   DEPLOYMENT_PLATFORM = "heroku"
-else:
+except:
   DEPLOYMENT_PLATFORM = os.environ.get("DEPLOYMENT_PLATFORM","")
 
 
@@ -95,9 +96,9 @@ TEMPLATE_DEBUG = DEBUG
 
 # Database setup
 if DEPLOYMENT_PLATFORM == "heroku":
-  # use Heroku's prostgres
-  import dj_database_url
-  DATABASES = {'default': dj_database_url.config()}
+  # Activate Django-Heroku.
+  # (following: https://devcenter.heroku.com/articles/django-app-configuration)
+  django_heroku.settings(locals())
 else:
   # use a local sqlite
   DATABASES = {
