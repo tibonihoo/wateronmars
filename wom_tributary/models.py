@@ -52,39 +52,39 @@ class GeneratedFeed(models.Model):
   # Date marking the last time the source was checked for an update
   last_update_check = models.DateTimeField('last update')
   
-  
+# Consider renaming to TwitterUserAccessInfo
+# see for instance: https://stackoverflow.com/questions/2862979/easiest-way-to-rename-a-model-using-django-south
+class TwitterUserInfo(models.Model):
+  """The oauth tokens that can be used to access twitter API after a user has granted us permission.
+  """
+  USERNAME_MAX_LENGTH = 50 # Twitter currently says 15 actually
+  # User for which these tweets should be looked up
+  username = models.CharField(max_length=USERNAME_MAX_LENGTH)
+  oauth_access_token = models.TextField()
+  oauth_access_token_secret = models.TextField()
+
 
 class TwitterTimeline(models.Model):
   """Define the twitter timeline to collect and convert to a stream.
   """
   
-  # Constants
-  KIND_MAX_LENGTH = 4
-  HOME_TIMELINE = 'HOME'
-  USER_TIMELINE = 'USER'
-  MENTIONS_TIMELINE = 'MNTN'
-  USERNAME_MAX_LENGTH = 50 # Twitter currently says 15 actually
   SOURCE_URL = "https://twitter.com"
   SOURCE_NAME = "Twitter"
   
-  KIND_CHOICES = (
-    (HOME_TIMELINE, 'HOME_TIMELINE'),
-    (USER_TIMELINE, 'USER_TIMELINE'),
-    (MENTIONS_TIMELINE, 'MENTIONS_TIMELINE'),
-    )
-
   generated_feed = models.OneToOneField(GeneratedFeed)
-  
-  # What kind of content to extract
-  kind = models.CharField(
-    max_length=KIND_MAX_LENGTH,
-    choices=KIND_CHOICES,
-    default=HOME_TIMELINE,
-    )
-  
+    
   # User for which these tweets should be looked up
   # NOTE: in current use case this user will be requested to
-  # "authorize" the app, so there may be 'constraints' on what the
-  # username can be.
-  username = models.CharField(max_length=USERNAME_MAX_LENGTH)
+  # "authorize" the app, so there may be 'constraints'
+  # on what the username can be.
+  username = models.CharField(max_length=TwitterUserInfo.USERNAME_MAX_LENGTH)
+
+  # Credential to access twitter (bound to each timeline
+  # to be sure we don't fill a timeline while benefiting
+  # from credentials of another user)
+  twitter_user_access_info = models.ForeignKey(TwitterUserInfo,
+                                                 null=True,
+                                                 default=None,
+                                                 on_delete=models.CASCADE)
+
 

@@ -1,5 +1,8 @@
 fabhosts.cfg
 
+twitter_app_key
+twitter_app_secret
+
 celerybeat-schedule
 celery
 
