@@ -79,8 +79,14 @@ def reset_schema(app_name):
 
 def update_schema(app_name=None):
     app_selection = [app_name] if app_name else DJANGO_APPS
-    for app in app_selection: 
-        local("python manage.py schemamigration {0} --auto".format(app))
+    for app in app_selection:
+        try:
+            local("python manage.py schemamigration {0} --auto".format(app))
+        except:
+            if app_name is None:
+                pass
+            else:
+                raise
 
 def db_reset():
     for app_name in DJANGO_APPS:
