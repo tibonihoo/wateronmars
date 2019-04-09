@@ -44,6 +44,10 @@ def try_get_authorized_client(
   and a valid client if it has been granted."""
   register_acces_token_if_present(
     request_params, session, user_info)
+  if None in (
+      user_info.oauth_access_token,
+      user_info.oauth_access_token_secret ):
+    return None
   try:
     client = build_twitter_client(user_info)
     if client and client.get_actor() is not None:
