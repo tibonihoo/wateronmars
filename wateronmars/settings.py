@@ -22,7 +22,6 @@
 
 import os
 APP_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-print(APP_BASE_DIR)
 
 ADMINS = (
     # ('Your name', 'your@email'),
@@ -69,7 +68,7 @@ USE_CELERY = False
 
 # Test if we're on heroku environment
 DEPLOYMENT_PLATFORM = None
-if "/app/.heroku" in APP_BASE_DIR:
+if "/app/.heroku" in os.environ["PATH"]:
   # Consider moving to django_heroku that requires python3
   DEPLOYMENT_PLATFORM = "heroku"
 else:
