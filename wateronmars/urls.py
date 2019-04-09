@@ -67,6 +67,8 @@ if not settings.READ_ONLY:
   urlpatterns += patterns('',
                           url(r'^accounts/new/$',
                               'wom_user.views.user_creation'),
+                          url(r'^accounts/auth_landing/twitter/$',
+                              'wom_user.views.user_auth_landing_twitter'),
                           url(r'^admin/',
                               include(admin.site.urls)),
                           # Uncomment the admin/doc line below to

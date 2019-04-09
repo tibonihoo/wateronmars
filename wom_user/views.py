@@ -414,7 +414,18 @@ class TwitterTimelineInfo:
     t = TwitterTimelineInfo(f, f.twittertimeline, len(d)>0)
     return t
 
-    
+@login_required(login_url=settings.LOGIN_URL)
+def user_auth_landing_twitter(request, owner_name):
+  twitter_info = request.user.userprofile.twitter_info
+  if twitter_info:
+    get_twitter_auth_status(
+      twitter_info, request
+      )
+    return HttpResponseRedirect(reverse('wom_user.views.user_tributary_twitter', args=(request.user.username,)))
+  else:
+    return HttpResponseNotFound("Couldn't find twitter info to update.")
+
+
 @loggedin_and_owner_required
 @require_http_methods(["GET"])
 def user_tributary_twitter(request, owner_name):
