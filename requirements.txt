@@ -2,4 +2,5 @@
 # for Heroku-like deployment:
 gunicorn==19.9.0
 psycopg2==2.8.1
-django-heroku==0.1.0
+dj-database-url==0.2.1
+

@@ -69,11 +69,10 @@ USE_CELERY = False
 
 # Test if we're on heroku environment
 DEPLOYMENT_PLATFORM = None
-try:
-  import django_heroku
+if "/app/.heroku" in APP_BASE_DIR:
+  # Consider moving to django_heroku that requires python3
   DEPLOYMENT_PLATFORM = "heroku"
-except Exception, e:
-  print(e)
+else:
   DEPLOYMENT_PLATFORM = os.environ.get("DEPLOYMENT_PLATFORM","")
 print("Setting DEPLOYMENT_PLATFORM to {}".format(DEPLOYMENT_PLATFORM))
 
@@ -86,9 +85,9 @@ DEMO_USER_PASSWD = "redh2o"
 # displayed publicly for convenience, and you don't want a random visiter
 # filling up you db with radom feeds).
 #
-# You may still allow a DEMO run with READ_ONLY=True if you want to demo/test
+# You may still allow a DEMO run with READ_ONLY=False if you want to demo/test
 # edition features of course, on a local or protected network (but releasing
-# DEMO=True and READ_ONLY=False to the open web is almost surely a bad idea)
+# DEMO=True and READ_ONLY=True to the open web is almost surely a bad idea)
 READ_ONLY = True
 
 # DEBUG or not DEBUG
@@ -98,9 +97,6 @@ TEMPLATE_DEBUG = DEBUG
 
 # Database setup
 if DEPLOYMENT_PLATFORM == "heroku":
-  # Activate Django-Heroku.
-  # (following: https://devcenter.heroku.com/articles/django-app-configuration)
-  django_heroku.settings(locals())
   import dj_database_url
   DATABASES = {'default': dj_database_url.config()}
 else:
