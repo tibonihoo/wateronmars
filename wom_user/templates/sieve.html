@@ -53,9 +53,7 @@ prepareKeyBindings();
     <div class="panel-heading">
       <h4 class="panel-title">
         <small><a class="wom-title-list-switch btn btn-default btn-xs"
-        href="javascript:switchTitleListDisplay()" title="{% trans
-        "Switch headlines display"
-        %}">H</a><a id="wom-ref{{forloop.counter0}}-url" href="{{ rust.reference.url }}">{{ rust.reference_pub_date }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+        href="javascript:switchTitleListDisplay()" title="{% trans "Switch headlines display" %}">H</a><a id="wom-ref{{forloop.counter0}}-url" href="{{ rust.reference.url }}" title="{{ rust.reference_pub_date }}">{{ rust.reference_pub_date|date:'SHORT_DATE_FORMAT' }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
       </h4>
     </div>
     <div id="wom-ref{{forloop.counter0}}-content" class="wom-reference-content panel-body carousel-fig" role="article">
