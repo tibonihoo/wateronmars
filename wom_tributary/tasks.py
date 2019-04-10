@@ -121,11 +121,6 @@ def add_new_reference_from_tweeter_timeline_summary(
     timeline, summary, title, date):
   """Create and save a reference corresponding to the input.
   """
-  feed = timeline.generated_feed
-  source = feed.source
-  feed_last_update_check = feed.last_update_check
-  if feed_last_update_check > date:
-    return None
   summary_url = "wom-tributary:/twitter/timeline/{}/{}".format(
     timeline.username,
     (date - datetime.utcfromtimestamp(0)
@@ -139,8 +134,6 @@ def add_new_reference_from_tweeter_timeline_summary(
       title,
       date,
       previous_ref)
-  current_ref_date = r.pub_date
-  # save all references at once
   with transaction.commit_on_success():
     try:
       r.save()
@@ -149,9 +142,6 @@ def add_new_reference_from_tweeter_timeline_summary(
         "Skipping news item %s because of exception: %s."\
         % (r.url,e))
       return None
-  r.sources.add(source)
-  feed.last_update_check = current_ref_date
-  feed.save()
   return r
 
 
@@ -161,11 +151,16 @@ def collect_new_references_for_twitter_timeline(
   """Get the timeline data from Twitter and collect the new references into the db.
   Return a dictionary mapping the new references to a corresponding set of tags.
   """  
-  num_items_to_ask = APPROX_NB_TWEETS_PER_1H * hours_to_cover
+  feed = timeline.generated_feed
   now = timezone.now()
-  keep_only_after_datetime = (
+  last_update_check = feed.last_update_check
+  if last_update_check > now:
+    return None
+  num_items_to_ask = APPROX_NB_TWEETS_PER_1H * hours_to_cover
+  earliest_item_date_allowed = (
     now - timedelta(hours=hours_to_cover)
     )
+  keep_only_after_datetime = max(last_update_check, earliest_item_date_allowed)
   access_info = timeline.twitter_user_access_info
   try:
     auth = get_twitter_auth_status(access_info)
@@ -185,9 +180,13 @@ def collect_new_references_for_twitter_timeline(
     logger.error("Skipping timeline for %s because of the following error: %s."\
                  % (timeline.username,e))
     return None
-  return add_new_reference_from_tweeter_timeline_summary(
+  r = add_new_reference_from_tweeter_timeline_summary(
     timeline, summary, title, now)
-
+  r.sources.add(timeline.generated_feed.source)
+  r.save()
+  feed.last_update_check = now
+  feed.save()
+  return r
 
 
 def collect_news_from_tweeter_feeds(hours_to_cover):
