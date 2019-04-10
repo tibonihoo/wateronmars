@@ -18,6 +18,11 @@ body {
   margin-bottom: 0px;
 }
 
+
+.panel-heading {
+ white-space: nowrap;
+}
+
 .panel-title {
   padding-left: 15px;
   padding-right: 15px;
