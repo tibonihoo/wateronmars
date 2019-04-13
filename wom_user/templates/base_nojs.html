@@ -27,10 +27,10 @@
           <span class="navbar-brand navbar-nav" role="navigation">
             <a href="{% url wom_user.views.home %}" title="{% trans "Water On Mars landing zone" %} [H]" accesskey="H" id="wom-brand-name">WoM</a>
             {% if visitor_name %}
+            <a href="{% url wom_user.views.user_river_sources visitor_name %}" title="{% trans "Your Sources" %} [S]" accesskey="S"><i class="glyphicon glyphicon-book"></i></a>
             <a href="{% url wom_user.views.user_river_view visitor_name %}" title="{% trans "Your River" %} [R]" accesskey="R"><i class="glyphicon glyphicon-align-left"></i></a>
             <a href="{% url wom_user.views.user_river_sieve visitor_name %}" title="{% trans "Your Sieve" %} [F]" accesskey="F"><i class="glyphicon glyphicon-filter"></i></a>
             <a href="{% url wom_user.views.user_collection visitor_name %}" title="{% trans "Your Collection" %} [C]" accesskey="C"><i class="glyphicon glyphicon-bookmark"></i></a>
-            <a href="{% url wom_user.views.user_river_sources visitor_name %}" title="{% trans "Your Sources" %} [S]" accesskey="S"><i class="glyphicon glyphicon-book"></i></a>
             {% endif %}
           </span>
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#wom-navbar-collapse">

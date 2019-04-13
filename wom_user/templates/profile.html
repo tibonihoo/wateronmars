@@ -30,6 +30,21 @@
 
 
 <dl class="dl-horizontal">
+  {% url wom_user.views.user_river_source_add visitor_name as source_add_url %}
+  {% url wom_user.views.user_upload_opml visitor_name as upload_opml_url %}
+  {% url wom_user.views.user_river_sources owner_name as sources_url %}
+  <dt><a href="{{ sources_url }}">
+      <abbr title="{% trans "Subscriptions and sites referenced by bookmarks." %}">{% trans "Sources" %}</abbr>
+      &nbsp;<i class="glyphicon glyphicon-book"></i></a></dt>
+  <dd>
+    {% if visitor_name == owner_name %}
+    {% blocktrans %}Check, <a href="{{ source_add_url }}" title="Subscribe to a new source.">add</a>,
+    <a href="{{ upload_opml_url }}" title="Add a batch of sources from a former subscription list.">import many</a> 
+    or <a href="{{ sources_url }}?format=opml" title="Export your sources as OPML">export all</a>.{% endblocktrans %}
+    {% else %}
+    {% trans "Check." %}
+    {% endif %}
+  </dd>
   <dt><a href="{% url wom_user.views.user_river_view owner_name %}">
       <abbr title="{% trans "A stream of fresh news." %}">River</abbr>
       &nbsp;<i class="glyphicon glyphicon-align-left"></i></a></dt>
@@ -52,26 +67,11 @@
       &nbsp;<i class="glyphicon glyphicon-bookmark"></i></a></dt>
   <dd>
     {% if visitor_name == owner_name %}
-    {% blocktrans %}Search or <a href="{{ collection_add_url }}" title="Add an URL to your collection.">add a bookmark</a>,
-    or <a href="{{ upload_nsbmk_url }}" title="Add a batch of bookmarks at once, from your former bookmark lists.">import several</a>
+    {% blocktrans %}Search, <a href="{{ collection_add_url }}" title="Add an URL to your collection.">add a bookmark</a>,
+    <a href="{{ upload_nsbmk_url }}" title="Add a batch of bookmarks at once, from your former bookmark lists.">import many</a>
     or <a href="{{ collection_url }}?format=ns-bmk-list" title="Export as Netscape's bookmarks xml file.">export all</a>.{% endblocktrans %}
     {% else %}
     {% trans "Search." %}
-    {% endif %}
-  </dd>
-  {% url wom_user.views.user_river_source_add visitor_name as source_add_url %}
-  {% url wom_user.views.user_upload_opml visitor_name as upload_opml_url %}
-  {% url wom_user.views.user_river_sources owner_name as sources_url %}
-  <dt><a href="{{ sources_url }}">
-      <abbr title="{% trans "Subscriptions and sites referenced by bookmarks." %}">{% trans "Sources" %}</abbr>
-      &nbsp;<i class="glyphicon glyphicon-book"></i></a></dt>
-  <dd>
-    {% if visitor_name == owner_name %}
-    {% blocktrans %}Check or <a href="{{ source_add_url }}" title="Subscribe to a new source.">add</a> 
-    or <a href="{{ upload_opml_url }}" title="Add a batch of sources from a former subscription list.">import several</a> 
-    or <a href="{{ sources_url }}?format=opml" title="Export your sources as OPML">export all</a>.{% endblocktrans %}
-    {% else %}
-    {% trans "Check." %}
     {% endif %}
   </dd>
 </dl>
