@@ -5,6 +5,22 @@
 --
 -- See https://mathiasbynens.be/notes/mysql-utf8mb4#column-index-length
 
+-- Also the Django app settings should have something like:
+--  DATABASES = {
+--     'default': {
+--       'ENGINE': 'django.db.backends.mysql',
+--       'NAME': '...',     # Irrelevant to encoding
+--       'USER': '...',     # Irrelevant to encoding
+--       'PASSWORD': '...', # Irrelevant to encoding
+--       'HOST': '...',     # Irrelevant to encoding
+--       'PORT': '',        # Irrelevant to encoding
+--       'STORAGE_ENGINE': 'INNODB', # Force storage engine, unrelated to encoding but better for consistency over stack updates (see https://stackoverflow.com/questions/6178816/django-cannot-add-or-update-a-child-row-a-foreign-key-constraint-fails)
+--       'OPTIONS': { # Here the actual encoding declaration
+--         'charset': 'utf8mb4',
+--         'use_unicode': True,
+--         }
+--     }
+-- }
 
 
 -- For each database:
