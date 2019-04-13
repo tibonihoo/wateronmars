@@ -39,11 +39,13 @@ body {
 }
 
 .wom-metadata {
-  padding-left: 1em;
+  padding-left: 2em;
+  margin-top: 3px;
+  padding-top:0.5em;
 }
 
-.wom-metadata i {
-  padding-left: 1em;
+.wom-metadata button {
+  margin-left: .5em;
 }
 
 .wom-reference.read .panel-heading:first-child {color: gray; border: none}
@@ -160,10 +162,6 @@ body {
   overflow: auto;
 }
 
-.wom-metadata { 
-  margin-top: 3px; 
-  padding-top:0.5em;
-}
 
 .wom-reference.panel {
   -webkit-box-shadow: 5px 5px 5px 5px #ddd;
@@ -249,6 +247,6 @@ body {
 }
 
 @media screen and (max-width: 400px) {
-  .wom-metadata a { padding-left: 3px;}
+  .wom-metadata button { padding-left: 3px;}
 }
 
