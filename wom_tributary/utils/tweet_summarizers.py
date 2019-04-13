@@ -54,7 +54,7 @@ class Tweet:
     matches = HASHTAG_REGEX.findall(content)
     if not matches:
       matches = SUBJECT_REGEX.findall(content)
-    tags = [encode_and_fix_format(m[1]) for m in matches]
+    tags = [encode_and_fix_format(m[1]).strip() for m in matches]
     content_summary = encode_and_fix_format(
         build_content_excerpt(content))
     return Tweet(link, content_summary, author, date, tags)
@@ -123,7 +123,7 @@ def generate_basic_html_summary(
     doc_lines.append("<dt>#{}</dt><dd>".format(tag))
     doc_lines.append("<ul>")
     for t in tweets:
-      doc_lines.append("<li><a href='{}'>{}</a>: {}</li>".format(t.link, t.author, t.content_summary))
+      doc_lines.append("<li><em>@{}:</em> {} <a href='{}'>&#128279;</a></li>".format(t.author, t.content_summary, t.link))
     doc_lines.append("</ul></dd>")
   doc_lines.append("</dl>")
   if not singular_topics_tweets:
@@ -135,7 +135,7 @@ def generate_basic_html_summary(
     doc_lines.append("<dt>@{}</dt><dd>".format(author))
     doc_lines.append("<ul>")
     for t in tweets:
-      doc_lines.append("<li><a href='{}'>&#128279;</a> {}</li>".format(t.link, t.content_summary))
+      doc_lines.append("<li>{} <a href='{}'>&#128279;</a></li>".format(t.content_summary, t.link))
     doc_lines.append("</ul></dd>")
   doc_lines.append("</dl>")
   return "\n".join(doc_lines)
