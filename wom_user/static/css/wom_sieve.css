@@ -44,7 +44,7 @@ body {
   padding-top:0.5em;
 }
 
-.wom-metadata button {
+.wom-metadata a {
   margin-left: .5em;
 }
 
@@ -247,6 +247,6 @@ body {
 }
 
 @media screen and (max-width: 400px) {
-  .wom-metadata button { padding-left: 3px;}
+  .wom-metadata a { padding-left: 3px;}
 }
 

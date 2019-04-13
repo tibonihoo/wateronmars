@@ -62,11 +62,11 @@ prepareKeyBindings();
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 
-      <button class="wom-save btn btn-default btn-xs" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
-        <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</button>
+      <a class="wom-save btn btn-default btn-xs" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
+        <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</a>
       <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
-      <button class="btn btn-default btn-xs" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
-        <i class="glyphicon glyphicon-globe"></i>{% trans "visit" %}</button>
+      <a class="btn btn-default btn-xs" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
+        <i class="glyphicon glyphicon-globe"></i>{% trans "visit" %}</a>
     </div>
     {% endspaceless %}
   </div>
