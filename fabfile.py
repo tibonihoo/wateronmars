@@ -44,10 +44,12 @@ def test():
     local("coverage run manage.py test {0}".format(" ".join(DJANGO_APPS)))
 
 def deploy_demo():
+    local("git pull --rebase heroku master")
     local("git push heroku master")
 
 def deploy():
     user_host_conf = lambda x: USER_CONF.get("{0}@{1}".format(env.user,env.host),x)
+    local("git pull --rebase origin master")
     local("git push origin master")
     with cd(user_host_conf("site_dir")):
         venv_dir = user_host_conf("virtual_env_dir")
