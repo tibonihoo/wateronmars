@@ -224,6 +224,11 @@ body {
   height: 3px;
 }
 
+.wom-reference-content img {
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+}
 
 
 @media screen and (max-width: 699px) {
