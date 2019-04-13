@@ -31,23 +31,24 @@ jQuery.ias({
 
 {% block content %}
 <h4>
+  <i class="glyphicon glyphicon-bookmark"></i>
   {% if visitor_name == owner_name  %}
-  <i class="glyphicon glyphicon-bookmark"></i>
   {% blocktrans with num_items=user_bookmarks.paginator.count %}Your collection of {{ num_items }} bookmarks.{% endblocktrans %}
-  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="{% trans "Edit your bookmarks !" %}"><i class="glyphicon glyphicon-edit"></i></a>
-  <small><a href="{% url wom_user.views.user_collection_add owner_name %}" title="{% trans "Add a bookmark." %}" class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a></small>
   {% else %}
-  <i class="glyphicon glyphicon-bookmark"></i>
   {% blocktrans with num_items=user_bookmarks.paginator.count name=owner_name %}{{ name }}'s collection of {{ num_items }} bookmarks.{% endblocktrans %}
   {% endif %}
 </h4>
+{% if visitor_name == owner_name  %}
+<p><a href="{% url wom_user.views.user_collection_add owner_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Add a bookmark." %}</a></p>
+{% endif  %}
+
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
   <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url|normalize_wom_protocol_url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ {% trans "Bookmarked since" %} {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
   </dt>
   <dd class="in_bookmark_def">
-    <a href="{% url wom_user.views.user_collection_item visitor_name bookmark.reference.url %}"><i class="glyphicon glyphicon-info-sign" title="{% trans "Details" %}"></i></a>
+    <a href="{% url wom_user.views.user_collection_item visitor_name bookmark.reference.url %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
       <small><em>{% spaceless %}
           {% if bookmark.get_sources %}@
           {% for source in bookmark.get_sources %}

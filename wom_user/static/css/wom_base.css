@@ -52,13 +52,19 @@ a { color: #3465a4; }
     padding-bottom: 1px;
 }
 
-.edit-tool {
-  color: black;
-  text-decoration: none;
+.tool {
+  color: #9e380c;
+}
+
+.tool:hover {
+  color: #dd4814;
+}
+
+.edit-only {
   display: none;
 }
 
-.edit-tool.edit-on {
+.edit-only.edit-on {
   display: inline;
   opacity: 1;
 }

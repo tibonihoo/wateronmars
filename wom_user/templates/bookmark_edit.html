@@ -8,7 +8,7 @@
 
 {% block content %}
 
-<h4><img src="http://plus.google.com/_/favicon?domain={{ ref_url|normalize_wom_protocol_url }}" style="padding-right:.5em;"/>{{ ref_title }}</h4>
+<h4><i class="glyphicon glyphicon-bookmark"></i>{{ ref_title }}</h4>
 
 <p>
   <a href="{{ ref_url|normalize_wom_protocol_url }}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-globe"></i>{% trans "View on site." %}</a>
@@ -32,7 +32,7 @@
   {% endif %}
 </div>
 
-<div class="edit-tool">
+<div class="edit-only">
   <br/>
   <h4>{% trans "Edit" %}</h4>
   <form class="form-horizontal" role="form" action="" method="post">
@@ -87,7 +87,7 @@
             {% if source.url == "#internal-bookmark-import" %}
             <li><i class="glyphicon glyphicon-floppy-save"></i>{{ source.title }}</li>
             {% else %}
-            <li><i class="glyphicon glyphicon-book"></i><a href="{{ source.url }}" title="{% trans "View on site" %}">{{ source.title }}</a> <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="{% trans "Edit source information or subscription." %}" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a></li>
+            <li><i class="glyphicon glyphicon-book"></i><a href="{{ source.url }}" title="{% trans "View on site" %}">{{ source.title }}</a> <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="{% trans "Edit source information or subscription." %}" class="edit-only tool"><i class="glyphicon glyphicon-edit"></i></a></li>
             {% endif %}
             {% endfor %}
           </ul>

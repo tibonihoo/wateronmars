@@ -23,26 +23,26 @@ jQuery.ias({
 <h4><i class="glyphicon glyphicon-book"></i>
   {% if visitor_name == owner_name  %}
   {% blocktrans %}Your {{ num_sources }} sources{% endblocktrans %}
-  <a href="javascript:toggleEditMode();" id="edit-toggle" class="edit-tool" title="{% trans "Edit your sources !" %}"><i class="glyphicon glyphicon-edit"></i></a>
   {% else %}
   {% blocktrans %}{{ owner_name}}'s {{ num_sources }} sources{% endblocktrans %}
   {% endif  %}
 </h4>
+{% if visitor_name == owner_name  %}
+<p><a href="{% url wom_user.views.user_river_source_add visitor_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Subscribe to a web feed (rss, atom etc)." %}</a></p>
+<p><a href="{% url wom_user.views.user_tributary_twitter_add visitor_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Follow a twitter timeline." %}</a></p>
+{% endif  %}
+
 <ul class="list-unstyled">
 {% if tagged_web_feeds %}
-  <li><h5>{% trans "Syndicated sources" %}
-    {% if visitor_name == owner_name  %}
-    <a href="{% url wom_user.views.user_river_source_add visitor_name %}" title="{% trans "Subscribe to a new source." %}" class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a>
-    {% endif  %}
-    </h5>
+  <li><h5>{% trans "Syndicated sources" %}</h5>
     <ul class="list-unstyled">
       {% for feed in tagged_web_feeds %}
       <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
-          <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
 {% if visitor_name == owner_name  %}
-          <a href="{% url wom_user.views.user_river_source_item visitor_name feed.source.url %}" title="{% trans "Edit source information or subscription." %}" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+          <a href="{% url wom_user.views.user_river_source_item visitor_name feed.source.url %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
 {% endif  %}
+          <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
       </li>
       {% endfor %}
     </ul>
@@ -55,17 +55,13 @@ jQuery.ias({
 
     
 {% if other_sources %}
-<li><h5>{% trans "Sources of bookmarks and 'generated' feeds" %}
-      {% if visitor_name == owner_name  %}
-    <a href="{% url wom_user.views.user_tributary_twitter_add visitor_name %}" title="{% trans "Create a new generated feed." %}" class="edit-tool"><i class="glyphicon glyphicon-plus-sign"></i></a>
-    {% endif  %}
-</h5>
+<li><h5>{% trans "Sources of bookmarks and 'generated' feeds" %}</h5>
   <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
    {% if source.url != "#internal-bookmark-import" %}
    <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/></a><a href="{{ source.url }}">{{ source.title }}</a>
     {% if visitor_name == owner_name  %}
-    <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="{% trans "Edit source information." %}" class="edit-tool"><i class="glyphicon glyphicon-edit"></i></a>
+    <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="{% trans "Edit source information." %}" class="edit-only tool"><i class="glyphicon glyphicon-edit"></i></a>
     {% endif %}
     {% endif %}
    </li>
