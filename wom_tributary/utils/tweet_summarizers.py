@@ -2,18 +2,18 @@
 #
 # Copyright 2019 Thibauld Nion
 #
-# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
+# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars)
 #
 # WaterOnMars is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # WaterOnMars is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -42,7 +42,7 @@ class Tweet:
 
   def __repr__(self):
     return " ".join([self.link, self.date])
-    
+
   @staticmethod
   def from_activity_item(item):
     link = item[u"url"].encode("utf-8")
@@ -72,8 +72,7 @@ def encode_and_fix_format(content_unicode):
     return str(content_encoded)[2:-1]
   else:
     return content_encoded
-    
-  
+
 def build_tweet_index_by_tag(data, keep_only_after_datetime):
   reverse_index = defaultdict(list)
   num_discarded = 0
@@ -106,6 +105,22 @@ def group_tweets_by_author(tweets):
     reverse_index[item.author].append(item)
   return reverse_index
 
+
+def build_reverse_index_cloud(reverse_index):
+  freqs = [len(c) for _,c in reverse_index.items()]
+  quantile_length = int(len(freqs)/5.)
+  freqs.sort()
+  max_quantile = freqs[4*quantile_length]
+  html_entries = []
+  for entry, content in reverse_index.items():
+    current_freq = len(content)
+    if  quantile_length!=0 and current_freq >= max_quantile:
+      html_entries.append("<strong>{}</strong>".format(entry))
+    else:
+      html_entries.append("<small>{}</small>".format(entry))
+  return html_entries
+
+
 def generate_basic_html_summary(
     activities,
     keep_only_after_datetime):
@@ -115,11 +130,23 @@ def generate_basic_html_summary(
   groups = group_tweet_by_best_tag(ridx)
   singular_topics_tweets = []
   doc_lines = []
+  html_tag_cloud = build_reverse_index_cloud(groups)
+  doc_lines.append("<p>")
+  doc_lines.append("#{}".format(" #".join(html_tag_cloud)))
+  doc_lines.append("</p>")
+  all_tweets = []
+  for _, tweets in groups.items():
+      all_tweets.extend(tweets)
+  all_tweets_by_author = group_tweets_by_author(all_tweets)
+  html_author_cloud = build_reverse_index_cloud(all_tweets_by_author)
+  doc_lines.append("<p>")
+  doc_lines.append("@{}".format(" @".join(html_author_cloud)))
+  doc_lines.append("</p>")
   doc_lines.append("<dl>")
   for tag, tweets in sorted(groups.items(), key=lambda g: (len(g[1]), g[0])):
     if not tweets:
       continue
-    if tag == NO_TAG:
+    if tag == NO_TAG or len(tweets)==1:
       singular_topics_tweets.extend(tweets)
       continue
     doc_lines.append("<dt>#{}</dt><dd>".format(tag))
