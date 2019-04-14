@@ -23,8 +23,8 @@ import re
 from collections import defaultdict
 
 MAX_CONTENT_SIZE_CHARS = 70
-HASHTAG_REGEX = re.compile("(^|\s)#([\w\-\.]+)(\W|$)")
-SUBJECT_REGEX = re.compile("(^)([^:]{1,20})(:\s*\S+)")
+HASHTAG_REGEX = re.compile("(^|\s)#([\w\-\.]+)(\W|$)", re.UNICODE)
+SUBJECT_REGEX = re.compile("(^\s*)([^:]{1,20})(:\s+\S+)", re.UNICODE)
 NO_TAG = "<NO_TAG>"
 
 from dateutil.parser import parse as parse_date
