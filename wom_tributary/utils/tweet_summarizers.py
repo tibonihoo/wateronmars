@@ -116,8 +116,10 @@ def generate_basic_html_summary(
   singular_topics_tweets = []
   doc_lines = []
   doc_lines.append("<dl>")
-  for tag, tweets in sorted(groups.items()):
-    if tag == NO_TAG or len(tweets)<=1:
+  for tag, tweets in sorted(groups.items(), key=lambda g: (len(g[1]), g[0])):
+    if not tweets:
+      continue
+    if tag == NO_TAG:
       singular_topics_tweets.extend(tweets)
       continue
     doc_lines.append("<dt>#{}</dt><dd>".format(tag))
@@ -131,7 +133,7 @@ def generate_basic_html_summary(
   # Format remaining tweets, grouped by author
   doc_lines.append("<dl>")
   by_author = group_tweets_by_author(singular_topics_tweets)
-  for author, tweets in sorted(by_author.items()):
+  for author, tweets in sorted(by_author.items(), key=lambda g: (len(g[1]), g[0])):
     doc_lines.append("<dt>@{}</dt><dd>".format(author))
     doc_lines.append("<ul>")
     for t in tweets:
