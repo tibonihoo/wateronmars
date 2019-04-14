@@ -120,6 +120,9 @@ def build_reverse_index_cloud(reverse_index):
       html_entries.append("<small>{}</small>".format(entry))
   return html_entries
 
+def get_items_sorted_by_dec_size_and_inc_key(reverse_index):
+  return sorted(reverse_index.items(),
+                  key=lambda item: (-len(item[1]), item[0]))
 
 def generate_basic_html_summary(
     activities,
@@ -143,7 +146,7 @@ def generate_basic_html_summary(
   doc_lines.append("@{}".format(" @".join(html_author_cloud)))
   doc_lines.append("</p>")
   doc_lines.append("<dl>")
-  for tag, tweets in sorted(groups.items(), key=lambda g: (len(g[1]), g[0])):
+  for tag, tweets in get_items_sorted_by_dec_size_and_inc_key(groups):
     if not tweets:
       continue
     if tag == NO_TAG or len(tweets)==1:
@@ -160,7 +163,7 @@ def generate_basic_html_summary(
   # Format remaining tweets, grouped by author
   doc_lines.append("<dl>")
   by_author = group_tweets_by_author(singular_topics_tweets)
-  for author, tweets in sorted(by_author.items(), key=lambda g: (len(g[1]), g[0])):
+  for author, tweets in get_items_sorted_by_dec_size_and_inc_key(by_author):
     doc_lines.append("<dt>@{}</dt><dd>".format(author))
     doc_lines.append("<ul>")
     for t in tweets:
