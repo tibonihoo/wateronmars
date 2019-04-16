@@ -107,23 +107,29 @@ def group_tweets_by_author(tweets):
 
 
 def build_reverse_index_cloud(reverse_index):
-  freqs = [len(t) for t in reverse_index.values()]
+  freqs = list(sorted(len(t) for t in reverse_index.values()))
+  print(freqs)
   num_quantiles = 10
   quantile_length = int(len(freqs)/float(num_quantiles))
-  freqs.sort()
-  max_quantile = freqs[(num_quantiles-1)*quantile_length]
+  threshold_index = (num_quantiles-1)*quantile_length
+  print(threshold_index)
+  max_quantile = freqs[threshold_index]
   html_entries = []
   for entry, tweets in reverse_index.items():
+    if entry == NO_TAG:
+      continue
     current_freq = len(tweets)
-    if quantile_length != 0 and current_freq >= max_quantile:
+    if quantile_length != 0 and current_freq > max_quantile:
       html_entries.append("<strong>{}</strong>".format(entry))
     else:
       html_entries.append("<small>{}</small>".format(entry))
   return html_entries
 
+
 def get_items_sorted_by_dec_size_and_inc_key(reverse_index):
   return sorted(reverse_index.items(),
                   key=lambda item: (-len(item[1]), item[0]))
+
 
 def generate_basic_html_summary(
     activities,
@@ -134,13 +140,13 @@ def generate_basic_html_summary(
   groups = group_tweet_by_best_tag(ridx)
   singular_topics_tweets = []
   doc_lines = []
-  html_tag_cloud = build_reverse_index_cloud(groups)
+  html_tag_cloud = build_reverse_index_cloud(ridx)
   doc_lines.append("<p>")
   doc_lines.append("#{}".format(" #".join(html_tag_cloud)))
   doc_lines.append("</p>")
   all_tweets = []
-  for _, tweets in groups.items():
-      all_tweets.extend(tweets)
+  for tweets in groups.values():
+    all_tweets.extend(tweets)
   all_tweets_by_author = group_tweets_by_author(all_tweets)
   html_author_cloud = build_reverse_index_cloud(all_tweets_by_author)
   doc_lines.append("<p>")
