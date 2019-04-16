@@ -76,13 +76,13 @@ def encode_and_fix_format(content_unicode):
 def build_tweet_index_by_tag(data, keep_only_after_datetime):
   reverse_index = defaultdict(list)
   num_discarded = 0
-  for item in data:
-    tweet = Tweet.from_activity_item(item)
+  all_tweets = [Tweet.from_activity_item(item) for item in data]
+  for tweet in sorted(all_tweets, key=lambda t: t.date):
     if tweet.date < keep_only_after_datetime:
       num_discarded += 1
       continue
-    for t in tweet.tags:
-      reverse_index[t].append(tweet)
+    for tag in tweet.tags:
+      reverse_index[tag].append(tweet)
     if not tweet.tags:
       reverse_index[NO_TAG].append(tweet)
   return reverse_index
