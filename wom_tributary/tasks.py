@@ -154,7 +154,7 @@ def collect_new_references_for_twitter_timeline(
   feed = timeline.generated_feed
   now = timezone.now()
   last_update_check = feed.last_update_check
-  if last_update_check > now:
+  if last_update_check >= now:
     return None
   num_items_to_ask = APPROX_NB_TWEETS_PER_1H * hours_to_cover
   earliest_item_date_allowed = (
