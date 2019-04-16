@@ -107,14 +107,15 @@ def group_tweets_by_author(tweets):
 
 
 def build_reverse_index_cloud(reverse_index):
-  freqs = [len(c) for _,c in reverse_index.items()]
-  quantile_length = int(len(freqs)/5.)
+  freqs = [len(t) for t in reverse_index.values()]
+  num_quantiles = 10
+  quantile_length = int(len(freqs)/float(num_quantiles))
   freqs.sort()
-  max_quantile = freqs[4*quantile_length]
+  max_quantile = freqs[(num_quantiles-1)*quantile_length]
   html_entries = []
-  for entry, content in reverse_index.items():
-    current_freq = len(content)
-    if  quantile_length!=0 and current_freq >= max_quantile:
+  for entry, tweets in reverse_index.items():
+    current_freq = len(tweets)
+    if quantile_length != 0 and current_freq >= max_quantile:
       html_entries.append("<strong>{}</strong>".format(entry))
     else:
       html_entries.append("<small>{}</small>".format(entry))
