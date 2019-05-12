@@ -14,7 +14,7 @@
 --       'PASSWORD': '...', # Irrelevant to encoding
 --       'HOST': '...',     # Irrelevant to encoding
 --       'PORT': '',        # Irrelevant to encoding
---       'STORAGE_ENGINE': 'INNODB', # Force storage engine, unrelated to encoding but better for consistency over stack updates (see https://stackoverflow.com/questions/6178816/django-cannot-add-or-update-a-child-row-a-foreign-key-constraint-fails)
+--       'DEFAULT_STORAGE_ENGINE': 'INNODB', # Force storage engine, unrelated to encoding but better for consistency over stack updates (see https://stackoverflow.com/questions/6178816/django-cannot-add-or-update-a-child-row-a-foreign-key-constraint-fails)
 --       'OPTIONS': { # Here the actual encoding declaration
 --         'charset': 'utf8mb4',
 --         'use_unicode': True,
