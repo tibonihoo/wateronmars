@@ -135,6 +135,7 @@ class UserBookmarkAdditionForm(forms.Form):
                                    pub_date=pub_date)
         bookmarked_ref.save()
         bookmarked_ref.sources.add(ref_src)
+        bookmarked_ref.save()
     with transaction.commit_on_success():
       try:
         bmk = UserBookmark.objects.get(owner=self.user,reference=bookmarked_ref)
@@ -160,6 +161,7 @@ class UserBookmarkAdditionForm(forms.Form):
     with transaction.commit_on_success():
       if ref_src not in self.user.userprofile.sources.all():
         self.user.userprofile.sources.add(ref_src)
+        self.user.userprofile.save()
     with transaction.commit_on_success():
       for rust in ReferenceUserStatus\
         .objects.filter(owner=self.user,
@@ -273,9 +275,13 @@ class UserSourceAdditionForm(forms.Form):
       new_feed.last_update_check = datetime.utcfromtimestamp(0)\
                                            .replace(tzinfo=timezone.utc)
       new_feed.save()
-    self.user.userprofile.sources.add(source_ref)
-    self.user.userprofile.public_sources.add(source_ref)
-    self.user.userprofile.web_feeds.add(new_feed)
+    with transaction.commit_on_success():
+      source_ref.save_count += 1
+      source_ref.save()
+      self.user.userprofile.sources.add(source_ref)
+      self.user.userprofile.public_sources.add(source_ref)
+      self.user.userprofile.web_feeds.add(new_feed)
+      self.user.userprofile.save()
     return new_feed
 
 
@@ -308,8 +314,10 @@ class WebFeedOptInOutForm(forms.Form):
     """Note: this save can have only one effect: removing a feed from the user's feed list."""
     if self.cleaned_data["follow"]:
       self.user.userprofile.web_feeds.add(self.feed)
+      self.user.userprofile.save()
     else:
       self.user.userprofile.web_feeds.remove(self.feed)
+      self.user.userprofile.save()
 
 
 from wom_tributary.models import TwitterTimeline
@@ -358,6 +366,7 @@ class UserTwitterSourceAdditionForm(forms.Form):
       new_twitter_user = TwitterUserInfo(username=form_username)
       new_twitter_user.save()
       self.user.userprofile.twitter_info = new_twitter_user
+      self.user.userprofile.save()
       same_twitter_info = new_twitter_user
     any_twitter_sources = Reference.objects.filter(
       url = source_url,
@@ -369,7 +378,8 @@ class UserTwitterSourceAdditionForm(forms.Form):
         twitter_source = Reference(
           url=source_url, title=source_name,
           pub_date=source_pub_date)
-        twitter_source.save()
+      twitter_source.save_count += 1
+      twitter_source.save()
     with transaction.commit_on_success():
       new_feed = GeneratedFeed(
         provider=provider,

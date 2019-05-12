@@ -212,7 +212,6 @@ def import_feedsources_from_opml(opml_txt):
   with transaction.commit_on_success():
     for f in db_new_feedsources:
       f.save()
-      # make sure to record the fact
     for r in newly_referenced_source:
       r.save_count += 1
       r.save()
