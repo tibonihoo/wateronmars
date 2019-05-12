@@ -45,7 +45,7 @@ else:
 
 
     
-from wom_pebbles.tasks import delete_old_references
+from wom_pebbles.tasks import delete_old_unpinned_references
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
 from wom_river.tasks import collect_news_from_feeds
@@ -79,8 +79,8 @@ def collect_all_new_twitter_references_regularly():
   collect_news_from_tweeter_feeds(1)
 
 @periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
-def delete_old_references_regularly():
-  delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
+def delete_old_unpinned_references_regularly():
+  delete_old_unpinned_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
 
 
 @task()
@@ -93,7 +93,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
     except ObjectDoesNotExist:
       bmk = UserBookmark(owner=user,reference=ref,
                          saved_date=ref.pub_date)
-      ref.save_count += 1
+      ref.add_pin()
       for src in ref.sources.all():
         user.userprofile.sources.add(src)
     bmk.is_public = meta.is_public
@@ -164,7 +164,7 @@ def generate_reference_user_status(user,references):
         rust.main_source = Reference.objects.get(url="<unknown>")
       except ObjectDoesNotExist:
         s = Reference(url="<unknown>",title="<unknown>",
-                      save_count=1,
+                      pin_count=1,
                       pub_date=datetime.utcfromtimestamp(0)\
                       .replace(tzinfo=timezone.utc))        
         s.save()

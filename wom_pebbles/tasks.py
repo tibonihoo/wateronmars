@@ -174,8 +174,8 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
   # hashes (before that they would have looked the same for the dict).
   return dict(ref_and_metadata)
 
-def delete_old_references(time_threshold):
+def delete_old_unpinned_references(time_threshold):
   """Delete references that are older that the time_threshold and have a
   save count equal to 0.
   """
-  Reference.objects.filter(save_count=0,pub_date__lt=time_threshold).delete()
+  Reference.objects.filter(pin_count=0,pub_date__lt=time_threshold).delete()

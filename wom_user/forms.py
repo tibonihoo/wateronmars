@@ -142,7 +142,7 @@ class UserBookmarkAdditionForm(forms.Form):
       except ObjectDoesNotExist:
         bmk = UserBookmark(owner=self.user,reference=bookmarked_ref,
                            saved_date=datetime.now(timezone.utc))
-        bookmarked_ref.save_count += 1
+        bookmarked_ref.add_pin()
         bmk.save()
         bookmarked_ref.save()
       # allow the user-specific comment to be changed and also prefix
@@ -276,7 +276,7 @@ class UserSourceAdditionForm(forms.Form):
                                            .replace(tzinfo=timezone.utc)
       new_feed.save()
     with transaction.commit_on_success():
-      source_ref.save_count += 1
+      source_ref.add_pin()
       source_ref.save()
       self.user.userprofile.sources.add(source_ref)
       self.user.userprofile.public_sources.add(source_ref)
@@ -378,7 +378,7 @@ class UserTwitterSourceAdditionForm(forms.Form):
         twitter_source = Reference(
           url=source_url, title=source_name,
           pub_date=source_pub_date)
-      twitter_source.save_count += 1
+      twitter_source.add_pin()
       twitter_source.save()
     with transaction.commit_on_success():
       new_feed = GeneratedFeed(

@@ -61,9 +61,8 @@ class UserBookmark(models.Model):
   there are users...
   """
   owner = models.ForeignKey(User)
-  # The saved reference
-  # WARNING: note that the Reference class has a save_count that must
-  # be incremented when linked by a UserBookmark.
+  # The saved reference (WARNING: it must be explicitly added an extra 'pin'
+  # when linked by a UserBookmark)
   reference = models.ForeignKey(Reference)
   # Date at which the bookmark was created
   saved_date = models.DateTimeField('saved date')

@@ -30,7 +30,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from wom_pebbles.models import Reference
 from wom_classification.models import get_item_tag_names
 from wom_classification.models import get_user_tags
-from wom_pebbles.tasks import delete_old_references
+from wom_pebbles.tasks import delete_old_unpinned_references
 from wom_river.tasks import collect_news_from_feeds
 from wom_tributary.tasks import collect_news_from_tweeter_feeds
 
@@ -188,7 +188,7 @@ def request_for_update(request):
   of all references that have never been saved (past an arbitrary
   delay).
   """
-  delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
+  delete_old_unpinned_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
   collect_news_from_feeds()
   collect_news_from_tweeter_feeds(1)
   if settings.DEMO:
@@ -196,7 +196,7 @@ def request_for_update(request):
     # to avoid bloating the demo
     with transaction.commit_on_success():
       for ref in list(Reference.objects\
-                      .filter(save_count=0)\
+                      .filter(pin_count=0)\
                       .order_by("-pub_date")[MAX_ITEMS_PER_PAGE:]):
         ref.delete()
   return HttpResponseRedirect(reverse("wom_user.views.home"))
@@ -206,7 +206,7 @@ def request_for_cleanup(request):
   """Trigger a cleanup of all references that have never been saved
   (past an arbitrary delay).
   """
-  delete_old_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
+  delete_old_unpinned_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
   return HttpResponseRedirect(reverse("wom_user.views.home"))
 
 

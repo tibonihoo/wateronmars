@@ -695,9 +695,9 @@ class ImportUserBookmarksFromNSList(TestCase):
       url=u"http://mouf/a",
       title=u"glop",
       pub_date=date,
-      save_count=1)
+      pin_count=1)
     reference.sources.add(self.source)
-    reference.save_count += 1
+    reference.add_pin()
     self.user = User.objects.create_user(username="uA",
                                          password="pA")
     self.user_profile = UserProfile.objects.create(owner=self.user)
@@ -737,11 +737,11 @@ Do Not Edit! -->
                      .get(reference__url="http://mouf/a")\
                      .reference.title)
     
-  def test_bookmarked_reference_save_count_updated(self):
+  def test_bookmarked_reference_pin_count_updated(self):
     self.assertEqual(2,self.user.userbookmark_set.count())
     for b in self.user.userbookmark_set.all():
-      self.assertEqual(1,b.reference.save_count,
-                       "Wrong save count %s for %s" % (b.reference.save_count,
+      self.assertEqual(1,b.reference.pin_count,
+                       "Wrong save count %s for %s" % (b.reference.pin_count,
                                                        b.reference))
     
   def test_check_bookmarks_not_added_to_other_user(self):

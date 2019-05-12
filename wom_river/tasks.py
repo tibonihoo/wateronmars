@@ -213,7 +213,7 @@ def import_feedsources_from_opml(opml_txt):
     for f in db_new_feedsources:
       f.save()
     for r in newly_referenced_source:
-      r.save_count += 1
+      r.add_pin()
       r.save()
   return dict(feeds_and_tags)
 
