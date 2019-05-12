@@ -1,0 +1,77 @@
+PB:
+
+A foreign key constraint fails (`tibonihoo_wom`.`wom_tributary_generatedfeed`, CONSTRAINT `source_id_refs_id_32b60462873e6f5c` FOREIGN KEY (`source_id`) REFERENCES `20190512_071145__wom_pebbles_reference__20190512_064125` (`)
+
+
+CMDS:
+
+mysql> UPDATE wom_tributary_generatedfeed SET source_id = 316508;
+
+
+https://dba.stackexchange.com/questions/102371/mysql-how-to-check-foreign-keys-related-to-a-table
+
+
+mysql> SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_NAME = 'wom_tributary_generatedfeed';
++--------------------------------------------+
+| CONSTRAINT_NAME                            |
++--------------------------------------------+
+| vvgenerated_feed_id_refs_id_591de0047590ade4vv |
+| ??generatedfeed_id_refs_id_368455b7108f6622??=> where is it ? |
++--------------------------------------------+
+2 rows in set (40.49 sec)
+
+mysql> SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'wom_tributary_generatedfeed';
++------------------------------------+
+| CONSTRAINT_NAME                    |
++------------------------------------+
+| PRIMARY                            |
+| xxsource_id_refs_id_32b60462873e6f5cxx |
++------------------------------------+
+2 rows in set (41.02 sec)
+
+mysql> SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'wom_tributary_twittertimeline';
++------------------------------------------------------+
+| CONSTRAINT_NAME                                      |
++------------------------------------------------------+
+| PRIMARY                                              |
+| xxgenerated_feed_idxx                                |
+| xxgenerated_feed_id_refs_id_591de0047590ade4xx       |
+| xxtwitter_user_access_info_id_refs_id_1a3c79e48392d4afxx |
++------------------------------------------------------+
+4 rows in set (1 min 2.12 sec)
+
+DONE:
+
+ALTER TABLE wom_tributary_generatedfeed DROP FOREIGN KEY source_id_refs_id_32b60462873e6f5c;
+ALTER TABLE wom_tributary_generatedfeed ADD CONSTRAINT source_id_refs_id_32b60462873e6f5c FOREIGN KEY (source_id) REFERENCES wom_pebbles_reference(id);
+
+-------------------
+
+
+mysql> SELECT REFERENCED_TABLE_NAME, TABLE_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE CONSTRAINT_NAME='generatedfeed_id_refs_id_368455b7108f6622';
++-----------------------------+--------------------------------------+
+| REFERENCED_TABLE_NAME       | TABLE_NAME                           |
++-----------------------------+--------------------------------------+
+| wom_tributary_generatedfeed | wom_user_userprofile_generated_feeds |
++-----------------------------+--------------------------------------+
+1 row in set (23.06 sec)
+
+
+mysql> SHOW CREATE TABLE wom_user_userprofile_generated_feeds;
+
+| wom_user_userprofile_generated_feeds | CREATE TABLE `wom_user_userprofile_generated_feeds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userprofile_id` int(11) NOT NULL,
+  `generatedfeed_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `wom_user_userprofile_gener_userprofile_id_736366e217553f5b_uniq` (`userprofile_id`,`generatedfeed_id`),
+  KEY `wom_user_userprofile_generated_feeds_1be3128f` (`userprofile_id`),
+  KEY `wom_user_userprofile_generated_feeds_c33d926` (`generatedfeed_id`),
+  CONSTRAINT `generatedfeed_id_refs_id_368455b7108f6622` FOREIGN KEY (`generatedfeed_id`) REFERENCES `wom_tributary_generatedfeed` (`id`),
+  CONSTRAINT `userprofile_id_refs_id_2e0c886312cf281b` FOREIGN KEY (`userprofile_id`) REFERENCES `20190512_071145__wom_user_userprofile__20190512_064125` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci |
+
+TO DO:
+
+ALTER TABLE wom_user_userprofile_generated_feeds DROP FOREIGN KEY userprofile_id_refs_id_2e0c886312cf281b;
+ALTER TABLE wom_user_userprofile_generated_feeds ADD CONSTRAINT userprofile_id_refs_id_2e0c886312cf281b FOREIGN KEY (userprofile_id) REFERENCES wom_user_userprofile(id);
