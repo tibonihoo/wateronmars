@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'TwitterTimeline.twitter_user_access_info'
-        db.alter_column('wom_tributary_twittertimeline', 'twitter_user_access_info_id', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['wom_tributary.TwitterUserInfo']))
+        db.alter_column('wom_tributary_twittertimeline', 'twitter_user_access_info_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wom_tributary.TwitterUserInfo']))
 
     def backwards(self, orm):
 
