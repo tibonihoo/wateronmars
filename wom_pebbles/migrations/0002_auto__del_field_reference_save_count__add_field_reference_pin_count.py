@@ -8,23 +8,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Reference.save_count'
-        db.delete_column('wom_pebbles_reference', 'save_count')
-
-        # Adding field 'Reference.pin_count'
-        db.add_column('wom_pebbles_reference', 'pin_count',
-                      self.gf('django.db.models.fields.IntegerField')(default=0),
-                      keep_default=False)
+        # Rename field 'Reference.save_count' to 'Reference.pin_count'
+        db.rename_column('wom_pebbles_reference', 'save_count', 'pin_count')
 
 
     def backwards(self, orm):
-        # Adding field 'Reference.save_count'
-        db.add_column('wom_pebbles_reference', 'save_count',
-                      self.gf('django.db.models.fields.IntegerField')(default=0),
-                      keep_default=False)
-
-        # Deleting field 'Reference.pin_count'
-        db.delete_column('wom_pebbles_reference', 'pin_count')
+        # Rename field 'Reference.pin_count' to 'Reference.save_count'
+        db.rename_column('wom_pebbles_reference', 'pin_count', 'save_count')
 
 
     models = {
