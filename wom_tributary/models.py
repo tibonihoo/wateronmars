@@ -83,8 +83,6 @@ class TwitterTimeline(models.Model):
   # to be sure we don't fill a timeline while benefiting
   # from credentials of another user)
   twitter_user_access_info = models.ForeignKey(TwitterUserInfo,
-                                                 null=True,
-                                                 default=None,
                                                  on_delete=models.CASCADE)
 
 

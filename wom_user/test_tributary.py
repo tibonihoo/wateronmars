@@ -170,7 +170,8 @@ class TwitterAuthPageTest(TestCase):
                 last_update_check=self.stub_date)
             TwitterTimeline.objects.create(
                 username=tw_uname,
-                generated_feed=feed)
+                generated_feed=feed,
+                twitter_user_access_info=info)
             p.generated_feeds.add(feed)
         p.save()
     
