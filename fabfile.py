@@ -62,14 +62,14 @@ def deploy():
         except ConfigParser.NoOptionError:
             pass
 
-def fab8():
+def style_check():
     local("flake8 --ignore=E501,E111,E121 ./ --exclude=utils/,.git,__pycache__")
 
 
-def cov_report():
+def test_coverage():
     local('coverage report --omit "/tmp/*,_*,*/venv/*,*/migrations/*"')
 
-def reset_schema(app_name):
+def schema_reset(app_name):
     migration_dir = os.path.join("./",app_name,"migrations")
     if os.path.isdir(migration_dir):
         print("Cleanup past migrations for {0}".format(app_name))
@@ -79,7 +79,7 @@ def reset_schema(app_name):
     print("""Don't forget that to cancel previous migrations of the actual db (if any) with:
   python manage.py migrate {0} zero""".format(app_name))
 
-def update_schema(app_name=None):
+def schema_update(app_name=None):
     app_selection = [app_name] if app_name else DJANGO_APPS
     for app in app_selection:
         try:
@@ -92,7 +92,7 @@ def update_schema(app_name=None):
 
 def db_reset():
     for app_name in DJANGO_APPS:
-        reset_schema(app_name)
+        schema_reset(app_name)
     # Just in case we're using a local sql3 db, remove it for
     # proper reset (in other cases, cleaning out the db must be
     # done before calling this script)
@@ -110,14 +110,14 @@ def db_update():
     local("python manage.py syncdb")
     local("python manage.py migrate")
 
-def trans_gen(lang):
+def transl_gen(lang):
     os.chdir("wom_user")
     try:
         local("python ../manage.py makemessages -l {0}".format(lang))
     finally:
         os.chdir("..")
 
-def trans_compile(lang):
+def transl_compile(lang):
     os.chdir("wom_user")
     try:
         local("python ../manage.py compilemessages -l {0}".format(lang))
