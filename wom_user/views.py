@@ -477,6 +477,7 @@ def user_tributary_twitter_add(request,owner_name):
     src_info = None
   form = UserTwitterSourceAdditionForm(
     request.user, src_info,
+    initial={"title": "Home timeline", "username": owner_name},
     error_class=CustomErrorList)
   if src_info and form.is_valid():
     form.save()

@@ -24,17 +24,17 @@
 
 <ul class="list-unstyled">
   {% for timeline_info in twitter_timelines_recap %}
-  <li> <i class="glyphicon glyphicon-paperclip"
-          style="padding-right:.5em;"></i>
-    {{timeline_info.feed.title}}
+  <li>
     {% if timeline_info.fetchable %}
     &#x2713;
     {% else %}
     &#x2205;
     {% endif %}
+    {{timeline_info.feed.title}}
   </li>
   {% endfor %}
 </ul>
+<p><a href="{% url wom_user.views.user_tributary_twitter_add visitor_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Follow another twitter timeline." %}</a></p>
 {% else %}
 <div class="alert alert-info alert-dismissable">
   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
