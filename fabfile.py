@@ -46,6 +46,7 @@ def test():
 def deploy_demo():
     local("git pull --rebase heroku master")
     local("git push heroku master")
+    local("heroku run \"python manage.py migrate\"")
 
 def deploy():
     user_host_conf = lambda x: USER_CONF.get("{0}@{1}".format(env.user,env.host),x)
