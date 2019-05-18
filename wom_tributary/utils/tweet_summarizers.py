@@ -69,7 +69,9 @@ def build_content_excerpt(content_unicode):
 def encode_and_fix_format(content_unicode):
   content_encoded = content_unicode.encode("utf-8")
   if sys.version_info.major == 2:
-    return str(content_encoded)[2:-1]
+    s = str(content_encoded)
+    if s.startswith("b'"):
+      return s[2:-1]
   else:
     return content_encoded
 
