@@ -54,7 +54,7 @@ class Tweet:
     matches = HASHTAG_REGEX.findall(content)
     if not matches:
       matches = SUBJECT_REGEX.findall(content)
-    tags = [encode_and_fix_format(m[1]).strip() for m in matches]
+    tags = [encode_and_fix_format(m[1]).strip() for m in matches if len(m)>1]
     content_summary = encode_and_fix_format(
         build_content_excerpt(content))
     return Tweet(link, content_summary, author, date, tags)
@@ -108,9 +108,10 @@ def group_tweets_by_author(tweets):
 
 def build_reverse_index_cloud(reverse_index):
   freqs = list(sorted(len(t) for t in reverse_index.values()))
+  num_reqs = len(freqs)
   num_quantiles = 10
-  quantile_length = int(len(freqs)/float(num_quantiles))
-  threshold_index = (num_quantiles-1)*quantile_length
+  quantile_length = int(num_reqs/float(num_quantiles))
+  threshold_index = min(num_reqs-1, (num_quantiles-1)*quantile_length)
   max_quantile = freqs[threshold_index]
   html_entries = []
   for entry, tweets in reverse_index.items():
