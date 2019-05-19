@@ -136,7 +136,7 @@ class UserBookmarkAdditionForm(forms.Form):
         bookmarked_ref.save()
         bookmarked_ref.sources.add(ref_src)
         bookmarked_ref.save()
-    with transaction.commit_on_success():
+    with transaction.atomic():
       try:
         bmk = UserBookmark.objects.get(owner=self.user,reference=bookmarked_ref)
       except ObjectDoesNotExist:
@@ -158,11 +158,11 @@ class UserBookmarkAdditionForm(forms.Form):
       if new_comment!=bmk.comment:
         bmk.comment = new_comment
         bmk.save()
-    with transaction.commit_on_success():
+    with transaction.atomic():
       if ref_src not in self.user.userprofile.sources.all():
         self.user.userprofile.sources.add(ref_src)
         self.user.userprofile.save()
-    with transaction.commit_on_success():
+    with transaction.atomic():
       for rust in ReferenceUserStatus\
         .objects.filter(owner=self.user,
                         reference=bookmarked_ref).all():
@@ -275,7 +275,7 @@ class UserSourceAdditionForm(forms.Form):
       new_feed.last_update_check = datetime.utcfromtimestamp(0)\
                                            .replace(tzinfo=timezone.utc)
       new_feed.save()
-    with transaction.commit_on_success():
+    with transaction.atomic():
       source_ref.add_pin()
       source_ref.save()
       self.user.userprofile.sources.add(source_ref)
@@ -371,7 +371,7 @@ class UserTwitterSourceAdditionForm(forms.Form):
     any_twitter_sources = Reference.objects.filter(
       url = source_url,
       ).all()
-    with transaction.commit_on_success():
+    with transaction.atomic():
       if any_twitter_sources:
         twitter_source = any_twitter_sources[0]
       else:
@@ -380,7 +380,7 @@ class UserTwitterSourceAdditionForm(forms.Form):
           pub_date=source_pub_date)
       twitter_source.add_pin()
       twitter_source.save()
-    with transaction.commit_on_success():
+    with transaction.atomic():
       new_feed = GeneratedFeed(
         provider=provider,
         source=twitter_source, title=form_title)
@@ -390,7 +390,7 @@ class UserTwitterSourceAdditionForm(forms.Form):
         .replace(tzinfo=timezone.utc)
         )
       new_feed.save()
-    with transaction.commit_on_success():
+    with transaction.atomic():
       new_twitter = TwitterTimeline(
         username=form_username,
         generated_feed=new_feed,

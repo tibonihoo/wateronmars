@@ -22,7 +22,8 @@ from django.db import models
 from django.db import transaction
 
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
+
 
 from django.contrib.auth.models import User
 
@@ -59,7 +60,7 @@ class ClassificationData(models.Model):
   
   content_type = models.ForeignKey(ContentType)
   object_id = models.PositiveIntegerField()
-  content_object = generic.GenericForeignKey('content_type', 'object_id')
+  content_object = GenericForeignKey('content_type', 'object_id')
   
   def __unicode__(self):
     return u"%s>%s: %s" % (self.owner.username,
@@ -129,7 +130,7 @@ def set_item_tag_names(user,item,names):
     else:
       t = Tag(name=tag_name)
       new_tags.append(t)
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for t in new_tags:
       t.save()
   return set_item_tags(user,item,tag_list+new_tags)

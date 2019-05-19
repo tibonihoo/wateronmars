@@ -76,7 +76,7 @@ def schema_reset(app_name):
         print("Cleanup past migrations for {0}".format(app_name))
         shutil.rmtree(migration_dir)
     print("Initialize the migration data for {0}".format(app_name))
-    local("python manage.py schemamigration {0} --initial".format(app_name))
+    local("python manage.py makemigrations {0} --initial".format(app_name))
     print("""Don't forget that to cancel previous migrations of the actual db (if any) with:
   python manage.py migrate {0} zero""".format(app_name))
 
@@ -84,7 +84,7 @@ def schema_update(app_name=None):
     app_selection = [app_name] if app_name else DJANGO_APPS
     for app in app_selection:
         try:
-            local("python manage.py schemamigration {0} --auto".format(app))
+            local("python manage.py makemigrations {0} --auto".format(app))
         except:
             if app_name is None:
                 pass
@@ -104,11 +104,9 @@ WARNING: Make sure to clean any db used by Django before the reset !""")
         print("Remove db.sql3")
         os.remove("./db.sql3")
     print("Setup the base db")
-    local("python manage.py syncdb")
     local("python manage.py migrate")
     
 def db_update():
-    local("python manage.py syncdb")
     local("python manage.py migrate")
 
 def transl_gen(lang):

@@ -54,7 +54,7 @@ class UserProfileViewTest(TestCase):
   def test_get_html_user_profile(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="A",password="pA"))
-    resp = self.client.get(reverse("wom_user.views.user_profile"))
+    resp = self.client.get(reverse("user_profile"))
     self.assertEqual(200,resp.status_code)
     self.assertIn("profile.html",[t.name for t in resp.templates])
     self.assertIn("username", resp.context)
@@ -65,5 +65,5 @@ class UserProfileViewTest(TestCase):
     self.assertIn("source_add_bookmarklet", resp.context)
 
   def test_get_html_anonymous_profile(self):
-    resp = self.client.get(reverse("wom_user.views.user_profile"))
+    resp = self.client.get(reverse("user_profile"))
     self.assertEqual(302,resp.status_code)

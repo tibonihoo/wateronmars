@@ -18,12 +18,13 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import json
+
 from datetime import datetime
 from django.utils import timezone
 from django.utils.http import urlunquote_plus
 
 from django.conf import settings
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -42,9 +43,8 @@ from django.http import HttpResponseForbidden
 from django.http import HttpResponseNotFound
 from django.http import QueryDict
 
-from django.shortcuts import render_to_response
-from django.utils import simplejson
-from django.forms.util import ErrorList
+from django.shortcuts import render
+from django.forms.utils import ErrorList
 from django.db import transaction
 
 from django.views.decorators.http import require_http_methods
@@ -148,17 +148,17 @@ def add_base_template_context_data(d,visitor_name, owner_name):
   })
   return d
 
-def is_request_a_form_POST(request):
+def contains_form_data(request):
   """Guesses whether the request comes from a form's POST action.
   Assumes the form is built with Django's conventions."""
-  return request.POST and u"next" in request.POST
+  return bool(request.POST)
 
 def clean_checkbox_value(request, post_data, checkbox_name, current_value):
   """Chose between leaving the current_value untouched or considering it
   changed to False for a checkbox field, handling the case when is it
   not present in a form's POST data."""
   if checkbox_name not in post_data:
-    if is_request_a_form_POST(request):
+    if contains_form_data(request):
       # For a form's POST, the unchecked checkbox won't appear in
       # the request
       post_data[checkbox_name] = False
@@ -179,8 +179,7 @@ def home(request):
   d = add_base_template_context_data({},
                                      request.user.username,
                                      request.user.username)
-  return render_to_response('home.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'home.html', d)
 
 
 def request_for_update(request):
@@ -194,12 +193,12 @@ def request_for_update(request):
   if settings.DEMO:
     # keep only a short number of refs (the most recent)
     # to avoid bloating the demo
-    with transaction.commit_on_success():
+    with transaction.atomic():
       for ref in list(Reference.objects\
                       .filter(pin_count=0)\
                       .order_by("-pub_date")[MAX_ITEMS_PER_PAGE:]):
         ref.delete()
-  return HttpResponseRedirect(reverse("wom_user.views.home"))
+  return HttpResponseRedirect(reverse("home"))
 
 
 def request_for_cleanup(request):
@@ -207,7 +206,7 @@ def request_for_cleanup(request):
   (past an arbitrary delay).
   """
   delete_old_unpinned_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
-  return HttpResponseRedirect(reverse("wom_user.views.home"))
+  return HttpResponseRedirect(reverse("home"))
 
 
 
@@ -218,7 +217,7 @@ User-agent: *
 Disallow: /u/*/river
 Disallow: /u/*/sieve
 Disallow: /accounts
-""",mimetype='text/plain')
+""", content_type='text/plain')
 
 def get_humans_txt(request):
   """Generate a set of humans.txt rules. See also http://humanstxt.org/."""
@@ -235,15 +234,15 @@ def get_humans_txt(request):
   License: Affero GPLv3
   Components: Twitter Bootstrap, mousetrap.js, jQuery, Infinite Ajax Scroll, TouchSwipe-Jquery-Plugin.
   Software: Django, Emacs, Firefox, Firebug, Inkscape
-""" % (HUMANS_TEAM, HUMANS_THANKS),mimetype='text/plain')
+""" % (HUMANS_TEAM, HUMANS_THANKS), content_type='text/plain')
 
   
 def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):
-  return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&comment='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_collection_add',args=(owner_name,)))
+  return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&comment='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('user_collection_add',args=(owner_name,)))
 
 
 def generate_source_add_bookmarklet(base_url_with_domain,owner_name):
-  return r"javascript:ref=location.href;t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t);" % (base_url_with_domain.rstrip("/"),reverse('wom_user.views.user_river_source_add',args=(owner_name,)))
+  return r"javascript:ref=location.href;t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t);" % (base_url_with_domain.rstrip("/"),reverse('user_river_source_add',args=(owner_name,)))
 
 
 class CustomErrorList(ErrorList):
@@ -265,15 +264,13 @@ def user_creation(request):
     form = UserProfileCreationForm(request.POST, error_class=CustomErrorList)
     if form.is_valid():
       form.save()
-      return HttpResponseRedirect(reverse('wom_user.views.user_profile',
+      return HttpResponseRedirect(reverse('user_profile',
                                           args=(request.user.username,)))
   elif request.method == 'GET':
     form = UserProfileCreationForm(error_class=CustomErrorList)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
-  return render_to_response('user_creation.html',
-                            {'form': form},
-                            context_instance=RequestContext(request))
+  return render(request, 'user_creation.html', {'form': form})
 
 
 @login_required(login_url=settings.LOGIN_URL)
@@ -288,16 +285,15 @@ def user_profile(request):
       'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
       'is_superuser': request.user.is_superuser,
       },request.user.username,request.user.username)
-  return render_to_response('profile.html', d,
-                            context_instance=RequestContext(request))
+  return render(request, 'profile.html', d)
 
 
 def user_logout(request):
     logout(request)
-    return HttpResponseRedirect(reverse("wom_user.views.home"))
+    return HttpResponseRedirect(reverse("home"))
 
 def user_root(request,owner_name):
-  return HttpResponseRedirect(reverse("wom_user.views.user_river_view", args=(owner_name,)))
+  return HttpResponseRedirect(reverse("user_river_view", args=(owner_name,)))
 
 
 def handle_uploaded_opml(opmlUploadedFile,user):
@@ -315,15 +311,14 @@ def user_upload_opml(request,owner_name):
                               error_class=CustomErrorList)
     if form.is_valid():
       handle_uploaded_opml(request.FILES['opml_file'],user=request.user)
-      return HttpResponseRedirect(reverse("wom_user.views.user_river_sources",
+      return HttpResponseRedirect(reverse("user_river_sources",
                                           args=(request.user.username,)))
   else:
     form = OPMLFileUploadForm(error_class=CustomErrorList)
   d = add_base_template_context_data({'form': form},
                                      request.user.username,
                                      request.user.username)
-  return render_to_response('opml_upload.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'opml_upload.html', d)
 
 
 
@@ -349,15 +344,14 @@ def user_upload_nsbmk(request,owner_name):
                                     error_class=CustomErrorList)
     if form.is_valid():
       handle_uploaded_nsbmk(request.FILES['bookmarks_file'],user=request.user)
-      return HttpResponseRedirect(reverse("wom_user.views.user_collection",
+      return HttpResponseRedirect(reverse("user_collection",
                                           args=(request.user.username,)))
   else:
     form = NSBookmarkFileUploadForm(error_class=CustomErrorList)
   d = add_base_template_context_data({'form': form},
                                      request.user.username,
                                      request.user.username)
-  return render_to_response('nsbmk_upload.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'nsbmk_upload.html', d)
 
 
 @loggedin_and_owner_required
@@ -380,21 +374,20 @@ def user_river_source_add(request,owner_name):
                                 error_class=CustomErrorList)
   if src_info and form.is_valid():
     form.save()
-    return HttpResponseRedirect(reverse('wom_user.views.user_river_sources',
+    return HttpResponseRedirect(reverse('user_river_sources',
                                         args=(request.user.username,)))
   d = add_base_template_context_data(
     {'form': form,
      'REST_PARAMS': ','.join(UserSourceAdditionForm.base_fields.keys())},
     request.user.username,request.user.username)
-  return render_to_response('source_addition.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'source_addition.html', d)
 
 
 @loggedin_and_owner_required
 @require_http_methods(["GET"])
 def user_tributary(request, owner_name):
   # FUTURE: if there is more than twitter plugged in, display a list of possible tributaries
-  return HttpResponseRedirect(reverse('wom_user.views.user_tributary_twitter', args=(request.user.username,)))
+  return HttpResponseRedirect(reverse('user_tributary_twitter', args=(request.user.username,)))
 
 
 class TwitterTimelineInfo:
@@ -417,7 +410,7 @@ def user_auth_landing_twitter(request):
     get_twitter_auth_status(
       twitter_info, request
       )
-    return HttpResponseRedirect(reverse('wom_user.views.user_tributary_twitter', args=(request.user.username,)))
+    return HttpResponseRedirect(reverse('user_tributary_twitter', args=(request.user.username,)))
   else:
     return HttpResponseNotFound("Couldn't find twitter info to update.")
 
@@ -451,9 +444,7 @@ def user_tributary_twitter(request, owner_name):
     'twitter_oauth_status': twitter_status,
     'twitter_timelines_recap': twitter_timelines_recap,
   }, request.user.username, owner_name)
-  return render_to_response(
-    'tributary_twitter.html',d,
-    context_instance=RequestContext(request))
+  return render(request, 'tributary_twitter.html', d)
 
 @loggedin_and_owner_required
 @csrf_protect
@@ -477,13 +468,12 @@ def user_tributary_twitter_add(request,owner_name):
     error_class=CustomErrorList)
   if src_info and form.is_valid():
     form.save()
-    return HttpResponseRedirect(reverse('wom_user.views.user_tributary_twitter', args=(request.user.username,)))
+    return HttpResponseRedirect(reverse('user_tributary_twitter', args=(request.user.username,)))
   d = add_base_template_context_data(
     {'form': form,
      'REST_PARAMS': ','.join(UserTwitterSourceAdditionForm.base_fields.keys())},
     request.user.username,request.user.username)
-  return render_to_response('twitter_source_addition.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'twitter_source_addition.html', d)
 
 def prepare_reference_form(request, reference_url, reference_query_set):
   """Return a tuple: (reference, form) with the form showing all
@@ -494,12 +484,12 @@ def prepare_reference_form(request, reference_url, reference_query_set):
   formatted body.
   """
   form_data = []
-  if request.POST:
-    if is_request_a_form_POST(request):
+  if request.method == "POST":
+    if contains_form_data(request):
       form_data.append(request.POST.copy())
     else:
       try:
-        src_info = simplejson.loads(request.body)
+        src_info = json.loads(request.body)
       except Exception:
         src_info = {}
       if not src_info:
@@ -544,13 +534,13 @@ def user_river_source_item(request, owner_name, source_url):
     return reduce(lambda currentValidity, nextForm: currentValidity and nextForm.is_valid(), feedForms.values(), True)
   def optOutFormsSave():
     return [f.save() for f in feedForms.values()]
-  if request.POST:
+  if request.method == "POST":
     if settings.READ_ONLY:
       return HttpResponseForbidden("Source editting is not possible in READ_ONLY mode.")
     if form.is_valid() and optOutFormsAreValid():
       form.save()
       optOutFormsSave()
-      return HttpResponseRedirect(reverse('wom_user.views.user_river_source_item',
+      return HttpResponseRedirect(reverse('user_river_source_item',
                                           args=(request.user.username, source_url)))
   d = add_base_template_context_data(
     { 
@@ -560,8 +550,7 @@ def user_river_source_item(request, owner_name, source_url):
       'ref_title': reference.title,
     },
     request.user.username,request.user.username)
-  return render_to_response('source_edit.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'source_edit.html', d)
 
 @loggedin_and_owner_required
 @csrf_protect
@@ -582,14 +571,13 @@ def user_collection_add(request,owner_name):
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
   if bmk_info and form.is_valid():
     form.save()
-    return HttpResponseRedirect(reverse('wom_user.views.user_collection',
+    return HttpResponseRedirect(reverse('user_collection',
                                         args=(request.user.username,)))
   d = add_base_template_context_data(
     {'form': form,
      'REST_PARAMS': ','.join(UserBookmarkAdditionForm.base_fields.keys())},
     request.user.username,request.user.username)
-  return render_to_response('bookmark_addition.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'bookmark_addition.html', d)
   
 
 @loggedin_and_owner_required
@@ -607,7 +595,7 @@ def post_to_user_collection(request,owner_name):
   if settings.READ_ONLY:
     return HttpResponseForbidden("Bookmark addition is not possible in READ_ONLY mode.")
   try:
-    bmk_info = simplejson.loads(request.body)
+    bmk_info = json.loads(request.body)
   except Exception:
     bmk_info = {}
   if not u"url" in bmk_info:
@@ -621,8 +609,8 @@ def post_to_user_collection(request,owner_name):
   else:
     response_dict["status"] = u"error"
     response_dict["form_fields_ul"] = form.as_ul()
-  return HttpResponse(simplejson.dumps(response_dict),
-                      mimetype='application/json')
+  return HttpResponse(json.dumps(response_dict),
+                      content_type='application/json')
 
 
 @check_and_set_owner
@@ -653,12 +641,9 @@ def get_user_collection(request,owner_name):
         request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, owner_name)
   if expectedFormat=="ns-bmk-list":
-    return render_to_response('collection_nsbmk.html',d,
-                              context_instance=RequestContext(request),
-                              mimetype="text/html")
+    return render(request, 'collection_nsbmk.html', d, content_type="text/html")
   else:
-    return render_to_response('collection.html',d,
-                              context_instance=RequestContext(request))
+    return render(request, 'collection.html', d)
 
 
 def user_collection(request,owner_name):
@@ -694,13 +679,13 @@ def user_collection_item(request, owner_name, reference_url):
   bmk_form = UserBookmarkEditForm(*form_data, instance=bookmark,
                                   error_class = CustomErrorList,
                                   prefix = "bmk")
-  if request.POST:
+  if request.method == "POST":
     if settings.READ_ONLY:
       return HttpResponseForbidden("Reference editting is not possible in READ_ONLY mode.")
     if form.is_valid() and bmk_form.is_valid():
       form.save()
       bmk_form.save()
-      return HttpResponseRedirect(reverse('wom_user.views.user_collection_item',
+      return HttpResponseRedirect(reverse('user_collection_item',
                                           args=(request.user.username, reference_url)))
   d = add_base_template_context_data(
     { 
@@ -714,8 +699,7 @@ def user_collection_item(request, owner_name, reference_url):
       'ref_tags': sorted(bookmark.get_tag_names())
     },
     request.user.username,request.user.username)
-  return render_to_response('bookmark_edit.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'bookmark_edit.html', d)
 
 
 @check_and_set_owner
@@ -736,8 +720,7 @@ def user_river_view(request,owner_name):
     'news_items': news_items,
     'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
   }, request.user.username, owner_name)
-  return render_to_response('river.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'river.html', d)
 
 
 def generate_user_sieve(request,owner_name):
@@ -755,13 +738,12 @@ def generate_user_sieve(request,owner_name):
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
       'num_unread_references': num_unread,
-      'user_collection_url': reverse("wom_user.views.user_collection",
+      'user_collection_url': reverse("user_collection",
                                      args=(request.user.username,)),
       'source_add_bookmarklet': generate_source_add_bookmarklet(
         request.build_absolute_uri("/"),request.user.username),
       }, request.user.username, request.user.username)
-  return render_to_response('sieve.html',d,
-                            context_instance=RequestContext(request))
+  return render(request, 'sieve.html', d)
 
 
 def apply_to_user_sieve(request,owner_name):
@@ -782,7 +764,7 @@ def apply_to_user_sieve(request,owner_name):
   if settings.READ_ONLY:
     return HttpResponseForbidden("Changing the sieve's state is not possible in READ_ONLY mode.")
   try:
-    action_dict = simplejson.loads(request.body)
+    action_dict = json.loads(request.body)
   except:
     action_dict = {}
   action_name = action_dict.get(u"action")
@@ -798,12 +780,12 @@ def apply_to_user_sieve(request,owner_name):
   for rust in rust_iterator:
     rust.has_been_read = True
     modified_rust.append(rust)
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for r in modified_rust:
       r.save()
   count = len(modified_rust)
   response_dict = {u"action": action_name, u"status": u"success", u"count": count}
-  return HttpResponse(simplejson.dumps(response_dict), mimetype='application/json')
+  return HttpResponse(json.dumps(response_dict), content_type='application/json')
 
   
 
@@ -849,17 +831,14 @@ def user_river_sources(request,owner_name):
         }, request.user.username, owner_name)
     expectedFormat = request.GET.get("format","html")
     if expectedFormat.lower()=="opml":
-      return render_to_response('sources_opml.xml',d,
-                                context_instance=RequestContext(request),
-                                mimetype="text/x-opml")
+      return render(request, 'sources_opml.xml', d, content_type="text/x-opml")
     else:
-      return render_to_response('sources.html',d,
-                                context_instance=RequestContext(request))
+      return render(request, 'sources.html', d)
   elif request.user != request.owner_user:
     return HttpResponseForbidden()
   elif request.method == 'POST':
     try:
-      src_info = simplejson.loads(request.body)
+      src_info = json.loads(request.body)
     except Exception:
       src_info = {}
     if not u"url" in src_info:

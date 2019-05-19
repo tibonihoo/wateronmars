@@ -17,7 +17,7 @@
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form class="form-horizontal" role="form" action="{% url wom_user.views.user_river_source_add visitor_name %}" method="post">
+<form class="form-horizontal" role="form" action="{% url 'user_river_source_add' visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}
@@ -37,6 +37,6 @@
   </div>
 </form>
 
-{% url wom_user.views.user_river_sources visitor_name as river_url %}
+{% url 'user_river_sources' visitor_name as river_url %}
 <p class="help-block">{% blocktrans %}If you want to subscribe to a source using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{{ river_url }}">the sources URL</a>:{% endblocktrans %} <code>{{ REST_PARAMS }}</code></p>
 {% endblock %}

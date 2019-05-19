@@ -14,18 +14,18 @@
   <p>
 {% if visitor_name %}
 <p>
-  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sources visitor_name %}" title="{% trans "Your Sources" %}"><i class="glyphicon glyphicon-book" style="margin-right: 1em"></i>{% trans "Check your sources." %}</a>
+  <a class="btn btn-primary btn-lg" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Your Sources" %}"><i class="glyphicon glyphicon-book" style="margin-right: 1em"></i>{% trans "Check your sources." %}</a>
 </p>
 <p>
-<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_view visitor_name %}" title="{% trans "Your River" %}"><i class="glyphicon glyphicon-align-left" style="margin-right: 1em"></i>{% trans "Watch your river of news." %}</a>
+<a class="btn btn-primary btn-lg" href="{% url 'user_river_view' visitor_name %}" title="{% trans "Your River" %}"><i class="glyphicon glyphicon-align-left" style="margin-right: 1em"></i>{% trans "Watch your river of news." %}</a>
 </p>
-<a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_river_sieve visitor_name %}" title="{% trans "Your Sieve" %}"><i class="glyphicon glyphicon-filter" style="margin-right: 1em"></i>{% trans "Sift the best pieces out." %}</a>
+<a class="btn btn-primary btn-lg" href="{% url 'user_river_sieve' visitor_name %}" title="{% trans "Your Sieve" %}"><i class="glyphicon glyphicon-filter" style="margin-right: 1em"></i>{% trans "Sift the best pieces out." %}</a>
 </p>
 <p>
-  <a class="btn btn-primary btn-lg" href="{% url wom_user.views.user_collection visitor_name %}" title="{% trans "Your Collection" %}"><i class="glyphicon glyphicon-bookmark" style="margin-right: 1em"></i>{% trans "Browse your bookmarks." %}</a>
+  <a class="btn btn-primary btn-lg" href="{% url 'user_collection' visitor_name %}" title="{% trans "Your Collection" %}"><i class="glyphicon glyphicon-bookmark" style="margin-right: 1em"></i>{% trans "Browse your bookmarks." %}</a>
 </p>
 {% else %}
-<a class="btn btn-primary btn-lg" href="{% url django.contrib.auth.views.login %}" title="{% trans "Login" %}"><i class="glyphicon glyphicon-user" style="margin-right: 1em"></i>{% trans "Login" %}</a>
+<a class="btn btn-primary btn-lg" href="{% url 'user_login' %}" title="{% trans "Login" %}"><i class="glyphicon glyphicon-user" style="margin-right: 1em"></i>{% trans "Login" %}</a>
 {% demo_info %}
 {% endif %}
 </div>

@@ -165,7 +165,7 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
                             set(bmk_info.get("tags","").split(",")),
                             bmk_info.get("private","0")=="0")
     ref_and_metadata.append((ref,meta))
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for ref in new_refs:
       ref.save()
       ref.sources.add(common_source)

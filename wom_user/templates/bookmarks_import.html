@@ -19,7 +19,7 @@
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form role="form" action="{% url wom_user.views.user_upload_nsbmk visitor_name %}" method="post" enctype="multipart/form-data">
+<form role="form" action="{% url 'user_upload_nsbmk' visitor_name %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}

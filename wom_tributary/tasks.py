@@ -134,7 +134,7 @@ def add_new_reference_from_tweeter_timeline_summary(
       title,
       date,
       previous_ref)
-  with transaction.commit_on_success():
+  with transaction.atomic():
     try:
       r.save()
     except Exception,e:

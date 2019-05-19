@@ -18,10 +18,11 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import json
+
 from datetime import datetime
 from datetime import timedelta
 from django.utils import timezone
-from django.utils import simplejson
 
 from django.core.urlresolvers import reverse
 
@@ -136,9 +137,9 @@ class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
     Send the request as a JSON loaded POST (a redirect is expected
     in case of success).
     """
-    resp = self.client.post(reverse("wom_user.views.user_river_sources",
+    resp = self.client.post(reverse("user_river_sources",
                     kwargs={"owner_name":username}),
-                simplejson.dumps(optionsDict),
+                json.dumps(optionsDict),
                 content_type="application/json")
     self.assertEqual(expectedStatusCode,resp.status_code)
     return resp
@@ -147,7 +148,7 @@ class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
-    resp = self.client.get(reverse("wom_user.views.user_river_sources",
+    resp = self.client.get(reverse("user_river_sources",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(200, resp.status_code)
     self.assertIn("visitor_name",resp.context)
@@ -299,7 +300,7 @@ class UserRiverViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # request uA's river
-        resp = self.client.get(reverse("wom_user.views.user_river_view",
+        resp = self.client.get(reverse("user_river_view",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
         self.assertIn("river.html",[t.name for t in resp.templates])
@@ -319,7 +320,7 @@ class UserRiverViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # request uB's river
-        resp = self.client.get(reverse("wom_user.views.user_river_view",
+        resp = self.client.get(reverse("user_river_view",
                                        kwargs={"owner_name":"uB"}))
         self.assertEqual(200,resp.status_code)
         self.assertIn("river.html",[t.name for t in resp.templates])
@@ -337,7 +338,7 @@ class UserRiverViewTest(TestCase):
         Make sure an anonymous (ie. not logged in) user can see a user's river.
         """
         # request uA's river without loging in.
-        resp = self.client.get(reverse("wom_user.views.user_river_view",
+        resp = self.client.get(reverse("user_river_view",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
         self.assertIn("river.html",[t.name for t in resp.templates])
@@ -427,7 +428,7 @@ class UserSieveViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # request uA's river
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
         self.assertIn("sieve.html",[t.name for t in resp.templates])
@@ -452,7 +453,7 @@ class UserSieveViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # request uB's river
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uB"}))
         self.assertEqual(403,resp.status_code)        
         
@@ -461,15 +462,15 @@ class UserSieveViewTest(TestCase):
         Make sure an anonymous (ie. not logged) user can see a user's river.
         """
         # request uA's river without loging in.
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(302,resp.status_code)
-        self.assertRegexpMatches(resp["Location"],
-                                 "http://\\w+"
-                                 + reverse('django.contrib.auth.views.login')
-                                 + "\\?next="
-                                 + reverse("wom_user.views.user_river_sieve",
-                                           kwargs={"owner_name":"uA"}))
+        self.assertRegexpMatches(
+            resp["Location"],
+            reverse('user_login')
+            + "\\?next="
+            + reverse("user_river_sieve",
+                          kwargs={"owner_name":"uA"}))
         
     def test_post_json_pick_item_out_of_sieve(self):
         """
@@ -478,23 +479,23 @@ class UserSieveViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # check presence of r1 reference
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         num_ref_r1 = [r.reference.url for r in items].count("http://r1")
         self.assertLessEqual(1,num_ref_r1)
         # mark the first reference as read.
-        resp = self.client.post(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.post(reverse("user_river_sieve",
                                         kwargs={"owner_name":"uA"}),
-                                simplejson.dumps({"action":"read","references":["http://r1"]}),
+                                json.dumps({"action":"read","references":["http://r1"]}),
                                 content_type="application/json")
         self.assertEqual(200,resp.status_code)
-        resp_dic = simplejson.loads(resp.content)
+        resp_dic = json.loads(resp.content)
         self.assertEqual("read",resp_dic["action"])
         self.assertEqual("success",resp_dic["status"])
         self.assertLessEqual(num_ref_r1,resp_dic["count"])
         # check absence of r1 reference
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         self.assertEqual(0,[r.reference.url for r in items].count("http://r1"))
@@ -506,7 +507,7 @@ class UserSieveViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # check presence of r1 reference
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         num_ref_r1 = [r.reference.url for r in items].count("http://r1")
@@ -514,18 +515,18 @@ class UserSieveViewTest(TestCase):
         num_ref_r3 = [r.reference.url for r in items].count("http://r3")
         self.assertLessEqual(1,num_ref_r3)
         # mark the first reference as read.
-        resp = self.client.post(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.post(reverse("user_river_sieve",
                                         kwargs={"owner_name":"uA"}),
-                                simplejson.dumps({"action":"read",
+                                json.dumps({"action":"read",
                                                   "references":["http://r1","http://r3"]}),
                                 content_type="application/json")
         self.assertEqual(200,resp.status_code)
-        resp_dic = simplejson.loads(resp.content)
+        resp_dic = json.loads(resp.content)
         self.assertEqual("read",resp_dic["action"])
         self.assertEqual("success",resp_dic["status"])
         self.assertLessEqual(num_ref_r1+num_ref_r3,resp_dic["count"])
         # check absence of r1 reference
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         self.assertEqual(0,[r.reference.url for r in items].count("http://r1"))
@@ -538,23 +539,23 @@ class UserSieveViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # check presence of r1 reference
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         num_refs = len(items)
         self.assertGreaterEqual(num_refs, 1)
         # mark the first reference as read.
-        resp = self.client.post(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.post(reverse("user_river_sieve",
                                         kwargs={"owner_name":"uA"}),
-                                simplejson.dumps({"action":"drop"}),
+                                json.dumps({"action":"drop"}),
                                 content_type="application/json")
         self.assertEqual(200,resp.status_code)
-        resp_dic = simplejson.loads(resp.content)
+        resp_dic = json.loads(resp.content)
         self.assertEqual("drop",resp_dic["action"])
         self.assertEqual("success",resp_dic["status"])
         self.assertLessEqual(num_refs,resp_dic["count"])
         # check emptyness of sieve
-        resp = self.client.get(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         self.assertEqual(0,len(items))
@@ -566,7 +567,7 @@ class UserSieveViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # mark a of uB reference as read.
-        resp = self.client.post(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.post(reverse("user_river_sieve",
                                         kwargs={"owner_name":"uA"}),
                                 "action=read,references=(http://r1)",
                                 content_type="application/json")
@@ -579,9 +580,9 @@ class UserSieveViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # mark a of uB reference as read.
-        resp = self.client.post(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.post(reverse("user_river_sieve",
                                         kwargs={"owner_name":"uB"}),
-                                simplejson.dumps({"action":"read","references":["http://r2"]}),
+                                json.dumps({"action":"read","references":["http://r2"]}),
                                 content_type="application/json")
         self.assertEqual(403,resp.status_code)
 
@@ -589,9 +590,9 @@ class UserSieveViewTest(TestCase):
         """
         Make sure an anonymous (ie. not logged) user can see a user's river.
         """
-        resp = self.client.post(reverse("wom_user.views.user_river_sieve",
+        resp = self.client.post(reverse("user_river_sieve",
                                         kwargs={"owner_name":"uA"}),
-                                simplejson.dumps({"action":"read","references":["http://r1"]}),
+                                json.dumps({"action":"read","references":["http://r1"]}),
                                 content_type="application/json")
         self.assertEqual(302,resp.status_code)
 
@@ -644,7 +645,7 @@ class UserSourcesViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # request uA's river
-        resp = self.client.get(reverse("wom_user.views.user_river_sources",
+        resp = self.client.get(reverse("user_river_sources",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
         self.assertIn("sources.html",[t.name for t in resp.templates])
@@ -671,7 +672,7 @@ class UserSourcesViewTest(TestCase):
         # login as uA and make sure it succeeds
         self.assertTrue(self.client.login(username="uA",password="pA"))
         # request uB's river
-        resp = self.client.get(reverse("wom_user.views.user_river_sources",
+        resp = self.client.get(reverse("user_river_sources",
                                        kwargs={"owner_name":"uB"}))
         self.assertEqual(200,resp.status_code)
         self.assertIn("sources.html",[t.name for t in resp.templates])
@@ -698,7 +699,7 @@ class UserSourcesViewTest(TestCase):
         Make sure an anonymous user can see users' sources.
         """
         # request uA's river
-        resp = self.client.get(reverse("wom_user.views.user_river_sources",
+        resp = self.client.get(reverse("user_river_sources",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(200,resp.status_code)
         self.assertIn("sources.html",[t.name for t in resp.templates])
@@ -725,7 +726,7 @@ class UserSourcesViewTest(TestCase):
         Make sure an anonymous user can see users' sources as OPML.
         """
         # request uA's river
-        resp = self.client.get(reverse("wom_user.views.user_river_sources",
+        resp = self.client.get(reverse("user_river_sources",
                                        kwargs={"owner_name":"uA"})+"?format=opml")
         self.assertEqual(200,resp.status_code)
         self.assertIn("sources_opml.xml",[t.name for t in resp.templates])
@@ -808,10 +809,10 @@ class UserSourceItemViewTest(TestCase):
     """
     Send the request as a JSON loaded POST.
     """
-    resp = self.client.post(reverse("wom_user.views.user_river_source_item",
+    resp = self.client.post(reverse("user_river_source_item",
                                     kwargs={"owner_name":username,
                                             "source_url": source_url}),
-                simplejson.dumps(optionsDict),
+                json.dumps(optionsDict),
                 content_type="application/json")
     self.assertEqual(expectedStatusCode,resp.status_code)
     return resp
@@ -819,7 +820,7 @@ class UserSourceItemViewTest(TestCase):
   def test_get_html_user_source(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
-    resp = self.client.get(reverse("wom_user.views.user_river_source_item",
+    resp = self.client.get(reverse("user_river_source_item",
                                    kwargs={"owner_name":"uA","source_url":self.source.url}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("source_edit.html",[t.name for t in resp.templates])
@@ -833,15 +834,15 @@ class UserSourceItemViewTest(TestCase):
 
   def test_get_html_other_user_source_is_forbidden(self):
     self.assertTrue(self.client.login(username="uB",password="pB"))
-    resp = self.client.get(reverse("wom_user.views.user_river_source_item",
+    resp = self.client.get(reverse("user_river_source_item",
                                    kwargs={"owner_name":"uA","source_url":self.source.url}))
     self.assertEqual(403,resp.status_code)
     
   def test_get_html_user_source_with_feed_has_feed_forms_filled(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
-    resp = self.client.get(reverse("wom_user.views.user_river_source_item",
-                                   kwargs={"owner_name":"uA",
+    resp = self.client.get(reverse("user_river_source_item",
+                                    kwargs={"owner_name":"uA",
                                            "source_url":self.feed_source.url}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("feed_forms", resp.context)

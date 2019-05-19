@@ -19,8 +19,9 @@
 #
 
 from datetime import datetime
+import json
+
 from django.utils import timezone
-from django.utils import simplejson
 
 from django.core.urlresolvers import reverse
 
@@ -201,7 +202,7 @@ class UserBookmarkAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # check presence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
@@ -212,10 +213,10 @@ class UserBookmarkAddTestMixin:
                   "source_url": u"http://glop",
                   "source_title": u"new name",
                   })
-    # resp_dic = simplejson.loads(resp.content)
+    # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
@@ -239,7 +240,7 @@ class UserBookmarkAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # check presence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
@@ -248,10 +249,10 @@ class UserBookmarkAddTestMixin:
                   "title": u"new title",
                   "comment": u"mouf",
                   })
-    # resp_dic = simplejson.loads(resp.content)
+    # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
@@ -274,15 +275,15 @@ class UserBookmarkAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # check presence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA", { "url": u"http://new/mouf"})
-    # resp_dic = simplejson.loads(resp.content)
+    # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
@@ -306,7 +307,7 @@ class UserBookmarkAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # check presence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
@@ -316,10 +317,10 @@ class UserBookmarkAddTestMixin:
                   "comment": u"mouf",
                   "source_url": self.source.url,
                   })
-    # resp_dic = simplejson.loads(resp.content)
+    # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
@@ -338,7 +339,7 @@ class UserBookmarkAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # check presence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
@@ -347,10 +348,10 @@ class UserBookmarkAddTestMixin:
                   "title": u"new title",
                   "comment": u"mouf",
                   })
-    # resp_dic = simplejson.loads(resp.content)
+    # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertIn(self.bkm.reference.url,
@@ -374,7 +375,7 @@ class UserBookmarkAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # check presence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
@@ -384,10 +385,10 @@ class UserBookmarkAddTestMixin:
                   "comment": u"mouf",
                   "source_url": u"http://barf",
                   })
-    # resp_dic = simplejson.loads(resp.content)
+    # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertIn(self.bkm.reference.url,
@@ -413,7 +414,7 @@ class UserBookmarkAddTestMixin:
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # check presence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
@@ -424,10 +425,10 @@ class UserBookmarkAddTestMixin:
                   "source_url": self.source.url,
                   "source_title": u"new name",
                   })
-    # resp_dic = simplejson.loads(resp.content)
+    # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertIn(self.bkm.reference.url,
@@ -475,7 +476,7 @@ class UserBookmarkAddTestMixin:
                "source_url": u"http://samesame",
                "source_title": u"same title",
                })
-    resp = self.client.get(reverse("wom_user.views.user_collection",
+    resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     new_item_candidates = [b.reference for b in resp.context["user_bookmarks"] \
                            if b.reference.url == u"http://samesame"]
@@ -493,9 +494,9 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     """
     Send the request as a JSON loaded POST.
     """
-    resp = self.client.post(reverse("wom_user.views.user_collection",
+    resp = self.client.post(reverse("user_collection",
                     kwargs={"owner_name":username}),
-                simplejson.dumps(optionsDict),
+                json.dumps(optionsDict),
                 content_type="application/json")
     self.assertEqual(expectedStatusCode,resp.status_code)
     return resp
@@ -506,7 +507,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
                       password="pA"))
     # request uA's collection
     resp = self.client.get(
-      reverse("wom_user.views.user_collection",
+      reverse("user_collection",
           kwargs={"owner_name":"uA"}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("collection.html",
@@ -531,7 +532,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
                       password="pA"))
     # request uB's collection
     resp = self.client.get(
-      reverse("wom_user.views.user_collection",
+      reverse("user_collection",
           kwargs={"owner_name":"uB"}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("collection.html",
@@ -547,7 +548,7 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
   def test_get_html_anonymous_returns_all(self):
     # request uA's collection
     resp = self.client.get(
-      reverse("wom_user.views.user_collection",
+      reverse("user_collection",
           kwargs={"owner_name":"uA"}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("collection.html",
@@ -570,7 +571,7 @@ class UserCollectionAddTest(TestCase,UserBookmarkAddTestMixin):
     """
     Send the request as a GET with some url parameters.
     """
-    url = reverse("wom_user.views.user_collection_add",
+    url = reverse("user_collection_add",
             kwargs={"owner_name":username})\
             +"?"+"&".join(\
       "%s=%s" % t for t in optionsDict.items())
@@ -615,10 +616,10 @@ class UserBookmarkViewTest(TestCase):
     """
     Send the request as a JSON loaded POST.
     """
-    resp = self.client.post(reverse("wom_user.views.user_collection_item",
+    resp = self.client.post(reverse("user_collection_item",
                                     kwargs={"owner_name":username,
                                             "reference_url": reference_url}),
-                simplejson.dumps(optionsDict),
+                json.dumps(optionsDict),
                 content_type="application/json")
     self.assertEqual(expectedStatusCode,resp.status_code)
     return resp
@@ -626,7 +627,7 @@ class UserBookmarkViewTest(TestCase):
   def test_get_html_user_bookmark(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
-    resp = self.client.get(reverse("wom_user.views.user_collection_item",
+    resp = self.client.get(reverse("user_collection_item",
                                    kwargs={"owner_name":"uA",
                                            "reference_url":self.reference.url}))
     self.assertEqual(200,resp.status_code)
@@ -646,7 +647,7 @@ class UserBookmarkViewTest(TestCase):
 
   def test_get_html_other_user_bookmark_is_forbidden(self):
     self.assertTrue(self.client.login(username="uB",password="pB"))
-    resp = self.client.get(reverse("wom_user.views.user_collection_item",
+    resp = self.client.get(reverse("user_collection_item",
                                    kwargs={"owner_name":"uA",
                                            "reference_url":self.reference.url}))
     self.assertEqual(403,resp.status_code)
@@ -667,7 +668,7 @@ class UserBookmarkViewTest(TestCase):
     newComment = self.bkm.comment + " NEW"
     self.change_request("uA",self.reference.url,
                         {"bmk-comment": newComment}, 302)
-    self.assertEqual(newComment,
+    self.assertEqual(newComment.strip(),
                      UserBookmark.objects.get(reference=self.reference).comment)
 
   def test_change_user_bookmark_privacy_updates_privacy_in_db(self):

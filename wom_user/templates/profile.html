@@ -30,9 +30,9 @@
 
 
 <dl class="dl-horizontal">
-  {% url wom_user.views.user_river_source_add visitor_name as source_add_url %}
-  {% url wom_user.views.user_upload_opml visitor_name as upload_opml_url %}
-  {% url wom_user.views.user_river_sources owner_name as sources_url %}
+  {% url 'user_river_source_add' visitor_name as source_add_url %}
+  {% url 'user_upload_opml' visitor_name as upload_opml_url %}
+  {% url 'user_river_sources' owner_name as sources_url %}
   <dt>
       <abbr title="{% trans "Subscriptions and sites referenced by bookmarks." %}">{% trans "Sources" %}</abbr>
       &nbsp;<i class="glyphicon glyphicon-book"></i></dt>
@@ -46,7 +46,7 @@
     {% blocktrans %}<a href="{{ sources_url }}" title="Look at current sources">Check</a>.{% endblocktrans %}
     {% endif %}
   </dd>
-  {% url wom_user.views.user_river_view owner_name as river_view_url %}
+  {% url 'user_river_view' owner_name as river_view_url %}
   <dt>
     <abbr title="{% trans "A stream of fresh news with latest headlines first." %}">River</abbr>
     &nbsp;<i class="glyphicon glyphicon-align-left"></i></dt>
@@ -54,7 +54,7 @@
     {% blocktrans %}<a href="{{ river_view_url }}" title="Read the headlines.">Browse</a>
     and <abbr title="The river page refreshes itself regularly.">contemplate ...</abbr>{% endblocktrans %}
   </dd>
-  {% url wom_user.views.user_river_sieve owner_name as sieve_url %}
+  {% url 'user_river_sieve' owner_name as sieve_url %}
   <dt>
       <abbr title="{% trans "An inbox-like view of news to make sure you don't miss anything." %}">{% trans "Sieve" %}</abbr>
       &nbsp;<i class="glyphicon glyphicon-filter"></i></dt>
@@ -66,9 +66,9 @@
     {% blocktrans %}<a href="{{ sieve_url }}" title="Sift through news summaries.">Use</a>.{% endblocktrans %}
     {% endif %}
   </dd>
-  {% url wom_user.views.user_collection_add owner_name as collection_add_url %}
-  {% url wom_user.views.user_upload_nsbmk visitor_name as upload_nsbmk_url %}
-  {% url wom_user.views.user_collection owner_name as collection_url %}
+  {% url 'user_collection_add' owner_name as collection_add_url %}
+  {% url 'user_upload_nsbmk' visitor_name as upload_nsbmk_url %}
+  {% url 'user_collection' owner_name as collection_url %}
   <dt>
       <abbr title="{% trans "The gems you picked up from your sieve and the web." %}">{% trans "Collection" %}</abbr>
       &nbsp;<i class="glyphicon glyphicon-bookmark"></i></dt>
@@ -90,7 +90,7 @@
 {% if is_superuser %}
 <div class="row show-grid">
   <div class="col-md-6">
-  <p><a href="{% url wom_user.views.user_creation %}" class="btn btn-default">{% trans "Create a new user" %}</a></p>
+  <p><a href="{% url 'user_creation' %}" class="btn btn-default">{% trans "Create a new user" %}</a></p>
   </div>
 </div>
 {% endif %}

@@ -19,12 +19,15 @@
 #
 
 from django.conf import settings
-
-from django.contrib.auth.models import User
-from wom_user.models import UserProfile
-
-from wom_user.tasks import import_user_feedsources_from_opml
-from wom_user.tasks import import_user_bookmarks_from_ns_list
+from django.apps import AppConfig
+  
+class WomUserConfig(AppConfig):
+    name = 'wom_user'
+    verbose_name = "WomUser"
+    def ready(self):
+        import os
+        if os.environ.get('RUN_MAIN'):
+            startup()
 
 OPML_TXT = """\
 <?xml version="1.0" encoding="UTF-8"?>
@@ -71,9 +74,16 @@ NS_BOOKMARKS_TXT_MORE_TEMPLATE = """\
 """
 
 
-def run():
+def startup():
+  from django.contrib.auth.models import User
+  from wom_user.models import UserProfile
+   
+  from wom_user.tasks import import_user_feedsources_from_opml
+  from wom_user.tasks import import_user_bookmarks_from_ns_list
+
+  print("DEMO mode: Ensuring demo user is available.")
   if settings.DEMO and not User.objects.filter(username=settings.DEMO_USER_NAME).exists():
-    print("DEMO mode: Creating demo user.")
+    raise Warning("DEMO mode: Creating demo user.")
     demo_user = User(username=settings.DEMO_USER_NAME)
     demo_user.set_password(settings.DEMO_USER_PASSWD)
     demo_user.save()
@@ -86,4 +96,4 @@ def run():
                                                  % (i,i) for i in range(200)))
     import_user_feedsources_from_opml(demo_user,OPML_TXT)
     print("DEMO mode: demo user setup finished.")
-
+            

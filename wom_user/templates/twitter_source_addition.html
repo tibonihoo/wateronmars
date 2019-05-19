@@ -17,7 +17,7 @@
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form class="form-horizontal" role="form" action="{% url wom_user.views.user_tributary_twitter_add visitor_name %}" method="post">
+<form class="form-horizontal" role="form" action="{% url 'user_tributary_twitter_add' visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}

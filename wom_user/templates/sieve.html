@@ -78,7 +78,7 @@ prepareKeyBindings();
     {% if source_add_bookmarklet %}
     <p>{% trans "You can subscribe to news sources with the following bookmarklet:" %} <a class="alert-link" href="{{ source_add_bookmarklet }}">{% trans "Subscribe !" %}</a></p>
     {% endif %}
-    <p><a class="alert-link" href="{% url wom_user.views.user_river_view visitor_name %}">{% trans "Old news are still visible in your river." %}</a></p> 
+    <p><a class="alert-link" href="{% url 'user_river_view' visitor_name %}">{% trans "Old news are still visible in your river." %}</a></p> 
   </div>
 {% endfor %}
 </div>

@@ -144,7 +144,7 @@ def add_new_references_from_feedparser_entries(feed,entries):
     if current_ref_date > latest_item_date:
       latest_item_date = current_ref_date
   # save all references at once
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for r,_ in all_references:
       try:
         r.save()
@@ -209,7 +209,7 @@ def import_feedsources_from_opml(opml_txt):
       newly_referenced_source.append(ref)
       db_new_feedsources.append(feed_source)
     feeds_and_tags.append((feed_source,current_feed.tags))
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for f in db_new_feedsources:
       f.save()
     for r in newly_referenced_source:
@@ -219,7 +219,7 @@ def import_feedsources_from_opml(opml_txt):
 
 
 # TODO put this in a function of wom_user with the appropriate tests.
-  # with transaction.commit_on_success():
+  # with transaction.atomic():
   #   for f,tags in feeds_and_tags:
   #     source_tag_setter(user,f,tags)
   #     f.save()

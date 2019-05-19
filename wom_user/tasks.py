@@ -100,7 +100,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
     bmk.comment = meta.note
     # pile up the bookmarks for tag attribution
     bmk_to_process.append((bmk,meta))
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for b,_ in bmk_to_process:
       b.reference.save()
       b.save()
@@ -112,7 +112,7 @@ def import_user_bookmarks_from_ns_list(user,nsbmk_txt):
       logger.error("Could not import some bmk tags with too long names (%s>%s)"\
                    % (",".join(len(t) for t in invalid_tags),TAG_NAME_MAX_LENGTH))
     classif_data_to_save.append(set_item_tag_names(user,bmk.reference,valid_tags))
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for cd in classif_data_to_save:
       cd.save()
 
@@ -132,7 +132,7 @@ def import_user_feedsources_from_opml(user,opml_txt):
                    % (",".join(str(len(t)) for t in invalid_tags),
                       TAG_NAME_MAX_LENGTH))
     classif_data_to_save.append(set_item_tag_names(user,feed,valid_tags))
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for cd in classif_data_to_save:
       cd.save()
 
@@ -229,7 +229,7 @@ def check_user_unread_feed_items(user):
     if discarded_ref_count:
       logger.debug("Discarded {0} duplicate feed items from news feed {1}."\
                    .format(discarded_ref_count,feed.xmlURL))
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for r in new_ref_status:
       r.save()
   for feed in user.userprofile.generated_feeds.select_related("source").all():
@@ -243,7 +243,7 @@ def check_user_unread_feed_items(user):
     if discarded_ref_count:
       logger.debug("Discarded {0} duplicate feed items from generated feed {1}."\
                    .format(discarded_ref_count,feed.title))
-  with transaction.commit_on_success():
+  with transaction.atomic():
     for r in new_ref_status:
       r.save()
   return len(new_ref_status)

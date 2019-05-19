@@ -30,7 +30,7 @@
 <div class="container-fluid">
   <h4>{% trans "User authentication" %}</h4>
 <form role="form" class="form-horizontal" 
-      method="post" action="{% url django.contrib.auth.views.login %}">
+      method="post" action="{% url 'user_login' %}">
   {% csrf_token %}
   <div class="form-group">
     <div class="col-sm-offset-1">

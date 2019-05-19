@@ -87,7 +87,7 @@
             {% if source.url == "#internal-bookmark-import" %}
             <li><i class="glyphicon glyphicon-floppy-save"></i>{{ source.title }}</li>
             {% else %}
-            <li><i class="glyphicon glyphicon-book"></i><a href="{{ source.url }}" title="{% trans "View on site" %}">{{ source.title }}</a> <a href="{% url wom_user.views.user_river_source_item visitor_name source.url %}" title="{% trans "Edit source information or subscription." %}" class="edit-only tool"><i class="glyphicon glyphicon-edit"></i></a></li>
+            <li><i class="glyphicon glyphicon-book"></i><a href="{{ source.url }}" title="{% trans "View on site" %}">{{ source.title }}</a> <a href="{% url 'user_river_source_item' visitor_name source.url %}" title="{% trans "Edit source information or subscription." %}" class="edit-only tool"><i class="glyphicon glyphicon-edit"></i></a></li>
             {% endif %}
             {% endfor %}
           </ul>

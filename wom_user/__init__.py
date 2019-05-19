@@ -21,3 +21,5 @@
 """
 Implementation of the user-experience for water on mars.
 """
+
+default_app_config = 'wom_user.apps.WomUserConfig'

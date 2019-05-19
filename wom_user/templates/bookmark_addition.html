@@ -17,7 +17,7 @@
   {{ form.non_field_errors|safe }}
 </div>
 {% endif %}
-<form class="form-horizontal" role="form" action="{% url wom_user.views.user_collection_add visitor_name %}" method="post">
+<form class="form-horizontal" role="form" action="{% url 'user_collection_add' visitor_name %}" method="post">
   {% csrf_token %}
   {% for field in form %}
   {% if field.errors %}
@@ -37,7 +37,7 @@
   </div>
 </form>
 
-{% url wom_user.views.user_collection visitor_name as collection_url %}
+{% url 'user_collection' visitor_name as collection_url %}
 <p class="help-block">{% blocktrans %}If you want to add a bookmark using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{{ collection_url }}">the collection URL</a>: <code>{{ REST_PARAMS }}</code>{% endblocktrans %}</p>
 
 {% endblock %}
