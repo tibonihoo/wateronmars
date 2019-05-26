@@ -1,5 +1,5 @@
-{% load i18n %}
 <?xml version="1.0" encoding="UTF-8"?>
+{% load i18n %}
 <opml version="1.0">
   <head>
     <title>{% blocktrans %}WaterOnMars sources for {{ owner_name }}.{% endblocktrans %}</title>
