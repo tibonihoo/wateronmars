@@ -312,7 +312,7 @@ def handle_uploaded_opml(opmlUploadedFile,user):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_upload_opml(request,owner_name):
-  if settings.read_only:
+  if settings.READ_ONLY:
     return HttpResponseForbidden("Uploading sources from OPML is disabled in READ_ONLY mode.")
   if request.method == 'POST':
     form = OPMLFileUploadForm(request.POST, request.FILES,
