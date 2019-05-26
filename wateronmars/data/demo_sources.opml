@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<opml version="1.0">
+  <head>
+    <title>WaterOnMars sources for demo.</title>
+  </head>
+  <body>
+
+
+  <outline title="Culture" text="Culture">
+  
+    <outline text="Astro Photo Of the Day" title="Astro Photo Of the Day" 
+              xmlUrl="https://apod.nasa.gov/apod.rss" htmlUrl="https://apod.nasa.gov/apod/astropix.html" />
+  
+  </outline>
+
+  </body>
+</opml>
