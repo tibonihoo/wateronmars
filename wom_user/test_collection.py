@@ -680,9 +680,9 @@ class UserBookmarkViewTest(TestCase):
                      UserBookmark.objects.get(reference=self.reference).is_public)
 
 
-class ImportUserBookmarksFromNSList(TestCase):
+class ImportUserBookmarksFromNSListMixin:
 
-  def setUp(self):
+  def setUpWithContent(self, content):
     # Create a single reference with its source, and a user with a
     # single bookmark on this reference. Create also another user to
     # check for user data isolation.
@@ -708,20 +708,7 @@ class ImportUserBookmarksFromNSList(TestCase):
         saved_date=date)
     self.other_user = User.objects.create_user(username="uB",
                                                password="pB")
-    nsbmk_txt = """\
-<!DOCTYPE NETSCAPE-Bookmark-file-1>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<!-- This is an automatically generated file.
-It will be read and overwritten.
-Do Not Edit! -->
-<TITLE>Bookmarks</TITLE>
-<H1>Bookmarks</H1>
-<DL><p>
-<DT><A HREF="http://www.example.com" ADD_DATE="1367951483" PRIVATE="1" TAGS="example,html">The example</A>
-<DD>An example bookmark.
-<DT><A HREF="http://mouf/a" ADD_DATE="1366828226" PRIVATE="0" TAGS="test">The mouf</A>
-"""
-    import_user_bookmarks_from_ns_list(self.user,nsbmk_txt)
+    import_user_bookmarks_from_ns_list(self.user, content)
   
   def test_bookmarks_are_added(self):
     self.assertEqual(2,self.user.userbookmark_set.count())
@@ -736,7 +723,7 @@ Do Not Edit! -->
                      UserBookmark.objects\
                      .get(reference__url="http://mouf/a")\
                      .reference.title)
-    
+                         
   def test_bookmarked_reference_pin_count_updated(self):
     self.assertEqual(2,self.user.userbookmark_set.count())
     for b in self.user.userbookmark_set.all():
@@ -763,3 +750,61 @@ Do Not Edit! -->
                                   Reference\
                                   .objects.get(url="http://mouf/a"))
     self.assertEqual(set(["test"]),set(ref_tags))
+
+class ImportUserBookmarksFromNSListInTypicalCase(ImportUserBookmarksFromNSListMixin, TestCase):
+
+  def setUp(self):
+    nsbmk_txt = """\
+<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<!-- This is an automatically generated file.
+It will be read and overwritten.
+Do Not Edit! -->
+<TITLE>Bookmarks</TITLE>
+<H1>Bookmarks</H1>
+<DL><p>
+<DT><A HREF="http://www.example.com" ADD_DATE="1367951483" PRIVATE="1" TAGS="example,html">The example</A>
+<DD>An example bookmark.
+<DT><A HREF="http://mouf/a" ADD_DATE="1366828226" PRIVATE="0" TAGS="test">The mouf</A>
+"""
+    self.setUpWithContent(nsbmk_txt)
+
+class ImportUserBookmarksFromNSListWithHtmlTagLowerCase(ImportUserBookmarksFromNSListMixin, TestCase):
+
+  def setUp(self):
+    nsbmk_txt = """\
+<!doctype netscape-bookmark-file-1>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- This is an automatically generated file.
+It will be read and overwritten.
+Do Not Edit! -->
+<title>Bookmarks</title>
+<h1>Bookmarks</H1>
+<dl><p>
+<dt><a href="http://www.example.com" add_date="1367951483" private="1" tags="example,html">The example</a>
+<dd>An example bookmark.
+<dt><a href="http://mouf/a" add_date="1366828226" private="0" tags="test">The mouf</a>
+"""
+    self.setUpWithContent(nsbmk_txt)
+
+class ImportUserBookmarksFromNSListAfterBrowserBeautification(ImportUserBookmarksFromNSListMixin, TestCase):
+
+  def setUp(self):
+    nsbmk_txt = """\
+<!DOCTYPE netscape-bookmark-file-1>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- This is an automatically generated file.
+It will be read and overwritten.
+Do Not Edit! -->
+<title>Bookmarks</title>
+</head><body><h1>WaterOnMars pebbles collected by demo</h1>
+<dl><p>
+
+</p><dt><a href="http://www.example.com" add_date="1367951483" private="1" tags="example,html">The example</a>
+</dt><dd>An example bookmark.
+
+</dd><dt><a href="http://mouf/a" add_date="1366828226" private="0" tags="test">The mouf</a>
+</dt></dl><p>
+</p></body></html>
+"""
+    self.setUpWithContent(nsbmk_txt)

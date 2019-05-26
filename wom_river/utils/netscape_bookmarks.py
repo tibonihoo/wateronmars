@@ -52,16 +52,16 @@ import re
 # The following prefix is not enough to identify a bookmark line (may
 # be a folder with '<H3 FOLDED' for instance), so that the line has to
 # be checked against the RE_BOOKMARK_URL too.
-BOOKMARK_LINE_PREFIX = "<DT>"
-BOOKMARK_NOTE_PREFIX = "<DD>"
-DOCTYPE_LINE = "<!DOCTYPE NETSCAPE-Bookmark-file-1>"
+RE_BOOKMARK_LINE = re.compile("<DT>.*", re.IGNORECASE)
+RE_BOOKMARK_NOTE = re.compile("<DD>.*", re.IGNORECASE)
+RE_DOCTYPE_LINE = re.compile("^<!DOCTYPE NETSCAPE-Bookmark-file-1>.*", re.IGNORECASE)
 # Regular expression to extract info about the bookmark
-RE_BOOKMARK_URL = re.compile('HREF="(?P<url>[^"]+)"')
+RE_BOOKMARK_URL = re.compile('HREF="(?P<url>[^"]+)"', re.IGNORECASE)
 RE_BOOKMARK_COMPONENTS = {
-  "posix_timestamp" : re.compile('ADD_DATE="(?P<posix_timestamp>\d+)"'),
-  "tags"   : re.compile('TAGS="(?P<tags>[\w,]+)"'),
-  "private": re.compile('PRIVATE="(?P<private>\d)"'),
-  "title"  : re.compile('<A[^>]*>(?P<title>[^<]*)<'),
+  "posix_timestamp" : re.compile('[^\w]ADD_DATE="(?P<posix_timestamp>\d+)"', re.IGNORECASE),
+  "tags"   : re.compile('[^\w]TAGS="(?P<tags>[\w,]+)"', re.IGNORECASE),
+  "private": re.compile('[^\w]PRIVATE="(?P<private>\d)"', re.IGNORECASE),
+  "title"  : re.compile('<A[^>]*>(?P<title>[^<]*)<', re.IGNORECASE),
   }
 
 
@@ -70,7 +70,7 @@ def is_netscape_bookmarks_file(candidateFile):
   correct_doctype_found = False
   for line in candidateFile:
     line = line.lstrip()
-    if line.startswith(DOCTYPE_LINE):
+    if RE_DOCTYPE_LINE.match(line):
       correct_doctype_found = True
     if not line and not correct_doctype_found:
       return False
@@ -89,14 +89,14 @@ def parse_netscape_bookmarks(bookmarkHTMFile):
   correct_doctype_found = False
   for line in bookmarkHTMFile.splitlines():
     line = line.lstrip()
-    if line.startswith("<!DOCTYPE NETSCAPE-Bookmark-file-1>"):
+    if RE_DOCTYPE_LINE.match(line):
       correct_doctype_found = True
       continue
     if line.rstrip() and not correct_doctype_found:
       raise ValueError("Couldn't find a correct DOCTYPE in the bookmark file (wrong format?)")
     if not line.rstrip():
       continue
-    if line.startswith(BOOKMARK_LINE_PREFIX):
+    if RE_BOOKMARK_LINE.search(line):
       # we will successively apply the various regexes until we get
       # all the bookmark's info
       m = RE_BOOKMARK_URL.search(line)
@@ -109,7 +109,7 @@ def parse_netscape_bookmarks(bookmarkHTMFile):
         if m: bmk[cpnt_name] = m.group(cpnt_name)
       bookmark_list.append(bmk)
       last_line_is_bmk = True
-    elif last_line_is_bmk and line.startswith(BOOKMARK_NOTE_PREFIX):
+    elif last_line_is_bmk and RE_BOOKMARK_NOTE.search(line):
       last_line_is_bmk = False
       bookmark_list[-1]["note"] = line[4:].strip()
     else:
@@ -148,11 +148,11 @@ def expand_short_urls(bookmarkHTMFile,outputFile):
   outputLines = []
   for line in bookmarkHTMFile:
     line = line.lstrip()
-    if line.startswith("<!DOCTYPE NETSCAPE-Bookmark-file-1>"):
+    if RE_DOCTYPE_LINE.match(line):
       correct_doctype_found = True
     if not line and not correct_doctype_found:
       raise ValueError("Couldn't find a correct DOCTYPE in the bookmark file (wrong format?)")
-    if line.startswith(BOOKMARK_LINE_PREFIX):
+    if RE_BOOKMARK_LINE.search(line):
       # we will successively apply the various regexes until we get
       # all the bookmark's info
       m = RE_BOOKMARK_URL.search(line)
@@ -165,7 +165,7 @@ def expand_short_urls(bookmarkHTMFile,outputFile):
         # specific line for Delicous export that have several "None"
         # titled links when the link has itself been extracted from twitter.
         if "from twitter" in line:
-          line = line.replace(">None</A>",">%s</A>" % expanded_url)
+          re.sub(">None</(A)>",">%s</\1>" % expanded_url, re.IGNORECASE)
     outputLines.append(line)
     if len(outputLines)==1000:
       print "flush %s" % outputLines[0]
