@@ -46,6 +46,9 @@ def test():
 def deploy_demo():
     local("git pull --rebase heroku master")
     local("git push heroku master")
+    # NOTE: for existing apps running with Django1.4, the first upgrade to
+    # Django1.11 should fail here and be replaced by a manual:
+    # "heroku run \"python manage.py migrate --fake\""
     local("heroku run \"python manage.py migrate\"")
 
 def deploy():
@@ -56,6 +59,9 @@ def deploy():
         venv_dir = user_host_conf("virtual_env_dir")
         run("git pull --rebase origin master")
         run("source {0}/bin/activate && pip install -r requirements_base.txt".format(venv_dir))
+        # NOTE: for existing apps running with Django1.4, the first upgrade to
+        # Django1.11 should fail here and be replaced by a manual:
+        # "python manage.py migrate --fake" !
         run("source {0}/bin/activate && python manage.py migrate".format(venv_dir))
         run("source {0}/bin/activate && python manage.py collectstatic".format(venv_dir))
         try:
