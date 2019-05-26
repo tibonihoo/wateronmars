@@ -855,7 +855,7 @@ def user_river_sources(request,owner_name):
     if expectedFormat.lower()=="opml":
       return render_to_response('sources_opml.xml',d,
                                 context_instance=RequestContext(request),
-                                mimetype="text/xml")
+                                mimetype="text/x-opml")
     else:
       return render_to_response('sources.html',d,
                                 context_instance=RequestContext(request))
