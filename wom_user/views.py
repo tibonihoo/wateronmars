@@ -301,11 +301,7 @@ def user_root(request,owner_name):
 
 
 def handle_uploaded_opml(opmlUploadedFile,user):
-  if opmlUploadedFile.name.endswith(".opml") \
-     or opmlUploadedFile.name.endswith(".xml"):
-    import_user_feedsources_from_opml(user,opmlUploadedFile.read())
-  else:
-    raise ValueError("Uploaded file '%s' is not OPML !" % opmlUploadedFile.name)
+  import_user_feedsources_from_opml(user,opmlUploadedFile.read())
     
 
 @loggedin_and_owner_required
