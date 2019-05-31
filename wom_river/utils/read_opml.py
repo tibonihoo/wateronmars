@@ -54,7 +54,7 @@ class Feed:
     return "Feed: %s\n- %s\n- %s\n- %s" % (self.title.encode("utf-8"),self.xmlUrl,self.htmlUrl,",".join(self.tags))
   
 def warning(txt):
-  print "WARNING: " + txt
+  print("WARNING: " + txt)
   
 
 def parse_opml(opml_file,isPath=True):
@@ -124,10 +124,10 @@ def parse_outlines(parent_tag,current_tags,collected_feeds,collected_tags):
 
 
 if __name__ == '__main__':
-  import urllib
-  urllib.urlretrieve("http://hosting.opml.org/dave/spec/subscriptionList.opml",
+  import urllib.request, urllib.parse, urllib.error
+  urllib.request.urlretrieve("http://hosting.opml.org/dave/spec/subscriptionList.opml",
                      "subscriptionList.opml")
   collected_feeds,collected_tags = parse_opml("subscriptionList.opml")
-  print "Feeds:\n\t" + "\n\t".join(str(f) for f in collected_feeds)
-  print "Tags:\n\t" + "\n\t".join(collected_tags)
+  print("Feeds:\n\t" + "\n\t".join(str(f) for f in collected_feeds))
+  print("Tags:\n\t" + "\n\t".join(collected_tags))
   

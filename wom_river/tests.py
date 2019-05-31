@@ -131,7 +131,7 @@ class ImportFeedSourcesFromOPMLTaskTest(TestCase):
                        xmlURL="http://www.openculture.com/feed").source.title)
     
   def test_check_sources_correctly_returned(self):
-    self.assertEqual(4,len(self.feeds_and_tags.keys()))
+    self.assertEqual(4,len(list(self.feeds_and_tags.keys())))
     returned_xmlURLs = [s.xmlURL for s in self.feeds_and_tags.keys()]
     self.assertIn("http://stallman.org/rss/rss.xml",returned_xmlURLs)
     self.assertIn("http://www.scripting.com/rss.xml",returned_xmlURLs)
@@ -156,8 +156,8 @@ class AddReferencesFromFeedParserEntriesTask(TestCase):
   def setUp(self):
     date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
-      url=u"http://example.com",
-      title=u"Test Source",
+      url="http://example.com",
+      title="Test Source",
       pub_date=date)
     web_feed  = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                        source=self.source,
@@ -208,7 +208,7 @@ class AddReferencesFromFeedParserEntriesTask(TestCase):
 </rss>
 """ % ("u"*(URL_MAX_LENGTH),"u"*(URL_MAX_LENGTH))
     
-    f1 = feedparser.parse(rss_xml)
+    f1 = feedparser.parse(rss_xml.encode("utf-8"))
     self.ref_and_tags = add_new_references_from_feedparser_entries(web_feed,
                                                                    f1.entries)
     
@@ -263,8 +263,8 @@ class AddReferencesFromFeedParserTaskOnBrokenFeed(TestCase):
   def setUp(self):
     date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
-      url=u"http://example.com",
-      title=u"Test Source",
+      url="http://example.com",
+      title="Test Source",
       pub_date=date)
     web_feed  = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                        source=self.source,
@@ -315,7 +315,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeed(TestCase):
 </rss>
 """
     
-    f1 = feedparser.parse(rss_xml)
+    f1 = feedparser.parse(rss_xml.encode("utf-8"))
     self.ref_and_tags = add_new_references_from_feedparser_entries(web_feed,
                                                                    f1.entries)
     

@@ -45,7 +45,7 @@ APPROX_NB_TWEETS_PER_1H = 300
 import logging
 logger = logging.getLogger(__name__)
 
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 
 
 def HTMLUnescape(s):
@@ -137,7 +137,7 @@ def add_new_reference_from_tweeter_timeline_summary(
   with transaction.atomic():
     try:
       r.save()
-    except Exception,e:
+    except Exception as e:
       logger.error(
         "Skipping news item %s because of exception: %s."\
         % (r.url,e))
@@ -176,7 +176,7 @@ def collect_new_references_for_twitter_timeline(
       date_str,
       hours_to_cover,
       timeline.generated_feed.title)
-  except Exception,e:
+  except Exception as e:
     logger.error("Skipping timeline for %s because of the following error: %s."\
                  % (timeline.username,e))
     return None

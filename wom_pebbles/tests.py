@@ -37,7 +37,7 @@ from wom_pebbles.templatetags.html_sanitizers  import defang_html
 
 
 if URL_MAX_LENGTH>255:
-  print "WARNING: the current max length for URLs may cause portability problems (see https://docs.djangoproject.com/en/1.4/ref/databases/#character-fields)"
+  print("WARNING: the current max length for URLs may cause portability problems (see https://docs.djangoproject.com/en/1.4/ref/databases/#character-fields)")
     
 class ReferenceModelTest(TestCase):
 
@@ -96,12 +96,12 @@ class ReferenceModelTest(TestCase):
   def test_get_productions(self):
     date = datetime.datetime.now(timezone.utc)
     source = Reference.objects.create(
-      url=u"http://mouf",
-      title=u"mouf",
+      url="http://mouf",
+      title="mouf",
       pub_date=date)
     reference = Reference.objects.create(
-      url=u"http://mouf/a",
-      title=u"glop",
+      url="http://mouf/a",
+      title="glop",
       pub_date=date)
     reference.sources.add(source)
     self.assertEqual(reference,source.productions.get())
@@ -172,7 +172,7 @@ class UtilityFunctionsTests(TestCase):
     self.assertGreaterEqual(URL_MAX_LENGTH,len(truncated_url))
 
   def test_sanitize_url_with_spaces(self):
-    short_url = u"http://m m"
+    short_url = "http://m m"
     self.assertTrue(len(short_url)<URL_MAX_LENGTH)
     escaped_url= "http://m%20m"
     self.assertEqual((escaped_url,False),sanitize_url(short_url))
@@ -191,12 +191,12 @@ class ImportReferencesFromNSBookmarkListTaskTest(TestCase):
   def setUp(self):
     date = datetime.datetime.now(timezone.utc)
     self.source = Reference.objects.create(
-      url=u"http://mouf",
-      title=u"mouf",
+      url="http://mouf",
+      title="mouf",
       pub_date=date)
     self.reference = Reference.objects.create(
-      url=u"http://mouf/a",
-      title=u"glop",
+      url="http://mouf/a",
+      title="glop",
       pub_date=date)
     self.reference.sources.add(self.source)
     nsbmk_txt = """\

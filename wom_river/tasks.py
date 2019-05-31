@@ -41,7 +41,7 @@ from wom_pebbles.tasks import sanitize_url
 import logging
 logger = logging.getLogger(__name__)
 
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 
 def HTMLUnescape(s):
   return HTMLParser().unescape(s)
@@ -90,7 +90,7 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
     url_truncated,did_truncate = sanitize_url(url)
     if did_truncate:
       # Save the full url in info to limit the loss of information
-      info = u"<WOM had to truncate the following URL: %s>" % url
+      info = "<WOM had to truncate the following URL: %s>" % url
       logger.warning("Found an url of length %d (>%d) \
 when importing references from feed." % (len(url),URL_MAX_LENGTH))
     url = url_truncated
@@ -148,7 +148,7 @@ def add_new_references_from_feedparser_entries(feed,entries):
     for r,_ in all_references:
       try:
         r.save()
-      except Exception,e:
+      except Exception as e:
         logger.error("Skipping news item %s because of exception: %s."\
                      % (r.url,e))
         continue
@@ -164,7 +164,7 @@ def collect_new_references_for_feed(feed):
   """
   try:
     d = feedparser.parse(feed.xmlURL)
-  except Exception,e:
+  except Exception as e:
     logger.error("Skipping feed at %s because of a parse problem (%s))."\
                  % (feed.source.url,e))
     return []

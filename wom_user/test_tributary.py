@@ -69,8 +69,8 @@ class UserTwitterSourceAddTest(TestCase):
                       password="pA"))
     self.assertEqual(0,self.user_profile.sources.count())
     self.assertEqual(0,self.user_profile.web_feeds.count())
-    new_timeline_user = u"joe"
-    new_timeline_title = u"a new"
+    new_timeline_user = "joe"
+    new_timeline_title = "a new"
     self.add_request("uA",
                      {"username": new_timeline_user,
                       "title": new_timeline_title})
@@ -90,8 +90,8 @@ class UserTwitterSourceAddTest(TestCase):
                       password="pA"))
     self.assertEqual(0,self.user_profile.sources.count())
     self.assertEqual(0,self.user_profile.web_feeds.count())
-    new_timeline_user = u"joe"
-    new_timeline_title = u"a new"
+    new_timeline_user = "joe"
+    new_timeline_title = "a new"
     self.add_request("uB",
                        {"username": new_timeline_user,
                     "title": new_timeline_title},
@@ -101,8 +101,8 @@ class UserTwitterSourceAddTest(TestCase):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
-    new_timeline_user = u"joe"
-    new_timeline_title = u"a new"
+    new_timeline_user = "joe"
+    new_timeline_title = "a new"
     self.add_request("uA",
                      {"username": new_timeline_user,
                       "title": new_timeline_title})
@@ -118,13 +118,13 @@ class UserTwitterSourceAddTest(TestCase):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
-    new_timeline_user = u"joe"
-    new_timeline_title = u"a new"
+    new_timeline_user = "joe"
+    new_timeline_title = "a new"
     self.add_request("uA",
                      {"username": new_timeline_user,
                       "title": new_timeline_title})
-    second_timeline_user = u"bill"
-    second_timeline_title = u"another new"
+    second_timeline_user = "bill"
+    second_timeline_title = "another new"
     self.add_request("uA",
                      {"username": second_timeline_user,
                       "title": second_timeline_title})

@@ -156,22 +156,22 @@ class UserBookmarkAddTestMixin:
   def setUp(self):
     date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
-      url=u"http://mouf",
-      title=u"mouf",
+      url="http://mouf",
+      title="mouf",
       pub_date=date)
     reference = Reference.objects.create(
-      url=u"http://mouf/a",
-      title=u"glop",
+      url="http://mouf/a",
+      title="glop",
       pub_date=date)
     reference.sources.add(self.source)
     reference_private = Reference.objects.create(
-      url=u"http://mouf/p",
-      title=u"nop",
+      url="http://mouf/p",
+      title="nop",
       pub_date=date)
     reference_private.sources.add(self.source)
     reference_b = Reference.objects.create(
-      url=u"http://mouf/b",
-      title=u"paglop",
+      url="http://mouf/b",
+      title="paglop",
       pub_date=date)
     reference_b.sources.add(self.source)
     self.user = User.objects.create_user(username="uA",
@@ -207,11 +207,11 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
-                { "url": u"http://new/mouf",
-                  "title": u"new title",
-                  "comment": u"mouf",
-                  "source_url": u"http://glop",
-                  "source_title": u"new name",
+                { "url": "http://new/mouf",
+                  "title": "new title",
+                  "comment": "mouf",
+                  "source_url": "http://glop",
+                  "source_title": "new name",
                   })
     # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -221,15 +221,15 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
     new_b_candidates = [b for b in items \
-                        if b.reference.url==u"http://new/mouf"]
+                        if b.reference.url=="http://new/mouf"]
     self.assertEqual(1, len(new_b_candidates))
     new_b = new_b_candidates[0]
-    self.assertEqual(u"mouf",new_b.comment)
-    self.assertEqual(u"new title",new_b.reference.title)
+    self.assertEqual("mouf",new_b.comment)
+    self.assertEqual("new title",new_b.reference.title)
     self.assertEqual(1,len(new_b.reference.sources.all()))
     new_b_src = new_b.reference.sources.all()[0]
-    self.assertEqual(u"http://glop",new_b_src.url)
-    self.assertEqual(u"new name",new_b_src.title)
+    self.assertEqual("http://glop",new_b_src.url)
+    self.assertEqual("new name",new_b_src.title)
     
     
   def test_add_new_item_is_added_without_source(self):
@@ -245,9 +245,9 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
-                { "url": u"http://new/mouf",
-                  "title": u"new title",
-                  "comment": u"mouf",
+                { "url": "http://new/mouf",
+                  "title": "new title",
+                  "comment": "mouf",
                   })
     # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -257,15 +257,15 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
     new_b_candidates = [b for b in items \
-                        if b.reference.url==u"http://new/mouf"]
+                        if b.reference.url=="http://new/mouf"]
     self.assertEqual(1, len(new_b_candidates))
     new_b = new_b_candidates[0]
-    self.assertEqual(u"mouf",new_b.comment)
-    self.assertEqual(u"new title",new_b.reference.title)
+    self.assertEqual("mouf",new_b.comment)
+    self.assertEqual("new title",new_b.reference.title)
     self.assertEqual(1,len(new_b.reference.sources.all()))
     new_b_src = new_b.reference.sources.all()[0]
-    self.assertEqual(u"http://new",new_b_src.url)
-    self.assertEqual(u"new",new_b_src.title)
+    self.assertEqual("http://new",new_b_src.url)
+    self.assertEqual("new",new_b_src.title)
 
   def test_add_new_item_is_added_with_url_only(self):
     """
@@ -279,7 +279,7 @@ class UserBookmarkAddTestMixin:
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
-    resp = self.add_request("uA", { "url": u"http://new/mouf"})
+    resp = self.add_request("uA", { "url": "http://new/mouf"})
     # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
     # check absence of r1 reference
@@ -288,15 +288,15 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
     new_b_candidates = [b for b in items \
-                        if b.reference.url==u"http://new/mouf"]
+                        if b.reference.url=="http://new/mouf"]
     self.assertEqual(1, len(new_b_candidates))
     new_b = new_b_candidates[0]
-    self.assertEqual(u"",new_b.comment)
-    self.assertEqual(u"new/mouf",new_b.reference.title)
+    self.assertEqual("",new_b.comment)
+    self.assertEqual("new/mouf",new_b.reference.title)
     self.assertEqual(1,len(new_b.reference.sources.all()))
     new_b_src = new_b.reference.sources.all()[0]
-    self.assertEqual(u"http://new",new_b_src.url)
-    self.assertEqual(u"new",new_b_src.title)
+    self.assertEqual("http://new",new_b_src.url)
+    self.assertEqual("new",new_b_src.title)
     
   def test_add_new_item_is_added_with_existing_source_url(self):
     """
@@ -312,9 +312,9 @@ class UserBookmarkAddTestMixin:
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     # mark the first reference as read.
     resp = self.add_request("uA",
-                { "url": u"http://new/mouf",
-                  "title": u"new title",
-                  "comment": u"mouf",
+                { "url": "http://new/mouf",
+                  "title": "new title",
+                  "comment": "mouf",
                   "source_url": self.source.url,
                   })
     # resp_dic = json.loads(resp.content)
@@ -324,12 +324,12 @@ class UserBookmarkAddTestMixin:
                      kwargs={"owner_name":"uA"}))
     self.assertEqual(3,resp.context["user_bookmarks"].paginator.count)
     items = resp.context["user_bookmarks"]
-    self.assertIn(u"http://new/mouf",[b.reference.url for b in items])
-    self.assertIn(u"mouf",[b.comment for b in items \
-                           if b.reference.url==u"http://new/mouf"])
+    self.assertIn("http://new/mouf",[b.reference.url for b in items])
+    self.assertIn("mouf",[b.comment for b in items \
+                           if b.reference.url=="http://new/mouf"])
     self.assertEqual(self.source,
                      Reference\
-                     .objects.get(url=u"http://new/mouf").sources.get())
+                     .objects.get(url="http://new/mouf").sources.get())
 
   def test_add_new_item_is_added_with_existing_url(self):
     """
@@ -345,8 +345,8 @@ class UserBookmarkAddTestMixin:
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": self.bkm.reference.url,
-                  "title": u"new title",
-                  "comment": u"mouf",
+                  "title": "new title",
+                  "comment": "mouf",
                   })
     # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -362,9 +362,9 @@ class UserBookmarkAddTestMixin:
     r = Reference.objects.get(url=self.bkm.reference.url)
     self.assertEqual(self.source.url,r.sources.get().url)
     # The ref info hasn't changed
-    self.assertEqual(u"glop",r.title)
-    self.assertEqual(u"",r.description)
-    self.assertEqual(u"new title: mouf",
+    self.assertEqual("glop",r.title)
+    self.assertEqual("",r.description)
+    self.assertEqual("new title: mouf",
                      UserBookmark.objects.get(reference=r).comment)
     
   def test_add_new_item_is_added_with_existing_url_other_source(self):
@@ -381,9 +381,9 @@ class UserBookmarkAddTestMixin:
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": self.bkm.reference.url,
-                  "title": u"new title",
-                  "comment": u"mouf",
-                  "source_url": u"http://barf",
+                  "title": "new title",
+                  "comment": "mouf",
+                  "source_url": "http://barf",
                   })
     # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -398,11 +398,11 @@ class UserBookmarkAddTestMixin:
                .filter(url=self.bkm.reference.url).count())
     r = Reference.objects.get(url=self.bkm.reference.url)
     # The source has not changed
-    self.assertEqual(u"http://mouf",r.sources.get().url)
+    self.assertEqual("http://mouf",r.sources.get().url)
     # The ref info has not changed
-    self.assertEqual(u"glop",r.title)
-    self.assertEqual(u"",r.description)
-    self.assertEqual(u"new title: mouf",
+    self.assertEqual("glop",r.title)
+    self.assertEqual("",r.description)
+    self.assertEqual("new title: mouf",
                      UserBookmark.objects.get(reference=r).comment)
     
   def test_add_new_item_is_added_with_existing_url_same_source(self):
@@ -420,10 +420,10 @@ class UserBookmarkAddTestMixin:
     # mark the first reference as read.
     resp = self.add_request("uA",
                 { "url": self.bkm.reference.url,
-                  "title": u"new title",
-                  "comment": u"mouf",
+                  "title": "new title",
+                  "comment": "mouf",
                   "source_url": self.source.url,
-                  "source_title": u"new name",
+                  "source_title": "new name",
                   })
     # resp_dic = json.loads(resp.content)
     # self.assertEqual("success",resp_dic["status"])
@@ -439,11 +439,11 @@ class UserBookmarkAddTestMixin:
     r = Reference.objects.get(url=self.bkm.reference.url)
     self.assertEqual(self.source.url,r.sources.get().url)
     # The source name has not changed
-    self.assertEqual(u"mouf",r.sources.get().title)
+    self.assertEqual("mouf",r.sources.get().title)
     # The ref info has not changed
-    self.assertEqual(u"glop",r.title)
-    self.assertEqual(u"",r.description)
-    self.assertEqual(u"new title: mouf",
+    self.assertEqual("glop",r.title)
+    self.assertEqual("",r.description)
+    self.assertEqual("new title: mouf",
                      UserBookmark.objects.get(reference=r).comment)
   
   def test_add_new_item_to_other_user_fails(self):
@@ -454,11 +454,11 @@ class UserBookmarkAddTestMixin:
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # mark the first reference as read.
     self.add_request("uB",
-             { "url": u"http://new/mouf",
-               "title": u"new title",
-               "comment": u"mouf",
-               "source_url": u"http://glop",
-               "source_title": u"new name",
+             { "url": "http://new/mouf",
+               "title": "new title",
+               "comment": "mouf",
+               "source_url": "http://glop",
+               "source_title": "new name",
                },
              expectedStatusCode=403)
     
@@ -470,16 +470,16 @@ class UserBookmarkAddTestMixin:
     self.assertTrue(self.client.login(username="uA",password="pA"))
     # mark the first reference as read.
     self.add_request("uA",
-             { "url": u"http://samesame",
-               "title": u"same title",
-               "comment": u"same",
-               "source_url": u"http://samesame",
-               "source_title": u"same title",
+             { "url": "http://samesame",
+               "title": "same title",
+               "comment": "same",
+               "source_url": "http://samesame",
+               "source_title": "same title",
                })
     resp = self.client.get(reverse("user_collection",
                      kwargs={"owner_name":"uA"}))
     new_item_candidates = [b.reference for b in resp.context["user_bookmarks"] \
-                           if b.reference.url == u"http://samesame"]
+                           if b.reference.url == "http://samesame"]
     self.assertEqual(1,len(new_item_candidates))
     new_item_reference = new_item_candidates[0]
     self.assertEqual(0,len(new_item_reference.sources.all()))
@@ -514,10 +514,10 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
             [t.name for t in resp.templates])
     self.assertIn("owner_name", resp.context)
     self.assertEqual("uA", resp.context["owner_name"])
-    self.assertIn(u"user_bookmarks", resp.context)
-    self.assertIn(u"num_bookmarks", resp.context)
-    self.assertIn(u"collection_url", resp.context)
-    self.assertIn(u"collection_add_bookmarklet", resp.context)
+    self.assertIn("user_bookmarks", resp.context)
+    self.assertIn("num_bookmarks", resp.context)
+    self.assertIn("collection_url", resp.context)
+    self.assertIn("collection_add_bookmarklet", resp.context)
     self.assertEqual(2,resp.context["user_bookmarks"].paginator.count)
     self.assertEqual(2,len(resp.context["user_bookmarks"]))
     self.assertEqual(set([self.bkm,self.bkm_private]),
@@ -537,10 +537,10 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertEqual(200,resp.status_code)
     self.assertIn("collection.html",
             [t.name for t in resp.templates])
-    self.assertIn(u"user_bookmarks", resp.context)
-    self.assertIn(u"num_bookmarks", resp.context)
-    self.assertIn(u"collection_url", resp.context)
-    self.assertIn(u"collection_add_bookmarklet", resp.context)
+    self.assertIn("user_bookmarks", resp.context)
+    self.assertIn("num_bookmarks", resp.context)
+    self.assertIn("collection_url", resp.context)
+    self.assertIn("collection_add_bookmarklet", resp.context)
     self.assertEqual(1,resp.context["user_bookmarks"].paginator.count)
     self.assertEqual([self.bkm_b],
              list(resp.context["user_bookmarks"]))
@@ -553,10 +553,10 @@ class UserCollectionViewTest(TestCase,UserBookmarkAddTestMixin):
     self.assertEqual(200,resp.status_code)
     self.assertIn("collection.html",
             [t.name for t in resp.templates])
-    self.assertIn(u"user_bookmarks", resp.context)
-    self.assertIn(u"num_bookmarks", resp.context)
-    self.assertIn(u"collection_url", resp.context)
-    self.assertIn(u"collection_add_bookmarklet", resp.context)
+    self.assertIn("user_bookmarks", resp.context)
+    self.assertIn("num_bookmarks", resp.context)
+    self.assertIn("collection_url", resp.context)
+    self.assertIn("collection_add_bookmarklet", resp.context)
     self.assertEqual(1,resp.context["user_bookmarks"].paginator.count)
     self.assertEqual([self.bkm],
              list(resp.context["user_bookmarks"]))
@@ -587,16 +587,16 @@ class UserBookmarkViewTest(TestCase):
   def setUp(self):
     self.date = datetime.now(timezone.utc)
     self.reference = Reference.objects.create(
-      url=u"http://bla",
-      title=u"a bla",
+      url="http://bla",
+      title="a bla",
       pub_date=self.date)
     self.source1 = Reference.objects.create(
-      url=u"http://blaSrc1",
-      title=u"a source",
+      url="http://blaSrc1",
+      title="a source",
       pub_date=self.date)
     self.source2 = Reference.objects.create(
-      url=u"http://blaSrc2",
-      title=u"a source2",
+      url="http://blaSrc2",
+      title="a source2",
       pub_date=self.date)
     self.reference.sources.add(self.source1)
     self.reference.sources.add(self.source2)
@@ -658,7 +658,7 @@ class UserBookmarkViewTest(TestCase):
     newTitle = self.reference.title + "MOUF"
     self.change_request("uA",self.reference.url,
                         {"ref-title": newTitle,
-                         "ref-description": u"blah"}, 302)
+                         "ref-description": "blah"}, 302)
     self.assertEqual(newTitle,
                      Reference.objects.get(url=self.reference.url).title)
     
@@ -689,12 +689,12 @@ class ImportUserBookmarksFromNSListMixin:
     # check for user data isolation.
     date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
-      url=u"http://mouf",
-      title=u"mouf",
+      url="http://mouf",
+      title="mouf",
       pub_date=date)
     reference = Reference.objects.create(
-      url=u"http://mouf/a",
-      title=u"glop",
+      url="http://mouf/a",
+      title="glop",
       pub_date=date,
       pin_count=1)
     reference.sources.add(self.source)

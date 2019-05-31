@@ -181,18 +181,18 @@ def clean_corrupted_rusts(user):
   for rust in ReferenceUserStatus.objects.filter(owner=user,has_been_read=False):
     corrupted = False
     try:
-      rust_ref = unicode(rust.reference)
+      rust_ref = str(rust.reference)
     except ObjectDoesNotExist:
       rust_ref = "not-found"
       corrupted = True
-    except Exception,e:
+    except Exception as e:
       rust_ref = "err(%s)" % e
     try:
-      rust_src = unicode(rust.main_source)
+      rust_src = str(rust.main_source)
     except ObjectDoesNotExist:
       rust_src = "not-found"
       corrupted = True
-    except Exception,e:
+    except Exception as e:
       rust_src = "err(%s)" % e
     if corrupted:
       logger.warning("Deleting corrupted ReferenceUserStatus: \
@@ -201,7 +201,7 @@ read %s, pub_date %s, reference %s, source %s." \
                         rust_ref,rust_src))
       try:
         rust.delete()
-      except Exception,e:
+      except Exception as e:
         logger.error("Could not delete a corrupted ReferenceUserStatus (%s)." % e)
         continue
 

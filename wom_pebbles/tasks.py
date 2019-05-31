@@ -32,7 +32,7 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 import datetime
-from urlparse import urlparse
+from urllib.parse import urlparse
 from collections import namedtuple
 
 import logging
@@ -140,7 +140,7 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
     u_truncated, did_truncate = sanitize_url(u)
     if did_truncate:
       # Save the full url in info to limit the loss of information
-      info = u"<WOM had to truncate the following URL: %s>" % u
+      info = "<WOM had to truncate the following URL: %s>" % u
       logger.warning("Found an url of length %d (>%d) \
 when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
     u = u_truncated

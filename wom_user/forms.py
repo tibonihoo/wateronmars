@@ -42,9 +42,7 @@ from wom_user.models import UserProfile
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
 
-from wom_river.utils import feedfinder
-feedfinder.setUserAgent(settings.USER_AGENT)
-
+from wom_river.utils import feedfinder2
 
 class OPMLFileUploadForm(forms.Form):
   """From used to upload an OPML file."""
@@ -196,25 +194,26 @@ class UserSourceAdditionForm(forms.Form):
     if not url:
       raise forms.ValidationError("The source URL is required.")
     feed_url = cleaned_data.get("feed_url")
-    if feed_url and feedfinder.isFeed(feed_url.encode("utf-8"),checkRobotAllowed=False):
+    if feed_url and feed_url in feedfinder2.find_feeds(feed_url, user_agent=settings.USER_AGENT, timeout=5):
       return cleaned_data
-    if feedfinder.isFeed(url.encode("utf-8"),checkRobotAllowed=False):
+    found_feeds = feedfinder2.find_feeds(url, user_agent=settings.USER_AGENT, timeout=5)
+    if url in found_feeds:
       cleaned_data["feed_url"] = url
       return cleaned_data
     # the feed is not here or invalid: let's see if we can find some
     # valid feed urls by ourselves.
-    feed_error_msg = u"Please give the URL of an existing valid feed."
-    candidates = set(unicode(f) for f in feedfinder.feeds(url.encode("utf-8")))
+    feed_error_msg = "Please give the URL of an existing valid feed."
+    candidates = set(str(f) for f in found_feeds)
     if not candidates:
       self._errors["feed_url"] = self.error_class([feed_error_msg])
-      raise forms.ValidationError(u"Impossible to find feeds at the given URL or even to discover one related to the source's URL")
+      raise forms.ValidationError("Impossible to find feeds at the given URL or even to discover one related to the source's URL")
     # A little sorting will help making a good guess when several
     # candidates are available.
     # For Wordpress blogs at least there is usually several feeds
     # one of which is the comment feed and is "probably not" the one
     # the user wants to subscribe when giving only the url to the
     # said blog.
-    second_candidates = set(f for f in candidates if u"comment" in f)
+    second_candidates = set(f for f in candidates if "comment" in f)
     candidates = list(candidates - second_candidates) + list(second_candidates)
     if feed_url:
       # The user has given a URL, and we cannot exchange it without
@@ -222,9 +221,9 @@ class UserSourceAdditionForm(forms.Form):
       # TODO: try to see if one of the candidates is close enough that
       # the first URL could be a typo
       self._errors["feed_url"] = self.error_class([feed_error_msg])
-      raise forms.ValidationError(u"There is no valid field at the given URL (maybe you meant one of %s)" % candidates)
+      raise forms.ValidationError("There is no valid field at the given URL (maybe you meant one of %s)" % candidates)
     # try to guess the right feed for the URL
-    best_guess_url = unicode(candidates[0])
+    best_guess_url = str(candidates[0])
     if len(candidates)>1:
       # too much sources, we should ask the user to select one of
       # these. TODO: do this with a better UX that raw display of URLs
@@ -234,7 +233,7 @@ class UserSourceAdditionForm(forms.Form):
       data = self.data.copy()
       data["feed_url"] = best_guess_url
       self.data = data
-      raise forms.ValidationError(u"There are several feeds related to the source at '%s', please select one of them (candidate URLs: %s)" % (url,candidates))
+      raise forms.ValidationError("There are several feeds related to the source at '%s', please select one of them (candidate URLs: %s)" % (url,candidates))
     # only one candidate and no feed proposed by the user, let's
     # select it arbitrarily
     cleaned_data["feed_url"] = best_guess_url

@@ -45,7 +45,7 @@ class Tag(models.Model):
   name = models.CharField(max_length=TAG_NAME_MAX_LENGTH,
                           unique=True, db_index=True)
   
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
     
@@ -62,8 +62,8 @@ class ClassificationData(models.Model):
   object_id = models.PositiveIntegerField()
   content_object = GenericForeignKey('content_type', 'object_id')
   
-  def __unicode__(self):
-    return u"%s>%s: %s" % (self.owner.username,
+  def __str__(self):
+    return "%s>%s: %s" % (self.owner.username,
                            self.content_object,
                            list(t for t in self.tags.all()))
 
@@ -79,7 +79,7 @@ def get_item_tags(user,item):
     return Tag.objects.none()
   else:
     if numRes>1:
-      print "WARNING: unexpectedly found more than one CD for %s's%s" % (user,item)
+      print("WARNING: unexpectedly found more than one CD for %s's%s" % (user,item))
     # in any case return the first tags
     return qs[0].tags
 
@@ -111,7 +111,7 @@ def set_item_tags(user,item,tags):
     cd.save()
   else:
     if numRes>1:
-      print "WARNING: unexpectedly found more than one CD for %s's%s" % (user,item)
+      print("WARNING: unexpectedly found more than one CD for %s's%s" % (user,item))
     cd = qs[0]
   cd.tags.add(*tags)
   return cd

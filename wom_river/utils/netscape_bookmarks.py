@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import sys
 import os
 import re
@@ -117,7 +117,7 @@ def parse_netscape_bookmarks(bookmarkHTMFile):
   return bookmark_list
 
 def expand_url(url):
-  opener = urllib2.build_opener()
+  opener = urllib.request.build_opener()
   opener.addheaders = [('User-agent', 'netscape_bookmarks.py')]
   initial_url = url
   new_url = None
@@ -128,16 +128,16 @@ def expand_url(url):
       res = opener.open(url)
       if str(res.getcode())[0] in (5,4):
         # something bad happened, reutrn the url as is
-        print "Keeping url %s as is because of an HTTP error %s" % (initial_url,res.getcode())
+        print("Keeping url %s as is because of an HTTP error %s" % (initial_url,res.getcode()))
         return initial_url
-    except urllib2.HTTPError,e:
-      print "Keeping url %s as is because of an HTTP error %s (%s)" % (initial_url,e.code, e.reason)
+    except urllib.error.HTTPError as e:
+      print("Keeping url %s as is because of an HTTP error %s (%s)" % (initial_url,e.code, e.reason))
       return initial_url
-    except urllib2.URLError,e:
-      print "Keeping url %s as is because of an URL error %s" % (initial_url,e.reason)
+    except urllib.error.URLError as e:
+      print("Keeping url %s as is because of an URL error %s" % (initial_url,e.reason))
       return initial_url
-    except Exception,e:
-      print "Keeping url %s as is because of an unexpected error %s" % (initial_url,e)
+    except Exception as e:
+      print("Keeping url %s as is because of an unexpected error %s" % (initial_url,e))
       return initial_url
     new_url = res.geturl()
   return url
@@ -168,7 +168,7 @@ def expand_short_urls(bookmarkHTMFile,outputFile):
           re.sub(">None</(A)>",">%s</\1>" % expanded_url, re.IGNORECASE)
     outputLines.append(line)
     if len(outputLines)==1000:
-      print "flush %s" % outputLines[0]
+      print("flush %s" % outputLines[0])
       outputFile.write("\n".join(outputLines))
       del outputLines[:]
   outputFile.write("\n".join(outputLines))
@@ -182,16 +182,16 @@ USAGE: netscape_bookmarks.py PRINT bookmarkfilepath.html
 In the second case a new file is created called bookmarkfilepath_expanded.html
 """
   if len(sys.argv) !=3:
-    print USAGE
+    print(USAGE)
     sys.exit(2)
   if sys.argv[1]=="PRINT":
     bookmarks = parse_netscape_bookmarks(open(sys.argv[2], 'r+').read())
-    print "Found %d bookmarks" % len(bookmarks)
+    print("Found %d bookmarks" % len(bookmarks))
     for b in bookmarks:
-      print "  - %s: %s (%s)" % (b.get("title","<no title>"), b["url"], b.get("note",""))
+      print("  - %s: %s (%s)" % (b.get("title","<no title>"), b["url"], b.get("note","")))
   elif sys.argv[1]=="EXPAND":
     input_file_path = os.path.abspath(sys.argv[2])
     input_path,input_ext = os.path.splitext(input_file_path)
     new_file_path = input_path+"_expanded"+input_ext
     expand_short_urls(open(input_file_path,"r+"),open(new_file_path,"w"))
-    print "Bookmarks file with expanded short urls is at %s" % new_file_path
+    print("Bookmarks file with expanded short urls is at %s" % new_file_path)

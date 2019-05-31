@@ -81,6 +81,7 @@ from wom_user.settings import NEWS_TIME_THRESHOLD
 from wom_user.settings import MAX_ITEMS_PER_PAGE
 from wom_user.settings import HUMANS_TEAM
 from wom_user.settings import HUMANS_THANKS
+from functools import reduce
 
 
 
@@ -247,12 +248,12 @@ def generate_source_add_bookmarklet(base_url_with_domain,owner_name):
 
 class CustomErrorList(ErrorList):
   """Customize errors display in forms to use Bootstrap classes."""
-  def __unicode__(self):
+  def __str__(self):
     return self.as_span()
   def as_span(self):
-    if not self: return u''
-    return u'<span class="help-inline">%s</span>' \
-      % ''.join([ unicode(e) for e in self])
+    if not self: return ''
+    return '<span class="help-inline">%s</span>' \
+      % ''.join([ str(e) for e in self])
 
 
 @login_required(login_url=settings.LOGIN_URL)
@@ -517,7 +518,7 @@ def user_river_source_item(request, owner_name, source_url):
                                                         owner_profile.sources)
   except Reference.DoesNotExist:
     return HttpResponseNotFound()
-  except ValueError, e:
+  except ValueError as e:
     return HttpResponseBadRequest(str(e))
   feedForms = {}
   for idx,feed in enumerate(WebFeed.objects.filter(source__url=source_url)):
@@ -598,16 +599,16 @@ def post_to_user_collection(request,owner_name):
     bmk_info = json.loads(request.body)
   except Exception:
     bmk_info = {}
-  if not u"url" in bmk_info:
+  if not "url" in bmk_info:
     return HttpResponseBadRequest("Only a JSON formatted request with a 'url' parameter is accepted.")
   form = UserBookmarkAdditionForm(request.user, bmk_info)
   response_dict = {}
   if form.is_valid():
     form.save()
-    response_dict["status"] = u"success"
+    response_dict["status"] = "success"
     # TODO: also add the url to the new bookmark in the answer
   else:
-    response_dict["status"] = u"error"
+    response_dict["status"] = "error"
     response_dict["form_fields_ul"] = form.as_ul()
   return HttpResponse(json.dumps(response_dict),
                       content_type='application/json')
@@ -669,7 +670,7 @@ def user_collection_item(request, owner_name, reference_url):
                                                                 =request.user))
   except Reference.DoesNotExist:
     return HttpResponseNotFound()
-  except ValueError, e:
+  except ValueError as e:
     return HttpResponseBadRequest(str(e))
   bookmark = UserBookmark.objects.get(owner=request.owner_user, reference__url=reference_url)
   if form_data:
@@ -767,15 +768,15 @@ def apply_to_user_sieve(request,owner_name):
     action_dict = json.loads(request.body)
   except:
     action_dict = {}
-  action_name = action_dict.get(u"action")
-  if action_name not in (u"read", u"drop"):
+  action_name = action_dict.get("action")
+  if action_name not in ("read", "drop"):
     return HttpResponseBadRequest("Only a JSON formatted 'read' and 'drop' actions are supported.")
   modified_rust = []
   rust_iterator = ReferenceUserStatus.objects\
                                       .filter(has_been_read=False,
                                               owner=request.owner_user)
-  if action_name == u"read":
-    target_urls = action_dict.get(u"references",[])
+  if action_name == "read":
+    target_urls = action_dict.get("references",[])
     rust_iterator = rust_iterator.filter(reference__url__in=target_urls)
   for rust in rust_iterator:
     rust.has_been_read = True
@@ -784,7 +785,7 @@ def apply_to_user_sieve(request,owner_name):
     for r in modified_rust:
       r.save()
   count = len(modified_rust)
-  response_dict = {u"action": action_name, u"status": u"success", u"count": count}
+  response_dict = {"action": action_name, "status": "success", "count": count}
   return HttpResponse(json.dumps(response_dict), content_type='application/json')
 
   
@@ -841,7 +842,7 @@ def user_river_sources(request,owner_name):
       src_info = json.loads(request.body)
     except Exception:
       src_info = {}
-    if not u"url" in src_info:
+    if not "url" in src_info:
       return HttpResponseBadRequest("Only a JSON formatted request with a 'url' parameter is accepted.")
     q = QueryDict('', mutable=True)
     q.update(src_info)

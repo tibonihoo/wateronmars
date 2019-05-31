@@ -32,7 +32,7 @@ def defang_html(text, autoescape=None):
   soup = BeautifulSoup(auto_esc(text,autoescape), "html.parser")
   for tag in soup.find_all("script"):
     tag.replace_with('')
-  html = unicode(soup)
+  html = str(soup)
   text = DANGEROUS_TAGS_RE.sub(" ",html)
   return mark_safe(text)
 

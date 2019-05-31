@@ -59,8 +59,8 @@ class UserSourceAddTestMixin:
   def setUp(self):
     self.date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
-      url=u"http://mouf",
-      title=u"a mouf",
+      url="http://mouf",
+      title="a mouf",
       pub_date=self.date)
     self.user = User.objects.create_user(username="uA",
                           password="pA")
@@ -79,8 +79,8 @@ class UserSourceAddTestMixin:
                                                password="pB")
     self.other_profile = UserProfile.objects.create(owner=self.other_user)
     self.source_b = Reference.objects.create(
-      url=u"http://glop",
-      title=u"a glop",
+      url="http://glop",
+      title="a glop",
       pub_date=self.date)
     self.other_profile.sources.add(self.source_b)
 
@@ -93,11 +93,11 @@ class UserSourceAddTestMixin:
                       password="pA"))
     self.assertEqual(2,self.user_profile.sources.count())
     self.assertEqual(1,self.user_profile.web_feeds.count())
-    new_feed_url = u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"
+    new_feed_url = "http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"
     self.add_request("uA",
                      {"url": new_feed_url,
                       "feed_url": new_feed_url,
-                      "title": u"a new"})
+                      "title": "a new"})
     self.assertEqual(3,self.user_profile.sources.count())
     self.assertEqual(2,self.user_profile.web_feeds.count())
     new_s_candidates = [
@@ -105,7 +105,7 @@ class UserSourceAddTestMixin:
       if s.url==new_feed_url]
     self.assertEqual(1, len(new_s_candidates))
     new_s = new_s_candidates[0]
-    self.assertEqual(u"a new",new_s.title)
+    self.assertEqual("a new",new_s.title)
     self.assertEqual(new_feed_url,new_s.url)
     new_w = WebFeed.objects.get(source=new_s)
     self.assertEqual(new_feed_url,new_w.xmlURL)
@@ -119,11 +119,11 @@ class UserSourceAddTestMixin:
                       password="pA"))
     self.assertEqual(2,self.user_profile.sources.count())
     self.assertEqual(1,self.user_profile.web_feeds.count())
-    new_feed_url = u"http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"
+    new_feed_url = "http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"
     self.add_request("uB",
              {"url": new_feed_url,
               "feed_url": new_feed_url,
-              "name": u"a new"},
+              "name": "a new"},
              expectedStatusCode=403)
 
 
@@ -309,7 +309,7 @@ class UserRiverViewTest(TestCase):
         items = resp.context["news_items"]
         self.assertGreaterEqual(MAX_ITEMS_PER_PAGE,len(items))
         sourceNames = set(int(rust.reference.title[1]) for rust in items)
-        self.assertItemsEqual(sourceNames,(1,3))
+        self.assertCountEqual(sourceNames,(1,3))
         referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
         
@@ -329,7 +329,7 @@ class UserRiverViewTest(TestCase):
         items = resp.context["news_items"]
         self.assertGreaterEqual(MAX_ITEMS_PER_PAGE,len(items))
         sourceNames = set(int(rust.reference.title[1]) for rust in items)
-        self.assertItemsEqual(sourceNames,(2,3))
+        self.assertCountEqual(sourceNames,(2,3))
         referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
         
@@ -348,7 +348,7 @@ class UserRiverViewTest(TestCase):
         self.assertGreaterEqual(MAX_ITEMS_PER_PAGE,len(items))
         self.assertLess(0,len(items))
         sourceNames = set(int(rust.reference.title[1]) for rust in items)
-        self.assertItemsEqual(sourceNames,(1,3))
+        self.assertCountEqual(sourceNames,(1,3))
         referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
 
@@ -465,7 +465,7 @@ class UserSieveViewTest(TestCase):
         resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uA"}))
         self.assertEqual(302,resp.status_code)
-        self.assertRegexpMatches(
+        self.assertRegex(
             resp["Location"],
             reverse('user_login')
             + "\\?next="
@@ -786,8 +786,8 @@ class UserSourceItemViewTest(TestCase):
   def setUp(self):
     self.date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
-      url=u"http://mouf",
-      title=u"a mouf",
+      url="http://mouf",
+      title="a mouf",
       pub_date=self.date)
     self.user = User.objects.create_user(username="uA",
                           password="pA")
@@ -847,7 +847,7 @@ class UserSourceItemViewTest(TestCase):
     self.assertEqual(200,resp.status_code)
     self.assertIn("feed_forms", resp.context)
     self.assertEqual(1, len(resp.context["feed_forms"]))
-    self.assertEqual(self.web_feed.xmlURL,resp.context["feed_forms"].keys()[0])
+    self.assertEqual(self.web_feed.xmlURL,list(resp.context["feed_forms"].keys())[0])
 
   def test_change_user_source_title_updates_title_in_db(self):
     # login as uA and make sure it succeeds
@@ -855,7 +855,7 @@ class UserSourceItemViewTest(TestCase):
     newTitle = self.source.title + "MOUF"
     self.change_request("uA",self.source.url,
                         {"ref-title": newTitle,
-                         "ref-description": u"blah"}, 302)
+                         "ref-description": "blah"}, 302)
     self.assertEqual(newTitle, Reference.objects.get(url=self.source.url).title)
     
   def test_change_user_source_title_updates_dont_mess_subscriptions(self):
@@ -864,7 +864,7 @@ class UserSourceItemViewTest(TestCase):
     formerFeedCount = self.user_profile.web_feeds.count()
     self.change_request("uA",self.feed_source.url,
                         {"ref-title": self.feed_source.title+"MOUF",
-                         "ref-description": u"blah"}, 302)
+                         "ref-description": "blah"}, 302)
     self.assertEqual(formerFeedCount, self.user_profile.web_feeds.count())
     
   def test_unsubscribe_from_feed(self):

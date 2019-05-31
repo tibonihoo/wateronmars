@@ -59,7 +59,7 @@ try:
   djcelery.setup_loader()
   USE_CELERY = True
 except ImportError:
-  print "djcelery not available, no background task possible"
+  print("djcelery not available, no background task possible")
   USE_CELERY = False
 
 # Feel free to force de-activation of celery

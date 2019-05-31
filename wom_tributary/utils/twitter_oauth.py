@@ -23,8 +23,8 @@ Providing functions for the various steps described at:
 https://developer.twitter.com/en/docs/basics/authentication/overview/3-legged-oauth.html
 """
 
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import tweepy
 from granary.twitter import Twitter
 from granary.twitter import appengine_config as twitter_cfg
@@ -54,7 +54,7 @@ def try_get_authorized_client(
   except urllib.error.HTTPError as e:
     if e.code!=401: # HTTP Error 401: Authorization Required
       raise
-  except urllib2.HTTPError as e:
+  except urllib.error.HTTPError as e:
     if e.code!=401: # HTTP Error 401: Authorization Required
       raise
   return None

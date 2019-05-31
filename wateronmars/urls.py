@@ -19,7 +19,7 @@
 #
 
 
-import settings
+from . import settings
 from django.conf.urls import include, url
 
 # Uncomment the next two lines to enable the admin:

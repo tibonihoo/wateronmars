@@ -49,7 +49,7 @@ class UserProfile(models.Model):
   # Info related to the user's twitter account
   twitter_info = models.OneToOneField(TwitterUserInfo, related_name="userprofile", null=True)
   
-  def __unicode__(self):
+  def __str__(self):
     return "%s>Profile" % self.owner
 
 
@@ -71,7 +71,7 @@ class UserBookmark(models.Model):
   # User-specific note about the reference
   comment = models.TextField(default="", blank=True)
   
-  def __unicode__(self):
+  def __str__(self):
     return "%s%s>%s" % (self.owner,"" if self.is_public else "<private",
                         self.reference)
 
@@ -138,7 +138,7 @@ class ReferenceUserStatus(models.Model):
   main_source = models.ForeignKey(Reference,related_name="+")
   
   
-  def __unicode__(self):
+  def __str__(self):
     return "'%s' (read: %s, saved: %s by '%s')" \
       % (self.reference.title,self.has_been_read,self.has_been_saved,self.owner.username)
   

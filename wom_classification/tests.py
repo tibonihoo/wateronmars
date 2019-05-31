@@ -36,7 +36,7 @@ from wom_classification.models import select_model_items_with_tags
 
 
 if TAG_NAME_MAX_LENGTH>255:
-  print "WARNING: the current max length for TAG name may cause portability problems (see https://docs.djangoproject.com/en/1.4/ref/databases/#character-fields)"
+  print("WARNING: the current max length for TAG name may cause portability problems (see https://docs.djangoproject.com/en/1.4/ref/databases/#character-fields)")
 
 
 class TagModelTest(TestCase):
@@ -83,11 +83,11 @@ class ClassificationDataModelTest(TestCase):
     self.assertEqual(0,nbUserBCD)
 
   def test_stringification(self):
-    """Test the __unicode__ method since it is slightly non-trivial."""
+    """Test the __str__ method since it is slightly non-trivial."""
     item = User.objects.create(username="ItemC")
     ci = ClassificationData.objects.create(owner=self.user_a,
                       content_object=item)
-    unicodeStr = unicode(ci)
+    unicodeStr = str(ci)
     self.assertIn("ItemC",unicodeStr)
     self.assertIn("UserA",unicodeStr)
 

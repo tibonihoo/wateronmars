@@ -45,18 +45,17 @@ class Tweet:
 
   @staticmethod
   def from_activity_item(item):
-    link = item[u"url"].encode("utf-8")
-    details = item[u"object"]
-    date = parse_date(details[u"published"])
-    author_info = details[u"author"]
-    author = (author_info.get(u"displayName") or author_info["username"]).encode("utf-8")
-    content = details.get(u"content") or link # already encoded it seems
+    link = item["url"]
+    details = item["object"]
+    date = parse_date(details["published"])
+    author_info = details["author"]
+    author = (author_info.get("displayName") or author_info["username"])
+    content = (details.get("content") or link)
     matches = HASHTAG_REGEX.findall(content)
     if not matches:
       matches = SUBJECT_REGEX.findall(content)
-    tags = [encode_and_fix_format(m[1]).strip() for m in matches if len(m)>1]
-    content_summary = encode_and_fix_format(
-        build_content_excerpt(content))
+    tags = [m[1].strip() for m in matches if len(m)>1]
+    content_summary = build_content_excerpt(content)
     return Tweet(link, content_summary, author, date, tags)
 
 
@@ -65,15 +64,6 @@ def build_content_excerpt(content_unicode):
   if len(excerpt) < len(content_unicode):
       excerpt += "(...)"
   return excerpt
-
-def encode_and_fix_format(content_unicode):
-  content_encoded = content_unicode.encode("utf-8")
-  if sys.version_info.major == 2:
-    s = str(content_encoded)
-    if s.startswith("b'"):
-      return s[2:-1]
-  else:
-    return content_encoded
 
 def build_tweet_index_by_tag(data, keep_only_after_datetime):
   reverse_index = defaultdict(list)
