@@ -181,7 +181,7 @@ class UserSourceAdditionForm(forms.Form):
                          required=False,
                          widget=forms.TextInput(
                            attrs={"class":"form-control"}))
-  feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
+  feed_url = forms.CharField(max_length=URL_MAX_LENGTH, required=False,
                              widget=forms.TextInput(
                                attrs={"class":"form-control"}))
 
