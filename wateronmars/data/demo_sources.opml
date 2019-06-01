@@ -9,8 +9,18 @@
 
   <outline title="Culture" text="Culture">
   
-    <outline text="Astro Photo Of the Day" title="Astro Photo Of the Day" 
-              xmlUrl="https://apod.nasa.gov/apod.rss" htmlUrl="https://apod.nasa.gov/apod/astropix.html" />
+    <outline text="Open Culture" title="Open Culture" 
+              xmlUrl="http://www.openculture.com/feed" htmlUrl="http://www.openculture.com" />
+  
+  </outline>
+
+  <outline title="News" text="News">
+  
+    <outline text="Dave&#39;s LifeLiner" title="Dave&#39;s LifeLiner" 
+              xmlUrl="http://www.scripting.com/rss.xml" htmlUrl="http://scripting.com/" />
+  
+    <outline text="Richard Stallman&#39;s Political Notes" title="Richard Stallman&#39;s Political Notes" 
+              xmlUrl="http://stallman.org/rss/rss.xml" htmlUrl="http://stallman.org/archives/polnotes.html" />
   
   </outline>
 
