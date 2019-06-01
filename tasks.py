@@ -40,9 +40,9 @@ DEPLOY_TARGETS = USER_CONF.sections()
 
 @task
 def serve(c):
-    c.run("python manage.py migrate")
-    c.run("python manage.py collectstatic")
-    c.run("python manage.py runserver")
+    c.run("python3 manage.py migrate")
+    c.run("python3 manage.py collectstatic")
+    c.run("python3 manage.py runserver")
 
 @task
 def test(c):
@@ -53,8 +53,8 @@ def deploy_heroku(c):
     c.run("git push heroku master")
     # NOTE: for existing apps running with Django1.4, the first upgrade to
     # Django1.11 should fail here and be replaced by a manual:
-    # "heroku run \"python manage.py migrate --fake\""
-    c.run("heroku run \"python manage.py migrate\"")
+    # "heroku run \"python3 manage.py migrate --fake\""
+    c.run("heroku run \"python3 manage.py migrate\"")
 
 def deploy_on_remote(c, target_config):
     with Connection(target_config["connection"]) as conn:
@@ -65,9 +65,9 @@ def deploy_on_remote(c, target_config):
         run_in_dir("source {0}/bin/activate && pip install -r requirements_base.txt".format(venv_dir))
         # NOTE: for existing apps running with Django1.4, the first upgrade to
         # Django1.11 should fail here and be replaced by a manual:
-        # "python manage.py migrate --fake" !
-        run_in_dir("source {0}/bin/activate && python manage.py migrate".format(venv_dir))
-        run_in_dir("source {0}/bin/activate && python manage.py collectstatic".format(venv_dir))
+        # "python3 manage.py migrate --fake" !
+        run_in_dir("source {0}/bin/activate && python3 manage.py migrate".format(venv_dir))
+        run_in_dir("source {0}/bin/activate && python3 manage.py collectstatic".format(venv_dir))
         try:
             run_in_dir(target_config["final_deploy_action"])
         except configparser.NoOptionError:
@@ -102,16 +102,16 @@ def schema_reset(c, app_name):
         print("Cleanup past migrations for {0}".format(app_name))
         shutil.rmtree(migration_dir)
     print("Initialize the migration data for {0}".format(app_name))
-    c.run("python manage.py makemigrations {0} --initial".format(app_name))
+    c.run("python3 manage.py makemigrations {0} --initial".format(app_name))
     print("""Don't forget that to cancel previous migrations of the actual db (if any) with:
-  python manage.py migrate {0} zero""".format(app_name))
+  python3 manage.py migrate {0} zero""".format(app_name))
 
 @task
 def schema_update(c, app_name=None):
     app_selection = [app_name] if app_name else DJANGO_APPS
     for app in app_selection:
         try:
-            c.run("python manage.py makemigrations {0}".format(app))
+            c.run("python3 manage.py makemigrations {0}".format(app))
         except:
             if app_name is None:
                 pass
@@ -131,17 +131,17 @@ WARNING: Make sure to clean any db used by Django before the reset !""")
         print("Remove db.sql3")
         os.remove("./db.sql3")
     print("Setup the base db")
-    c.run("python manage.py migrate")
+    c.run("python3 manage.py migrate")
 
 @task
 def db_update(c):
-    c.run("python manage.py migrate")
+    c.run("python3 manage.py migrate")
 
 @task
 def transl_gen(c, lang):
     os.chdir("wom_user")
     try:
-        c.run("python ../manage.py makemessages -l {0}".format(lang))
+        c.run("python3 ../manage.py makemessages -l {0}".format(lang))
     finally:
         os.chdir("..")
 
@@ -149,7 +149,7 @@ def transl_gen(c, lang):
 def transl_compile(c, lang):
     os.chdir("wom_user")
     try:
-        c.run("python ../manage.py compilemessages -l {0}".format(lang))
+        c.run("python3 ../manage.py compilemessages -l {0}".format(lang))
     finally:
         os.chdir("..")
 
