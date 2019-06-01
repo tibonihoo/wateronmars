@@ -57,10 +57,10 @@ def deploy_heroku(c):
     c.run("heroku run \"python manage.py migrate\"")
 
 def deploy_on_remote(c, target_config):
-    with Connection(target_config("connection")) as conn:
-        site_dir = target_config("site_dir")
+    with Connection(target_config["connection"]) as conn:
+        site_dir = target_config["site_dir"]
         run_in_dir = lambda cmd: conn.run("cd {0} && {0}".format(site_dir, cmd))
-        venv_dir = target_config("virtual_env_dir")
+        venv_dir = target_config["virtual_env_dir"]
         run_in_dir("git pull --rebase origin master")
         run_in_dir("source {0}/bin/activate && pip install -r requirements_base.txt".format(venv_dir))
         # NOTE: for existing apps running with Django1.4, the first upgrade to
@@ -69,7 +69,7 @@ def deploy_on_remote(c, target_config):
         run_in_dir("source {0}/bin/activate && python manage.py migrate".format(venv_dir))
         run_in_dir("source {0}/bin/activate && python manage.py collectstatic".format(venv_dir))
         try:
-            run_in_dir(target_config("final_deploy_action"))
+            run_in_dir(target_config["final_deploy_action"])
         except configparser.NoOptionError:
             pass
 
@@ -79,10 +79,10 @@ def deploy(c, targets=None):
         targets = DEPLOY_TARGETS
     c.run("git pull --rebase origin master")
     c.run("git push origin master")
-    for target in targets:
-        target_config = USER_CONF.get(target)
-        if target_config("provider") == "heroku":
-            return deploy_heroku()
+    for target in targets.split(","):
+        target_config = USER_CONF[target]
+        if target_config.get("provider") == "heroku":
+            return deploy_heroku(c)
         else:
             return deploy_on_remote(c, target_config)
 
