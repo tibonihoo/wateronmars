@@ -59,7 +59,7 @@ def deploy_heroku(c):
 def deploy_on_remote(c, target_config):
     with Connection(target_config["connection"]) as conn:
         site_dir = target_config["site_dir"]
-        run_in_dir = lambda cmd: conn.run("cd {0} && {0}".format(site_dir, cmd))
+        run_in_dir = lambda cmd: conn.run("cd '{0}' && {1}".format(site_dir, cmd))
         venv_dir = target_config["virtual_env_dir"]
         run_in_dir("git pull --rebase origin master")
         run_in_dir("source {0}/bin/activate && pip install -r requirements_base.txt".format(venv_dir))
