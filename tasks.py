@@ -74,11 +74,8 @@ def deploy_on_remote(c, target_config):
             pass
 
 @task
-def deploy(c, targets_str=None):
-    if not targets_str:
-        targets = DEPLOY_TARGETS
-    else:
-        targets = targets_str.split(",")
+def deploy(c, to = None):
+    targets = to.split(",") if to else DEPLOY_TARGETS
     c.run("git pull --rebase origin master")
     c.run("git push origin master")
     for target in targets:
