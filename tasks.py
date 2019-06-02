@@ -84,9 +84,9 @@ def deploy(c, targets_str=None):
     for target in targets:
         target_config = USER_CONF[target]
         if target_config.get("provider") == "heroku":
-            return deploy_heroku(c)
+            deploy_heroku(c)
         else:
-            return deploy_on_remote(c, target_config)
+            deploy_on_remote(c, target_config)
 
 @task
 def style_check(c):
