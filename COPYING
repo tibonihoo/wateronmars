@@ -10,6 +10,7 @@ with their own different licenses:
 - Infinite Ajax Scroll (http://plugins.jquery.com/ias/) under the MIT license
 - TouchSwipe-Jquery-Plugin (https://github.com/mattbryson/TouchSwipe-Jquery-Plugin) under the MIT license
 - feedfinder.py (http://www.aaronsw.com/2002/feedfinder/) under the Python license
+- feedfinder2.py (https://github.com/dfm/feedfinder2) under the MIT license
 
 Mentioned licenses location:
 - the Apache License v2.0 is available at http://www.apache.org/licenses/LICENSE-2.0
