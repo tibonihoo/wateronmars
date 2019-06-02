@@ -74,12 +74,14 @@ def deploy_on_remote(c, target_config):
             pass
 
 @task
-def deploy(c, targets=None):
-    if not targets:
+def deploy(c, targets_str=None):
+    if not targets_str:
         targets = DEPLOY_TARGETS
+    else:
+        targets = targets_str.split(",")
     c.run("git pull --rebase origin master")
     c.run("git push origin master")
-    for target in targets.split(","):
+    for target in targets:
         target_config = USER_CONF[target]
         if target_config.get("provider") == "heroku":
             return deploy_heroku(c)
