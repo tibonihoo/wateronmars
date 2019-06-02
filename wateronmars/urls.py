@@ -53,7 +53,7 @@ from wom_user.views import (
     user_auth_landing_twitter,
     )
 
-from django.contrib.auth.views import login
+from django.contrib.auth import views as auth_views
 from django.views.static import serve as static_serve
 
 
@@ -61,7 +61,7 @@ urlpatterns = [
     url(r'^robots.txt$', get_robots_txt),
     url(r'^humans.txt$', get_humans_txt),
     url(r'^$', home, name='home'),
-    url(r'^accounts/login/$', login, {'template_name': 'login.html'}, name='user_login'),
+    url(r'^accounts/login/$', auth_views.LoginView.as_view(template_name='login.html'), name='user_login'),
     url(r'^accounts/logout/$', user_logout, name='user_logout'),
     url(r'^accounts/profile/$', user_profile, name='user_profile'),
     url(r'^u/(?P<owner_name>[^/]*)/$', user_root, name='user_root'),
@@ -94,7 +94,7 @@ if not settings.READ_ONLY:
   urlpatterns += [
     url(r'^accounts/new/$', user_creation),
     url(r'^accounts/auth_landing/twitter/$', user_auth_landing_twitter, name='user_auth_landing_twitter'),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     # Uncomment the admin/doc line below to
     # enable admin documentation
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

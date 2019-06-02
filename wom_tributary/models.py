@@ -47,7 +47,7 @@ class GeneratedFeed(models.Model):
     )
   
   # Reference considered as the source
-  source = models.ForeignKey(Reference)
+  source = models.ForeignKey(Reference, on_delete=models.CASCADE)
   
   # Date marking the last time the source was checked for an update
   last_update_check = models.DateTimeField('last update')
@@ -71,7 +71,7 @@ class TwitterTimeline(models.Model):
   SOURCE_URL = "https://twitter.com"
   SOURCE_NAME = "Twitter"
   
-  generated_feed = models.OneToOneField(GeneratedFeed)
+  generated_feed = models.OneToOneField(GeneratedFeed, on_delete=models.CASCADE)
     
   # User for which these tweets should be looked up
   # NOTE: in current use case this user will be requested to

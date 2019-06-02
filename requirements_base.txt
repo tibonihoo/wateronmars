@@ -1,5 +1,4 @@
-Django>=1.11.19,<2.0
-South==1.0.1
+Django>=2.2,<2.3
 feedparser>=5.2.1,<6.0
 beautifulsoup4
 granary==1.14

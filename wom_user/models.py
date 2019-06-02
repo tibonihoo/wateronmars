@@ -37,7 +37,7 @@ class UserProfile(models.Model):
   Gather user-specific information and settings. 
   """
   # The user of whom this is the profile
-  owner = models.OneToOneField(User)
+  owner = models.OneToOneField(User, on_delete=models.CASCADE)
   # User's selection of syndicated sources
   web_feeds = models.ManyToManyField(WebFeed)
   # All (public+private) sources of user bookmarks
@@ -47,7 +47,7 @@ class UserProfile(models.Model):
   # Feeds providing anything else than the plain content of "simple" web feed
   generated_feeds = models.ManyToManyField(GeneratedFeed,related_name="userprofile")
   # Info related to the user's twitter account
-  twitter_info = models.OneToOneField(TwitterUserInfo, related_name="userprofile", null=True)
+  twitter_info = models.OneToOneField(TwitterUserInfo, related_name="userprofile", null=True, on_delete=models.CASCADE)
   
   def __str__(self):
     return "%s>Profile" % self.owner
@@ -60,10 +60,10 @@ class UserBookmark(models.Model):
   There may be as many UserBookmark instances for a same reference as
   there are users...
   """
-  owner = models.ForeignKey(User)
+  owner = models.ForeignKey(User, on_delete=models.CASCADE)
   # The saved reference (WARNING: it must be explicitly added an extra 'pin'
   # when linked by a UserBookmark)
-  reference = models.ForeignKey(Reference)
+  reference = models.ForeignKey(Reference, on_delete=models.CASCADE)
   # Date at which the bookmark was created
   saved_date = models.DateTimeField('saved date')
   # Flag telling if the User accepts the bookmark to be public
@@ -125,9 +125,9 @@ class ReferenceUserStatus(models.Model):
   the read flag is set to true, then the user has read the reference.
   """
   # The reference that waits to be read
-  reference = models.ForeignKey(Reference)
+  reference = models.ForeignKey(Reference, on_delete=models.CASCADE)
   # The user that is supposed to read it
-  owner = models.ForeignKey(User)
+  owner = models.ForeignKey(User, on_delete=models.CASCADE)
   # Repeat the publication date of the reference
   reference_pub_date = models.DateTimeField('reference publication date')
   # Read flag
@@ -135,7 +135,7 @@ class ReferenceUserStatus(models.Model):
   # Saved flag
   has_been_saved = models.BooleanField(default=False)
   # The main source (used to ease display)
-  main_source = models.ForeignKey(Reference,related_name="+")
+  main_source = models.ForeignKey(Reference,related_name="+", on_delete=models.CASCADE)
   
   
   def __str__(self):

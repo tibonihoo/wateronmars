@@ -54,11 +54,11 @@ class ClassificationData(models.Model):
   and its user-specific classification data ("features" in machine
   learning terminology)."""
   
-  owner = models.ForeignKey(User)
+  owner = models.ForeignKey(User, on_delete=models.CASCADE)
   
   tags = models.ManyToManyField(Tag)
   
-  content_type = models.ForeignKey(ContentType)
+  content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
   object_id = models.PositiveIntegerField()
   content_object = GenericForeignKey('content_type', 'object_id')
   

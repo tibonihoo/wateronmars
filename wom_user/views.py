@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.utils.http import urlunquote_plus
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from wom_pebbles.models import Reference
@@ -368,7 +368,7 @@ def user_river_source_add(request,owner_name):
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
-    src_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+    src_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
   else:
     src_info = None
   form = UserSourceAdditionForm(request.user, src_info,
@@ -460,7 +460,7 @@ def user_tributary_twitter_add(request,owner_name):
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
-    src_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+    src_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
   else:
     src_info = None
   form = UserTwitterSourceAdditionForm(
@@ -566,7 +566,7 @@ def user_collection_add(request,owner_name):
   if request.method == 'POST':
     bmk_info = request.POST
   elif request.GET: # GET
-    bmk_info = dict( (k,urlunquote_plus(v.encode("utf-8"))) for k,v in request.GET.items())
+    bmk_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
   else:
     bmk_info = None
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)

@@ -51,7 +51,7 @@ class Feed:
     self.tags = set()
     
   def __str__(self):
-    return "Feed: %s\n- %s\n- %s\n- %s" % (self.title.encode("utf-8"),self.xmlUrl,self.htmlUrl,",".join(self.tags))
+    return "Feed: %s\n- %s\n- %s\n- %s" % (self.title,self.xmlUrl,self.htmlUrl,",".join(self.tags))
   
 def warning(txt):
   print("WARNING: " + txt)

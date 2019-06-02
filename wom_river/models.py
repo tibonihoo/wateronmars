@@ -29,7 +29,7 @@ class WebFeed(models.Model):
   reference to be considered as a source of news items.
   """
   # Reference considered as the source
-  source = models.ForeignKey(Reference)
+  source = models.ForeignKey(Reference, on_delete=models.CASCADE)
   # The URL where to get updated list of References from
   xmlURL = models.CharField(max_length=URL_MAX_LENGTH)
   # Date marking the last time the source was checked for an update

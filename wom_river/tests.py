@@ -208,7 +208,7 @@ class AddReferencesFromFeedParserEntriesTask(TestCase):
 </rss>
 """ % ("u"*(URL_MAX_LENGTH),"u"*(URL_MAX_LENGTH))
     
-    f1 = feedparser.parse(rss_xml.encode("utf-8"))
+    f1 = feedparser.parse(rss_xml)
     self.ref_and_tags = add_new_references_from_feedparser_entries(web_feed,
                                                                    f1.entries)
     
@@ -315,7 +315,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeed(TestCase):
 </rss>
 """
     
-    f1 = feedparser.parse(rss_xml.encode("utf-8"))
+    f1 = feedparser.parse(rss_xml)
     self.ref_and_tags = add_new_references_from_feedparser_entries(web_feed,
                                                                    f1.entries)
     

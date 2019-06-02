@@ -46,11 +46,11 @@ from wom_river.utils import feedfinder2
 
 class OPMLFileUploadForm(forms.Form):
   """From used to upload an OPML file."""
-  opml_file  = forms.FileField("OPML file")
+  opml_file  = forms.FileField(label="OPML file")
 
 class NSBookmarkFileUploadForm(forms.Form):
   """From used to upload an Netscape-style bookmarks file."""
-  bookmarks_file  = forms.FileField("Bookmarks file")
+  bookmarks_file  = forms.FileField(label="Bookmarks file")
 
 
 class UserProfileCreationForm(UserCreationForm):
