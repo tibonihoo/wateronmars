@@ -41,7 +41,7 @@ DEPLOY_TARGETS = USER_CONF.sections()
 @task
 def serve(c):
     c.run("python3 manage.py migrate")
-    c.run("python3 manage.py collectstatic")
+    c.run("python3 manage.py collectstatic --noinput")
     c.run("python3 manage.py runserver")
 
 @task
@@ -67,7 +67,7 @@ def deploy_on_remote(c, target_config):
         # Django1.11 should fail here and be replaced by a manual:
         # "python3 manage.py migrate --fake" !
         run_in_dir("source {0}/bin/activate && python3 manage.py migrate".format(venv_dir))
-        run_in_dir("source {0}/bin/activate && python3 manage.py collectstatic".format(venv_dir))
+        run_in_dir("source {0}/bin/activate && python3 manage.py collectstatic --noinput".format(venv_dir))
         try:
             run_in_dir(target_config["final_deploy_action"])
         except configparser.NoOptionError:
