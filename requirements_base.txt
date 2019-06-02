@@ -1,7 +1,7 @@
 Django>=2.2,<2.3
 feedparser>=5.2.1,<6.0
 beautifulsoup4
-granary==1.14
+granary>=2.0,<3.0
 python-dateutil
 six # for feedfinder2
 requests # for feedfinder2
