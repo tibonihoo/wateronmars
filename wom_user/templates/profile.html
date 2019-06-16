@@ -60,7 +60,7 @@
       &nbsp;<i class="glyphicon glyphicon-filter"></i></dt>
   <dd>
     {% if visitor_name == owner_name %}
-    {% blocktrans %}<a href="{{ sieve_url }}" title="Sift through news summaries and get a chance to bookmark them.">Use</a>
+    {% blocktrans %}<a href="{{ sieve_url }}" title="Sift through news summaries and get a chance to bookmark them.">Read</a>
     or <a href="javascript:dropSieveContent('{{ sieve_url }}')" title="Drop all unread items.">empty your sieve</a>.{% endblocktrans %}
     {% else %}
     {% blocktrans %}<a href="{{ sieve_url }}" title="Sift through news summaries.">Use</a>.{% endblocktrans %}
