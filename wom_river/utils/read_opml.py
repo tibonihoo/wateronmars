@@ -12,7 +12,7 @@ http://dev.opml.org/spec2.html
 
 License: 2-clause BSD
 
-Copyright (c) 2013, Thibauld Nion
+Copyright (C) 2013-2019 Thibauld Nion
 All rights reserved.
  
 Redistribution and use in source and binary forms, with or without

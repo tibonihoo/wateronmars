@@ -1,5 +1,5 @@
 // wom_base.js
-// Copyright 2015 Thibauld Nion
+// Copyright (C) 2015-2019 Thibauld Nion
 //
 // This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars).
 //

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 #
-# Copyright 2013 Thibauld Nion
+# Copyright (C) 2013-2019 Thibauld Nion
 #
 # This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
 #

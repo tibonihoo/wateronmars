@@ -61,7 +61,7 @@ __version__ = "1.38"
 __date__ = "2013-06-18"
 __maintainer__ = "Aaron Swartz (me@aaronsw.com)" # with a pinch from Thibauld Nion
 __author__ = "Mark Pilgrim (http://diveintomark.org)"
-__copyright__ = "Copyright 2002-4, Mark Pilgrim; 2006 Aaron Swartz; 2013 Thibauld Nion"
+__copyright__ = "Copyright (C) 2002-4, Mark Pilgrim; 2006 Aaron Swartz; 2013-2019 Thibauld Nion"
 __license__ = "Python"
 __credits__ = """Abe Fettig for a patch to sort Syndic8 feeds by popularity
 Also Jason Diamond, Brian Lalor for bug reporting and patches"""

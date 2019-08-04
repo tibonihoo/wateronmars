@@ -1,5 +1,5 @@
 // sieve_ux.js 
-// Copyright 2013-2014 Thibauld Nion
+// Copyright (C) 2013-2019 Thibauld Nion
 //
 // This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars).
 //

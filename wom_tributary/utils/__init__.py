@@ -1,6 +1,6 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 #
-# Copyright 2019 Thibauld Nion
+# Copyright (C) 2019 Thibauld Nion
 #
 # This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
 #
