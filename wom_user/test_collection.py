@@ -27,7 +27,11 @@ from django.urls import reverse
 
 from django.test import TestCase
 
-from wom_pebbles.models import Reference
+from wom_pebbles.models import (
+    Reference,
+    build_safe_code_from_url,
+    )
+
 from wom_river.models import WebFeed
 
 from wom_user.models import UserProfile
@@ -616,9 +620,10 @@ class UserBookmarkViewTest(TestCase):
     """
     Send the request as a JSON loaded POST.
     """
+    url_code = build_safe_code_from_url(reference_url)
     resp = self.client.post(reverse("user_collection_item",
-                                    kwargs={"owner_name":username,
-                                            "reference_url": reference_url}),
+                                    kwargs={"owner_name": username,
+                                            "reference_url_code": url_code}),
                 json.dumps(optionsDict),
                 content_type="application/json")
     self.assertEqual(expectedStatusCode,resp.status_code)
@@ -627,9 +632,10 @@ class UserBookmarkViewTest(TestCase):
   def test_get_html_user_bookmark(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
+    url_code = build_safe_code_from_url(self.reference.url)
     resp = self.client.get(reverse("user_collection_item",
-                                   kwargs={"owner_name":"uA",
-                                           "reference_url":self.reference.url}))
+                                   kwargs={"owner_name": "uA",
+                                           "reference_url_code": url_code}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("bookmark_edit.html",[t.name for t in resp.templates])
     self.assertIn("ref_form", resp.context)
@@ -647,9 +653,10 @@ class UserBookmarkViewTest(TestCase):
 
   def test_get_html_other_user_bookmark_is_forbidden(self):
     self.assertTrue(self.client.login(username="uB",password="pB"))
+    url_code = build_safe_code_from_url(self.reference.url)
     resp = self.client.get(reverse("user_collection_item",
-                                   kwargs={"owner_name":"uA",
-                                           "reference_url":self.reference.url}))
+                                   kwargs={"owner_name": "uA",
+                                           "reference_url_code": url_code}))
     self.assertEqual(403,resp.status_code)
     
   def test_change_user_bookmark_title_updates_title_in_db(self):

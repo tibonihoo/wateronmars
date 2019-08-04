@@ -73,11 +73,11 @@ urlpatterns = [
     url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/$', user_tributary, name='user_tributary'),
     url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/twitter/$', user_tributary_twitter, name='user_tributary_twitter'),
     url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/twitter/add/$', user_tributary_twitter_add, name='user_tributary_twitter_add'),
-    url(r'^u/(?P<owner_name>[^/]*)/sources/item/(?P<source_url>.*)$', user_river_source_item, name='user_river_source_item'),
+    url(r'^u/(?P<owner_name>[^/]*)/sources/item/(?P<source_url_code>.*)$', user_river_source_item, name='user_river_source_item'),
     url(r'^u/(?P<owner_name>[^/]*)/river/$', user_river_view, name='user_river_view'),
     url(r'^u/(?P<owner_name>[^/]*)/sieve/$', user_river_sieve, name='user_river_sieve'),
     url(r'^u/(?P<owner_name>[^/]*)/collection/add/$', user_collection_add, name='user_collection_add'),
-    url(r'^u/(?P<owner_name>[^/]*)/collection/item/(?P<reference_url>.*)$',user_collection_item, name='user_collection_item'),
+    url(r'^u/(?P<owner_name>[^/]*)/collection/item/(?P<reference_url_code>.*)$',user_collection_item, name='user_collection_item'),
     # access to static files
     url(r'^static/(?P<path>.*)$', static_serve, {'document_root': settings.STATIC_ROOT}),
     ]

@@ -40,7 +40,7 @@ jQuery.ias({
       <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
 {% if visitor_name == owner_name  %}
-          <a href="{% url 'user_river_source_item' visitor_name feed.source.url %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
+          <a href="{% url 'user_river_source_item' visitor_name feed.source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
 {% endif  %}
           <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
       </li>
@@ -61,7 +61,7 @@ jQuery.ias({
    {% if source.url != "#internal-bookmark-import" %}
    <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/>
     {% if visitor_name == owner_name  %}
-     <a href="{% url 'user_river_source_item' visitor_name source.url %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
+     <a href="{% url 'user_river_source_item' visitor_name source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
     {% endif %}
      <a href="{{ source.url }}">{{ source.title }}</a>
     {% endif %}

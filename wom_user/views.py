@@ -2,18 +2,18 @@
 #
 # Copyright 2013-2019 Thibauld Nion
 #
-# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
+# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars)
 #
 # WaterOnMars is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # WaterOnMars is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -28,7 +28,11 @@ from django.conf import settings
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from wom_pebbles.models import Reference
+from wom_pebbles.models import (
+    Reference,
+    build_url_from_safe_code,
+    )
+
 from wom_classification.models import get_item_tag_names
 from wom_classification.models import get_user_tags
 from wom_pebbles.tasks import delete_old_unpinned_references
@@ -89,14 +93,14 @@ def check_and_set_owner(func):
   """
   Decorator that applies to functions expecting the "owner" name as a
   second argument.
-  
+
   It will check if a user exists with this name and if so add to the
   request instance a member variable called owner_user pointing to the
   User instance corresponding to the owner.
 
   If the owner doesn't exists, the visitor is redirected to 404.
   """
-  
+
   def _check_and_set_owner(request, owner_name, *args, **kwargs):
      try:
        owner_user = User.objects.get(username=owner_name)
@@ -134,7 +138,7 @@ def loggedin_and_owner_required(func):
 def add_base_template_context_data(d,visitor_name, owner_name):
   """Generate the context data needed for templates that inherit from
   the base template.
-  
+
   'd': the dictionary of custom data for the context.
   'visitor_name': the username of the visitor ("None" if anonymous).
   'owner_name': the username of the owner.
@@ -168,8 +172,8 @@ def clean_checkbox_value(request, post_data, checkbox_name, current_value):
       # the original one unchanged.
       post_data[checkbox_name] = current_value
 
-  
-  
+
+
 def home(request):
 
   """
@@ -212,7 +216,7 @@ def request_for_cleanup(request):
 
 
 def get_robots_txt(request):
-  """Generate a set of robots.txt rules.""" 
+  """Generate a set of robots.txt rules."""
   return HttpResponse("""
 User-agent: *
 Disallow: /u/*/river
@@ -222,12 +226,12 @@ Disallow: /accounts
 
 def get_humans_txt(request):
   """Generate a set of humans.txt rules. See also http://humanstxt.org/."""
-  
+
   return HttpResponse("""
-%s  
+%s
 
 %s
-  
+
 /* SITE */
   Standards: HTML5, CSS3
   Platform: WaterOnMars
@@ -237,7 +241,7 @@ def get_humans_txt(request):
   Software: Django, Emacs, Firefox, Firebug, Inkscape
 """ % (HUMANS_TEAM, HUMANS_THANKS), content_type='text/plain')
 
-  
+
 def generate_collection_add_bookmarklet(base_url_with_domain,owner_name):
   return r"javascript:ref=location.href;selection%%20=%%20''%%20+%%20(window.getSelection%%20?%%20window.getSelection()%%20:%%20document.getSelection%%20?%%20document.getSelection()%%20%%20:%%20document.selection.createRange().text);t=document.title;window.location.href='%s%s?url='+encodeURIComponent(ref)+'&title='+encodeURIComponent(t)+'&comment='+encodeURIComponent(selection);" % (base_url_with_domain.rstrip("/"),reverse('user_collection_add',args=(owner_name,)))
 
@@ -299,7 +303,7 @@ def user_root(request,owner_name):
 
 def handle_uploaded_opml(opmlUploadedFile,user):
   import_user_feedsources_from_opml(user,opmlUploadedFile.read())
-    
+
 
 @loggedin_and_owner_required
 @csrf_protect
@@ -396,7 +400,7 @@ class TwitterTimelineInfo:
     self.feed = feed
     self.timeline = timeline
     self.fetchable = fetchable
-    
+
   @staticmethod
   def from_feed(f, twitter_status):
     d = fetch_timeline_data(
@@ -432,7 +436,7 @@ def user_tributary_twitter(request, owner_name):
               twittertimeline__isnull=False)
       .select_related("twittertimeline")
       .order_by('-last_update_check', 'title')
-    ).all()    
+    ).all()
     twitter_timelines_recap = [
       TwitterTimelineInfo
       .from_feed(f, twitter_status)
@@ -440,7 +444,7 @@ def user_tributary_twitter(request, owner_name):
       ]
   else:
     twitter_status = None
-    twitter_timelines_recap = None  
+    twitter_timelines_recap = None
   d = add_base_template_context_data({
     'twitter_oauth_status': twitter_status,
     'twitter_timelines_recap': twitter_timelines_recap,
@@ -510,8 +514,9 @@ def prepare_reference_form(request, reference_url, reference_query_set):
 @loggedin_and_owner_required
 @csrf_protect
 @require_http_methods(["GET","POST"])
-def user_river_source_item(request, owner_name, source_url):
+def user_river_source_item(request, owner_name, source_url_code):
   """Generate an editable view of a given source identified by its url."""
+  source_url = build_url_from_safe_code(source_url_code)
   owner_profile = request.owner_user.userprofile
   try:
     reference, form, form_data = prepare_reference_form(request, source_url,
@@ -542,9 +547,9 @@ def user_river_source_item(request, owner_name, source_url):
       form.save()
       optOutFormsSave()
       return HttpResponseRedirect(reverse('user_river_source_item',
-                                          args=(request.user.username, source_url)))
+                                          args=(request.user.username, source_url_code)))
   d = add_base_template_context_data(
-    { 
+    {
       'ref_form': form,
       'feed_forms': feedForms,
       'ref_url': source_url,
@@ -579,13 +584,13 @@ def user_collection_add(request,owner_name):
      'REST_PARAMS': ','.join(UserBookmarkAdditionForm.base_fields.keys())},
     request.user.username,request.user.username)
   return render(request, 'bookmark_addition.html', d)
-  
+
 
 @loggedin_and_owner_required
 @csrf_protect
 def post_to_user_collection(request,owner_name):
   """Add an item with the payload from a form's POST or with the
-  following JSON payload::  
+  following JSON payload::
     { "url": "<url>",
       "title": "the title", // optional but recommended
       "comment": "", // optional
@@ -661,8 +666,9 @@ def user_collection(request,owner_name):
 @loggedin_and_owner_required
 @csrf_protect
 @require_http_methods(["GET","POST"])
-def user_collection_item(request, owner_name, reference_url):
+def user_collection_item(request, owner_name, reference_url_code):
   """Generate an editable view of a given reference identified by its url."""
+  reference_url = build_url_from_safe_code(reference_url_code)
   try:
     reference, form, form_data = prepare_reference_form(request, reference_url,
                                                         Reference.objects\
@@ -687,9 +693,10 @@ def user_collection_item(request, owner_name, reference_url):
       form.save()
       bmk_form.save()
       return HttpResponseRedirect(reverse('user_collection_item',
-                                          args=(request.user.username, reference_url)))
+                                          args=(request.user.username,
+                                                reference_url_code)))
   d = add_base_template_context_data(
-    { 
+    {
       'bmk_form': bmk_form,
       'ref_form': form,
       'ref_url': reference_url,
@@ -750,16 +757,16 @@ def generate_user_sieve(request,owner_name):
 def apply_to_user_sieve(request,owner_name):
   """
   Act on the items passing through the sieve.
-  
+
   The accepted actions are to mark items as read, with the
   following JSON payload::
-  
+
     { "action" = "read",
       "references" = [ "<url1>", "<url2>", ...],
     }
 
   or to mark all items as read:
-  
+
     { "action" = "drop" }
   """
   if settings.READ_ONLY:
@@ -788,7 +795,7 @@ def apply_to_user_sieve(request,owner_name):
   response_dict = {"action": action_name, "status": "success", "count": count}
   return HttpResponse(json.dumps(response_dict), content_type='application/json')
 
-  
+
 
 @loggedin_and_owner_required
 def user_river_sieve(request,owner_name):
@@ -802,7 +809,7 @@ def user_river_sieve(request,owner_name):
     return HttpResponseNotAllowed(['GET','POST'])
 
 
-  
+
 @check_and_set_owner
 def user_river_sources(request,owner_name):
   if request.method == 'GET':
@@ -824,7 +831,7 @@ def user_river_sources(request,owner_name):
     web_feeds.sort(key=lambda f:f.main_tag_name)
     d = add_base_template_context_data({
         'tagged_web_feeds': web_feeds,
-        'user_tags': get_user_tags(request.owner_user), 
+        'user_tags': get_user_tags(request.owner_user),
         'other_sources': other_sources,
         'num_sources' : len(web_feeds)+other_sources.count(),
         'source_add_bookmarklet': generate_source_add_bookmarklet(
@@ -850,4 +857,3 @@ def user_river_sources(request,owner_name):
     return user_river_source_add(request, owner_name)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
-

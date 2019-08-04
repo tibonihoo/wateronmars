@@ -20,6 +20,7 @@
 
 
 from django.db import models
+import base64
 
 
 # Max number of characters in a URL.
@@ -33,6 +34,17 @@ URL_MAX_LENGTH = 255
 # WARNING: READ ONLY !
 REFERENCE_TITLE_MAX_LENGTH = 150
 
+
+def build_safe_code_from_url(ref_url):
+  url_bytes = ref_url.encode("utf-8")
+  code_bytes = base64.urlsafe_b64encode(url_bytes)
+  return code_bytes.decode("utf-8")
+
+
+def build_url_from_safe_code(code):
+  code_bytes = code.encode("utf-8")
+  url_bytes = base64.urlsafe_b64decode(code_bytes)
+  return url_bytes.decode("utf-8")
 
 
 class Reference(models.Model): # A pebble !
@@ -62,6 +74,10 @@ class Reference(models.Model): # A pebble !
 
   def add_pin(self):
     self.pin_count += 1
+
+  @property
+  def url_safe_code(self):
+    return build_safe_code_from_url(self.url)
 
   def __str__(self):
     return "%s[%s]" % (self.title,self.url)

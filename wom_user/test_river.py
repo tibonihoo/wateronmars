@@ -2,18 +2,18 @@
 #
 # Copyright 2013 Thibauld Nion
 #
-# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
+# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars)
 #
 # WaterOnMars is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # WaterOnMars is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -28,7 +28,10 @@ from django.urls import reverse
 
 from django.test import TestCase
 
-from wom_pebbles.models import Reference
+from wom_pebbles.models import (
+    Reference,
+    build_safe_code_from_url,
+    )
 from wom_river.models import WebFeed
 
 from wom_user.models import UserProfile
@@ -49,7 +52,7 @@ class UserSourceAddTestMixin:
   """Mixin implementing the common tests for the Form and the REST API
   of source addition.
   """
-  
+
   def add_request(self,url,optionsDict):
     """
     Returns the response that can be received from the input url.
@@ -109,7 +112,7 @@ class UserSourceAddTestMixin:
     self.assertEqual(new_feed_url,new_s.url)
     new_w = WebFeed.objects.get(source=new_s)
     self.assertEqual(new_feed_url,new_w.xmlURL)
-    
+
   def test_add_new_feed_source_to_other_user_fails(self):
     """
     WARNING: dependent on an internet access !
@@ -131,7 +134,7 @@ class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
 
   def setUp(self):
     UserSourceAddTestMixin.setUp(self)
-  
+
   def add_request(self,username,optionsDict,expectedStatusCode=302):
     """
     Send the request as a JSON loaded POST (a redirect is expected
@@ -143,7 +146,7 @@ class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
                 content_type="application/json")
     self.assertEqual(expectedStatusCode,resp.status_code)
     return resp
-  
+
   def test_get_sources_for_owner(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
@@ -217,7 +220,7 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
 </opml>
 """
     import_user_feedsources_from_opml(self.user,opml_txt)
-    
+
   def test_check_sources_correctly_added(self):
     self.assertEqual(7,self.user_profile.sources.count())
     self.assertEqual(5,self.user_profile.web_feeds.count())
@@ -225,16 +228,16 @@ class ImportUserFeedSourceFromOPMLTaskTest(TestCase):
     self.assertIn("http://stallman.org/rss/rss.xml",feed_urls)
     self.assertIn("http://www.scripting.com/rss.xml",feed_urls)
     self.assertIn("http://www.openculture.com/feed",feed_urls)
-    
+
   def test_check_sources_not_added_to_other_user(self):
     self.assertEqual(0,self.other_user_profile.sources.count())
     self.assertEqual(0,self.other_user_profile.web_feeds.count())
-    
+
   def test_check_tags_correctly_added(self):
     # Check that tags were added too
     self.assertTrue(Tag.objects.filter(name="News").exists())
     self.assertTrue(Tag.objects.filter(name="Culture").exists())
-    
+
   def test_check_tags_correctly_associated_to_sources(self):
     # Check that tags were correctly associated with the sources
     src_tags = get_item_tag_names(self.user,
@@ -292,7 +295,7 @@ class UserRiverViewTest(TestCase):
             r = Reference.objects.create(url="http://moufc%d"%i,title="s3r%d" % i,
                                          pub_date=date)#,source=s3
             r.sources.add(r3)
-    
+
     def test_get_html_for_owner_returns_max_items_ordered_newest_first(self):
         """
         Make sure a user can see its river properly ordered
@@ -312,7 +315,7 @@ class UserRiverViewTest(TestCase):
         self.assertCountEqual(sourceNames,(1,3))
         referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
-        
+
     def test_get_html_for_non_owner_logged_user_returns_max_items_ordered_newest_first(self):
         """
         Make sure a logged in user can see another user's river.
@@ -332,7 +335,7 @@ class UserRiverViewTest(TestCase):
         self.assertCountEqual(sourceNames,(2,3))
         referenceNumbers = [int(rust.reference.title[3:]) for rust in items]
         self.assertEqual(list(reversed(sorted(referenceNumbers))),referenceNumbers)
-        
+
     def test_get_html_for_anonymous_returns_max_items_ordered_newest_first(self):
         """
         Make sure an anonymous (ie. not logged in) user can see a user's river.
@@ -410,7 +413,7 @@ class UserSieveViewTest(TestCase):
               r = Reference.objects.create(url="http://r3%d" % i,title="s3r%d" % i,
                                            pub_date=date)#,source=s3
               r.sources.add(self.s3)
-              
+
 
     def test_check_user_unread_feed_items(self):
       """Test that that unread items are correctly collected: just the
@@ -420,7 +423,7 @@ class UserSieveViewTest(TestCase):
       self.assertEqual(2*self.num_items_per_source,count)
       self.assertEqual(count,ReferenceUserStatus.objects\
                        .filter(owner=self.user1).count())
-      
+
     def test_get_html_for_owner_returns_max_items_ordered_oldest_first(self):
         """
         Make sure a user can see its river properly ordered
@@ -445,7 +448,7 @@ class UserSieveViewTest(TestCase):
         for rust in items:
           expected_source = getattr(self,"s%d" % int(rust.reference.title[1]))
           self.assertEqual(expected_source,rust.main_source,"Wrong main source for %s" % rust)
-        
+
     def test_get_html_for_non_owner_logged_user_is_forbidden(self):
         """
         Make sure a logged in user can see another user's river.
@@ -455,8 +458,8 @@ class UserSieveViewTest(TestCase):
         # request uB's river
         resp = self.client.get(reverse("user_river_sieve",
                                        kwargs={"owner_name":"uB"}))
-        self.assertEqual(403,resp.status_code)        
-        
+        self.assertEqual(403,resp.status_code)
+
     def test_get_html_for_anonymous_redirects_to_login(self):
         """
         Make sure an anonymous (ie. not logged) user can see a user's river.
@@ -471,7 +474,7 @@ class UserSieveViewTest(TestCase):
             + "\\?next="
             + reverse("user_river_sieve",
                           kwargs={"owner_name":"uA"}))
-        
+
     def test_post_json_pick_item_out_of_sieve(self):
         """
         Make sure posting an item as read will remove it from the sieve.
@@ -530,7 +533,7 @@ class UserSieveViewTest(TestCase):
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         self.assertEqual(0,[r.reference.url for r in items].count("http://r1"))
-        self.assertEqual(0,[r.reference.url for r in items].count("http://r3"))        
+        self.assertEqual(0,[r.reference.url for r in items].count("http://r3"))
 
     def test_post_json_drop_sieve_content(self):
         """
@@ -559,7 +562,7 @@ class UserSieveViewTest(TestCase):
                                        kwargs={"owner_name":"uA"}))
         items = resp.context["oldest_unread_references"]
         self.assertEqual(0,len(items))
-        
+
     def test_post_malformed_json_returns_error(self):
         """
         Make sure when the json is malformed an error that is not a server error is returned.
@@ -596,7 +599,7 @@ class UserSieveViewTest(TestCase):
                                 content_type="application/json")
         self.assertEqual(302,resp.status_code)
 
-        
+
 class UserSourcesViewTest(TestCase):
 
     def setUp(self):
@@ -637,7 +640,7 @@ class UserSourcesViewTest(TestCase):
         user2_profile.sources.add(s2)
         user2_profile.public_sources.add(s2)
         user2_profile.sources.add(s3)
-        
+
     def test_get_html_for_owner_returns_separate_source_and_feed(self):
         """
         Make sure a user can see its sources in two categories.
@@ -664,7 +667,7 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(set(("f",)),feedTypes)
         feedTags = set([s.main_tag_name for s in feed_items])
         self.assertEqual(set(("",)),feedTags)
-        
+
     def test_get_html_for_non_owner_logged_user_returns_public_source_only(self):
         """
         Make sure a logged in user can see another user's sources.
@@ -693,7 +696,7 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(feedNames,set((2,3)))
         feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
-        
+
     def test_get_html_for_anonymous_returns_all_sources(self):
         """
         Make sure an anonymous user can see users' sources.
@@ -720,7 +723,7 @@ class UserSourcesViewTest(TestCase):
         self.assertEqual(feedNames,set((1,3)))
         feedTypes = set([s.source.title[0] for s in feed_items])
         self.assertEqual(set(("f",)),feedTypes)
-        
+
     def test_get_opml_for_anonymous_returns_all_sources(self):
         """
         Make sure an anonymous user can see users' sources as OPML.
@@ -750,7 +753,7 @@ class ReferenceUserStatusModelTest(TestCase):
                                               title="glop",
                                               pub_date=self.date)
     self.user = User.objects.create(username="name")
-    
+
   def test_construction_defaults(self):
     """
     This tests just makes it possible to double check that a
@@ -782,7 +785,7 @@ class ReferenceUserStatusModelTest(TestCase):
 
 class UserSourceItemViewTest(TestCase):
   """Test the single source view."""
-  
+
   def setUp(self):
     self.date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
@@ -809,19 +812,23 @@ class UserSourceItemViewTest(TestCase):
     """
     Send the request as a JSON loaded POST.
     """
+    url_code = build_safe_code_from_url(source_url)
     resp = self.client.post(reverse("user_river_source_item",
-                                    kwargs={"owner_name":username,
-                                            "source_url": source_url}),
+                                    kwargs={"owner_name": username,
+                                            "source_url_code": url_code}),
                 json.dumps(optionsDict),
                 content_type="application/json")
     self.assertEqual(expectedStatusCode,resp.status_code)
     return resp
-    
+
   def test_get_html_user_source(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
+    url_code = build_safe_code_from_url(self.source.url)
     resp = self.client.get(reverse("user_river_source_item",
-                                   kwargs={"owner_name":"uA","source_url":self.source.url}))
+                                   kwargs={
+                                     "owner_name": "uA",
+                                     "source_url_code": url_code}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("source_edit.html",[t.name for t in resp.templates])
     self.assertIn("ref_form", resp.context)
@@ -834,16 +841,21 @@ class UserSourceItemViewTest(TestCase):
 
   def test_get_html_other_user_source_is_forbidden(self):
     self.assertTrue(self.client.login(username="uB",password="pB"))
+    url_code = build_safe_code_from_url(self.source.url)
     resp = self.client.get(reverse("user_river_source_item",
-                                   kwargs={"owner_name":"uA","source_url":self.source.url}))
+                                   kwargs={
+                                     "owner_name": "uA",
+                                     "source_url_code": url_code}))
     self.assertEqual(403,resp.status_code)
-    
+
   def test_get_html_user_source_with_feed_has_feed_forms_filled(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
+    url_code = build_safe_code_from_url(self.feed_source.url)
     resp = self.client.get(reverse("user_river_source_item",
-                                    kwargs={"owner_name":"uA",
-                                           "source_url":self.feed_source.url}))
+                                    kwargs={
+                                      "owner_name": "uA",
+                                      "source_url_code": url_code}))
     self.assertEqual(200,resp.status_code)
     self.assertIn("feed_forms", resp.context)
     self.assertEqual(1, len(resp.context["feed_forms"]))
@@ -857,7 +869,7 @@ class UserSourceItemViewTest(TestCase):
                         {"ref-title": newTitle,
                          "ref-description": "blah"}, 302)
     self.assertEqual(newTitle, Reference.objects.get(url=self.source.url).title)
-    
+
   def test_change_user_source_title_updates_dont_mess_subscriptions(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
@@ -866,7 +878,7 @@ class UserSourceItemViewTest(TestCase):
                         {"ref-title": self.feed_source.title+"MOUF",
                          "ref-description": "blah"}, 302)
     self.assertEqual(formerFeedCount, self.user_profile.web_feeds.count())
-    
+
   def test_unsubscribe_from_feed(self):
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",password="pA"))
@@ -875,4 +887,3 @@ class UserSourceItemViewTest(TestCase):
                         {"feed0-follow": False}, 302)
     self.assertEqual(0, self.user_profile.web_feeds.count())
     self.assertEqual(1, WebFeed.objects.filter(xmlURL=self.web_feed.xmlURL).count())
-

@@ -48,7 +48,7 @@ jQuery.ias({
   <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url|normalize_wom_protocol_url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ {% trans "Bookmarked since" %} {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
   </dt>
   <dd class="in_bookmark_def">
-    <a href="{% url 'user_collection_item' visitor_name bookmark.reference.url %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
+    <a href="{% url 'user_collection_item' visitor_name bookmark.reference.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
       <small><em>{% spaceless %}
           {% if bookmark.get_sources %}@
           {% for source in bookmark.get_sources %}
