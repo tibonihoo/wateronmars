@@ -79,11 +79,13 @@ def deploy(c, to = None):
     c.run("git pull --rebase origin master")
     c.run("git push origin master")
     for target in targets:
+        print(f"STARTING DEPLOY ON: {target}")
         target_config = USER_CONF[target]
         if target_config.get("provider") == "heroku":
             deploy_heroku(c)
         else:
             deploy_on_remote(c, target_config)
+        print(f"ENDING DEPLOY ON: {target}")
 
 @task
 def style_check(c):
