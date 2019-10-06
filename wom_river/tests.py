@@ -311,6 +311,15 @@ class AddReferencesFromFeedParserTaskOnBrokenFeed(TestCase):
       <pubDate>Sun, 17 Nov 2013 16:56:06 GMT</pubDate>
       <guid>http://mouf/a#guid</guid>
     </item>
+    <item>
+      <title>The mouf</title>
+      <!-- No link -->
+      <category>test</category>
+      <description>&lt;p>This is just a test&lt;/p>
+      </description>
+      <!-- No pubDate -->
+      <guid>http://mouf/a#guid</guid>
+    </item>
   </channel>
 </rss>
 """

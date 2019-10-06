@@ -120,19 +120,22 @@ def add_new_references_from_feedparser_entries(feed,entries):
   latest_item_date = feed_last_update_check
   all_references = []
   ref_by_url = {}
-  entries_with_dates = [(e,get_date_from_feedparser_entry(e)) for e in entries]
+  entries_with_link = []
+  # reject entries that have no link tag
+  for e in entries:
+    entry_link = e.get("link",None)
+    if not entry_link:
+      logger.warning("Skipping a feed entry without 'link' : %s." % e)
+      continue
+    entries_with_link.append(e)
+  entries_with_dates = [(e,get_date_from_feedparser_entry(e)) for e in entries_with_link]
   new_entries = [(e,d) for e,d in entries_with_dates \
                  if d>feed_last_update_check]
   entries_url = [e.link for e,_ in new_entries if e.get("link",None)]
   existing_references = list(Reference.objects.filter(url__in=entries_url).all())
   existing_references_by_url = dict([(r.url,r) for r in existing_references])
   for entry,date in new_entries:
-    entry_link = entry.get("link",None)
-    if not entry_link:
-      # reject entries that have no link tag or an empty string as a
-      # link as well
-      logger.warning("Skipping a feed entry without 'link' : %s." % entry)
-      continue
+    entry_link = entry.link
     previous_ref = existing_references_by_url.get(entry_link,None)
     if previous_ref is None:
       # there may also be duplicate in the current feed list of items
