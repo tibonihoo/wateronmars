@@ -219,6 +219,7 @@ function updateReadingProgress()
   elt.attr("style","width: "+progress.toString()+"%;");
 }
 
+
 // Perform all necessary stuff to indicate that a reference should be
 // considered as read.
 // Note: will act only if the reference has not be marked as read yet !
@@ -230,7 +231,11 @@ function markAsRead(refElement,refIdx) {
   if ( gNumReferences>0 && !refElement.hasClass('read') ) { 
     refElement.addClass("read");
     $("#wom-ref-nav-"+refIdx.toString()).addClass('read');
-    gReadURLs.push(document.getElementById('wom-ref'+refIdx.toString()+"-url").href);
+    url_elt = document.getElementById('wom-ref'+refIdx.toString()+"-url");
+    // NOTE: calling .href on the element provded to applied a silent encoding (at least on firefox)
+    // whereas getAttributes provided an untouched value
+    raw_url = url_elt.getAttribute("href")
+    gReadURLs.push(raw_url);
     rollingUpdateReadStatusOnServer(true);
     gNumUnread -= 1;
     updateReadingProgress();
