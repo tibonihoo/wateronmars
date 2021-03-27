@@ -1,6 +1,6 @@
 -r requirements_base.txt
 # for Heroku-like deployment:
 gunicorn==19.9.0
-psycopg2>=2.8.2,<2.9
+psycopg2-binary>=2.8.2,<2.9
 dj-database-url==0.5.0
 
