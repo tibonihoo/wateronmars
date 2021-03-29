@@ -8,6 +8,10 @@ twitter_app_secret
 celerybeat-schedule
 celery
 
+# direnv files
+.direnv
+.envrc
+
 *.sql3
 
 *.py[cod]
