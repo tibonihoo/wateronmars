@@ -35,7 +35,7 @@ from wom_pebbles.models import (
 
 from wom_classification.models import get_item_tag_names
 from wom_classification.models import get_user_tags
-from wom_pebbles.tasks import delete_old_unpinned_references
+
 from wom_river.tasks import collect_news_from_feeds
 from wom_tributary.tasks import collect_news_from_tweeter_feeds
 
@@ -80,8 +80,9 @@ from wom_user.forms import WebFeedOptInOutForm
 from wom_user.tasks import import_user_feedsources_from_opml
 from wom_user.tasks import import_user_bookmarks_from_ns_list
 from wom_user.tasks import check_user_unread_feed_items
+from wom_user.tasks import delete_obsolete_unpinned_references_regularly
 
-from wom_user.settings import NEWS_TIME_THRESHOLD
+
 from wom_user.settings import MAX_ITEMS_PER_PAGE
 from wom_user.settings import HUMANS_TEAM
 from wom_user.settings import HUMANS_THANKS
@@ -192,7 +193,7 @@ def request_for_update(request):
   of all references that have never been saved (past an arbitrary
   delay).
   """
-  delete_old_unpinned_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
+  delete_obsolete_unpinned_references_regularly()
   collect_news_from_feeds()
   collect_news_from_tweeter_feeds(1)
   if settings.DEMO:
@@ -210,7 +211,7 @@ def request_for_cleanup(request):
   """Trigger a cleanup of all references that have never been saved
   (past an arbitrary delay).
   """
-  delete_old_unpinned_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
+  delete_obsolete_unpinned_references_regularly()
   return HttpResponseRedirect(reverse("home"))
 
 

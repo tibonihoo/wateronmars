@@ -18,6 +18,7 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from datetime import timedelta
 from django.db import models
 
 from wom_pebbles.models import Reference
@@ -34,4 +35,5 @@ class WebFeed(models.Model):
   xmlURL = models.CharField(max_length=URL_MAX_LENGTH)
   # Date marking the last time the source was checked for an update
   last_update_check = models.DateTimeField('last update')
-      
+  # Time before considering an item obsolete
+  item_relevance_duration = models.DurationField(default=timedelta(weeks=4))

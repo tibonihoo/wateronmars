@@ -28,11 +28,6 @@ from django.conf import settings
 from datetime import timedelta
 
 
-if hasattr(settings,"WOM_USER_NEWS_TIME_THRESHOLD"):
-  NEWS_TIME_THRESHOLD = settings.WOM_USER_NEWS_TIME_THRESHOLD
-else:
-  NEWS_TIME_THRESHOLD = timedelta(weeks=4)
-
 if hasattr(settings,"WOM_USER_MAX_ITEMS_PER_PAGE"):
   MAX_ITEMS_PER_PAGE = settings.WOM_USER_MAX_ITEMS_PER_PAGE
 else:

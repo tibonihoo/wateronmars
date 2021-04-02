@@ -51,8 +51,6 @@ from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 from wom_river.tasks import collect_news_from_feeds
 from wom_river.tasks import import_feedsources_from_opml
 
-from wom_user.settings import NEWS_TIME_THRESHOLD
-
 from wom_pebbles.models import Reference
 from wom_user.models import UserBookmark
 from wom_user.models import UserProfile
@@ -61,7 +59,10 @@ from wom_user.models import ReferenceUserStatus
 from wom_classification.models import TAG_NAME_MAX_LENGTH
 from wom_classification.models import set_item_tag_names
 
+from wom_river.models import WebFeed
+
 from wom_tributary.tasks import collect_news_from_tweeter_feeds
+from wom_tributary.models import GeneratedFeed
 
 import logging
 logger = logging.getLogger(__name__)
@@ -79,8 +80,8 @@ def collect_all_new_twitter_references_regularly():
   collect_news_from_tweeter_feeds(1)
 
 @periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
-def delete_old_unpinned_references_regularly():
-  delete_old_unpinned_references(datetime.now(timezone.utc)-NEWS_TIME_THRESHOLD)
+def delete_obsolete_unpinned_references_regularly():
+  delete_obsolete_unpinned_references_from_feeds()
 
 
 @task()
@@ -247,3 +248,13 @@ def check_user_unread_feed_items(user):
     for r in new_ref_status:
       r.save()
   return len(new_ref_status)
+
+
+@task()
+def delete_obsolete_unpinned_references_from_feeds():
+  for feed in WebFeed.objects.select_related("source").all():
+      date_threshold = datetime.now() - feed.item_relevance_duration
+      feed.source.productions.filter(pin_count=0, pub_date__lt=date_threshold).delete()
+  for feed in GeneratedFeed.objects.select_related("source").all():
+      date_threshold = datetime.now() - feed.item_relevance_duration
+      feed.source.productions.filter(pin_count=0, pub_date__lt=date_threshold).delete()
