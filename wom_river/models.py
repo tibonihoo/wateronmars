@@ -37,3 +37,25 @@ class WebFeed(models.Model):
   last_update_check = models.DateTimeField('last update')
   # Time before considering an item obsolete
   item_relevance_duration = models.DurationField(default=timedelta(weeks=4))
+
+
+class WebFeedCollation(models.Model):
+  """Collect references from a feed that
+  needs to be collated (ie grouped together).
+
+  Note: designed to be used as a buffer where to store the references
+  waiting to be collated, qssuming thqt once the references are
+  collated the list is cleared.
+  """
+  # Target feed
+  feed = models.ForeignKey(WebFeed, on_delete=models.CASCADE)
+  # References to be collated
+  references = models.ManyToManyField(Reference)
+  # Last time the references were collated
+  last_completed_collation_date = models.DateTimeField('latest collation date')
+
+
+  def flush(self, completion_date):
+    self.references.clear()
+    self.last_completed_collation_date = completion_date
+

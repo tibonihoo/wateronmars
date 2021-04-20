@@ -32,12 +32,15 @@ from wom_pebbles.models import (
     Reference,
     build_safe_code_from_url,
     )
-from wom_river.models import WebFeed
+from wom_river.models import (
+    WebFeed,
+    WebFeedCollation
+    )
 
 from wom_user.models import UserProfile
 from wom_user.models import ReferenceUserStatus
 
-
+from wom_user.settings import WEB_FEED_COLLATION_TIMEOUT
 from wom_user.views import MAX_ITEMS_PER_PAGE
 from wom_user.tasks import import_user_feedsources_from_opml
 from wom_user.tasks import check_user_unread_feed_items
@@ -424,6 +427,22 @@ class UserSieveViewTest(TestCase):
       self.assertEqual(count,ReferenceUserStatus.objects\
                        .filter(owner=self.user1).count())
 
+    def test_check_user_unread_feed_items_with_collations(self):
+      """Test that that unread items are correctly collected
+      when they are all set for collations.
+      """
+      user1_profile = UserProfile.objects.filter(owner=self.user1).get()
+      user1_feeds = list(user1_profile.web_feeds.all())
+      last_processing_date = datetime.now(timezone.utc)- 2*WEB_FEED_COLLATION_TIMEOUT
+      for f in user1_feeds:
+        print("Setting collation for ", f)
+        collating_feed = WebFeedCollation.objects.create(
+            feed=f,
+            last_completed_collation_date=last_processing_date)
+        user1_profile.collating_feeds.add(collating_feed)
+      count = check_user_unread_feed_items(self.user1)
+      self.assertEqual(len(user1_feeds), count)
+      
     def test_get_html_for_owner_returns_max_items_ordered_oldest_first(self):
         """
         Make sure a user can see its river properly ordered
@@ -887,3 +906,48 @@ class UserSourceItemViewTest(TestCase):
                         {"feed0-follow": False}, 302)
     self.assertEqual(0, self.user_profile.web_feeds.count())
     self.assertEqual(1, WebFeed.objects.filter(xmlURL=self.web_feed.xmlURL).count())
+    
+  def test_subscribe_twice_does_not_add_twice_the_feed(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    self.assertEqual(1,self.user_profile.web_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-follow": True}, 302)
+    self.assertEqual(1, self.user_profile.web_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-follow": True}, 302)
+    self.assertEqual(1, self.user_profile.web_feeds.count())
+    self.assertEqual(1, WebFeed.objects.filter(xmlURL=self.web_feed.xmlURL).count())
+    
+  def test_collate_feed(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    self.assertEqual(0, self.user_profile.collating_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-collate": True}, 302)
+    self.assertEqual(1, self.user_profile.collating_feeds.count())
+    self.assertEqual(1, WebFeedCollation.objects.filter(feed=self.web_feed).count())
+    
+  def test_collate_twice_does_not_add_2_collations(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    self.assertEqual(0, self.user_profile.collating_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-collate": True}, 302)
+    self.assertEqual(1, self.user_profile.collating_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-collate": True}, 302)
+    self.assertEqual(1, self.user_profile.collating_feeds.count())
+    self.assertEqual(1, WebFeedCollation.objects.filter(feed=self.web_feed).count())
+
+  def test_stop_collating_feed(self):
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",password="pA"))
+    self.assertEqual(0, self.user_profile.collating_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-collate": True}, 302)
+    self.assertEqual(1, self.user_profile.collating_feeds.count())
+    self.change_request("uA",self.feed_source.url,
+                        {"feed0-collate": False}, 302)
+    self.assertEqual(0, self.user_profile.collating_feeds.count())
+    self.assertEqual(0, WebFeedCollation.objects.filter(feed=self.web_feed).count())

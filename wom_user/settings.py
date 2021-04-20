@@ -27,6 +27,15 @@ from django.conf import settings
 
 from datetime import timedelta
 
+if hasattr(settings, "WOM_WEB_FEED_COLLATION_MIN_NUM_REF_TARGET"):
+  WEB_FEED_COLLATION_MIN_NUM_REF_TARGET = settings.WOM_WEB_FEED_COLLATION_MIN_NUM_REF_TARGET
+else:
+  WEB_FEED_COLLATION_MIN_NUM_REF_TARGET = 3
+
+if hasattr(settings,"WOM_WEB_FEED_COLLATION_TIMEOUT"):
+  WEB_FEED_COLLATION_TIMEOUT = settings.WOM_WEB_FEED_COLLATION_TIMEOUT
+else:
+  WEB_FEED_COLLATION_TIMEOUT = timedelta(days=1)
 
 if hasattr(settings,"WOM_USER_MAX_ITEMS_PER_PAGE"):
   MAX_ITEMS_PER_PAGE = settings.WOM_USER_MAX_ITEMS_PER_PAGE

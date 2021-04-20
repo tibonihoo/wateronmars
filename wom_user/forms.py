@@ -36,11 +36,15 @@ from wom_pebbles.tasks import build_reference_title_from_url
 from wom_pebbles.tasks import build_source_url_from_reference_url
 from wom_pebbles.tasks import sanitize_url
 
-from wom_river.models import WebFeed
+from wom_river.models import (
+    WebFeed,
+    WebFeedCollation
+    )
 
 from wom_user.models import UserProfile
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
+from wom_user.settings import WEB_FEED_COLLATION_TIMEOUT
 
 from wom_river.utils import feedfinder2
 
@@ -303,7 +307,8 @@ class UserBookmarkEditForm(ModelForm):
 class WebFeedOptInOutForm(forms.Form):
   """Designed to allow unsubscribing to a given feed."""
   follow = forms.BooleanField(required=False)
-
+  collate = forms.BooleanField(required=False)
+  
   def __init__(self,user, feed, *args, **kwargs):
     forms.Form.__init__(self,*args,**kwargs)
     self.user = user
@@ -312,11 +317,26 @@ class WebFeedOptInOutForm(forms.Form):
   def save(self):
     """Note: this save can have only one effect: removing a feed from the user's feed list."""
     if self.cleaned_data["follow"]:
-      self.user.userprofile.web_feeds.add(self.feed)
-      self.user.userprofile.save()
+      if not self.user.userprofile.web_feeds.filter(pk=self.feed.pk).exists():
+        self.user.userprofile.web_feeds.add(self.feed)
     else:
       self.user.userprofile.web_feeds.remove(self.feed)
-      self.user.userprofile.save()
+    if self.cleaned_data["collate"]:
+      if not self.user.userprofile.collating_feeds.filter(feed=self.feed).exists():    
+        last_processing_date = datetime.now(timezone.utc) - WEB_FEED_COLLATION_TIMEOUT
+        collating_feed = WebFeedCollation.objects.create(
+            feed=self.feed,
+            last_completed_collation_date=last_processing_date)
+        collating_feed.save()
+        self.user.userprofile.collating_feeds.add(collating_feed)
+    else:
+      try:
+        c = self.user.userprofile.collating_feeds.get(feed=self.feed)
+        self.user.userprofile.collating_feeds.remove(c)
+        c.delete()
+      except ObjectDoesNotExist:
+          pass
+    self.user.userprofile.save()
 
 
 from wom_tributary.models import TwitterTimeline

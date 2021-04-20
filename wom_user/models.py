@@ -24,7 +24,7 @@ from django.contrib.auth.models import User
 
 from wom_pebbles.models import Reference
 
-from wom_river.models import WebFeed
+from wom_river.models import WebFeed, WebFeedCollation
 
 from wom_classification.models import get_item_tag_names
 
@@ -40,6 +40,8 @@ class UserProfile(models.Model):
   owner = models.OneToOneField(User, on_delete=models.CASCADE)
   # User's selection of syndicated sources
   web_feeds = models.ManyToManyField(WebFeed)
+  # Feeds that must be collated
+  collating_feeds = models.ManyToManyField(WebFeedCollation)
   # All (public+private) sources of user bookmarks
   sources = models.ManyToManyField(Reference,related_name="userprofile")
   # Public sources of a user bookmarks and web_feeds

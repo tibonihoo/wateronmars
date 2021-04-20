@@ -45,23 +45,34 @@
     {{ feedForms.non_field_errors|safe }}
   </div>
   {% endif %}
-  {% for field in form %}
-  {% if field.errors %}
+  {% if form.follow.errors %}
   <div class="form-group has-error">
   {%  else %}
   <div class="form-group">
   {% endif %}
     <span class="col-sm-2 control-label">
       <label><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.2em"/></label><br/>
-      <i class="glyphicon glyphicon-filter" style="padding-top:.4em"></i>
+      <i class="glyphicon glyphicon-filter" style="padding-top:.5em"></i>
     </span>
   <p class="form-control-static"><a href="{{ feed_url }}">{{ feed_url }}</a></p>
     <span class="input-group checkbox">
-         {{ field }} <label>{% trans "Following" %}</label>
-        {{ field.errors|safe }}
+         {{ form.follow }} <label>{% trans "Following" %}</label>
+        {{ form.follow.errors|safe }}
     </span>
   </div>
-  {% endfor %}
+  {% if form.collate.errors %}
+  <div class="form-group has-error">
+  {%  else %}
+  <div class="form-group">
+  {% endif %}
+    <span class="col-sm-2 control-label">
+      <i class="glyphicon glyphicon-compress" style="padding-top:.2em"></i>
+    </span>
+    <span class="input-group checkbox">
+      {{ form.collate }} <label>{% trans "Collating" %}</label>
+      {{ form.collate.errors|safe }}
+    </span>
+  </div>
   {% endfor %}
   <div class="form-group">
     <span class="col-sm-offset-2">

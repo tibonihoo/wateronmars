@@ -26,6 +26,10 @@ from datetime import datetime
 from django.utils import timezone
 
 from django.conf import settings
+from wom_user.settings import (
+    WEB_FEED_COLLATION_MIN_NUM_REF_TARGET,
+    WEB_FEED_COLLATION_TIMEOUT
+    )
 
 if settings.USE_CELERY:
   from celery.task.schedules import crontab  
@@ -48,8 +52,11 @@ else:
 from wom_pebbles.tasks import delete_old_unpinned_references
 from wom_pebbles.tasks import import_references_from_ns_bookmark_list
 
-from wom_river.tasks import collect_news_from_feeds
-from wom_river.tasks import import_feedsources_from_opml
+from wom_river.tasks import (
+    collect_news_from_feeds,
+    import_feedsources_from_opml,
+    generate_collations
+    )
 
 from wom_pebbles.models import Reference
 from wom_user.models import UserBookmark
@@ -144,32 +151,40 @@ class FakeReferenceUserStatus:
     self.user = None 
 
 
+def get_unknown_reference():
+  """Returns 'the' Reference representing an unknown source.
+  NOTE: Will create it if it hasn't been created yet.
+  """
+  try:
+    return Reference.objects.get(url="<unknown>")
+  except ObjectDoesNotExist:
+    s = Reference(url="<unknown>",title="<unknown>",
+                  pin_count=1,
+                  pub_date=datetime.utcfromtimestamp(0)\
+                  .replace(tzinfo=timezone.utc))        
+    s.save()
+    return s
+
+  
 def generate_reference_user_status(user,references):
   """Generate reference user status instances for a given set of references.
   WARNING: the new instances are not saved in the database!
   """
   new_ref_status = []
   for ref in references:
-    rust = ReferenceUserStatus()
-    rust.owner = user
-    rust.reference = ref
-    rust.reference_pub_date = ref.pub_date
     source_query = ref.sources.filter(userprofile=user.userprofile)\
                               .distinct().order_by("pub_date")
     try:
-      rust.main_source = source_query.get()
+      s = source_query.get()
     except MultipleObjectsReturned:
-      rust.main_source = source_query.all()[0]
+      s = source_query.all()[0]
     except ObjectDoesNotExist:
-      try:
-        rust.main_source = Reference.objects.get(url="<unknown>")
-      except ObjectDoesNotExist:
-        s = Reference(url="<unknown>",title="<unknown>",
-                      pin_count=1,
-                      pub_date=datetime.utcfromtimestamp(0)\
-                      .replace(tzinfo=timezone.utc))        
-        s.save()
-        rust.main_source = s
+      s = get_unknown_reference()
+    rust = ReferenceUserStatus()
+    rust.main_source = s
+    rust.owner = user
+    rust.reference = ref
+    rust.reference_pub_date = ref.pub_date
     new_ref_status.append(rust)
   return new_ref_status
 
@@ -206,7 +221,12 @@ read %s, pub_date %s, reference %s, source %s." \
         logger.error("Could not delete a corrupted ReferenceUserStatus (%s)." % e)
         continue
 
-  
+# TODO test
+def build_feed_collation_map(user):
+  collating_feeds = user.userprofile.collating_feeds.select_related("feed").all()
+  return {cf.feed: cf for cf in collating_feeds}
+
+    
 @task()  
 def check_user_unread_feed_items(user):
   """Browse all feed sources registered by a given user and create as
@@ -219,9 +239,22 @@ def check_user_unread_feed_items(user):
   new_ref_status = []
   processed_references = set()
   discarded_ref_count = 0
+  feed_collations = build_feed_collation_map(user)
+  collation_url_parent_path = f"wom-user:/collation/{user.username}"
   for feed in user.userprofile.web_feeds.select_related("source").all():
+    feed_references = set(feed.source.productions
+                          .exclude(referenceuserstatus__owner=user).all())
+    if feed in feed_collations:
+      with transaction.atomic():
+        feed_references = set(
+          generate_collations(collation_url_parent_path,
+                              feed,
+                              feed_collations[feed],
+                              feed_references,
+                              WEB_FEED_COLLATION_MIN_NUM_REF_TARGET,
+                              WEB_FEED_COLLATION_TIMEOUT,
+                              datetime.now(timezone.utc)))
     # filter out rust that have the same reference
-    feed_references = set(feed.source.productions.exclude(referenceuserstatus__owner=user).all())
     new_references = feed_references-processed_references
     new_ref_status += generate_reference_user_status(user,new_references)
     discarded_ref_count += len(feed_references)-len(new_references)
@@ -253,8 +286,8 @@ def check_user_unread_feed_items(user):
 @task()
 def delete_obsolete_unpinned_references_from_feeds():
   for feed in WebFeed.objects.select_related("source").all():
-      date_threshold = datetime.now() - feed.item_relevance_duration
+      date_threshold = datetime.now(timezone.utc) - feed.item_relevance_duration
       feed.source.productions.filter(pin_count=0, pub_date__lt=date_threshold).delete()
   for feed in GeneratedFeed.objects.select_related("source").all():
-      date_threshold = datetime.now() - feed.item_relevance_duration
+      date_threshold = datetime.now(timezone.utc) - feed.item_relevance_duration
       feed.source.productions.filter(pin_count=0, pub_date__lt=date_threshold).delete()

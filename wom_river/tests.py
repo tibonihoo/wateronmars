@@ -18,7 +18,7 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 
 import feedparser
@@ -27,11 +27,18 @@ from django.test import TestCase
 
 from wom_pebbles.models import Reference
 
-from wom_river.models import WebFeed
-from wom_river.models import URL_MAX_LENGTH
+from wom_river.models import (
+    WebFeed,
+    URL_MAX_LENGTH,
+    WebFeedCollation
+    )
 
-from wom_river.tasks import import_feedsources_from_opml
-from wom_river.tasks import add_new_references_from_feedparser_entries
+from wom_river.tasks import (
+    import_feedsources_from_opml,
+    add_new_references_from_feedparser_entries,
+    generate_collated_content,
+    yield_collated_reference
+    )
 
 from django.contrib.auth.models import User
 
@@ -151,7 +158,7 @@ class ImportFeedSourcesFromOPMLTaskTest(TestCase):
 
 
 
-class AddReferencesFromFeedParserEntriesTask(TestCase):
+class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
 
   def setUp(self):
     date = datetime.now(timezone.utc)
@@ -258,7 +265,7 @@ class AddReferencesFromFeedParserEntriesTask(TestCase):
       Reference.objects.get(url=urls[-1])]
     self.assertEqual(set(["test"]),set(tags))
 
-class AddReferencesFromFeedParserTaskOnBrokenFeed(TestCase):
+class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
 
   def setUp(self):
     date = datetime.now(timezone.utc)
@@ -348,3 +355,356 @@ class AddReferencesFromFeedParserTaskOnBrokenFeed(TestCase):
       if ref!=self.source:
         self.assertIn(self.source,ref.sources.all(),ref)
 
+
+class WebFeedCollationModelTest(TestCase):
+
+  def setUp(self):
+    self.date = datetime.now(timezone.utc)
+    self.source = Reference.objects.create(
+        url="http://mouf",
+        pub_date=self.date)
+    self.feed = WebFeed.objects.create(
+        xmlURL="http://mouf/bla.xml",
+        last_update_check=self.date,
+        source=self.source)
+    self.collation = WebFeedCollation.objects.create(
+        feed=self.feed,
+        last_completed_collation_date=datetime.min.replace(tzinfo=timezone.utc))
+
+  def test_construction_defaults(self):
+    """
+    This tests just makes it possible to double check that a
+    change in the default is voluntary.
+    """
+    self.assertEqual(self.feed, self.collation.feed)
+    self.assertEqual(0, len(self.collation.references.all()))
+        
+  def test_flush_then_references_is_empty(self):
+    date = self.date + timedelta(days=1)
+    r = Reference.objects.create(url="http://mouf/1",
+                                 pub_date=date)
+    self.collation.references.add(r)
+    completion_date = date + timedelta(days=1)
+    self.collation.flush(completion_date)
+    self.assertEqual(0, len(self.collation.references.all()))
+    self.assertEqual(completion_date, self.collation.last_completed_collation_date)
+
+
+class GenerateCollatedContentTaskTest(TestCase):
+
+  def test_given_2_references_sequentially_paste_their_titles_and_descriptions(self):
+    date1 = datetime.now(timezone.utc)
+    title1 = "Hop 1"
+    desc1 = "<b>glop</b> bop."
+    r1 = Reference.objects.create(url="http://mouf/1",
+                                  title=title1,
+                                  description=desc1,
+                                  pub_date=date1)
+    date2 = date1 + timedelta(days=2)
+    title2 = "Arf 2"
+    desc2 = "bip <i>bli</i>"
+    r2 = Reference.objects.create(url="http://mouf/2",
+                                  title=title2,
+                                  description=desc2,
+                                  pub_date=date2)
+    res = generate_collated_content([r1, r2])
+    expected_res = f"""\
+<h2>{title1}</h2>
+{desc1}
+<br/>
+<h2>{title2}</h2>
+{desc2}
+<br/>"""
+    self.assertEqual(expected_res, res)
+
+
+class YieldCollatedReferencesTaskTest(TestCase):
+
+  def setUp(self):
+    self.date = datetime.now(timezone.utc)
+    self.source = Reference.objects.create(
+        url="http://mouf",
+        pub_date=self.date)
+    self.parent_path = "wom-tests:/mouf/glop"
+    self.feed = WebFeed.objects.create(
+        xmlURL="http://mouf/bla.xml",
+        last_update_check=self.date,
+        source=self.source)
+    self.collation = WebFeedCollation.objects.create(
+        feed=self.feed,
+        last_completed_collation_date=datetime.min.replace(tzinfo=timezone.utc))
+    self.min_num_ref_target = 2
+    self.timeout = timedelta(days=2)
+
+  def _add_reference_1(self):
+    title1 = "Hop 1"
+    desc1 = "<b>glop</b> bop."
+    date1 = datetime.utcfromtimestamp(10).replace(tzinfo=timezone.utc)
+    r1 = Reference.objects.create(url="http://mouf/1",
+                                  title=title1,
+                                  description=desc1,
+                                  pub_date=date1)
+    r1.save()
+    self.collated_content_r1 = f"""\
+<h2>{title1}</h2>
+{desc1}
+<br/>"""
+    self.collation.references.add(r1)
+    return r1
+
+  def _add_reference_2(self):
+    title2 = "Arf 2"
+    desc2 = "bip <i>bli</i>"
+    date2 = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
+    r2 = Reference.objects.create(url="http://mouf/2",
+                                  title=title2,
+                                  description=desc2,
+                                  pub_date=date2)
+    r2.save()
+    self.collated_content_r2 = f"""\
+<h2>{title2}</h2>
+{desc2}
+<br/>"""
+    self.collation.references.add(r2)  
+    return r2
+
+  def test_given_empty_collation_yields_empty_results(self):
+    res = list(yield_collated_reference(self.parent_path,
+                                        self.feed,
+                                        self.collation,
+                                        self.min_num_ref_target,
+                                        self.timeout,
+                                        datetime.utcnow()))
+    self.assertEqual(0, len(res))
+
+  def test_given_0_ref_target_does_not_output_empty_content_ref(self):
+    res = list(yield_collated_reference(self.parent_path,
+                                        self.feed,
+                                        self.collation,
+                                        0,
+                                        self.timeout,
+                                        datetime.utcnow()))
+    self.assertEqual(0, len(res))
+
+  def test_given_ref_added_and_processing_before_timeout_no_collation_returned(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 1
+    self._add_reference_1()
+    processing_date = last_completion_date + timeout - timedelta(days=1)
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(0, len(res))
+
+  def test_given_2refs_added_and_processing_after_timeout_returns_collation(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 1
+    self._add_reference_1()
+    self._add_reference_2()
+    processing_date = last_completion_date + timeout + timedelta(days=1)
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(1, len(res))
+    expected_res_ref_desc = f"""\
+{self.collated_content_r1}
+{self.collated_content_r2}"""
+    self.assertEqual(expected_res_ref_desc, res[0].description)
+
+  def test_given_too_few_refs_added_processing_after_timeout_returns_no_collation(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 2
+    self._add_reference_1()
+    processing_date = last_completion_date + timeout + timedelta(days=1)
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(0, len(res))
+      
+  def test_given_too_few_ref_processing_long_enough_after_timeout_returns_collation(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 2
+    self._add_reference_1()
+    processing_date = last_completion_date + 2 * timeout
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(1, len(res))
+    self.assertEqual(self.collated_content_r1, res[0].description)
+
+  def test_avoid_creating_duplicate_ref(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 1
+    processing_date = last_completion_date + timeout + timedelta(days=1)
+    r1 = self._add_reference_1()
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(1, len(res))
+    # Cheating a bit to force duplication
+    self.collation.last_completed_collation_date = last_completion_date
+    self.collation.references.add(r1)
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(0, len(res))
+
+  def test_avoid_num_refs_inifinite_accumulation(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 1
+    self._add_reference_1()
+    processing_date = last_completion_date
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(0, len(res))
+    for i in range(100):
+        title = f"Too {i}"
+        desc = "much"
+        date = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
+        r = Reference.objects.create(url=f"http://more/{i}",
+                                    title=title,
+                                    description=desc,
+                                    pub_date=date)
+        self.collation.references.add(r)
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(1, len(res))
+
+
+def GenerateCollationsTaskTest(Testcase):
+
+  def setUp(self):
+    self.date = datetime.now(timezone.utc)
+    self.source = Reference.objects.create(
+        url="http://mouf",
+        pub_date=self.date)
+    self.parent_path = "wom-tests:/mouf/glop"
+    self.feed = WebFeed.objects.create(
+        xmlURL="http://mouf/bla.xml",
+        last_update_check=self.date,
+        source=self.source)
+    self.collation = WebFeedCollation.objects.create(
+        feed=self.feed,
+        last_completed_collation_date=datetime.min.replace(tzinfo=timezone.utc))
+    self.min_num_ref_target = 2
+    self.timeout = timedelta(days=2)
+    self.r1 = self._add_reference_1()
+    self.r2 = self._add_reference_2()
+
+  def _add_reference_1(self):
+    title1 = "Hop 1"
+    desc1 = "<b>glop</b> bop."
+    date1 = datetime.utcfromtimestamp(10).replace(tzinfo=timezone.utc)
+    r1 = Reference.objects.create(url="http://mouf/1",
+                                  title=title1,
+                                  description=desc1,
+                                  pub_date=date1)
+    r1.save()
+    self.collated_content_r1 = f"""\
+<h2>{title1}</h2>
+{desc1}
+<br/>"""
+    return r1
+
+  def _add_reference_2(self):
+    title2 = "Arf 2"
+    desc2 = "bip <i>bli</i>"
+    date2 = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
+    r2 = Reference.objects.create(url="http://mouf/2",
+                                  title=title2,
+                                  description=desc2,
+                                  pub_date=date2)
+    r2.save()
+    self.collated_content_r2 = f"""\
+<h2>{title2}</h2>
+{desc2}
+<br/>"""
+    return r2
+
+  def test_no_collation_because_too_early(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 1
+    processing_date = last_completion_date + timeout - timedelta(days=1)
+    res = list(generate_collations(self.parent_path,
+                                   self.feed,
+                                   self.collation,
+                                   [self.r1],
+                                   min_num_ref_target,
+                                   timeout,
+                                   processing_date))
+    self.assertEqual(0, len(res))
+    
+  def test_collation_after_timeout(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 1
+    processing_date = last_completion_date + timeout + timedelta(days=1)
+    res = list(generate_collations(self.parent_path,
+                                   self.feed,
+                                   self.collation,
+                                   [self.r1],
+                                   min_num_ref_target,
+                                   timeout,
+                                   processing_date))
+    self.assertEqual(1, len(res))
+
+  def test_no_collation_because_too_few_refs(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 2
+    processing_date = last_completion_date + timeout + timedelta(days=1)
+    res = list(generate_collations(self.parent_path,
+                                   self.feed,
+                                   self.collation,
+                                   [self.r1],
+                                   min_num_ref_target,
+                                   timeout,
+                                   processing_date))
+    self.assertEqual(0, len(res))
+    
+  def test_collation_on_last_ref(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 2
+    processing_date = last_completion_date + timeout + timedelta(days=1)
+    res = list(generate_collations(self.parent_path,
+                                   self.feed,
+                                   self.collation,
+                                   [self.r1, self.r2],
+                                   min_num_ref_target,
+                                   timeout,
+                                   processing_date))
+    self.assertEqual(1, len(res))

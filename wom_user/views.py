@@ -529,10 +529,15 @@ def user_river_source_item(request, owner_name, source_url_code):
   feedForms = {}
   for idx,feed in enumerate(WebFeed.objects.filter(source__url=source_url)):
     currentPrefix = "feed{0}".format(idx)
-    initial = {"follow": feed in owner_profile.web_feeds.all()}
+    initial = {
+        "follow": owner_profile.web_feeds.filter(pk=feed.pk).exists(),
+        "collate": owner_profile.collating_feeds.filter(feed=feed).exists()        
+        }
     followFieldName = currentPrefix+"-follow"
+    collateFieldName = currentPrefix+"-collate"
     if form_data:
       clean_checkbox_value(request, form_data[0], followFieldName, initial["follow"])
+      clean_checkbox_value(request, form_data[0], collateFieldName, initial["collate"])
     feedForms[feed.xmlURL] = WebFeedOptInOutForm(request.owner_user,feed,
                                                  *form_data, error_class = CustomErrorList,
                                                  prefix=currentPrefix, initial=initial)
