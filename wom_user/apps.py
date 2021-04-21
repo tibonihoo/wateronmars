@@ -73,17 +73,27 @@ NS_BOOKMARKS_TXT_MORE_TEMPLATE = """\
 <DD>An example tag to test the pagination.
 """
 
-
-def startup():
+def setup_demo():
+  from datetime import datetime
+  from django.utils import timezone  
   from django.contrib.auth.models import User
-  from wom_user.models import UserProfile
-   
-  from wom_user.tasks import import_user_feedsources_from_opml
-  from wom_user.tasks import import_user_bookmarks_from_ns_list
+  
+  from wom_user.tasks import (
+      WEB_FEED_COLLATION_TIMEOUT,
+      import_user_feedsources_from_opml,
+      import_user_bookmarks_from_ns_list,
+      UserProfile
+      )
 
+  from wom_river.models import (
+      WebFeed,
+      WebFeedCollation,
+      )
+
+  
   print("DEMO mode: Ensuring demo user is available.")
-  if settings.DEMO and not User.objects.filter(username=settings.DEMO_USER_NAME).exists():
-    raise Warning("DEMO mode: Creating demo user.")
+  if not User.objects.filter(username=settings.DEMO_USER_NAME).exists():
+    print("DEMO mode: Creating demo user.")
     demo_user = User(username=settings.DEMO_USER_NAME)
     demo_user.set_password(settings.DEMO_USER_PASSWD)
     demo_user.save()
@@ -94,6 +104,21 @@ def startup():
                                        NS_BOOKMARKS_TXT \
                                        + "".join(NS_BOOKMARKS_TXT_MORE_TEMPLATE \
                                                  % (i,i) for i in range(200)))
-    import_user_feedsources_from_opml(demo_user,OPML_TXT)
-    print("DEMO mode: demo user setup finished.")
-            
+    import_user_feedsources_from_opml(demo_user,OPML_TXT)    
+  if not WebFeedCollation.objects.exists():
+    print("DEMO mode: Setting up a collation.")
+    last_processing_date = datetime.now(timezone.utc) - WEB_FEED_COLLATION_TIMEOUT
+    feed = WebFeed.objects.get(xmlURL="http://stallman.org/rss/rss.xml")
+    collating_feed = WebFeedCollation.objects.create(
+        feed=feed,
+        last_completed_collation_date=last_processing_date)
+    collating_feed.save()
+    demo_profile = UserProfile.objects.get(owner__username=settings.DEMO_USER_NAME)
+    demo_profile.collating_feeds.add(collating_feed)
+  print("DEMO mode: demo user setup finished.")
+
+
+
+def startup():
+  if settings.DEMO:
+    setup_demo()
