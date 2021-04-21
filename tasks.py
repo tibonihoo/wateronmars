@@ -74,6 +74,29 @@ def deploy_on_remote(c, target_config):
             pass
 
 @task
+def fix_contenttype_integrity_on_remote(c, to = None):
+    """
+    Post-migration integrity issue when adding a new model.
+    """
+    targets = to.split(",") if to else DEPLOY_TARGETS
+    for target in targets:
+        target_config = USER_CONF[target]
+        if target_config.get("provider") == "heroku":
+            print("Run commands directly with heroku run")
+            continue
+        with Connection(target_config["connection"]) as conn:
+            site_dir = target_config["site_dir"]
+            run_in_dir = lambda cmd: conn.run("cd '{0}' && {1}".format(site_dir, cmd))
+            venv_dir = target_config["virtual_env_dir"]
+            run_in_dir("source {0}/bin/activate && python3 manage.py migrate contenttypes 0001 --fake".format(venv_dir))
+            run_in_dir("source {0}/bin/activate && python3 manage.py migrate contenttypes".format(venv_dir))
+            run_in_dir("source {0}/bin/activate && python3 manage.py migrate --fake".format(venv_dir))
+            try:
+                run_in_dir(target_config["final_deploy_action"])
+            except configparser.NoOptionError:
+                pass
+
+@task
 def deploy(c, to = None):
     targets = to.split(",") if to else DEPLOY_TARGETS
     c.run("git pull --rebase origin master")

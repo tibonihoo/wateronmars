@@ -1,0 +1,184 @@
+
+Upgrades to 1.11:
+
+
+- [1.5] Non-form data in HTTP requests
+https://docs.djangoproject.com/en/1.11/ref/request-response/#django.http.HttpRequest.POST
+=> "to access the raw POST data for these cases, should use the request.body attribute instead."
+
+
+- [1.5] simplejson no longer used
+https://docs.djangoproject.com/en/2.2/releases/1.5/#system-version-of-simplejson-no-longer-used
+=> import standard lib's json instead
+
+
+- [1.5] deprecation of mimetype in HttpResponse*
+https://docs.djangoproject.com/en/dev/internals/deprecation/#deprecation-removed-in-1-7
+=> replace with content_type
+
+
+- [1.6] Transaction refactoring
+https://docs.djangoproject.com/en/2.2/releases/1.6/#transaction-management-apis
+=> changes commit_on_success() to atomic()
+
+
+- [1.7] Use Djangos built-in migrations instead of South
+https://docs.djangoproject.com/en/1.8/topics/migrations/#upgrading-from-south
+
+
+- [1.7] Don't use syncdb anymore
+https://docs.djangoproject.com/en/2.2/releases/1.7/#schema-migrations
+
+
+- [1.7] Use better way to run startup code
+https://stackoverflow.com/questions/6791911/execute-code-when-django-starts-once-only
+=> startup.run used for demo doesn't work anymore for some reason, but 1.7 has a new hook we can (ab)use
+
+
+- [1.7] Reorg of contrib content types
+https://docs.djangoproject.com/en/2.2/releases/1.7/#reorganization-of-django-contrib-contenttypes
+=> change import for GenericForeignKey
+
+
+- [1.8] TEMPLATE_ settings change
+https://docs.djangoproject.com/en/2.2/releases/1.8/#template-related-settings
+
+
+- [1.8] reverse doesn't take dotted path
+https://docs.djangoproject.com/en/2.2/releases/1.8/#passing-a-dotted-path-to-reverse-and-url
+=> use named url everywhere: defined them in urls.py, use them in reverse and {% url%}
+
+
+- [1.8] dictionary and context_instance arguments of rendering functions
+https://docs.djangoproject.com/en/dev/releases/1.8/#dictionary-and-context-instance-arguments-of-rendering-functions
+=> replace render_to_response by render and change args
+
+
+- [1.9] strip=True for CharField
+https://docs.djangoproject.com/fr/1.9/ref/forms/fields/#django.forms.CharField.strip
+
+
+- [1.11] TimeZONE none not allowed
+https://docs.djangoproject.com/en/2.2/releases/1.11/#pytz-is-a-required-dependency-and-support-for-settings-time-zone-none-is-removed
+
+
+
+--------------------------
+
+Upgrade to 2.2
+
+- [1.9] on_delete for foreignkey and onetoone fields
+  https://docs.djangoproject.com/en/2.2/releases/1.9/#foreignkey-and-onetoonefield-on-delete-argument
+
+- [1.9] https://docs.djangoproject.com/en/2.2/releases/1.9/#passing-a-3-tuple-or-an-app-name-to-include
+
+- [1.10] The django.core.urlresolvers module is removed in favor of its new
+  location, django.urls.
+  https://docs.djangoproject.com/en/2.2/releases/1.10/#id3
+
+- [1.10] https://docs.djangoproject.com/en/2.2/releases/1.10/#new-style-middleware  
+  https://docs.djangoproject.com/en/2.2/topics/http/middleware/#upgrading-middleware
+
+- [1.11] contrib.auth.views.login() deprecated
+  https://docs.djangoproject.com/en/2.2/releases/1.11/#id2
+
+- [2.1+2.2] mysqlclient mysqlclient is increased from 1.3.3 to 1.3.13.
+  https://docs.djangoproject.com/en/2.2/releases/2.1/#miscellaneous
+
+- [2.1] Since migrations are now loaded from .pyc files, you might
+  need to delete them if you’re working in a mixed Python 2 and Python
+  3 environment.
+  https://docs.djangoproject.com/en/2.2/releases/2.1/#miscellaneous
+
+
+
+
+--------------------------
+1.5
+Non-form data in HTTP requests¶
+
+request.POST will no longer include data posted via HTTP requests with
+non form-specific content-types in the header. In prior versions, data
+posted with content-types other than multipart/form-data or
+application/x-www-form-urlencoded would still end up represented in
+the request.POST attribute. Developers wishing to access the raw POST
+data for these cases, should use the request.body attribute instead.
+
+https://docs.djangoproject.com/en/1.11/ref/request-response/#django.http.HttpRequest.POST
+
+1.6
+QuerySet.dates() returns date objects¶
+
+QuerySet.dates() now returns a list of date. It used to return a list of datetime.
+
+QuerySet.datetimes() returns a list of datetime.
+
+
+
+1.7
+*** https://docs.djangoproject.com/en/1.8/topics/migrations/
+*** https://docs.djangoproject.com/en/1.8/topics/migrations/#upgrading-from-south
+
+https://docs.djangoproject.com/en/2.2/releases/1.7/#wsgi-scripts
+https://docs.djangoproject.com/en/2.2/releases/1.7/#validationerror-constructor-and-internal-storage
+https://docs.djangoproject.com/en/2.2/releases/1.7/#contrib-middleware-removed-from-default-middleware-classes
+https://docs.djangoproject.com/en/2.2/releases/1.7/#miscellaneous
+
+1.8
+https://docs.djangoproject.com/en/2.2/releases/1.8/#id2
+
+1.9
+https://docs.djangoproject.com/en/2.2/releases/1.9/#features-removed-in-1-9
+https://docs.djangoproject.com/fr/1.9/ref/forms/fields/#django.forms.RegexField.strip
+
+1.10
+--
+
+1.11
+https://docs.djangoproject.com/en/2.2/releases/1.11/#pytz-is-a-required-dependency-and-support-for-settings-time-zone-none-is-removed
+
+2.0
+https://docs.djangoproject.com/en/2.2/releases/2.0/#backwards-incompatible-changes-in-2-0
+
+
+
+2.1
+***
+https://docs.djangoproject.com/en/2.2/releases/1.11/#deprecated-features-1-11
+
+
+2.2
+
+
+---------
+Notes: post-migration (not sure which version to which)
+integrity issue when adding a new model.  It happened that adding a
+new model caused an integrity issue (not directly related to the model
+itself) when migration were applied with errors like:
+
+- On MySQL
+  django.db.utils.IntegrityError: (1364, "Field 'name' doesn't have a default value")
+- On PostgresSQL
+  psycopg2.IntegrityError: null value in column "name" violates not-null constraint
+  DETAIL:  Failing row contains (19, null, wom_river, webfeedcollation)
+
+These errors (in the above example webfeedcollation was a new model)
+related to the django_content_type and what appeared as a missing
+application of the '0002_remove_content_type_name' migration of the
+related django contrib module.
+
+Fixing it required the following steps (adapted from
+https://stackoverflow.com/questions/31323618/django-1-8-migrations-contenttype-integrity-error):
+
+- Force django to forget about the 0002 migration
+  ./manage.py migrate contenttypes 0001 --fake
+  
+- Force applying this migration *for real*
+  ./manage.py migrate contenttypes
+  
+- Force django to consider applied all migrations that it "forgot" due
+  to the first command (even if their effect were actually kept all
+  along)
+  ./manage.py migrate --fake
+
+----------------------------------------------------------  
