@@ -120,8 +120,6 @@ def schema_update(c, app_name=None):
                 raise
 @task
 def db_reset(c):
-    for app_name in DJANGO_APPS:
-        schema_reset(app_name)
     # Just in case we're using a local sql3 db, remove it for
     # proper reset (in other cases, cleaning out the db must be
     # done before calling this script)
