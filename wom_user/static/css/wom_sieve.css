@@ -41,7 +41,7 @@ body {
 .wom-metadata {
   padding-left: 2em;
   margin-top: 3px;
-  padding-top:0.5em;
+  padding-top:0.1em;
 }
 
 .wom-metadata a {
@@ -70,12 +70,12 @@ body {
 
 .carousel-control, .carousel-control span {
   font-size: 20px;
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
   border: none;
   opacity: 1;
-  -moz-border-radius: 15px;
-  border-radius: 15px;
+  -moz-border-radius: 25px;
+  border-radius: 25px;
   top: auto;
   bottom: -6px;
 }

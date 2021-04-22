@@ -47,7 +47,10 @@ function prepareKeyBindings()
 function onCarouselSlid() {  
   $(".carousel").carousel("pause");
   // get the index by slicing the "wom-refXXX" id after a len(wom-ref) offset
-  var newlyShownItemIdx = parseInt($(".item:visible").attr("id").slice(7));
+  newlyShownItemId = $(".item:visible").attr("id");
+  if (newlyShownItemId === undefined)
+      return;
+  var newlyShownItemIdx = parseInt(newlyShownItemId.slice(7));
   var previouslyShownItemIdx = gCurrentlyFocusedItem;
   gCurrentlyFocusedItem  = newlyShownItemIdx;
   if (previouslyShownItemIdx>=0) {
@@ -154,7 +157,7 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
   // check if viewed in a touch device (and if so activate the
   // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
   var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-  if (isTouch)
+  if (isTouch || gInitialNumUnread<=1)
     hideTitleList();
   else
     showTitleList();

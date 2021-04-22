@@ -62,23 +62,34 @@ prepareKeyBindings();
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 
-      <a class="wom-save btn btn-default btn-xs" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
+      <a class="wom-save btn btn-default btn-xl" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
         <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</a>
       <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
-      <a class="btn btn-default btn-xs" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
+      <a class="btn btn-default btn-xl" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
         <i class="glyphicon glyphicon-globe"></i>{% trans "visit" %}</a>
     </div>
     {% endspaceless %}
   </div>
 {% empty %}
-  <div class="alert alert-info alert-dismissable fade in">
-    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-    <h4>{% trans "No news is good news ?" %}</h4> 
-    <p>{% trans "No new items were found since your last visit !" %}</p> 
-    {% if source_add_bookmarklet %}
-    <p>{% trans "You can subscribe to news sources with the following bookmarklet:" %} <a class="alert-link" href="{{ source_add_bookmarklet }}">{% trans "Subscribe !" %}</a></p>
-    {% endif %}
-    <p><a class="alert-link" href="{% url 'user_river_view' visitor_name %}">{% trans "Old news are still visible in your river." %}</a></p> 
+  <div class="wom-reference panel panel-default item">
+    <div class="panel-heading">
+      <h4 class="panel-title">{% trans "No news is good news ?" %}</h4></div>
+    <div class="wom-reference-content panel-body carousel-fig"
+         role="article">
+      <div class="alert alert-info">
+        <p>{% trans "No new items were found since your last visit !" %}</p> 
+        {% if source_add_bookmarklet %}
+        <p>{% trans "You can subscribe to news sources with the following bookmarklet:" %} <a class="alert-link" href="{{ source_add_bookmarklet }}">{% trans "Subscribe !" %}</a></p>
+        {% endif %}
+        <p><a class="alert-link" href="{% url 'user_river_view' visitor_name %}">{% trans "Old news are still visible in your river." %}</a></p> 
+      </div>
+    </div>
+    {% spaceless %}
+    <div class="wom-metadata"> 
+      <a class="btn btn-default btn-xl" title="(r) {% trans "Reload the sieve." %}" href="{% url 'user_river_sieve' visitor_name %}">
+        <i class="glyphicon glyphicon-refresh"></i>{% trans "reload" %}</a>
+    </div>
+    {% endspaceless %}
   </div>
 {% endfor %}
 </div>
