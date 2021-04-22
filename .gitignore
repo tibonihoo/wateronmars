@@ -5,6 +5,8 @@ static
 twitter_app_key
 twitter_app_secret
 
+wom_tributary/utils/tweet_summarizer_demo.html
+
 celerybeat-schedule
 celery
 

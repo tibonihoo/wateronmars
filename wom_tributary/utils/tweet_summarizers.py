@@ -22,8 +22,8 @@ import sys
 import re
 from collections import defaultdict
 
-MAX_CONTENT_SIZE_CHARS = 70
-HASHTAG_REGEX = re.compile("(^|\s)#([\w\-\.]+)(\W|$)", re.UNICODE)
+MAX_CONTENT_SIZE_CHARS = 140
+HASHTAG_REGEX = re.compile("(^|\s)#([\w\-\.]+)", re.UNICODE)
 SUBJECT_REGEX = re.compile("(^\s*)([^:]{1,20})(:\s+\S+)", re.UNICODE)
 NO_TAG = "<NO_TAG>"
 
@@ -98,7 +98,7 @@ def group_tweets_by_author(tweets):
   return reverse_index
 
 
-def build_reverse_index_cloud(reverse_index):
+def build_reverse_index_cloud(reverse_index, top_only):
   freqs = list(sorted(len(t) for t in reverse_index.values()))
   num_reqs = len(freqs)
   num_quantiles = 10
@@ -112,7 +112,7 @@ def build_reverse_index_cloud(reverse_index):
     current_freq = len(tweets)
     if quantile_length != 0 and current_freq > max_quantile:
       html_entries.append("<strong>{}</strong>".format(entry))
-    else:
+    elif not top_only:
       html_entries.append("<small>{}</small>".format(entry))
   return html_entries
 
@@ -131,41 +131,109 @@ def generate_basic_html_summary(
   groups = group_tweet_by_best_tag(ridx)
   singular_topics_tweets = []
   doc_lines = []
-  html_tag_cloud = build_reverse_index_cloud(ridx)
-  doc_lines.append("<p>")
-  doc_lines.append("#{}".format(" #".join(html_tag_cloud)))
-  doc_lines.append("</p>")
+  hot_lines = []
+  html_tag_cloud = build_reverse_index_cloud(ridx, top_only=True)
+  if html_tag_cloud:
+    #hot_lines.append("<h3>#</h3>")
+    hot_lines.append("<p>")
+    hot_lines.append("#{}".format(" #".join(html_tag_cloud)))
+    hot_lines.append("</p>")
   all_tweets = []
   for tweets in groups.values():
     all_tweets.extend(tweets)
   all_tweets_by_author = group_tweets_by_author(all_tweets)
-  html_author_cloud = build_reverse_index_cloud(all_tweets_by_author)
-  doc_lines.append("<p>")
-  doc_lines.append("@{}".format(" @".join(html_author_cloud)))
-  doc_lines.append("</p>")
-  doc_lines.append("<dl>")
+  html_author_cloud = build_reverse_index_cloud(all_tweets_by_author, top_only=True)
+  if html_author_cloud:
+    #hot_lines.append("<h3>@</h3>")
+    hot_lines.append("<p>")
+    hot_lines.append("@{}".format(" @".join(html_author_cloud)))
+    hot_lines.append("</p>")
+  if hot_lines:
+    doc_lines.append("<h2>&#128293;</h2>") # Fire Emoji
+    doc_lines.extend(hot_lines)
+  doc_lines.append("<h2>&#127754;</h2>") # Water wave emoji
   for tag, tweets in get_items_sorted_by_dec_size_and_inc_key(groups):
     if not tweets:
       continue
     if tag == NO_TAG or len(tweets)==1:
       singular_topics_tweets.extend(tweets)
       continue
-    doc_lines.append("<dt>#{}</dt><dd>".format(tag))
-    doc_lines.append("<ul>")
-    for t in tweets:
-      doc_lines.append("<li><em>@{}:</em> {} <a href='{}'>&#128279;</a></li>".format(t.author, t.content_summary, t.link))
-    doc_lines.append("</ul></dd>")
-  doc_lines.append("</dl>")
+    doc_lines.append("<h3>#{}</h3>".format(tag))
+    for t in sorted(tweets, key=lambda t:t.date):
+      doc_lines.append(f"<p><a href='{t.link}'>&sect;</a> <em>@{t.author}:</em> {t.content_summary}</p>")
+  doc_lines.append("")
   if not singular_topics_tweets:
     return "\n".join(doc_lines)
   # Format remaining tweets, grouped by author
-  doc_lines.append("<dl>")
   by_author = group_tweets_by_author(singular_topics_tweets)
   for author, tweets in get_items_sorted_by_dec_size_and_inc_key(by_author):
-    doc_lines.append("<dt>@{}</dt><dd>".format(author))
-    doc_lines.append("<ul>")
-    for t in tweets:
-      doc_lines.append("<li>{} <a href='{}'>&#128279;</a></li>".format(t.content_summary, t.link))
-    doc_lines.append("</ul></dd>")
-  doc_lines.append("</dl>")
+    doc_lines.append("<h3>@{}</h3>".format(author))
+    for t in sorted(tweets, key=lambda t:t.date):
+      doc_lines.append(f"<p><a href='{t.link}'>&sect;</a> {t.content_summary}</p>")
+  doc_lines.append("")
   return "\n".join(doc_lines)
+
+
+if __name__=="__main__":
+  print("Generating a test HTML")
+  activities = [
+   {
+    "url": "http://t/one/1",
+    "object": {
+      "published": "2012-01-19 17:21:00",
+      "author": {
+        "displayName": "One",
+        "username": "o.ne"
+        },
+      "content": "Lorem1 #bla"
+      },
+    },
+    {
+     "url": f"http://t/talkative/1",
+     "object": {
+        "published": f"2012-01-19 15:12:00",
+        "author": {
+            "displayName": f"Talkative",
+            "username": f"t.alkative"
+            },
+        "content": f"{6*'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '} #Mouf #blip #glop #glip #groumpf #hop #hip #blop #paglop #lorem #talk #grr"
+        },
+    }
+    ]
+  for i in range(10):
+    activities.append(
+    {
+     "url": f"http://t/two/{i}",
+     "object": {
+        "published": f"2012-01-19 18:{i:02}:00",
+        "author": {
+            "displayName": "Deux",
+            "username": "t.wo"
+            },
+        "content": f"Lorem2 {i}"
+        },
+    }
+    )
+  for i in range(10):
+    activities.append(
+    {
+     "url": f"http://t/u{i}/1",
+     "object": {
+        "published": f"2012-01-19 19:{i:02}:00",
+        "author": {
+            "displayName": f"User{i}",
+            "username": f"u.{i}"
+            },
+        "content": f"Lorem2 {i} #Mouf"
+        },
+    }
+    )
+  
+  threshold_date = parse_date("2011-01-19 17:21:00")
+  html = generate_basic_html_summary(activities, threshold_date)
+  html_file = "./tweet_summarizer_demo.html"
+  with open(html_file, "w") as f:
+      f.write(html)
+  import webbrowser as w
+  w.open(html_file)
+  
