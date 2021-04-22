@@ -12,7 +12,6 @@ body {
 
 #below-nav .container-fluid {
     padding: 0px;
-    margin-top: 3px;
 }
 
 .alert {
@@ -37,15 +36,17 @@ body {
 .wom-reference .panel-heading:first-child {
   background-color:#eeeeec;
   padding:3px;
+  padding-top: 0px;
 }
 
 .wom-metadata {
-  padding-left: 2em;
-  padding-top:0.2em;
+  padding-left: 2.5em;
+  padding-top: 5px;
+  padding-bottom: 2px;
 }
 
 .wom-metadata a {
-  margin-left: .5em;
+  margin-left: 1em;
 }
 
 .wom-reference.read .panel-heading:first-child {color: gray; border: none}
@@ -69,7 +70,6 @@ body {
 }
 
 .carousel-control, .carousel-control span {
-  font-size: 20px;
   width: 44px;
   height: 44px;
   border: none;
@@ -77,7 +77,7 @@ body {
   -moz-border-radius: 22px;
   border-radius: 22px;
   top: auto;
-  bottom: -3px;
+  bottom: 0px;
 }
 
 
