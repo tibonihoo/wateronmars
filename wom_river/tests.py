@@ -395,24 +395,26 @@ class GenerateCollatedContentTaskTest(TestCase):
   def test_given_2_references_sequentially_paste_their_titles_and_descriptions(self):
     date1 = datetime.now(timezone.utc)
     title1 = "Hop 1"
+    url1 = "http://mouf/1"
     desc1 = "<b>glop</b> bop."
-    r1 = Reference.objects.create(url="http://mouf/1",
+    r1 = Reference.objects.create(url=url1,
                                   title=title1,
                                   description=desc1,
                                   pub_date=date1)
     date2 = date1 + timedelta(days=2)
     title2 = "Arf 2"
+    url2 = "http://mouf/2"
     desc2 = "bip <i>bli</i>"
-    r2 = Reference.objects.create(url="http://mouf/2",
+    r2 = Reference.objects.create(url=url2,
                                   title=title2,
                                   description=desc2,
                                   pub_date=date2)
     res = generate_collated_content([r1, r2])
     expected_res = f"""\
-<h2>{title1}</h2>
+<h2><a href='{url1}'>{title1}</a></h2>
 {desc1}
 <br/>
-<h2>{title2}</h2>
+<h2><a href='{url2}'>{title2}</a></h2>
 {desc2}
 <br/>"""
     self.assertEqual(expected_res, res)
@@ -438,15 +440,16 @@ class YieldCollatedReferencesTaskTest(TestCase):
 
   def _add_reference_1(self):
     title1 = "Hop 1"
+    url1 = "http://mouf/1"
     desc1 = "<b>glop</b> bop."
     date1 = datetime.utcfromtimestamp(10).replace(tzinfo=timezone.utc)
-    r1 = Reference.objects.create(url="http://mouf/1",
+    r1 = Reference.objects.create(url=url1,
                                   title=title1,
                                   description=desc1,
                                   pub_date=date1)
     r1.save()
     self.collated_content_r1 = f"""\
-<h2>{title1}</h2>
+<h2><a href='{url1}'>{title1}</a></h2>
 {desc1}
 <br/>"""
     self.collation.references.add(r1)
@@ -454,15 +457,16 @@ class YieldCollatedReferencesTaskTest(TestCase):
 
   def _add_reference_2(self):
     title2 = "Arf 2"
+    url2 = "http://mouf/2"
     desc2 = "bip <i>bli</i>"
     date2 = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
-    r2 = Reference.objects.create(url="http://mouf/2",
+    r2 = Reference.objects.create(url=url2,
                                   title=title2,
                                   description=desc2,
                                   pub_date=date2)
     r2.save()
     self.collated_content_r2 = f"""\
-<h2>{title2}</h2>
+<h2><a href='{url2}'>{title2}</a></h2>
 {desc2}
 <br/>"""
     self.collation.references.add(r2)  
@@ -625,30 +629,32 @@ def GenerateCollationsTaskTest(Testcase):
 
   def _add_reference_1(self):
     title1 = "Hop 1"
+    url1 = "http://mouf/1"
     desc1 = "<b>glop</b> bop."
     date1 = datetime.utcfromtimestamp(10).replace(tzinfo=timezone.utc)
-    r1 = Reference.objects.create(url="http://mouf/1",
+    r1 = Reference.objects.create(url=url1,
                                   title=title1,
                                   description=desc1,
                                   pub_date=date1)
     r1.save()
     self.collated_content_r1 = f"""\
-<h2>{title1}</h2>
+<h2><a href='{url1}'>{title1}</a></h2>
 {desc1}
 <br/>"""
     return r1
 
   def _add_reference_2(self):
     title2 = "Arf 2"
+    url2 = "http://mouf/2"
     desc2 = "bip <i>bli</i>"
     date2 = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
-    r2 = Reference.objects.create(url="http://mouf/2",
+    r2 = Reference.objects.create(url=url2,
                                   title=title2,
                                   description=desc2,
                                   pub_date=date2)
     r2.save()
     self.collated_content_r2 = f"""\
-<h2>{title2}</h2>
+<h2><a href='{url2}'>{title2}</a></h2>
 {desc2}
 <br/>"""
     return r2

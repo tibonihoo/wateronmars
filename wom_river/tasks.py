@@ -225,7 +225,7 @@ def import_feedsources_from_opml(opml_txt):
 def generate_collated_content(references):
   doc_lines = []
   for ref in references:
-    doc_lines.append(f"<h2>{ref.title}</h2>")
+    doc_lines.append(f"<h2><a href='{ref.url}'>{ref.title}</a></h2>")
     doc_lines.append(ref.description)
     doc_lines.append("<br/>")
   return "\n".join(doc_lines)
