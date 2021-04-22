@@ -157,7 +157,8 @@ body {
 .wom-reference-content { 
   padding-left: 20px; 
   padding-right: 20px;
-  padding-bottom: 3px;
+  padding-bottom: 4px;
+  margin-bottom: -3px;
   border-top: 1px solid rgb(229, 229, 229);
   overflow: auto;
 }

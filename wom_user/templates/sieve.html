@@ -62,10 +62,10 @@ prepareKeyBindings();
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 
-      <a class="wom-save btn btn-default btn-xl" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
+      <a class="wom-save btn btn-default" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
         <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</a>
       <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
-      <a class="btn btn-default btn-xl" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
+      <a class="btn btn-default" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
         <i class="glyphicon glyphicon-globe"></i>{% trans "visit" %}</a>
     </div>
     {% endspaceless %}
@@ -86,7 +86,7 @@ prepareKeyBindings();
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 
-      <a class="btn btn-default btn-xl" title="(r) {% trans "Reload the sieve." %}" href="{% url 'user_river_sieve' visitor_name %}">
+      <a class="btn btn-default" title="(r) {% trans "Reload the sieve." %}" href="{% url 'user_river_sieve' visitor_name %}">
         <i class="glyphicon glyphicon-refresh"></i>{% trans "reload" %}</a>
     </div>
     {% endspaceless %}
