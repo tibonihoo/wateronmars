@@ -64,6 +64,7 @@ function onCarouselSlid() {
   var navItem = "#wom-ref-nav-"+newlyShownItemIdx.toString();
   $(navItem).addClass("shown");
   ensureCorrectVisibility(navItem,"#wom-title-list");
+  $("#"+newlyShownItemId+"-content").focus();
 }
 
 
@@ -165,8 +166,8 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 
 
 
-// Make sure that an element is visible by scrolling the page if
-// necessary to make it appear at a comfortable place on the page.
+// Make sure that an element (in the title list) is visible by scrolling
+// the page if necessary to make it appear at a comfortable place on the page.
 // Note: adapted from http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling 
 function ensureCorrectVisibility(elem,view)
 {
