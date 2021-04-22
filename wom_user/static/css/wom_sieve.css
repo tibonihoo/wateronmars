@@ -11,7 +11,8 @@ body {
 }
 
 #below-nav .container-fluid {
-  padding: 0px;
+    padding: 0px;
+    margin-top: 3px;
 }
 
 .alert {
@@ -40,7 +41,7 @@ body {
 
 .wom-metadata {
   padding-left: 2em;
-  padding-top:0.1em;
+  padding-top:0.2em;
 }
 
 .wom-metadata a {
