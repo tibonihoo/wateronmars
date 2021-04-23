@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -13,11 +11,11 @@
    height="48"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="1.0.2 (394de47547, 2021-03-26)"
    sodipodi:docname="wom-logo.svg"
-   inkscape:export-filename="/home/thibauld/Development/wateronmars/wom-experiment/wom_user/static/img/wom-logo-128.png"
-   inkscape:export-xdpi="240.72937"
-   inkscape:export-ydpi="240.72937">
+   inkscape:export-filename="/home/thibauld/Développements/wateronmars/wateronmars/wom_user/static/img/wom-logo-152.png"
+   inkscape:export-xdpi="304"
+   inkscape:export-ydpi="304">
   <title
      id="title3885">Water On Mars Logo</title>
   <defs
@@ -29,17 +27,22 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.6568543"
-     inkscape:cx="-9.9351715"
-     inkscape:cy="9.6484672"
+     inkscape:zoom="8.2291667"
+     inkscape:cx="-4.9079073"
+     inkscape:cy="44.329384"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
-     inkscape:window-width="1366"
-     inkscape:window-height="716"
+     showgrid="true"
+     inkscape:window-width="1680"
+     inkscape:window-height="1023"
      inkscape:window-x="0"
-     inkscape:window-y="24"
-     inkscape:window-maximized="1" />
+     inkscape:window-y="-10"
+     inkscape:window-maximized="1"
+     inkscape:document-rotation="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid844" />
+  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -67,10 +70,10 @@
         </dc:publisher>
         <dc:source>https://github.com/tibonihoo/wateronmars</dc:source>
         <cc:license
-           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+           rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
       </cc:Work>
       <cc:License
-         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+         rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
         <cc:permits
            rdf:resource="http://creativecommons.org/ns#Reproduction" />
         <cc:permits
@@ -91,38 +94,29 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-1004.3622)">
-    <path
-       sodipodi:type="arc"
-       style="fill:#ce5c00;fill-opacity:1;stroke:none"
+    <ellipse
+       style="fill:#d45500;fill-opacity:1;stroke:none;stroke-width:1.73572"
        id="path2985"
-       sodipodi:cx="25.758928"
-       sodipodi:cy="20.008928"
-       sodipodi:rx="13.4375"
-       sodipodi:ry="13.4375"
-       d="m 39.196428,20.008928 c 0,7.421327 -6.016173,13.4375 -13.4375,13.4375 -7.421326,0 -13.4375,-6.016173 -13.4375,-13.4375 0,-7.421326 6.016174,-13.4374997 13.4375,-13.4374997 7.421327,0 13.4375,6.0161737 13.4375,13.4374997 z"
-       transform="matrix(1.3787376,0,0,1.3787376,-16.27373,1005.6234)" />
+       cx="24.217922"
+       cy="1027.3502"
+       rx="23.807207"
+       ry="22.850246" />
     <path
-       transform="translate(0,1004.3622)"
-       style="fill:none;stroke:none"
-       d="m 0.17857143,14.160713 47.76786057,0 0,33.75 -47.76786057,0 z"
+       style="fill:none;stroke:none;stroke-width:1.25215"
+       d="M 0.17857143,1010.6636 H 60.928859 v 41.608 H 0.17857143 Z"
        id="rect3775" />
     <g
        id="g3862"
-       transform="matrix(1.1409385,0,0,1.1409385,-6.7675652,-141.55079)">
+       transform="matrix(1.1712708,0,0,2.2597514,-14.991793,-1224.5483)">
       <path
-         inkscape:connector-curvature="0"
-         id="rect3778"
-         d="m 28.796365,1019.4655 11.342583,-11.3426 4.189604,4.1897 -11.342584,11.3425 z"
-         style="fill:#ce5c00;stroke:none" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path3781"
-         d="m 46.3288,1006.0334 -14.678706,0 14.678706,14.4775 z"
-         style="color:#000000;fill:#ce5c00;fill-opacity:1;fill-rule:nonzero;stroke:#ce5c00;stroke-width:3.37811303;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+         id="rect18"
+         style="fill:#d45500;fill-rule:evenodd;stroke-width:0.42413"
+         d="m 33.493129,986.42949 20.287973,0.0285 0.0054,10.03227 -20.017543,0.0439 z"
+         sodipodi:nodetypes="ccccc" />
     </g>
     <g
        id="g3838"
-       transform="matrix(0.92073578,0,0,1,1.9256717,-5.2635382)">
+       transform="matrix(1.0598805,0.51312664,-0.58292413,1.1005236,609.32126,-125.01205)">
       <g
          id="g3857">
         <path
@@ -130,9 +124,9 @@
            inkscape:connector-curvature="0"
            id="path3843"
            d="m 8.054123,1032.3305 c 0,0 2.886907,-1.8027 6.438278,-1.8027 3.55137,0 5.507042,3.7343 9.142355,3.7343 3.635313,0 5.923216,-1.9316 5.923216,-1.9316"
-           style="color:#000000;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
         <path
-           style="color:#000000;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
            d="m 8.054123,1038.4096 c 0,0 2.886908,-1.8026 6.438278,-1.8026 3.55137,0 5.507042,3.7341 9.142356,3.7341 3.635312,0 5.923216,-1.9315 5.923216,-1.9315"
            id="path3845"
            inkscape:connector-curvature="0"
@@ -142,7 +136,7 @@
            inkscape:connector-curvature="0"
            id="path3847"
            d="m 8.054123,1044.4887 c 0,0 2.886908,-1.8026 6.438278,-1.8026 3.55137,0 5.507042,3.7341 9.142356,3.7341 3.635312,0 5.923216,-1.9315 5.923216,-1.9315"
-           style="color:#000000;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#eeeeec;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
       </g>
     </g>
   </g>
