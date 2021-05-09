@@ -242,7 +242,8 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
          - feed_collation.last_completed_collation_date)
   earliest_pub_date = min(r.pub_date for r in references)
   most_recent_pub_date = max(r.pub_date for r in references)
-  num_refs_below_cap = num_refs < 100*min_num_ref_target
+  num_refs_cap = 100*min_num_ref_target
+  num_refs_below_cap = num_refs < num_refs_cap
   if age < timeout and num_refs_below_cap:
     return
   date_extent = most_recent_pub_date - earliest_pub_date
@@ -264,7 +265,7 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
   if same_refs:
     logger.warning(f"Skipped duplicated collated reference for {url}")
     return
-  description = generate_collated_content(references[:num_refs_below_cap])
+  description = generate_collated_content(references[:num_refs_cap])
   t = f"{source.title} (>={earliest_pub_date:%Y-%m-%d %H:%M})"
   r = Reference(url=url,
                 title=t,
