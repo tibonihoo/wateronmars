@@ -264,7 +264,7 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
   if same_refs:
     logger.warning(f"Skipped duplicated collated reference for {url}")
     return
-  description = generate_collated_content(references)
+  description = generate_collated_content(references[:num_refs_below_cap])
   t = f"{source.title} (>={earliest_pub_date:%Y-%m-%d %H:%M})"
   r = Reference(url=url,
                 title=t,
