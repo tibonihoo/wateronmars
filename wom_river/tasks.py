@@ -253,11 +253,12 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
   source = feed.source
   source_url_code = source.url
   feed_url_code = build_safe_code_from_url(feed.xmlURL)
+  pub_date = processing_date
   url = "{}/{}/{}/{}".format(
       url_parent_path,
       source_url_code,
       feed_url_code,
-      (source.pub_date - datetime.utcfromtimestamp(0)
+      (pub_date - datetime.utcfromtimestamp(0)
        .replace(tzinfo=timezone.utc)).total_seconds())
   same_refs = Reference.objects.filter(url=url).all()
   if same_refs:
@@ -267,7 +268,7 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
   t = f"{source.title} (>={earliest_pub_date:%Y-%m-%d %H:%M})"
   r = Reference(url=url,
                 title=t,
-                pub_date=processing_date,
+                pub_date=pub_date,
                 description=description)
   r.save()
   r.sources.add(source)

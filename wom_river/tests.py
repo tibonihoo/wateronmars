@@ -552,7 +552,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
     self.assertEqual(1, len(res))
     self.assertEqual(self.collated_content_r1, res[0].description)
 
-  def test_avoid_creating_duplicate_ref(self):
+  def test_given_same_processing_date_avoid_creating_duplicate_ref(self):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
     min_num_ref_target = 1
@@ -565,7 +565,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                          timeout,
                                          processing_date))
     self.assertEqual(1, len(res))
-    # Cheating a bit to force duplication
+    # Cheating a bit to force processing of the collation with a same processing_date.
     self.collation.last_completed_collation_date = last_completion_date
     self.collation.references.add(r1)
     res = list(yield_collated_reference(self.parent_path,
@@ -575,6 +575,29 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                          timeout,
                                          processing_date))
     self.assertEqual(0, len(res))
+    
+  def test_given_some_ref_and_new_processing_date_create_second_collation(self):
+    last_completion_date = self.collation.last_completed_collation_date
+    timeout = timedelta(days=15)
+    min_num_ref_target = 1
+    processing_date = last_completion_date + timeout + timedelta(days=1)
+    r1 = self._add_reference_1()
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(1, len(res))
+    self.collation.references.add(r1)
+    processing_date = processing_date + timeout + timedelta(days=1)
+    res = list(yield_collated_reference(self.parent_path,
+                                         self.feed,
+                                         self.collation,
+                                         min_num_ref_target,
+                                         timeout,
+                                         processing_date))
+    self.assertEqual(1, len(res))
 
   def test_avoid_num_refs_inifinite_accumulation(self):
     last_completion_date = self.collation.last_completed_collation_date
