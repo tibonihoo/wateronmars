@@ -66,7 +66,7 @@ prepareKeyBindings();
         <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</a>
       <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
       <a class="btn btn-default" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
-        <i class="glyphicon glyphicon-globe"></i>{% trans "visit" %}</a>
+        <i class="glyphicon glyphicon-globe"></i>{% trans "Visit" %}</a>
     </div>
     {% endspaceless %}
   </div>
@@ -87,7 +87,7 @@ prepareKeyBindings();
     {% spaceless %}
     <div class="wom-metadata"> 
       <a class="btn btn-default" title="(r) {% trans "Reload the sieve." %}" href="{% url 'user_river_sieve' visitor_name %}">
-        <i class="glyphicon glyphicon-refresh"></i>{% trans "reload" %}</a>
+        <i class="glyphicon glyphicon-refresh"></i>{% trans "Reload" %}</a>
     </div>
     {% endspaceless %}
   </div>
