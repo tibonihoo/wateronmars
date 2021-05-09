@@ -234,18 +234,21 @@ def generate_collated_content(references):
 def yield_collated_reference(url_parent_path, feed, feed_collation,
                              min_num_ref_target,
                              timeout, processing_date):
-  references = list(feed_collation.references.all())
+  references = list(feed_collation.references.order_by('pub_date').all())
   num_refs = len(references)
   if num_refs == 0:
     return
   age = (processing_date
          - feed_collation.last_completed_collation_date)
-  earliest_pub_date = min(r.pub_date for r in references)
-  most_recent_pub_date = max(r.pub_date for r in references)
   num_refs_cap = 100*min_num_ref_target
   num_refs_below_cap = num_refs < num_refs_cap
   if age < timeout and num_refs_below_cap:
     return
+  processed_references = references[:num_refs_cap]
+  if num_refs_cap < num_refs:
+    logger.warning(f"Collated references list cropped from {num_refs} to {num_refs_cap}")
+  earliest_pub_date = processed_references[0].pub_date
+  most_recent_pub_date = processed_references[-1].pub_date
   date_extent = most_recent_pub_date - earliest_pub_date
   too_few_refs = num_refs < min_num_ref_target
   young_enough = age < 1.5*timeout
@@ -255,17 +258,19 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
   source_url_code = source.url
   feed_url_code = build_safe_code_from_url(feed.xmlURL)
   pub_date = processing_date
-  url = "{}/{}/{}/{}".format(
+  url = "{}/{}/{}/{}/{}".format(
       url_parent_path,
       source_url_code,
       feed_url_code,
       (pub_date - datetime.utcfromtimestamp(0)
+       .replace(tzinfo=timezone.utc)).total_seconds(),
+      (earliest_pub_date - datetime.utcfromtimestamp(0)
        .replace(tzinfo=timezone.utc)).total_seconds())
   same_refs = Reference.objects.filter(url=url).all()
   if same_refs:
     logger.warning(f"Skipped duplicated collated reference for {url}")
     return
-  description = generate_collated_content(references[:num_refs_cap])
+  description = generate_collated_content(processed_references)
   t = f"{source.title} (>={earliest_pub_date:%Y-%m-%d %H:%M})"
   r = Reference(url=url,
                 title=t,
@@ -284,6 +289,6 @@ def generate_collations(url_parent_path,
                         min_num_ref_target, timeout, processing_date):
   for ref in feed_references:
     yield from yield_collated_reference(url_parent_path, feed, feed_collation, min_num_ref_target, timeout, processing_date)
-    feed_collation.references.add(ref)
+    feed_collation.take(ref)
   else:
     yield from yield_collated_reference(url_parent_path, feed, feed_collation, min_num_ref_target, timeout, processing_date)

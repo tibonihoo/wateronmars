@@ -59,3 +59,8 @@ class WebFeedCollation(models.Model):
     self.references.clear()
     self.last_completed_collation_date = completion_date
 
+  def take(self, reference):
+    # TODO: compare to the newest reference processed (a field to be added)
+    if reference.pub_date >= self.last_completed_collation_date:
+      self.references.add(reference)
+    
