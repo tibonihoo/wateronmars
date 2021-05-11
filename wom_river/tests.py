@@ -389,7 +389,9 @@ class WebFeedCollationModelTest(TestCase):
     self.assertEqual(0, len(self.collation.references.all()))
     self.assertEqual(completion_date, self.collation.last_completed_collation_date)
 
-
+def remove_whitespaces(s):
+    return "".join(s.split())
+    
 class GenerateCollatedContentTaskTest(TestCase):
 
   def test_given_2_references_sequentially_paste_their_titles_and_descriptions(self):
@@ -417,7 +419,8 @@ class GenerateCollatedContentTaskTest(TestCase):
 <h2><a href='{url2}'>{title2}</a></h2>
 {desc2}
 <br/>"""
-    self.assertEqual(expected_res, res)
+    self.assertEqual(remove_whitespaces(expected_res),
+                     remove_whitespaces(res))
 
 
 class YieldCollatedReferencesTaskTest(TestCase):
@@ -521,7 +524,8 @@ class YieldCollatedReferencesTaskTest(TestCase):
     expected_res_ref_desc = f"""\
 {self.collated_content_r1}
 {self.collated_content_r2}"""
-    self.assertEqual(expected_res_ref_desc, res[0].description)
+    self.assertEqual(remove_whitespaces(expected_res_ref_desc),
+                     remove_whitespaces(res[0].description))
 
   def test_given_too_few_refs_added_processing_after_timeout_returns_no_collation(self):
     last_completion_date = self.collation.last_completed_collation_date
@@ -550,7 +554,9 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                          timeout,
                                          processing_date))
     self.assertEqual(1, len(res))
-    self.assertEqual(self.collated_content_r1, res[0].description)
+    self.assertEqual(remove_whitespaces(self.collated_content_r1),
+                     remove_whitespaces(res[0].description))
+    from bs4 import BeautifulSoup
 
   def test_given_same_processing_date_avoid_creating_duplicate_ref(self):
     last_completion_date = self.collation.last_completed_collation_date

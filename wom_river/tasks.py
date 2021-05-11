@@ -19,6 +19,8 @@
 #
 
 import feedparser
+from bs4 import BeautifulSoup
+
 from datetime import datetime
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -221,12 +223,16 @@ def import_feedsources_from_opml(opml_txt):
   return dict(feeds_and_tags)
 
 
-
 def generate_collated_content(references):
   doc_lines = []
   for ref in references:
     doc_lines.append(f"<h2><a href='{ref.url}'>{ref.title}</a></h2>")
-    doc_lines.append(ref.description)
+    # Due to the accumulation of possibly flacky content, it's better
+    # to prettify piece by piece (it did happen that prettifying the
+    # whole collation in one go broke beautifulsoup in the case when
+    # each description only contained a <p> without ever closing it.)
+    soup = BeautifulSoup(ref.description, 'html.parser')
+    doc_lines.append(soup.prettify())
     doc_lines.append("<br/>")
   return "\n".join(doc_lines)
 
