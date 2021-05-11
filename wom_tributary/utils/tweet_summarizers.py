@@ -160,7 +160,7 @@ def generate_basic_html_summary(
       continue
     doc_lines.append("<h3>#{}</h3>".format(tag))
     for t in sorted(tweets, key=lambda t:t.date):
-      doc_lines.append(f"<p><em>@{t.author}:</em><a href='{t.link}'>{t.content_summary}</a></p>")
+      doc_lines.append(f"<p><em>@{t.author}:</em> <a href='{t.link}'>{t.content_summary}</a></p>")
   doc_lines.append("")
   if not singular_topics_tweets:
     return "\n".join(doc_lines)
