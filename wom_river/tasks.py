@@ -43,10 +43,10 @@ from wom_pebbles.tasks import sanitize_url
 import logging
 logger = logging.getLogger(__name__)
 
-from html.parser import HTMLParser
+import html
 
 def HTMLUnescape(s):
-  return HTMLParser().unescape(s)
+  return html.unescape(s)
 
 
 def get_date_from_feedparser_entry(entry):
