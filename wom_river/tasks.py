@@ -282,6 +282,9 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
       extent_str_list.append(f"{date_extent.days}d")
   if date_extent.seconds >= 3600:
       extent_str_list.append(f"{date_extent.seconds // 3600}h")
+  if not extent_str_list:
+      extent_min = max(1, date_extent.seconds//60)
+      extent_str_list.append(f"{extent_min}min")
   t = f"{source.title} /{','.join(extent_str_list)}"
   r = Reference(url=url,
                 title=t,
