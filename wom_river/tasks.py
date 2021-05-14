@@ -277,7 +277,12 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
     logger.warning(f"Skipped duplicated collated reference for {url}")
     return
   description = generate_collated_content(processed_references)
-  t = f"{source.title} (>={earliest_pub_date:%Y-%m-%d %H:%M})"
+  extent_str_list = []
+  if date_extent.days:
+      extent_str_list.append(f"{date_extent.days}d")
+  if date_extent.seconds >= 3600:
+      extent_str_list.append(f"{date_extent.seconds // 3600}h")
+  t = f"{source.title} /{','.join(extent_str_list)}"
   r = Reference(url=url,
                 title=t,
                 pub_date=pub_date,
