@@ -172,10 +172,7 @@ def collect_new_references_for_twitter_timeline(
       activities,
       keep_only_after_datetime)
     date_str = now.strftime("%Y%m%d%H")
-    title = "{}/{}h {}".format(
-      date_str,
-      hours_to_cover,
-      timeline.generated_feed.title)
+    title = f"{timeline.generated_feed.title} /{hours_to_cover}h"
   except Exception as e:
     logger.error("Skipping timeline for %s because of the following error: %s."\
                  % (timeline.username,e))
