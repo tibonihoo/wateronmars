@@ -18,12 +18,13 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from django.db import models
 
 from wom_pebbles.models import Reference
 from wom_pebbles.models import URL_MAX_LENGTH
 
+DEFAULT_RELEVANCE_DURATION = timedelta(weeks=4)
 
 class WebFeed(models.Model):
   """Represent a web feed (typically RSS or Atom) associated to a
@@ -36,8 +37,11 @@ class WebFeed(models.Model):
   # Date marking the last time the source was checked for an update
   last_update_check = models.DateTimeField('last update')
   # Time before considering an item obsolete
-  item_relevance_duration = models.DurationField(default=timedelta(weeks=4))
+  item_relevance_duration = models.DurationField(
+      default=DEFAULT_RELEVANCE_DURATION)
 
+
+DEFAULT_FLUSHED_PUB_DATE = datetime.fromtimestamp(0, tz=timezone.utc)
 
 class WebFeedCollation(models.Model):
   """Collect references from a feed that
@@ -53,14 +57,24 @@ class WebFeedCollation(models.Model):
   references = models.ManyToManyField(Reference)
   # Last time the references were collated
   last_completed_collation_date = models.DateTimeField('latest collation date')
-
+  # Pub date of the latest reference that was part of a flush
+  latest_reference_flushed = models.DateTimeField(
+      'latest reference flushed',
+      default=DEFAULT_FLUSHED_PUB_DATE)
 
   def flush(self, completion_date):
+    self.latest_reference_flushed = max(r.pub_date for r in self.references.all())
     self.references.clear()
     self.last_completed_collation_date = completion_date
 
   def take(self, reference):
-    # TODO: compare to the newest reference processed (a field to be added)
-    if reference.pub_date >= self.last_completed_collation_date:
-      self.references.add(reference)
-    
+    threshold = self.latest_reference_flushed
+    pub_date = reference.pub_date
+    if pub_date < threshold:
+        return
+    if threshold == DEFAULT_FLUSHED_PUB_DATE:
+      # Backward compatibility for before/after addition
+      # of the 'latest_reference_flushed attribute'
+      if pub_date < self.last_completed_collation_date:
+        return
+    self.references.add(reference)
