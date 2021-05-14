@@ -53,11 +53,11 @@ def get_date_from_feedparser_entry(entry):
   """
   Extract the date from the 'parsed date' fields of a feedparser generated entry.
   """
-  if entry.get("updated_parsed",None):
+  if "updated_parsed" in entry:
     updated_date_utc = entry.updated_parsed[:6]
-  elif entry.get("published_parsed",None):
+  elif "published_parsed" in entry:
     updated_date_utc = entry.published_parsed[:6]
-  elif entry.get("created_parsed",None):
+  elif "created_parsed" in entry:
     updated_date_utc = entry.created_parsed[:6]
   else:
     logger.debug("Using 'now' as date for item %s" % entry.link)
