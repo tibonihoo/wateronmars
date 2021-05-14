@@ -37,7 +37,7 @@ jQuery.ias({
   <li><h5>{% trans "Syndicated sources" %}</h5>
     <ul class="list-unstyled">
       {% for feed in tagged_web_feeds %}
-      <li><img src="http://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
+      <li><img src="https://plus.google.com/_/favicon?domain={{ feed.source.url }}" style="padding-right:.5em;"/>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
 {% if visitor_name == owner_name  %}
           <a href="{% url 'user_river_source_item' visitor_name feed.source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
@@ -59,7 +59,7 @@ jQuery.ias({
   <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
    {% if source.url != "#internal-bookmark-import" %}
-   <li class="source_def"><img src="http://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/>
+   <li class="source_def"><img src="https://plus.google.com/_/favicon?domain={{ source.url }}" style="padding-right:.5em;"/>
     {% if visitor_name == owner_name  %}
      <a href="{% url 'user_river_source_item' visitor_name source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
     {% endif %}
