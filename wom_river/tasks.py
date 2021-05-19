@@ -260,7 +260,7 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
     return
   age = (processing_date
          - feed_collation.last_completed_collation_date)
-  num_refs_cap = 100*min_num_ref_target
+  num_refs_cap = 10*min_num_ref_target
   num_refs_below_cap = num_refs < num_refs_cap
   if age < timeout and num_refs_below_cap:
     return
