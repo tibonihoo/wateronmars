@@ -237,6 +237,20 @@ def generate_collated_content(references):
   return "\n".join(doc_lines)
 
 
+def format_date_extent(delta):
+  days = delta.days
+  hours = delta.seconds // 3600
+  if days:
+    displayed_days = days+1 if hours >= 6 else days
+    return f"{displayed_days}d"
+  minutes = (delta.seconds // 60) - (hours * 60)
+  if hours:
+    displayed_hours = hours+1 if minutes >= 15 else hours
+    return f"{displayed_hours}h"
+  displayed_minutes = max(1, minutes//60)
+  return f"{displayed_minutes}min"
+
+
 def yield_collated_reference(url_parent_path, feed, feed_collation,
                              min_num_ref_target,
                              timeout, processing_date):
@@ -277,15 +291,8 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
     logger.warning(f"Skipped duplicated collated reference for {url}")
     return
   description = generate_collated_content(processed_references)
-  extent_str_list = []
-  if date_extent.days:
-      extent_str_list.append(f"{date_extent.days}d")
-  if date_extent.seconds >= 3600:
-      extent_str_list.append(f"{date_extent.seconds // 3600}h")
-  if not extent_str_list:
-      extent_min = max(1, date_extent.seconds//60)
-      extent_str_list.append(f"{extent_min}min")
-  t = f"{source.title} /{','.join(extent_str_list)}"
+  date_extent_str = format_date_extent(date_extent)
+  t = f"{source.title} /{date_extent_str}"
   r = Reference(url=url,
                 title=t,
                 pub_date=pub_date,
