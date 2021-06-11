@@ -49,6 +49,20 @@ def HTMLUnescape(s):
   return html.unescape(s)
 
 
+def get_date_from_feedparser_feed(feed):
+  """
+  Extract the date from the 'parsed date' fields of a feedparser generated entry.
+  """
+  if "updated_parsed" in feed:
+    updated_date_utc = feed.updated_parsed[:6]
+  elif "published_parsed" in feed:
+    updated_date_utc = feed.published_parsed[:6]
+  else:
+    logger.debug("No date found for feed %s" % feed)
+    return None
+  return datetime(*(updated_date_utc),tzinfo=timezone.utc)
+
+
 def get_date_from_feedparser_entry(entry):
   """
   Extract the date from the 'parsed date' fields of a feedparser generated entry.
@@ -60,8 +74,8 @@ def get_date_from_feedparser_entry(entry):
   elif "created_parsed" in entry:
     updated_date_utc = entry.created_parsed[:6]
   else:
-    logger.debug("Using 'now' as date for item %s" % entry.link)
-    updated_date_utc = datetime.now(timezone.utc).utctimetuple()[:6]
+    logger.debug("No date found for entry %s" % entry.link)
+    return None
   return datetime(*(updated_date_utc),tzinfo=timezone.utc)
 
 
@@ -110,7 +124,7 @@ when importing references from feed." % (len(url),URL_MAX_LENGTH))
   return (ref,tags)
 
 
-def add_new_references_from_feedparser_entries(feed,entries):
+def add_new_references_from_parsed_feed(feed, entries, default_date):
   """Create and save references from the entries found in a feedparser
   generated list.
   
@@ -129,13 +143,34 @@ def add_new_references_from_feedparser_entries(feed,entries):
     if not entry_link:
       logger.warning("Skipping a feed entry without 'link' : %s." % e)
       continue
-    entries_with_link.append(e)
-  entries_with_dates = [(e,get_date_from_feedparser_entry(e)) for e in entries_with_link]
-  new_entries = [(e,d) for e,d in entries_with_dates \
-                 if d>feed_last_update_check]
-  entries_url = [e.link for e,_ in new_entries if e.get("link",None)]
+    entries_with_link.append((e, entry_link))
+  entries_url = [link for e, link in entries_with_link]
   existing_references = list(Reference.objects.filter(url__in=entries_url).all())
   existing_references_by_url = dict([(r.url,r) for r in existing_references])
+  entries_with_dates = []
+  for e, link in entries_with_link:
+    date = get_date_from_feedparser_entry(e)
+    # For items that actually have no dates declared in the feed,
+    # we'll default their date to the existing reference
+    # with the same link (if any):
+    # - this has the benefit from avoiding to pretend that items are
+    #   updated again and again for broken feeds (ie feed that don't
+    #   bother declaring any date at item level), thus avoiding
+    #   to flood the user with news that aren't
+    # - this has the drawback that an actual update to the item's
+    #   linked content will be ignored for such feed which is fair
+    #   for a feed not providing dates.
+    if date is None:
+      if link in existing_references_by_url:
+        date = existing_references_by_url[link].pub_date
+      else:
+        date = default_date
+    entries_with_dates.append((e, date))
+  new_entries = [
+      (e, d)
+      for e, d in entries_with_dates
+      if d > feed_last_update_check
+      ]
   for entry,date in new_entries:
     entry_link = entry.link
     previous_ref = existing_references_by_url.get(entry_link,None)
@@ -173,7 +208,9 @@ def collect_new_references_for_feed(feed):
     logger.error("Skipping feed at %s because of a parse problem (%s))."\
                  % (feed.source.url,e))
     return []
-  return add_new_references_from_feedparser_entries(feed,d.entries)
+  now = datetime.now(timezone.utc)
+  default_date = get_date_from_feedparser_feed(d) or now
+  return add_new_references_from_parsed_feed(feed, d.entries, default_date)
 
 
 

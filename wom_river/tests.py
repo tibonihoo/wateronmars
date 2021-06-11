@@ -35,7 +35,7 @@ from wom_river.models import (
 
 from wom_river.tasks import (
     import_feedsources_from_opml,
-    add_new_references_from_feedparser_entries,
+    add_new_references_from_parsed_feed,
     generate_collated_content,
     yield_collated_reference
     )
@@ -216,8 +216,7 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
 """ % ("u"*(URL_MAX_LENGTH),"u"*(URL_MAX_LENGTH))
     
     f1 = feedparser.parse(rss_xml)
-    self.ref_and_tags = add_new_references_from_feedparser_entries(web_feed,
-                                                                   f1.entries)
+    self.ref_and_tags = add_new_references_from_parsed_feed(web_feed, f1.entries, None)
     
   def test_references_are_added_with_correct_urls(self):
     references_in_db = list(Reference.objects.all())
@@ -273,13 +272,14 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
       url="http://example.com",
       title="Test Source",
       pub_date=date)
-    web_feed  = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
-                                       source=self.source,
-                                       last_update_check=\
-                                       datetime.utcfromtimestamp(0)\
-                                       .replace(tzinfo=timezone.utc))
+    self.web_feed  = WebFeed.objects.create(
+        xmlURL="http://mouf/rss.xml",
+        source=self.source,
+        last_update_check=\
+        datetime.utcfromtimestamp(0)\
+        .replace(tzinfo=timezone.utc))
     # RSS from a source that already has a mapping
-    rss_xml = """\
+    self.rss_xml = """\
 <?xml version="1.0"?>
 <rss version="2.0">
   <channel>
@@ -287,7 +287,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
     <link>http://example.com/test_source</link>
     <description>A RSS test source</description>
     <pubDate>Sun, 17 Nov 2013 19:08:15 GMT</pubDate>
-    <lastBuildDate>Sun, 17 Nov 2013 19:08:15 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 18 Nov 2013 20:18:32 GMT</lastBuildDate>
     <language>en-us</language>
     <generator>Testor</generator>
     <docs>http://cyber.law.harvard.edu/rss/rss.html</docs>
@@ -331,9 +331,12 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
 </rss>
 """
     
-    f1 = feedparser.parse(rss_xml)
-    self.ref_and_tags = add_new_references_from_feedparser_entries(web_feed,
-                                                                   f1.entries)
+    f1 = feedparser.parse(self.rss_xml)
+    self.default_date = datetime.now(timezone.utc)
+    self.ref_and_tags = add_new_references_from_parsed_feed(
+        self.web_feed,
+        f1.entries,
+        self.default_date)
     
   def test_references_are_added_with_correct_urls(self):
     references_in_db = list(Reference.objects.all())
@@ -354,6 +357,28 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
     for ref in references_in_db:
       if ref!=self.source:
         self.assertIn(self.source,ref.sources.all(),ref)
+
+  def test_references_are_added_with_default_date(self):
+    references_in_db = list(Reference.objects.all())
+    self.assertEqual(3,len(references_in_db))
+    for r in references_in_db:
+      self.assertEqual(self.default_date.utctimetuple()[:6],
+                       r.pub_date.utctimetuple()[:6])
+      
+  def test_dates_not_updated_even_for_dateless_items(self):
+    references_in_db = list(Reference.objects.all())
+    self.assertEqual(3,len(references_in_db))
+    first_dates = set(r.pub_date for r in references_in_db)
+    f2 = feedparser.parse(self.rss_xml)
+    new_default_date = self.default_date + timedelta(days=1)
+    self.ref_and_tags = add_new_references_from_parsed_feed(
+        self.web_feed,
+        f2.entries,
+        new_default_date)
+    references_in_db = list(Reference.objects.all())
+    self.assertEqual(3,len(references_in_db))
+    new_dates = set(r.pub_date for r in references_in_db)
+    self.assertEqual(first_dates, new_dates)
 
 
 class WebFeedCollationModelTest(TestCase):
