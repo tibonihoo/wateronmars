@@ -316,13 +316,18 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
   feed_url_code = build_safe_code_from_url(feed.xmlURL)
   pub_date = processing_date
   url = "{}/{}/{}/{}/{}".format(
-      url_parent_path,
-      source_url_code,
+      url_parent_path.rstrip("/"),
+      source_url_code.rstrip("/"),
       feed_url_code,
-      (pub_date - datetime.utcfromtimestamp(0)
-       .replace(tzinfo=timezone.utc)).total_seconds(),
-      (earliest_pub_date - datetime.utcfromtimestamp(0)
-       .replace(tzinfo=timezone.utc)).total_seconds())
+      int((pub_date
+           - datetime.utcfromtimestamp(0)
+           .replace(tzinfo=timezone.utc))
+          .total_seconds()),
+      int((earliest_pub_date
+           - datetime.utcfromtimestamp(0)
+           .replace(tzinfo=timezone.utc))
+          .total_seconds())
+          )
   same_refs = Reference.objects.filter(url=url).all()
   if same_refs:
     logger.warning(f"Skipped duplicated collated reference for {url}")
