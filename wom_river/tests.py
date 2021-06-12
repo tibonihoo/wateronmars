@@ -404,18 +404,44 @@ class WebFeedCollationModelTest(TestCase):
     self.assertEqual(self.feed, self.collation.feed)
     self.assertEqual(0, len(self.collation.references.all()))
         
+  def test_take(self):
+    date = self.date + timedelta(days=1)
+    r = Reference.objects.create(url="http://mouf/1",
+                                 pub_date=date)
+    self.collation.take(r)
+    taken_refs = list(self.collation.references.all())
+    self.assertEqual(1, len(taken_refs))
+    self.assertEqual(r, taken_refs[0])
+
+  def test_take_skip_dates_equal_to_latest_flushed_refs(self):
+    date = self.date + timedelta(days=1)
+    r = Reference.objects.create(url="http://mouf/1",
+                                 pub_date=date)
+    self.collation.take(r)
+    # Take date in the reference's past to be sure the
+    # completion date is not taken into account
+    completion_date = date + timedelta(days=-1)
+    self.collation.flush(completion_date)
+    self.assertEqual(0, len(self.collation.references.all()))
+    r2 = Reference.objects.create(url="http://mouf/2",
+                                  pub_date=date)
+    self.collation.take(r2)
+    self.assertEqual(0, len(self.collation.references.all()))
+
   def test_flush_then_references_is_empty(self):
     date = self.date + timedelta(days=1)
     r = Reference.objects.create(url="http://mouf/1",
                                  pub_date=date)
-    self.collation.references.add(r)
+    self.collation.take(r)
     completion_date = date + timedelta(days=1)
     self.collation.flush(completion_date)
     self.assertEqual(0, len(self.collation.references.all()))
     self.assertEqual(completion_date, self.collation.last_completed_collation_date)
+    self.assertEqual(date, self.collation.latest_reference_flushed)
+    
 
 def remove_whitespaces(s):
-    return "".join(s.split())
+  return "".join(s.split())
     
 class GenerateCollatedContentTaskTest(TestCase):
 

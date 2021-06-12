@@ -70,7 +70,7 @@ class WebFeedCollation(models.Model):
   def take(self, reference):
     threshold = self.latest_reference_flushed
     pub_date = reference.pub_date
-    if pub_date < threshold:
+    if pub_date <= threshold:
         return
     if threshold == DEFAULT_FLUSHED_PUB_DATE:
       # Backward compatibility for before/after addition
