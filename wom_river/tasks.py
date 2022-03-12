@@ -269,7 +269,17 @@ def generate_collated_content(references):
     # whole collation in one go broke beautifulsoup in the case when
     # each description only contained a <p> without ever closing it.)
     soup = BeautifulSoup(ref.description, 'html.parser')
-    doc_lines.append(soup.prettify())
+    try:
+      doc_lines.append(soup.prettify())
+    except Exception as e:
+      # In some rare cases the prettifier fails, then we take just the
+      # text.  Note: such a case occured but was not reproducible on
+      # just any setup, meaning that it may relate to the version of
+      # python+bs available.
+      logger.warning(
+          f"Description prettification failed on {ref.url} with {e}")
+      soup2 = BeautifulSoup(ref.description, 'html.parser')
+      doc_lines.append(soup2.text)
     doc_lines.append("<br/>")
   return "\n".join(doc_lines)
 
