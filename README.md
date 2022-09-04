@@ -16,7 +16,7 @@ As such Water On Mars intends to be a news reading platform built around the fol
 
 > You can then use a sieve to filter out and collect the most interesting links.
 
-A demo website is up and running thanks to Heroku at: http://wateronmars-demo.herokuapp.com.
+A demo website is up and running at: https://wateronmars-demo.tibonihoo.dev
 
 Feature list:
 
