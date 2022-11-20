@@ -32,8 +32,11 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 import datetime
+from urllib import request
 from urllib.parse import urlparse
 from collections import namedtuple
+
+from bs4 import BeautifulSoup
 
 import logging
 logger = logging.getLogger(__name__)
@@ -43,6 +46,16 @@ import re
 # A string defining the query string related to "campain" trackers,
 # that may end up being stripped out when a url is too long.
 URL_CAMPAIN_QS_RE = re.compile("utm_[^&]*(&|$)")
+
+def try_get_title_from_page(url):
+  """Try to get the title from a web page, returns None if anything fails.
+  """
+  try:
+      soup = BeautifulSoup(request.urlopen(url), "html.parser")
+      return soup.title.string
+  except Exception as e:
+      logger.warning(f"Failed to find title for {url} because of '{e}'")
+      return None
 
 def build_reference_title_from_url(url):
   """Generate a valid reference title from an url.

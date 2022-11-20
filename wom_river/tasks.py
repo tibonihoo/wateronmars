@@ -198,6 +198,34 @@ def add_new_references_from_parsed_feed(feed, entries, default_date):
   return dict(all_references)
 
 
+def try_get_feed_title(feed_url):
+  """Try to parse and extract a feed url, returns None if anything fails.
+  """
+  try:
+    d = feedparser.parse(feed_url)
+    return d.feed.get("title", None)
+  except Exception as e:
+    logger.error("Could not find title for feed at %s because of a parse problem (%s))."\
+                 % (feed.source.url,e))
+    return None
+
+
+def try_get_feed_site_url(feed_url):
+  """Try to get a URL of a wevsite associated to the feed.
+  Returns None if anything fails.
+  """
+  try:
+    d = feedparser.parse(feed_url)
+    return (d.feed.get("link", None)
+            or d.feed.get("publisher_detail", {}).get("href", None)
+            or d.feed.get("author_detail", {}).get("href", None)
+            )
+  except Exception as e:
+    logger.error("Could not find the website associated to the feed at %s because of a parse problem (%s))."\
+                 % (feed.source.url,e))
+    return None
+    
+
 def collect_new_references_for_feed(feed):
   """Get the feed data from its URL and collect the new references into the db.
   Return a dictionary mapping the new references to a corresponding set of tags.

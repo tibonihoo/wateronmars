@@ -32,13 +32,20 @@ from wateronmars import settings
 from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
 from wom_pebbles.models import Reference
-from wom_pebbles.tasks import build_reference_title_from_url
-from wom_pebbles.tasks import build_source_url_from_reference_url
-from wom_pebbles.tasks import sanitize_url
+from wom_pebbles.tasks import (
+    try_get_title_from_page,
+    build_reference_title_from_url,
+    build_source_url_from_reference_url,
+    sanitize_url
+    )
 
 from wom_river.models import (
     WebFeed,
     WebFeedCollation
+    )
+from wom_river.tasks import (
+    try_get_feed_title,
+    try_get_feed_site_url
     )
 
 from wom_user.models import UserProfile
@@ -106,6 +113,7 @@ class UserBookmarkAdditionForm(forms.Form):
     """
     url,_ = sanitize_url(self.cleaned_data["url"])
     title = self.cleaned_data["title"] \
+            or try_get_title_from_page(url) \
             or build_reference_title_from_url(url)
     comment = self.cleaned_data["comment"]
     pub_date = self.cleaned_data["pub_date"] \
@@ -176,7 +184,7 @@ class UserBookmarkAdditionForm(forms.Form):
 class UserSourceAdditionForm(forms.Form):
   """Collect all necessary data to subscribe to a new source."""
 
-  url = forms.CharField(max_length=URL_MAX_LENGTH, required=True,
+  url = forms.CharField(max_length=URL_MAX_LENGTH, required=False,
                         widget=forms.TextInput(
                           attrs={"class":"form-control"}))
   title = forms.CharField(max_length=REFERENCE_TITLE_MAX_LENGTH,
@@ -191,21 +199,36 @@ class UserSourceAdditionForm(forms.Form):
     forms.Form.__init__(self,*args,**kwargs)
     self.user = user
 
+  def _clean_title(self, title, source_url, feed_url):
+      return (
+          title
+          or try_get_title_from_page(source_url)
+          or try_get_feed_title(feed_url)
+          or build_reference_title_from_url(source_url)
+        )
+
   def clean(self):
     """Used to set the right feed_url if it hasn't been given."""
     cleaned_data = super(UserSourceAdditionForm, self).clean()
     url = cleaned_data.get("url")
-    if not url:
-      raise forms.ValidationError("The source URL is required.")
     feed_url = cleaned_data.get("feed_url")
+    title = cleaned_data.get("title")
+    if not url and feed_url:
+      url = try_get_feed_site_url(feed_url)
+      cleaned_data["url"] = url
+    if not url:
+      raise forms.ValidationError("The source URL is required and could not be guessed.")
     if feed_url and feed_url in feedfinder2.find_feeds(feed_url, user_agent=settings.USER_AGENT, timeout=5):
-      return cleaned_data
+        cleaned_data["title"] = self._clean_title(title, url, feed_url)
+        return cleaned_data
+    # Maybe the main url is also a feed ?
     found_feeds = feedfinder2.find_feeds(url, user_agent=settings.USER_AGENT, timeout=5)
     if url in found_feeds:
       cleaned_data["feed_url"] = url
+      cleaned_data["title"] = self._clean_title(title, url, feed_url)
       return cleaned_data
-    # the feed is not here or invalid: let's see if we can find some
-    # valid feed urls by ourselves.
+    # The feed is not here or invalid: let's see if we can find some
+    # valid feeds automatically.
     feed_error_msg = "Please give the URL of an existing valid feed."
     candidates = set(str(f) for f in found_feeds)
     if not candidates:
@@ -228,19 +251,22 @@ class UserSourceAdditionForm(forms.Form):
       raise forms.ValidationError("There is no valid field at the given URL (maybe you meant one of %s)" % candidates)
     # try to guess the right feed for the URL
     best_guess_url = str(candidates[0])
+    title = self._clean_title(title, url, best_guess_url)
     if len(candidates)>1:
-      # too much sources, we should ask the user to select one of
+      # Too much sources, we should ask the user to select one of
       # these. TODO: do this with a better UX that raw display of URLs
       self._errors["feed_url"] = self.error_class([feed_error_msg])
       # get a mutable copy of the querydict and change it to add a
       # default value for the feed_url
       data = self.data.copy()
       data["feed_url"] = best_guess_url
+      data["title"] = title
       self.data = data
-      raise forms.ValidationError("There are several feeds related to the source at '%s', please select one of them (candidate URLs: %s)" % (url,candidates))
+      raise forms.ValidationError("There are several feeds related to the source at '%s', please select one of them (candidate URLs:\n\n%s)" % (url,"\n\n".join(candidates)))
     # only one candidate and no feed proposed by the user, let's
     # select it arbitrarily
     cleaned_data["feed_url"] = best_guess_url
+    cleaned_data["title"] = title
     return cleaned_data
 
 
@@ -261,10 +287,7 @@ class UserSourceAdditionForm(forms.Form):
     if same_sources:
       new_feed = same_sources[0]
     else:
-      if form_title:
-        source_title = form_title
-      else:
-        source_title = build_reference_title_from_url(form_url)
+      source_title = form_title
       try:
         source_ref = Reference.objects.get(url=form_url)
       except ObjectDoesNotExist:
