@@ -62,7 +62,8 @@ def deploy_on_remote(c, target_config):
         run_in_dir = lambda cmd: conn.run("cd '{0}' && {1}".format(site_dir, cmd))
         venv_dir = target_config["virtual_env_dir"]
         run_in_dir("git pull --rebase origin master")
-        run_in_dir("source {0}/bin/activate && pip3 install -r requirements_base.txt".format(venv_dir))
+        requirements = target_config["requirements"]
+        run_in_dir("source {0}/bin/activate && pip3 install -r {1}".format(venv_dir, requirements))
         # NOTE: for existing apps running with Django1.4, the first upgrade to
         # Django1.11 should fail here and be replaced by a manual:
         # "python3 manage.py migrate --fake" !

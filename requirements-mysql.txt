@@ -1,0 +1,4 @@
+# When the hosts only specifity to run Django
+# is usage of MySQL.
+-r requirements_base.txt
+mysqlclient
