@@ -25,6 +25,21 @@ values and the way to read them from the global django site settings.
 
 from django.conf import settings
 
+
+"""
+Application credentials for twitter can be provided in two ways:
+
+- for "development mode" you can use a single user token and set it in
+  the main applications settings (see below how this would then be
+  extracted)
+
+- for the "production" application use application key and
+  secrets. They must be stored in their own files in the folder where
+  the application is run (its current working directory when it runs).
+  The files need to be named `twitter_app_key` and `twitter_app_secret`
+  and contain the key and secret strings only.
+"""
+
 if hasattr(settings,"WOM_TRIBUTARY_TWITTER_OAUTH_TOKEN"):
   # Only useful in dev mode as a single token is only usable to access 1 user account.
   SINGLE_USER_TWITTER_OAUTH_TOKEN = settings.WOM_TRIBUTARY_TWITTER_OAUTH_TOKEN

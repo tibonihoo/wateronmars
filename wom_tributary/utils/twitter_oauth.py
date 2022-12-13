@@ -24,10 +24,10 @@ https://developer.twitter.com/en/docs/basics/authentication/overview/3-legged-oa
 """
 
 import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 import tweepy
 from granary.twitter import Twitter
-from granary.twitter import appengine_config as twitter_cfg
+from oauth_dropins import twitter_auth
+
 
 SESSION_TOKEN_NAME = "wom_tributary_twitter_rtk"
 
@@ -94,8 +94,8 @@ def register_acces_token_if_present(
   user_info.save()
 
 def get_consumer_app_key():
-  # See https://github.com/snarfed/oauth-dropins
-  # (used by granary) for how this is fetched.
-  key = twitter_cfg.TWITTER_APP_KEY
-  secret = twitter_cfg.TWITTER_APP_SECRET
+  # See from granary.twitter import appengine_config as twitter_cfg
+  # for how this is fetched.
+  key = twitter_auth.TWITTER_APP_KEY
+  secret = twitter_auth.TWITTER_APP_SECRET
   return key, secret
