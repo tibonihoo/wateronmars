@@ -177,9 +177,10 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-raise Exception("Replace SECRET_KEY with a specific unique key !")
 # see also https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-SECRET_KEY
-SECRET_KEY = 'REPLACE WITH A RANDOM KEY'
+SECRET_KEY =  ""  # Replace this !
+if not SECRET_KEY:
+    raise Exception("Set 'SECRET_KEY' to a specific unique key !")
 
 
 TEMPLATES = [
