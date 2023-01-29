@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% trans "New subscription" %}
+{% endblock %}
+
+{% block content %}
+
+<h4>{% trans "Subsribe to a Mastodon feed" %}</h4>
+
+<p class="help-block">{% trans "Select below what information to get from mastodon." %}</p>
+
+{% if form.errors %}
+<div class="alert alert-danger">
+  <p>{% trans "Please check the information below." %}</p>
+  {{ form.non_field_errors|safe }}
+</div>
+{% endif %}
+<form class="form-horizontal" role="form" action="{% url 'user_tributary_mastodon_add' visitor_name %}" method="post">
+  {% csrf_token %}
+  {% for field in form %}
+  {% if field.errors %}
+  <div class="form-group has-error">
+  {%  else %}
+  <div class="form-group">
+  {% endif %}
+    <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
+    <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
+  </div>
+  {% endfor %}
+  <div class="form-group">
+    <span class="col-sm-offset-2">
+      <input type="submit" value="{% trans "Subscribe to this source" %}" class="btn btn-default" />
+      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
+    </span>
+  </div>
+</form>
+
+{% endblock %}

@@ -42,6 +42,9 @@ from wom_user.views import (
     user_tributary,
     user_tributary_twitter,
     user_tributary_twitter_add,
+    user_tributary_mastodon,
+    user_tributary_mastodon_add,
+    user_tributary_mastodon_auth_gateway,
     user_river_source_item,
     user_river_view,
     user_river_sieve,
@@ -51,6 +54,7 @@ from wom_user.views import (
     request_for_cleanup,
     user_creation,
     user_auth_landing_twitter,
+    user_auth_landing_mastodon,
     )
 
 from django.contrib.auth import views as auth_views
@@ -73,6 +77,9 @@ urlpatterns = [
     url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/$', user_tributary, name='user_tributary'),
     url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/twitter/$', user_tributary_twitter, name='user_tributary_twitter'),
     url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/twitter/add/$', user_tributary_twitter_add, name='user_tributary_twitter_add'),
+    url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/mastodon/$', user_tributary_mastodon, name='user_tributary_mastodon'),
+    url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/mastodon/add/$', user_tributary_mastodon_add, name='user_tributary_mastodon_add'),
+      url(r'^u/(?P<owner_name>[^/]*)/sources/tributary/mastodon/auth_gateway/$', user_tributary_mastodon_auth_gateway, name='user_tributary_mastodon_auth_gateway'),    
     url(r'^u/(?P<owner_name>[^/]*)/sources/item/(?P<source_url_code>.*)$', user_river_source_item, name='user_river_source_item'),
     url(r'^u/(?P<owner_name>[^/]*)/river/$', user_river_view, name='user_river_view'),
     url(r'^u/(?P<owner_name>[^/]*)/sieve/$', user_river_sieve, name='user_river_sieve'),
@@ -94,6 +101,7 @@ if not settings.READ_ONLY:
   urlpatterns += [
     url(r'^accounts/new/$', user_creation),
     url(r'^accounts/auth_landing/twitter/$', user_auth_landing_twitter, name='user_auth_landing_twitter'),
+    url(r'^accounts/auth_landing/mastodon/$', user_auth_landing_mastodon, name='user_auth_landing_mastodon'),
     url(r'^admin/', admin.site.urls),
     # Uncomment the admin/doc line below to
     # enable admin documentation

@@ -1,6 +1,6 @@
 # -*- coding: utf-8; indent-tabs-mode: nil; python-indent: 2 -*-
 #
-# Copyright (C) 2019 Thibauld Nion
+# Copyright (C) 2022 Thibauld Nion
 #
 # This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
 #
@@ -20,21 +20,24 @@
 
 from datetime import timedelta
 from django.db import models
+from django_cryptography.fields import encrypt
 
 from wom_pebbles.models import Reference
 
 
 class GeneratedFeed(models.Model):
-  """Proxy to a feeds that required extra processing (ypically because
+  """Proxy to a feeds that required extra processing (typically because
   they come from something else than a web feed).
-"""
+  """
 
   TITLE_MAX_LENGTH = 50
   PROVIDER_MAX_LENGTH = 4
   TWITTER = "TWTR"
+  MASTODON = "MSTO"
 
   PROVIDERS_CHOICE = (
     (TWITTER, "twitter"),
+    (MASTODON, "mastodon"),
     )
     
   provider = models.CharField(
@@ -91,3 +94,61 @@ class TwitterTimeline(models.Model):
                                                  on_delete=models.CASCADE)
 
 
+class MastodonApplicationRegistration(models.Model):
+  """Holds information about app registration on mastodon.
+  """
+
+  URL_MAX_LENGTH = 255
+  NAME_MAX_LENGTH = 255
+  ID_MAX_LENGTH = 257
+  SECRET_MAX_LENGTH = 257
+  SCOPE_MAX_LENGTH = 50
+  
+  # URL of the instance on which this registration happened.
+  instance_url = models.CharField(max_length=URL_MAX_LENGTH)
+    
+  # Name of the registered application
+  application_name = models.CharField(max_length=NAME_MAX_LENGTH)
+  
+  # Redirect URI
+  redirect_uri = models.CharField(max_length=URL_MAX_LENGTH)
+
+  # "Client Id" provided by the mastodon instance for this application
+  # (see https://docs.joinmastodon.org/entities/Application/#client_id)
+  client_id = models.CharField(max_length=ID_MAX_LENGTH)
+
+  # "Client secret" associated to the `client_id`
+  # (see https://docs.joinmastodon.org/entities/Application/#client_secret)
+  client_secret = encrypt(models.CharField(max_length=SECRET_MAX_LENGTH))
+
+  # Validation Key
+  # (see https://docs.joinmastodon.org/entities/Application/#vapid_key)
+  validation_key = models.CharField(max_length=SECRET_MAX_LENGTH)
+
+  
+class MastodonUserAccessInfo(models.Model):
+  """The oauth tokens that can be used to a mastodon instance's API after a user has granted us permission.
+  """
+
+  # Registration information for how this application is knwown to the
+  # instance where the toos will be retrieved
+  application_registration_info = models.ForeignKey(MastodonApplicationRegistration,
+                                                    on_delete=models.CASCADE)
+  
+  # Token provided after the user granted access
+  oauth_access_token = models.TextField()
+
+
+class MastodonTimeline(models.Model):
+  """Define the mastodon timeline to collect and convert to a stream.
+  """
+  
+  SOURCE_NAME = "Mastodon"
+  
+  generated_feed = models.OneToOneField(GeneratedFeed, on_delete=models.CASCADE)
+    
+  # Credential to access the chosen mastodon instance (bound to each
+  # timeline to be sure we don't fill a timeline while benefiting from
+  # credentials of another user)
+  mastodon_user_access_info = models.ForeignKey(MastodonUserAccessInfo,
+                                                 on_delete=models.CASCADE)

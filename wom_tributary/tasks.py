@@ -29,6 +29,7 @@ from wom_pebbles.tasks import truncate_reference_title
 from wom_pebbles.tasks import sanitize_url
 
 from wom_tributary.utils import twitter_oauth
+from wom_tributary.utils import mastodon_oauth
 from wom_tributary.utils import tweet_summarizers
 
 from wom_tributary.settings import SINGLE_USER_TWITTER_OAUTH_TOKEN
@@ -201,5 +202,135 @@ def collect_news_from_tweeter_feeds(hours_to_cover):
   """
   for timeline in TwitterTimeline.objects.iterator():
     collect_new_references_for_twitter_timeline(
+      timeline, hours_to_cover)
+
+
+def register_mastodon_application_info_if_needed(instance_registration_info, website_homepage):
+  """Ensures the application registration info is complete.
+  Requires at minimum, the following to be set in input:
+  - instance_registration_info.instance_url
+  - instance_registration_info.application_name
+
+  Note: The calling code should probably lookup by itself
+    if a registration was made for the same instance already
+    and start building the instance_registration_info with it.
+  """
+  if instance_registration_info.client_secret:
+    return
+  app_name = instance_registration_info.application_name
+  instance_url = instance_registration_info.instance_url
+  redirect_uri = instance_registration_info.redirect_uri
+  registration_feedback = mastodon_oauth.register_application_on_instance(
+      instance_url,
+      app_name,
+      redirect_uri,
+      website_homepage
+      )
+  instance_registration_info.client_id = registration_feedback.client_id
+  instance_registration_info.client_secret = registration_feedback.client_secret
+  instance_registration_info.validation_key = registration_feedback.vapid_key
+  instance_registration_info.redirect_uri = registration_feedback.redirect_uri
+  instance_registration_info.save()
+  if not mastodon_oauth.is_application_registration_ok_on_instance(instance_url, registration_feedback):
+    raise Exception(f"Registration is not effective for the application on {instance_url}")
+
+
+def get_mastodon_auth_status(user_info, request = None):
+  """Can fetch user-related tokens if they are not registered yet BUT
+  assumes that user_info contains a valid application registation (see
+  `register_application_on_instance` for application registration).
+  """
+  request_params, session = \
+    (request.GET, request.session) if request \
+    else ({},{})
+  instance_url = user_info.application_registration_info.instance_url
+  reg_info = mastodon_oauth.RegistrationInfo(
+      user_info.application_registration_info.client_id,
+      user_info.application_registration_info.client_secret,
+      user_info.application_registration_info.validation_key,
+      user_info.application_registration_info.redirect_uri,
+      )
+  client, token = (mastodon_oauth.try_get_authorized_client_and_token(
+      request_params,
+      session,
+      instance_url,
+      reg_info,
+      ) or (None, None))
+  is_auth = client is not None
+  if is_auth:
+    user_info.oauth_access_token = token
+    user_info.save()
+  auth_url = None if is_auth \
+    else mastodon_oauth.generate_authorization_url(
+        request.session,
+        instance_url,
+        reg_info)
+  return AuthStatus(is_auth, client, auth_url)
+
+
+def fetch_mastodon_timeline_data(timeline, auth_status, max_num_items):
+    if not auth_status.is_auth:
+        return []
+    client = auth_status.client
+    tl_data = client.get_activities(
+        group_id=mastodon_oauth.TIMELINE_GROUP_ID,
+        count=max_num_items)
+    return tl_data
+
+
+def collect_new_references_for_mastodon_timeline(
+    timeline,
+    hours_to_cover):
+  """Get the timeline data from Mastodon and collect the new references into the db.
+  Return a dictionary mapping the new references to a corresponding set of tags.
+  """  
+  feed = timeline.generated_feed
+  now = timezone.now()
+  last_update_check = feed.last_update_check
+  if last_update_check >= now:
+    return None
+  num_items_to_ask = APPROX_NB_TWEETS_PER_1H * hours_to_cover
+  earliest_item_date_allowed = (
+    now - timedelta(hours=hours_to_cover)
+    )
+  keep_only_after_datetime = max(last_update_check, earliest_item_date_allowed)
+  access_info = timeline.mastodon_user_access_info
+  try:
+    auth = get_mastodon_auth_status(access_info)
+    activities = fetch_mastodon_timeline_data(
+      timeline,
+      auth,
+      num_items_to_ask)
+    summary = tweet_summarizers.generate_basic_html_summary(
+      activities,
+      keep_only_after_datetime)
+    date_str = now.strftime("%Y%m%d%H")
+    title = f"{timeline.generated_feed.title} /{hours_to_cover}h"
+  except Exception as e:
+    logger.error("Skipping timeline for %s because of the following error: %s."\
+                 % (timeline.username,e))
+    return None
+  r = add_new_reference_from_platform_timeline_summary(
+    MastodonTimeline.SOURCE_NAME.lower(),
+    timeline,
+    summary,
+    title,
+    now
+    )
+  r.sources.add(timeline.generated_feed.source)
+  r.save()
+  feed.last_update_check = now
+  feed.save()
+  return r
+
+
+def collect_news_from_mastodon_feeds(hours_to_cover):
+  """Fetch toots for the given info and fill the db of
+  References with them.
+
+  This is to ensure that we don't try
+  """
+  for timeline in MastodonTimeline.objects.iterator():
+    collect_new_references_for_mastodon_timeline(
       timeline, hours_to_cover)
 

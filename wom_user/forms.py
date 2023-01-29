@@ -20,6 +20,7 @@
 
 from datetime import datetime
 from django.utils import timezone
+from django.urls import reverse
 
 from django import forms
 from django.forms import ModelForm
@@ -362,9 +363,16 @@ class WebFeedOptInOutForm(forms.Form):
     self.user.userprofile.save()
 
 
-from wom_tributary.models import TwitterTimeline
-from wom_tributary.models import TwitterUserInfo
-from wom_tributary.models import GeneratedFeed
+from wom_tributary.models import (
+    TwitterTimeline,
+    TwitterUserInfo,
+    MastodonApplicationRegistration,
+    MastodonUserAccessInfo,
+    MastodonTimeline,
+    GeneratedFeed
+    )
+from wom_tributary.tasks import register_mastodon_application_info_if_needed
+
 
 class UserTwitterSourceAdditionForm(forms.Form):
   """Collect all necessary data to subscribe to a new twitter source."""
@@ -443,3 +451,121 @@ class UserTwitterSourceAdditionForm(forms.Form):
       self.user.userprofile.generated_feeds.add(new_feed)
       self.user.userprofile.save()
     return twitter_source
+
+
+class UserMastodonFeedAdditionForm(forms.Form):
+  """Collect all necessary data to create a feed from mastodon."""
+
+  title = forms.CharField(
+    max_length=GeneratedFeed.TITLE_MAX_LENGTH,
+    required=True,
+    widget=forms.TextInput(attrs={"class":"form-control"}))
+
+  instance_url = forms.CharField(
+    max_length=MastodonApplicationRegistration.URL_MAX_LENGTH,
+    required=True,
+    widget=forms.TextInput(attrs={"class":"form-control"}))
+
+  def __init__(self, user, *args, **kwargs):
+    forms.Form.__init__(self,*args,**kwargs)
+    self.user = user
+
+
+  def _get_or_create_mastodon_registration(self, url):
+    existing_mastodon_registrations = (
+      MastodonApplicationRegistration
+      .objects
+      .filter(instance_url = url)
+      .all()
+      )
+    mastodon_registration = (
+        existing_mastodon_registrations[0]
+        if existing_mastodon_registrations
+        else None
+        )
+    if not mastodon_registration:
+      mastodon_registration = MastodonApplicationRegistration(instance_url=url)
+      mastodon_registration.save()
+    return mastodon_registration
+
+  def clean(self):
+    """Used to ensure the application can be registered on the given mastodon instance."""
+    cleaned_data = super(UserMastodonFeedAdditionForm, self).clean()
+    form_title = self.cleaned_data['title']
+    form_instance_url = self.cleaned_data['instance_url']
+    existing_feeds_with_same_title = (GeneratedFeed
+                     .objects
+                     .filter(
+                         userprofile = self.user.userprofile,
+                         provider = GeneratedFeed.MASTODON,
+                         title = form_title
+                         )
+                     .all())
+    if any(f.source.url == form_instance_url for f in existing_feeds_with_same_title):
+      raise forms.ValidationError("A feed with the same title exists for the same instance.")
+    elif existing_feeds_with_same_title:
+      existing_source_url = existing_feeds_with_same_title[0].source.url
+      raise forms.ValidationError("A feed with the same title exists"
+                                  f"for at least a different instance: {existing_source_url}.")
+    registration = self._get_or_create_mastodon_registration(form_instance_url)
+    try:
+      website_url = reverse("home")
+      register_mastodon_application_info_if_needed(registration, website_url)
+    except Exception as e:
+      raise forms.ValidationError(f"Error while trying to register application to {form_instance_url}: {e}")
+    return cleaned_data
+
+  def save(self):
+    """Warning: the source will be saved as well as the related objects
+    (no commit options).
+    Returns the source.
+    """
+    form_title = self.cleaned_data['title']
+    form_instance_url = self.cleaned_data['instance_url']
+    source_url = form_instance_url
+    source_name = MastodonTimeline.SOURCE_NAME
+    source_pub_date = datetime.now(timezone.utc)
+    provider = GeneratedFeed.MASTODON
+    any_matching_mastodon_sources = Reference.objects.filter(
+      url = source_url,
+      ).all()
+    with transaction.atomic():
+      if any_matching_mastodon_sources:
+        mastodon_source = any_matching_mastodon_sources[0]
+      else:
+        mastodon_source = Reference(
+          url=source_url, title=source_name,
+          pub_date=source_pub_date)
+      mastodon_source.add_pin()
+      mastodon_source.save()
+    with transaction.atomic():
+      new_feed = GeneratedFeed(
+        provider=provider,
+        source=mastodon_source,
+        title=form_title)
+      new_feed.last_update_check = (
+        datetime
+        .utcfromtimestamp(0)
+        .replace(tzinfo=timezone.utc)
+        )
+      new_feed.save()
+    with transaction.atomic():
+      mastodon_registration = self._get_or_create_mastodon_registration(source_url)
+      # Create a new partial (ie w/o token) access info
+      # Indeed if the user wants to connect to a second profile
+      # on the same instance, we can't guess it here.
+      # Duplicates will have to be dealt with in later processes.
+      access_infos = MastodonUserAccessInfo(
+          application_registration_info=mastodon_registration
+          )
+      access_infos.save()
+      new_mastodon = MastodonTimeline(
+        generated_feed = new_feed,
+        mastodon_user_access_info = access_infos
+        )
+      new_mastodon.save()
+      if mastodon_source not in self.user.userprofile.sources.all():
+        self.user.userprofile.sources.add(mastodon_source)
+      self.user.userprofile.generated_feeds.add(new_feed)
+      self.user.userprofile.save()
+    return mastodon_source

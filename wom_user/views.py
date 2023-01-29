@@ -65,6 +65,11 @@ from wom_tributary.tasks import (
     get_twitter_auth_status,
     )
 
+from wom_tributary.tasks import (
+    fetch_mastodon_timeline_data,
+    get_mastodon_auth_status
+    )
+
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
 
@@ -481,7 +486,8 @@ def user_tributary_twitter_add(request,owner_name):
     {'form': form,
      'REST_PARAMS': ','.join(UserTwitterSourceAdditionForm.base_fields.keys())},
     request.user.username,request.user.username)
-  return render(request, 'twitter_source_addition.html', d)
+  return render(request, 'tributary_twitter_source_addition.html', d)
+
 
 def prepare_reference_form(request, reference_url, reference_query_set):
   """Return a tuple: (reference, form) with the form showing all
@@ -865,3 +871,161 @@ def user_river_sources(request,owner_name):
     return user_river_source_add(request, owner_name)
   else:
     return HttpResponseNotAllowed(['GET','POST'])
+
+
+
+# mastodon
+
+class MastodonTimelineInfo:
+  def __init__(self, feed, timeline, fetchable):
+    self.feed = feed
+    self.timeline = timeline
+    self.fetchable = fetchable
+
+  @staticmethod
+  def from_feed(f, mastodon_status):
+    d = fetch_mastodon_timeline_data(
+      f.mastodontimeline, mastodon_status, 1)
+    t = MastodonTimelineInfo(f, f.mastodontimeline, len(d)>0)
+    return t
+
+
+WOM_USER_MASTODON_TIMELINE_NAME = "wom_user_mastodon_timeline_name"
+
+
+@login_required(login_url=settings.LOGIN_URL)
+def user_auth_landing_mastodon(request):
+  timeline_name = request.session[WOM_USER_MASTODON_TIMELINE_NAME]
+  timelines = (
+      MastodonTimeline
+      .objects
+      .filter(
+          generated_feed__title = timeline_name,
+          generated_feed__userprofile = request.user.userprofile
+          )
+      .all()
+      )
+  del request.session[WOM_USER_MASTODON_TIMELINE_NAME]
+  if timelines:
+    get_mastodon_auth_status(
+      timelines[0].access_info, request
+      )
+    return HttpResponseRedirect(reverse('user_tributary_mastodon', args=(request.user.username,)))
+  else:
+    return HttpResponseNotFound("Couldn't find a Mastodon timeline connection to update.")
+
+
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET"])
+def user_tributary_mastodon_auth_gateway(request, owner_name):
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Mastodon auth workflow is disabled in READ_ONLY mode.")
+  if request.user != request.owner_user:
+    return HttpResponseForbidden()
+  timeline_name = request.GET.get(WOM_USER_MASTODON_TIMELINE_NAME)
+  if timeline_name:
+    return HttpResponseBadRequest("Request should indicate the timeline name.")
+  timelines = (
+      MastodonTimeline
+      .objects
+      .filter(
+          generated_feed__title = timeline_name,
+          generated_feed__userprofile = request.user.userprofile,
+          )
+      .all())
+  if not timelines:
+    return HttpResponseNotFound(f"Could not find timeline named {timeline_name}.")
+  status = get_mastodon_auth_status(
+    timelines[0].access_info, request
+    )
+  redirect_url = (
+    reverse('user_tributary_mastodon', args=(request.user.username,))
+    if status.is_auth
+    else status.auth_url
+    )
+  if not status.is_auth:
+    request.session[WOM_USER_MASTODON_TIMELINE_NAME] = timeline_name
+  return HttpResponseRedirect(redirect_url)
+
+
+class MastodonTimelineStatus:
+
+  def __init__(self, name, auth_status, auth_gateway_url, timelines_info):
+    self.name = name
+    self.auth_status = auth_status
+    self.auth_gateway_url = auth_gateway_url
+    self.timelines_info = timelines_info
+
+
+@loggedin_and_owner_required
+@require_http_methods(["GET"])
+def user_tributary_mastodon(request, owner_name):
+  if request.user != request.owner_user:
+    return HttpResponseForbidden()
+  owner_profile = request.owner_user.userprofile
+  timeline_set = owner_profile.mastodon_timeline_set.all()
+  connection_status_list = []
+  for timeline in timeline_set:
+    auth_status = get_mastodon_auth_status(
+      timeline.access_info, request
+      )
+    auth_gateway_url = reverse('user_tributary_mastodon_auth_gateway',
+                               args=(request.user.username,))
+    feeds = (GeneratedFeed
+      .objects
+      .filter(userprofile=owner_profile,
+              title = timeline.name,
+              mastodontimeline__isnull=False)
+      .select_related("mastodontimeline")
+      .order_by('-last_update_check', 'title')
+    ).all()
+    timelines_info = [
+      MastodonTimelineInfo
+      .from_feed(f, auth_status)
+      for f in feeds
+      ]
+
+    connection_status_list.append(
+        MastodonConnectionStatus(
+            timeline.name,
+            auth_status,
+            auth_gateway_url,
+            timelines_info))
+  d = add_base_template_context_data({
+    'mastodon_connection_status_list': connection_status_list,
+  }, request.user.username, owner_name)
+  return render(request, 'tributary_mastodon.html', d)
+
+
+@loggedin_and_owner_required
+@csrf_protect
+@require_http_methods(["GET","POST"])
+def user_tributary_mastodon_add(request,owner_name):
+  """Handle bookmarlet and form-based addition of a mastodon feed as a source.
+  The bookmarlet is formatted in the following way:
+  .../add?{0}
+  """.format('="..."&'.join(UserTwitterSourceAdditionForm.base_fields.keys()))
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Source addition is not possible in READ_ONLY mode.")
+  if request.method == 'POST':
+    src_info = request.POST
+  elif request.GET: # GET
+    src_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
+  else:
+    src_info = None
+  form = UserMastodonFeedAdditionForm(
+    request.user, src_info,
+    initial={"title": "Home timeline", "instance_url": "https://example.com"},
+    error_class=CustomErrorList)
+  if src_info and form.is_valid():
+    form.save()
+    return HttpResponseRedirect(reverse('user_tributary_mastodon', args=(request.user.username,)))
+  d = add_base_template_context_data(
+    {'form': form,
+     'REST_PARAMS': ','.join(UserMastodonFeedAdditionForm.base_fields.keys())},
+    request.user.username,request.user.username)
+  return render(request, 'tributary_mastodon_source_addition.html', d)
+
+
+# /mastodon

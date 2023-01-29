@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% trans "Mastodon tributary" %}
+{% endblock %}
+
+
+{% block content %}
+<h4>Mastodon timelines subscription summary</h4>
+{% if mastodon_connection_status_list %}
+{% for mastodon_connection_status in mastodon_connection_status_list %}
+
+<h5>{{mastodon_connection_status.name}}</h5>
+<!-- <p><e>{{mastodon_connection_status.}}</e></p> -->
+{% if mastodon_connection_status.auth_status.is_auth %}
+<p>{% trans "The connection to mastodon is ok" %}</p>
+{% else %}
+<div class="alert alert-warning">
+  <p><strong>{% trans "The connection to mastodon requires your authorization !"%}</strong></p>
+  <p><a href="{{ mastodon_connection_status.auth_status.auth_url }}">
+      {% trans "Please click here to grant it." %}</a></p>
+</div>
+{% endif %}
+
+<ul class="list-unstyled">
+  {% for timeline_info in mastodon_connection_status.timelines_info %}
+  <li>
+    {% if timeline_info.fetchable %}
+    &#x2713;
+    {% else %}
+    &#x2205;
+    {% endif %}
+    {{timeline_info.feed.title}}
+  </li>
+  {% endfor %}
+</ul>
+<p><a href="{% url 'user_tributary_mastodon_add' visitor_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Follow another mastodon timeline." %}</a></p>
+
+{% endfor %}
+{% else %}
+
+<div class="alert alert-info alert-dismissable">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <h4>{% trans "You are not subscribed to any mastodon timeline !" %}</h4>
+  {% url 'user_tributary_mastodon_add' owner_name as add_url %}
+  <p><a class="alert-link" href="{{ add_url }}">{% blocktrans %}Subscribe to one now!{% endblocktrans %}</a></p>
+
+</div>
+{% endif %}
+{% endblock %}

@@ -22,7 +22,9 @@ from django.contrib import admin
 
 from wom_tributary.models import GeneratedFeed
 from wom_tributary.models import TwitterTimeline
+from wom_tributary.models import MastodonTimeline
 
 admin.site.register(GeneratedFeed)
 admin.site.register(TwitterTimeline)
+admin.site.register(MastodonTimeline)
 
