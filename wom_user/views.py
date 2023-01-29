@@ -60,8 +60,10 @@ from django.contrib.auth import logout
 from wom_river.models import WebFeed
 from wom_tributary.models import GeneratedFeed
 
-from wom_tributary.tasks import fetch_timeline_data
-from wom_tributary.tasks import get_twitter_auth_status
+from wom_tributary.tasks import (
+    fetch_twitter_timeline_data,
+    get_twitter_auth_status,
+    )
 
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
@@ -404,7 +406,7 @@ class TwitterTimelineInfo:
 
   @staticmethod
   def from_feed(f, twitter_status):
-    d = fetch_timeline_data(
+    d = fetch_twitter_timeline_data(
       f.twittertimeline, twitter_status, 1)
     t = TwitterTimelineInfo(f, f.twittertimeline, len(d)>0)
     return t

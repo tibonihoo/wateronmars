@@ -64,12 +64,13 @@ def force_single_user_token_if_any(user_info):
   user_info.save()
 
 
-class TwitterAuthStatus:
+class AuthStatus:
 
     def __init__(self, is_auth, client, auth_url):
       self.is_auth = is_auth
       self.client = client
       self.auth_url = auth_url
+
 
 def get_twitter_auth_status(user_info, request = None):
   force_single_user_token_if_any(user_info)
@@ -82,22 +83,12 @@ def get_twitter_auth_status(user_info, request = None):
   auth_url = None if is_auth \
     else twitter_oauth.generate_authorization_url(
         request.session, user_info)
-  return TwitterAuthStatus(is_auth, client, auth_url)
+  return AuthStatus(is_auth, client, auth_url)
 
 
-def fetch_timeline_data(timeline, auth_status, max_num_items):
-    if not auth_status.is_auth:
-        return []
-    client = auth_status.client
-    tl_data = client.get_activities(
-        user_id=timeline.username,
-        count=max_num_items)
-    return tl_data
-
-
-def create_reference_from_tweet_summary(
+def create_reference_from_timeline_summary(
     summary, summary_url, title, date, previous_ref):
-  """Takes a html summary of a tweet timeline creates a reference from it, attributing it the publication date given in argument.
+  """Takes a html summary of a timeline creates a reference from it, attributing it the publication date given in argument.
 
   If the corresponding Reference already exists, it must be given as
   the previous_ref argument, and if previous_ref is None, it will be
@@ -117,18 +108,19 @@ def create_reference_from_tweet_summary(
   return ref
 
 
-def add_new_reference_from_tweeter_timeline_summary(
-    timeline, summary, title, date):
+def add_new_reference_from_platform_timeline_summary(
+    platform, timeline, summary, title, date):
   """Create and save a reference corresponding to the input.
   """
-  summary_url = "wom-tributary:/twitter/timeline/{}/{}".format(
+  summary_url = "wom-tributary:/{}/timeline/{}/{}".format(
+    platform,
     timeline.username,
     (date - datetime.utcfromtimestamp(0)
       .replace(tzinfo=timezone.utc)).total_seconds()
     )
   same_refs = Reference.objects.filter(url=summary_url).all()
   previous_ref = same_refs[0] if same_refs else None
-  r = create_reference_from_tweet_summary(
+  r = create_reference_from_timeline_summary(
       summary,
       summary_url,
       title,
@@ -143,6 +135,16 @@ def add_new_reference_from_tweeter_timeline_summary(
         % (r.url,e))
       return None
   return r
+
+
+def fetch_twitter_timeline_data(timeline, auth_status, max_num_items):
+    if not auth_status.is_auth:
+        return []
+    client = auth_status.client
+    tl_data = client.get_activities(
+        user_id=timeline.username,
+        count=max_num_items)
+    return tl_data
 
 
 def collect_new_references_for_twitter_timeline(
@@ -164,7 +166,7 @@ def collect_new_references_for_twitter_timeline(
   access_info = timeline.twitter_user_access_info
   try:
     auth = get_twitter_auth_status(access_info)
-    activities = fetch_timeline_data(
+    activities = fetch_twitter_timeline_data(
       timeline,
       auth,
       num_items_to_ask)
@@ -177,8 +179,13 @@ def collect_new_references_for_twitter_timeline(
     logger.error("Skipping timeline for %s because of the following error: %s."\
                  % (timeline.username,e))
     return None
-  r = add_new_reference_from_tweeter_timeline_summary(
-    timeline, summary, title, now)
+  r = add_new_reference_from_platform_timeline_summary(
+    TwitterTimeline.SOURCE_NAME.lower(),
+    timeline,
+    summary,
+    title,
+    now
+    )
   r.sources.add(timeline.generated_feed.source)
   r.save()
   feed.last_update_check = now

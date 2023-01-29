@@ -38,7 +38,7 @@
 {% else %}
 <div class="alert alert-info alert-dismissable">
   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-  <h4>{% trans "Your are not subscribed to any twitter timeline !" %}</h4>
+  <h4>{% trans "You are not subscribed to any twitter timeline !" %}</h4>
   {% url 'user_tributary_twitter_add' owner_name as add_url %}
   <p><a class="alert-link" href="{{ add_url }}">{% blocktrans %}Subscribe to one now!{% endblocktrans %}</a></p>
 

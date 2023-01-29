@@ -391,7 +391,7 @@ class UserTwitterSourceAdditionForm(forms.Form):
     form_title = self.cleaned_data['title']
     form_username = self.cleaned_data['username']
     source_url = TwitterTimeline.SOURCE_URL
-    source_name = "Twitter"
+    source_name = TwitterTimeline.SOURCE_NAME
     source_pub_date = datetime.now(timezone.utc)
     provider = GeneratedFeed.TWITTER
     # Make sure that this specific user profile has a
