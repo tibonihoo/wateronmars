@@ -10,13 +10,11 @@
 
 <h4>Tributaries</h4>
 
-<p>{% trans "Connection to services providing their own specific forms of syndication"%}</p>
+<p>{% trans "Connection to platforms providing their own specific forms of syndication"%}</p>
 
-<ul class="list-unstyled">
-  <li><a href="{% url 'user_tributary_twitter' visitor_name %}"
-         class="btn btn-default btn-xs">Twitter</a></li>
-  <li><a href="{% url 'user_tributary_mastodon' visitor_name %}"
-         class="btn btn-default btn-xs">Mastodon</a></li>
-</ul>
+<p><a href="{% url 'user_tributary_twitter' visitor_name %}"
+      class="btn btn-default">Twitter</a></p>
+<p><a href="{% url 'user_tributary_mastodon' visitor_name %}"
+      class="btn btn-default">Mastodon</a></p>
 
 {% endblock %}

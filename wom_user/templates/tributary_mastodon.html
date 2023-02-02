@@ -23,18 +23,15 @@
 </div>
 {% endif %}
 
-<ul class="list-unstyled">
-  {% for timeline_info in mastodon_connection_status.timelines_info %}
-  <li>
-    {% if timeline_info.fetchable %}
-    &#x2713;
-    {% else %}
-    &#x2205;
-    {% endif %}
-    {{timeline_info.feed.title}}
-  </li>
-  {% endfor %}
-</ul>
+<p>
+  {% if mastodon_connection_status.timelines_info.fetchable %}
+  &#x2713;
+  {% else %}
+  &#x2205;
+  {% endif %}
+  {{mastodon_connection_status.timelines_info.feed.title}}
+</p>
+
 <p><a href="{% url 'user_tributary_mastodon_add' visitor_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Follow another mastodon timeline." %}</a></p>
 
 {% endfor %}

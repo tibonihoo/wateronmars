@@ -30,7 +30,6 @@ from granary.mastodon import Mastodon, source
 
 
 CREATE_APP_PATH = '/api/v1/apps'
-VERIFY_APP_PATH = '/api/v1/accounts/verify_credentials'
 AUTHORIZE_PATH = '/oauth/authorize'
 TOKEN_PATH = '/oauth/token'
 
@@ -59,30 +58,22 @@ def register_application_on_instance(instance_url, app_name, redirect_uri, websi
     "scopes": RegistrationInfo.DEFAULT_SCOPE,
     "website": website
     }
-  registration = requests.post(f"{instance_url}{CREATE_APP_PATH}", data=data)
+  registration = requests.post(f"{instance_url.rstrip('/')}{CREATE_APP_PATH}", data=data)
   if not registration.ok:
       raise Exception(f"Failed to register the application as {app_name} on {instance_url}")
   info = registration.json()
   return RegistrationInfo(info["client_id"], info["client_secret"], info["vapid_key"], redirect_uri)
 
 
-def is_application_registration_ok_on_instance(instance_url, registration_info):
-  params = {
-    "client_id": registration_info.client_id,
-    "client_secret": registration_info.client_secret
-  }
-  validation = requests.get(f"{instance_url}{VERIFY_APP_PATH}", params=params)
-  return validation.ok
-
-
 def get_authorization_url_for_instance(instance_url, registration_info):
   params = {
+    "response_type": "code",
     "client_id": registration_info.client_id,
     "redirect_uri": registration_info.redirect_uri,
     "scope": registration_info.scope
     }
   query_params = urllib.parse.urlencode(params)
-  return f"{instance_url}{AUTHORIZE_PATH}?{query_params}"    
+  return f"{instance_url.rstrip('/')}{AUTHORIZE_PATH}?{query_params}"    
 
 
 def get_access_token_from_instance(instance_url, registration_info, code):
@@ -94,7 +85,7 @@ def get_access_token_from_instance(instance_url, registration_info, code):
     "grant_type": "authorization_code",
     "code": code
     }
-  token_response = requests.post(f"{instance_url}{TOKEN_PATH}", data=data)
+  token_response = requests.post(f"{instance_url.rstrip('/')}{TOKEN_PATH}", data=data)
   if token_response.ok:
     return token_response.json()["access_token"]
   else:

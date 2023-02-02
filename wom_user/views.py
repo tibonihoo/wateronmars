@@ -82,7 +82,7 @@ from wom_user.forms import UserTwitterSourceAdditionForm
 from wom_user.forms import ReferenceEditForm
 from wom_user.forms import UserBookmarkEditForm
 from wom_user.forms import WebFeedOptInOutForm
-
+from wom_user.forms import UserMastodonFeedAdditionForm
 
 from wom_user.tasks import import_user_feedsources_from_opml
 from wom_user.tasks import import_user_bookmarks_from_ns_list
@@ -399,8 +399,8 @@ def user_river_source_add(request,owner_name):
 @loggedin_and_owner_required
 @require_http_methods(["GET"])
 def user_tributary(request, owner_name):
-  # FUTURE: if there is more than twitter plugged in, display a list of possible tributaries
-  return HttpResponseRedirect(reverse('user_tributary_twitter', args=(request.user.username,)))
+  d = add_base_template_context_data({}, request.user, owner_name)
+  return render(request, 'tributary.html', d)
 
 
 class TwitterTimelineInfo:
@@ -951,11 +951,11 @@ def user_tributary_mastodon_auth_gateway(request, owner_name):
 
 class MastodonTimelineStatus:
 
-  def __init__(self, name, auth_status, auth_gateway_url, timelines_info):
+  def __init__(self, name, auth_status, auth_gateway_url, timeline_info):
     self.name = name
     self.auth_status = auth_status
     self.auth_gateway_url = auth_gateway_url
-    self.timelines_info = timelines_info
+    self.timeline_info = timeline_info
 
 
 @loggedin_and_owner_required
@@ -964,34 +964,29 @@ def user_tributary_mastodon(request, owner_name):
   if request.user != request.owner_user:
     return HttpResponseForbidden()
   owner_profile = request.owner_user.userprofile
-  timeline_set = owner_profile.mastodon_timeline_set.all()
   connection_status_list = []
-  for timeline in timeline_set:
-    auth_status = get_mastodon_auth_status(
-      timeline.access_info, request
-      )
-    auth_gateway_url = reverse('user_tributary_mastodon_auth_gateway',
-                               args=(request.user.username,))
-    feeds = (GeneratedFeed
+  mastodon_feeds = (
+      GeneratedFeed
       .objects
       .filter(userprofile=owner_profile,
-              title = timeline.name,
               mastodontimeline__isnull=False)
       .select_related("mastodontimeline")
       .order_by('-last_update_check', 'title')
-    ).all()
-    timelines_info = [
-      MastodonTimelineInfo
-      .from_feed(f, auth_status)
-      for f in feeds
-      ]
-
+      ).all()
+  for feed in mastodon_feeds:
+    timeline = feed.mastodontimeline
+    auth_status = get_mastodon_auth_status(
+      timeline.mastodon_user_access_info, request
+      )
+    auth_gateway_url = reverse('user_tributary_mastodon_auth_gateway',
+                               args=(request.user.username,))
+    timeline_info = MastodonTimelineInfo.from_feed(feed, auth_status)
     connection_status_list.append(
-        MastodonConnectionStatus(
-            timeline.name,
+        MastodonTimelineStatus(
+            feed.title,
             auth_status,
             auth_gateway_url,
-            timelines_info))
+            timeline_info))
   d = add_base_template_context_data({
     'mastodon_connection_status_list': connection_status_list,
   }, request.user.username, owner_name)

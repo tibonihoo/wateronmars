@@ -29,7 +29,7 @@ from django.test import TestCase
 
 from wom_pebbles.models import Reference
 
-from wom_user.models import UserProfile, MastodonConnection
+from wom_user.models import UserProfile
 
 
 from wom_tributary.models import (
@@ -80,26 +80,19 @@ class UserMastodonSourceAddTest(TestCase):
 
   def _default_mock_setup(
       self,
-      mocked_register_application_on_instance,
-      mocked_is_application_registration_ok_on_instance):
+      mocked_register_application_on_instance):
     mocked_register_application_on_instance.return_value = RegistrationInfo(
         MOCK_CLIENT_ID,
         MOCK_CLIENT_SECRET,
         MOCK_VAPID_KEY,
         MOCK_REDIRECT_URI)
-    mocked_is_application_registration_ok_on_instance.return_value = True
   
-  @mock.patch('wom_tributary.utils.mastodon_oauth.is_application_registration_ok_on_instance')
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_new_feed_source_to_owner_with_instance_registration_success(
       self,
-      mocked_register_application_on_instance,
-      mocked_is_application_registration_ok_on_instance):
+      mocked_register_application_on_instance):
   
-    self._default_mock_setup(
-        mocked_register_application_on_instance,
-        mocked_is_application_registration_ok_on_instance
-        )
+    self._default_mock_setup(mocked_register_application_on_instance)
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
@@ -136,17 +129,12 @@ class UserMastodonSourceAddTest(TestCase):
     self.assertEqual(added_registration_info.redirect_uri,
                      MOCK_REDIRECT_URI)
     
-  @mock.patch('wom_tributary.utils.mastodon_oauth.is_application_registration_ok_on_instance')
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_new_feed_source_to_owner_with_instance_registration_failing_registration(
       self,
-      mocked_register_application_on_instance,
-      mocked_is_application_registration_ok_on_instance):
+      mocked_register_application_on_instance):
     mock_error_message = "Connection error"
-    self._default_mock_setup(
-        mocked_register_application_on_instance,
-        mocked_is_application_registration_ok_on_instance
-        )
+    self._default_mock_setup(mocked_register_application_on_instance)
     mocked_register_application_on_instance.side_effect = RuntimeError(mock_error_message)
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
@@ -166,44 +154,10 @@ class UserMastodonSourceAddTest(TestCase):
     self.assertEqual(0,self.user_profile.sources.count())
     self.assertEqual(0,self.user_profile.web_feeds.count())
 
-  @mock.patch('wom_tributary.utils.mastodon_oauth.is_application_registration_ok_on_instance')
-  @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
-  def test_add_new_feed_source_to_owner_with_instance_registration_failing_validation(
-      self,
-      mocked_register_application_on_instance,
-      mocked_is_application_registration_ok_on_instance):
-    self._default_mock_setup(
-        mocked_register_application_on_instance,
-        mocked_is_application_registration_ok_on_instance
-        )                     
-    mocked_is_application_registration_ok_on_instance.return_value = False
-    # login as uA and make sure it succeeds
-    self.assertTrue(self.client.login(username="uA",
-                      password="pA"))
-    self.assertEqual(0,self.user_profile.sources.count())
-    self.assertEqual(0,self.user_profile.web_feeds.count())
-    new_timeline_instance = DEFAULT_INSTANCE
-    new_timeline_title = "a new"
-    response = self.add_request(
-        "uA",
-        {"instance_url": new_timeline_instance,
-         "title": new_timeline_title},
-        expectedStatusCode=200)
-    page_content = response.content.decode("utf-8")
-    self.assertTrue("Registration is not effective for the application" in page_content,
-                    page_content)
-    self.assertEqual(0,self.user_profile.sources.count())
-    self.assertEqual(0,self.user_profile.web_feeds.count())
-
-  @mock.patch('wom_tributary.utils.mastodon_oauth.is_application_registration_ok_on_instance')
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_new_feed_source_to_other_user_fails(self,
-      mocked_register_application_on_instance,
-      mocked_is_application_registration_ok_on_instance):
-    self._default_mock_setup(
-        mocked_register_application_on_instance,
-        mocked_is_application_registration_ok_on_instance
-        )
+      mocked_register_application_on_instance):
+    self._default_mock_setup(mocked_register_application_on_instance)
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
@@ -216,15 +170,10 @@ class UserMastodonSourceAddTest(TestCase):
                     "title": new_timeline_title},
                 expectedStatusCode=403)
 
-  @mock.patch('wom_tributary.utils.mastodon_oauth.is_application_registration_ok_on_instance')
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_same_timeline_fails(self,
-      mocked_register_application_on_instance,
-      mocked_is_application_registration_ok_on_instance):
-    self._default_mock_setup(
-        mocked_register_application_on_instance,
-        mocked_is_application_registration_ok_on_instance
-        )
+      mocked_register_application_on_instance):
+    self._default_mock_setup(mocked_register_application_on_instance)
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
@@ -243,16 +192,11 @@ class UserMastodonSourceAddTest(TestCase):
         "A feed with the same title exists for the same instance." in page_content,
         page_content)
     
-  @mock.patch('wom_tributary.utils.mastodon_oauth.is_application_registration_ok_on_instance')
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_second_timeline_from_same_instance(
       self,
-      mocked_register_application_on_instance,
-      mocked_is_application_registration_ok_on_instance):
-    self._default_mock_setup(
-        mocked_register_application_on_instance,
-        mocked_is_application_registration_ok_on_instance
-        )
+      mocked_register_application_on_instance):
+    self._default_mock_setup(mocked_register_application_on_instance)
     # login as uA and make sure it succeeds
     self.assertTrue(self.client.login(username="uA",
                       password="pA"))
@@ -296,31 +240,23 @@ class MastodonAuthPageTest(TestCase):
                         kwargs={"owner_name":"uA"}),
             request_params)
 
-    def _generate_userprofile_with_mastodon_access_info(self):
+    def _generate_userprofile_with_mastodon_access_info(self, num_timelines):
       app_reg = MastodonApplicationRegistration.objects.create(instance_url=DEFAULT_INSTANCE)
       app_reg.save()
       access_info = MastodonUserAccessInfo.objects.create(application_registration_info=app_reg)
       access_info.save()
       profile = UserProfile.objects.create(owner = self.user)
-      mastodon_connection = MastodonConnection.objects.create(
-          name = DEFAULT_CONNECTION_NAME,
-          owner_profile = profile,
-          access_info = access_info)
+      for i in range(num_timelines):
+        feed = GeneratedFeed.objects.create(
+            provider="M", source=self.source, title=DEFAULT_CONNECTION_NAME,
+            last_update_check=self.stub_date)
+        MastodonTimeline.objects.create(
+            generated_feed=feed,
+            mastodon_user_access_info=access_info)
+        profile.generated_feeds.add(feed)
       profile.save()
-      mastodon_connection.save()
       return profile, access_info
-  
-    def _generate_timelines(self, profile, access_info, num_timelines):
-        for i in range(num_timelines):
-            feed = GeneratedFeed.objects.create(
-                provider="M", source=self.source, title=DEFAULT_CONNECTION_NAME,
-                last_update_check=self.stub_date)
-            MastodonTimeline.objects.create(
-                generated_feed=feed,
-                mastodon_user_access_info=access_info)
-            profile.generated_feeds.add(feed)
-        profile.save()
-    
+      
     def test_without_timeline_nor_mastodon_info_template_context_has_no_info(self):
       UserProfile.objects.create(owner=self.user)
       resp = self._get()
@@ -335,7 +271,7 @@ class MastodonAuthPageTest(TestCase):
             mocked_try_get_authorized_client_and_token):
       mocked_try_get_authorized_client_and_token.return_value = None
       mocked_generate_auth_url.return_value = MOCK_AUTH_URL
-      self._generate_userprofile_with_mastodon_access_info()
+      self._generate_userprofile_with_mastodon_access_info(1)
       resp = self._get()
       self.assertEqual(200, resp.status_code)
       connection_statuses = resp.context["mastodon_connection_status_list"]
@@ -350,9 +286,11 @@ class MastodonAuthPageTest(TestCase):
     def test_when_authorized_context_has_no_auth_link(self,
             mocked_generate_auth_url,
             mocked_try_get_authorized_client_and_token):
-      mocked_try_get_authorized_client_and_token.return_value = (True, "mock_token")
+      client_mock = mock.MagicMock()
+      client_mock.is_auth = False
+      mocked_try_get_authorized_client_and_token.return_value = (client_mock, "mock_token")
       mocked_generate_auth_url.return_value = MOCK_AUTH_URL
-      self._generate_userprofile_with_mastodon_access_info()
+      self._generate_userprofile_with_mastodon_access_info(1)
       resp = self._get()
       self.assertEqual(200, resp.status_code)
       connection_statuses = resp.context["mastodon_connection_status_list"]
@@ -370,19 +308,21 @@ class MastodonAuthPageTest(TestCase):
       client_mock.get_activities.return_value = [1,2,3]
       mocked_try_get_authorized_client_and_token.return_value = (client_mock, "mock_token")
       mocked_generate_auth_url.return_value = MOCK_AUTH_URL
-      profile, info = self._generate_userprofile_with_mastodon_access_info()
-      self._generate_timelines(profile, info, 2)
+      profile, info = self._generate_userprofile_with_mastodon_access_info(2)
       resp = self._get()
       self.assertEqual(200, resp.status_code)
       connection_statuses = resp.context["mastodon_connection_status_list"]
-      self.assertEqual(1, len(connection_statuses))
+      self.assertEqual(2, len(connection_statuses))
       connection = connection_statuses[0]
       self.assertEqual(True, connection.auth_status.is_auth)
       self.assertEqual(None, connection.auth_status.auth_url)
-      timelines_info = connection.timelines_info
-      self.assertEqual(2, len(timelines_info))
-      self.assertTrue(timelines_info[0].fetchable)
-      self.assertTrue(timelines_info[1].fetchable)
+      timeline_info = connection.timeline_info
+      self.assertTrue(timeline_info.fetchable)
+      connection = connection_statuses[1]
+      self.assertEqual(True, connection.auth_status.is_auth)
+      self.assertEqual(None, connection.auth_status.auth_url)
+      timeline_info = connection.timeline_info
+      self.assertTrue(timeline_info.fetchable)
       
         
     @mock.patch('wom_tributary.utils.mastodon_oauth.try_get_authorized_client_and_token')
@@ -401,7 +341,6 @@ class MastodonAuthPageTest(TestCase):
       mocked_try_get_authorized_client_and_token.return_value = (client_mock, "mock_token")
       mocked_try_get_authorized_client_and_token.side_effect = assert_expected_token
       mocked_generate_auth_url.return_value = MOCK_AUTH_URL
-      profile, info = self._generate_userprofile_with_mastodon_access_info()
-      self._generate_timelines(profile, info, 2)        
+      profile, info = self._generate_userprofile_with_mastodon_access_info(2)
       resp = self._get({token_param_name: token_verifier})
       self.assertEqual(200, resp.status_code)

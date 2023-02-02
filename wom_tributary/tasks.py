@@ -231,8 +231,6 @@ def register_mastodon_application_info_if_needed(instance_registration_info, web
   instance_registration_info.validation_key = registration_feedback.vapid_key
   instance_registration_info.redirect_uri = registration_feedback.redirect_uri
   instance_registration_info.save()
-  if not mastodon_oauth.is_application_registration_ok_on_instance(instance_url, registration_feedback):
-    raise Exception(f"Registration is not effective for the application on {instance_url}")
 
 
 def get_mastodon_auth_status(user_info, request = None):
