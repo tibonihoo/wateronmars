@@ -85,6 +85,8 @@ urlpatterns = [
     url(r'^u/(?P<owner_name>[^/]*)/sieve/$', user_river_sieve, name='user_river_sieve'),
     url(r'^u/(?P<owner_name>[^/]*)/collection/add/$', user_collection_add, name='user_collection_add'),
     url(r'^u/(?P<owner_name>[^/]*)/collection/item/(?P<reference_url_code>.*)$',user_collection_item, name='user_collection_item'),
+    url(r'^accounts/auth_landing/twitter/$', user_auth_landing_twitter, name='user_auth_landing_twitter'),
+    url(r'^accounts/auth_landing/mastodon/$', user_auth_landing_mastodon, name='user_auth_landing_mastodon'),
     # access to static files
     url(r'^static/(?P<path>.*)$', static_serve, {'document_root': settings.STATIC_ROOT}),
     ]
@@ -100,8 +102,6 @@ if not settings.USE_CELERY:
 if not settings.READ_ONLY:
   urlpatterns += [
     url(r'^accounts/new/$', user_creation),
-    url(r'^accounts/auth_landing/twitter/$', user_auth_landing_twitter, name='user_auth_landing_twitter'),
-    url(r'^accounts/auth_landing/mastodon/$', user_auth_landing_mastodon, name='user_auth_landing_mastodon'),
     url(r'^admin/', admin.site.urls),
     # Uncomment the admin/doc line below to
     # enable admin documentation

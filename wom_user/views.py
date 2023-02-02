@@ -418,6 +418,8 @@ class TwitterTimelineInfo:
 
 @login_required(login_url=settings.LOGIN_URL)
 def user_auth_landing_twitter(request):
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Forbidden in READ_ONLY mode.")
   twitter_info = request.user.userprofile.twitter_info
   if twitter_info:
     get_twitter_auth_status(
@@ -895,6 +897,8 @@ WOM_USER_MASTODON_TIMELINE_NAME = "wom_user_mastodon_timeline_name"
 
 @login_required(login_url=settings.LOGIN_URL)
 def user_auth_landing_mastodon(request):
+  if settings.READ_ONLY:
+    return HttpResponseForbidden("Forbidden in READ_ONLY mode.")
   timeline_name = request.session[WOM_USER_MASTODON_TIMELINE_NAME]
   timelines = (
       MastodonTimeline

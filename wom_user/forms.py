@@ -18,6 +18,7 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from urllib.parse import urlparse
 from datetime import datetime
 from django.utils import timezone
 from django.urls import reverse
@@ -484,7 +485,13 @@ class UserMastodonFeedAdditionForm(forms.Form):
         else None
         )
     if not mastodon_registration:
-      mastodon_registration = MastodonApplicationRegistration(instance_url=url)
+      website_url = reverse("home")
+      parsed_uri = urlparse(website_url)
+      mastodon_registration = MastodonApplicationRegistration(
+        instance_url=url,
+        application_name=parsed_uri.netloc,
+        redirect_uri=reverse("user_auth_landing_mastodon")
+        )
       mastodon_registration.save()
     return mastodon_registration
 
