@@ -40,7 +40,10 @@ from wom_classification.models import get_item_tag_names
 from wom_classification.models import get_user_tags
 
 from wom_river.tasks import collect_news_from_feeds
-from wom_tributary.tasks import collect_news_from_tweeter_feeds
+from wom_tributary.tasks import (
+    collect_news_from_tweeter_feeds,
+    collect_news_from_mastodon_feeds,
+    )
 
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
@@ -206,6 +209,7 @@ def request_for_update(request):
   delete_obsolete_unpinned_references_regularly()
   collect_news_from_feeds()
   collect_news_from_tweeter_feeds(1)
+  collect_news_from_mastodon_feeds(1)
   if settings.DEMO:
     # keep only a short number of refs (the most recent)
     # to avoid bloating the demo
