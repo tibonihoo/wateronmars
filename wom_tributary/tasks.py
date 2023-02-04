@@ -35,7 +35,7 @@ from wom_tributary.utils import tweet_summarizers
 from wom_tributary.settings import SINGLE_USER_TWITTER_OAUTH_TOKEN
 from wom_tributary.settings import SINGLE_USER_TWITTER_OAUTH_TOKEN_SECRET
 
-from wom_tributary.models import TwitterTimeline
+from wom_tributary.models import TwitterTimeline, MastodonTimeline
 
 # Wild approx of the number of tweets you can find in
 # a user's home
