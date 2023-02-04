@@ -29,6 +29,10 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+WOM_ROOT_URL = ""  # Replace this ! 
+if not WOM_ROOT_URL:
+  raise Exception("'WOM_ROOT_URL' must be set to the URL where the site can be reached.")
+
 # A string formatted following the example of TEAM section given at:
 # http://humanstxt.org/Standard.html
 # WOM_USER_HUMANS_TEAM = """/* TEAM */

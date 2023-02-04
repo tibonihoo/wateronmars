@@ -53,7 +53,10 @@ from wom_river.tasks import (
 from wom_user.models import UserProfile
 from wom_user.models import UserBookmark
 from wom_user.models import ReferenceUserStatus
-from wom_user.settings import WEB_FEED_COLLATION_TIMEOUT
+from wom_user.settings import (
+    WEB_FEED_COLLATION_TIMEOUT,
+    ROOT_URL
+    )
 
 from wom_river.utils import feedfinder2
 
@@ -473,10 +476,10 @@ class UserMastodonFeedAdditionForm(forms.Form):
 
 
   def _get_or_create_mastodon_registration(self, url):
-    website_url = reverse("home")
+    website_url = ROOT_URL
     parsed_uri = urlparse(website_url)
     application_name = f"{parsed_uri.netloc}_wom_tributary",
-    redirect_uri = reverse("user_auth_landing_mastodon")
+    redirect_uri = f"{ROOT_URL.rstrip('/')}{reverse('user_auth_landing_mastodon')}"
     existing_mastodon_registrations = (
       MastodonApplicationRegistration
       .objects
@@ -525,8 +528,7 @@ class UserMastodonFeedAdditionForm(forms.Form):
                                   f"for at least a different instance: {existing_source_url}.")
     registration = self._get_or_create_mastodon_registration(form_instance_url)
     try:
-      website_url = reverse("home")
-      register_mastodon_application_info_if_needed(registration, website_url)
+      register_mastodon_application_info_if_needed(registration, ROOT_URL)
     except Exception as e:
       raise forms.ValidationError(f"Error while trying to register application to {form_instance_url}: {e}")
     return cleaned_data

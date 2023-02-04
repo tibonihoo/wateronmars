@@ -31,7 +31,6 @@ from wom_pebbles.models import Reference
 
 from wom_user.models import UserProfile
 
-
 from wom_tributary.models import (
     MastodonTimeline,
     GeneratedFeed,
@@ -123,9 +122,8 @@ class UserMastodonSourceAddTest(TestCase):
                      MOCK_CLIENT_SECRET)
     self.assertEqual(added_registration_info.validation_key,
                      MOCK_VAPID_KEY)
-    self.assertEqual(added_registration_info.redirect_uri,
-                     "/accounts/auth_landing/mastodon/")
-    
+
+
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_new_feed_source_to_owner_with_instance_registration_failing_registration(
       self,

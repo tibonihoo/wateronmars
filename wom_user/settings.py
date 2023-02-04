@@ -62,3 +62,7 @@ else:
 """
 
 
+if hasattr(settings,"WOM_ROOT_URL"):
+  ROOT_URL = settings.WOM_ROOT_URL
+else:
+  raise Exception("'WOM_ROOT_URL' must be provided in the settings.")
