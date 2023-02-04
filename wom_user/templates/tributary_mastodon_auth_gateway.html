@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+<meta http-equiv="refresh" content="0, url='{{mastodon_auth_url}}'"/>
+{% endblock %}
+
+{% block title %}
+{% trans "Mastodon tributary" %}
+{% endblock %}
+
+
+{% block content %}
+<p>{% blocktrans %}Please authorize access on <a href="{{mastodon_auth_url}}">Mastodon</a>{% endblocktrans %}</p>
+{% endblock %}

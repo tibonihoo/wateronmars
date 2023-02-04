@@ -896,10 +896,13 @@ WOM_USER_MASTODON_TIMELINE_NAME = "wom_user_mastodon_timeline_name"
 
 
 @login_required(login_url=settings.LOGIN_URL)
+@csrf_protect
 def user_auth_landing_mastodon(request):
   if settings.READ_ONLY:
     return HttpResponseForbidden("Forbidden in READ_ONLY mode.")
-  timeline_name = request.session[WOM_USER_MASTODON_TIMELINE_NAME]
+  timeline_name = request.session.get(WOM_USER_MASTODON_TIMELINE_NAME, None)
+  if timeline_name is None:
+    return HttpResponseNotFound("Couldn't find which Mastodon timeline connection to update.")
   timelines = (
       MastodonTimeline
       .objects
@@ -916,7 +919,7 @@ def user_auth_landing_mastodon(request):
       )
     return HttpResponseRedirect(reverse('user_tributary_mastodon', args=(request.user.username,)))
   else:
-    return HttpResponseNotFound("Couldn't find a Mastodon timeline connection to update.")
+    return HttpResponseNotFound("Couldn't find the Mastodon timeline connection to update.")
 
 
 @loggedin_and_owner_required
@@ -950,8 +953,10 @@ def user_tributary_mastodon_auth_gateway(request, owner_name):
     )
   if not status.is_auth:
     request.session[WOM_USER_MASTODON_TIMELINE_NAME] = timeline_name
-  return HttpResponseRedirect(redirect_url)
-
+  d = add_base_template_context_data({
+    'mastodon_auth_url': redirect_url,
+    }, request.user.username, owner_name)
+  return render(request, 'tributary_mastodon_auth_gateway.html', d)
 
 class MastodonTimelineStatus:
 
