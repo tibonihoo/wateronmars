@@ -18,7 +18,7 @@
 {% else %}
 <div class="alert alert-warning">
   <p><strong>{% trans "The connection to mastodon requires your authorization !"%}</strong></p>
-  <p><a href="{{ mastodon_connection_status.auth_status.auth_url }}">
+  <p><a href="{{ mastodon_connection_status.auth_gateway_url }}">
       {% trans "Please click here to grant it." %}</a></p>
 </div>
 {% endif %}

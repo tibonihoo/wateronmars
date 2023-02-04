@@ -22,7 +22,7 @@ import json
 
 from datetime import datetime
 from django.utils import timezone
-from django.utils.http import urlunquote_plus
+from django.utils.http import urlquote_plus, urlunquote_plus
 
 from django.conf import settings
 from django.urls import reverse
@@ -925,14 +925,14 @@ def user_auth_landing_mastodon(request):
 @loggedin_and_owner_required
 @csrf_protect
 @require_http_methods(["GET"])
-def user_tributary_mastodon_auth_gateway(request, owner_name):
+def user_tributary_mastodon_auth_gateway(request, owner_name, timeline_name):
   if settings.READ_ONLY:
     return HttpResponseForbidden("Mastodon auth workflow is disabled in READ_ONLY mode.")
   if request.user != request.owner_user:
     return HttpResponseForbidden()
-  timeline_name = request.GET.get(WOM_USER_MASTODON_TIMELINE_NAME)
-  if timeline_name:
+  if not timeline_name:
     return HttpResponseBadRequest("Request should indicate the timeline name.")
+  timeline_name = urlunquote_plus(timeline_name)
   timelines = (
       MastodonTimeline
       .objects
@@ -957,6 +957,7 @@ def user_tributary_mastodon_auth_gateway(request, owner_name):
     'mastodon_auth_url': redirect_url,
     }, request.user.username, owner_name)
   return render(request, 'tributary_mastodon_auth_gateway.html', d)
+
 
 class MastodonTimelineStatus:
 
@@ -988,7 +989,7 @@ def user_tributary_mastodon(request, owner_name):
       timeline.mastodon_user_access_info, request
       )
     auth_gateway_url = reverse('user_tributary_mastodon_auth_gateway',
-                               args=(request.user.username,))
+                               args=(request.user.username, urlquote_plus(feed.title)))
     timeline_info = MastodonTimelineInfo.from_feed(feed, auth_status)
     connection_status_list.append(
         MastodonTimelineStatus(
