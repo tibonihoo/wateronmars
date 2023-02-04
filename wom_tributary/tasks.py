@@ -115,7 +115,7 @@ def add_new_reference_from_platform_timeline_summary(
   """
   summary_url = "wom-tributary:/{}/timeline/{}/{}".format(
     platform,
-    timeline.username,
+    timeline.username if hasattr(timeline, "username") else hash(timeline),
     (date - datetime.utcfromtimestamp(0)
       .replace(tzinfo=timezone.utc)).total_seconds()
     )
@@ -312,7 +312,7 @@ def collect_new_references_for_mastodon_timeline(
     title = f"{timeline.generated_feed.title} /{hours_to_cover}h"
   except Exception as e:
     logger.error("Skipping timeline for %s because of the following error: %s."\
-                 % (timeline.username,e))
+                 % (feed.title, e))
     return None
   r = add_new_reference_from_platform_timeline_summary(
     MastodonTimeline.SOURCE_NAME.lower(),

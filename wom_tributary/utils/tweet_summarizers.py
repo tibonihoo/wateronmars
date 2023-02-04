@@ -45,8 +45,8 @@ class Tweet:
 
   @staticmethod
   def from_activity_item(item):
-    link = item["url"]
     details = item["object"]
+    link = item.get("url") or details.get("url")
     date = parse_date(details["published"])
     author_info = details["author"]
     author = (author_info.get("displayName") or author_info["username"])
