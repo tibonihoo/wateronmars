@@ -329,7 +329,7 @@ class MastodonAuthPageTest(TestCase):
       client_mock.get_activities.return_value = [1]
       token_param_name = 'oauth_verifier'
       token_verifier = "MASTO_TKV"
-      def assert_expected_token(request_params, session, instance_url, user_info):
+      def assert_expected_token(request_params, session, instance_url, redirect_uri, user_info):
         self.assertEqual(token_verifier,
                          request_params.get(token_param_name))
         self.assertEqual(DEFAULT_INSTANCE, instance_url)

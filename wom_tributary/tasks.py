@@ -83,7 +83,7 @@ def get_twitter_auth_status(user_info, request = None):
   is_auth = client is not None
   auth_url = None if is_auth \
     else twitter_oauth.generate_authorization_url(
-        request.session, user_info)
+        session, user_info)
   return AuthStatus(is_auth, client, auth_url)
 
 
@@ -247,10 +247,12 @@ def get_mastodon_auth_status(user_info, request = None):
       user_info.application_registration_info.client_secret,
       user_info.application_registration_info.validation_key,
       )
+  redirect_uri = user_info.application_registration_info.redirect_uri
   client, token = (mastodon_oauth.try_get_authorized_client_and_token(
       request_params,
       session,
       instance_url,
+      redirect_uri,
       reg_info,
       ) or (None, None))
   is_auth = client is not None
@@ -261,6 +263,7 @@ def get_mastodon_auth_status(user_info, request = None):
     else mastodon_oauth.generate_authorization_url(
         request.session,
         instance_url,
+        redirect_uri,
         reg_info)
   return AuthStatus(is_auth, client, auth_url)
 

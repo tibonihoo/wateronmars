@@ -72,22 +72,22 @@ def register_application_on_instance(instance_url, app_name, redirect_uri, websi
   return RegistrationInfo(info["client_id"], info["client_secret"], info["vapid_key"])
 
 
-def get_authorization_url_for_instance(instance_url, registration_info):
+def get_authorization_url_for_instance(instance_url, redirect_uri, registration_info):
   params = {
     "response_type": "code",
     "client_id": registration_info.client_id,
-    "redirect_uri": registration_info.redirect_uri,
+    "redirect_uri": redirect_uri,
     "scope": registration_info.scope
     }
   query_params = urllib.parse.urlencode(params)
   return f"{instance_url.rstrip('/')}{AUTHORIZE_PATH}?{query_params}"    
 
 
-def get_access_token_from_instance(instance_url, registration_info, code):
+def get_access_token_from_instance(instance_url, redirect_uri, registration_info, code):
   data = {
     "client_id": registration_info.client_id,
     "cient_secret": registration_info.client_secret,
-    "redirect_uri": registration_info.redirect_uri,
+    "redirect_uri": redirect_uri,
     "scope": registration_info.scope,
     "grant_type": "authorization_code",
     "code": code
@@ -112,6 +112,7 @@ def try_get_authorized_client_and_token(
     request_params,
     session,
     instance_url,
+    redirect_uri,
     registration_info
     ):
   """Returns None if authorization is required, 
@@ -119,6 +120,7 @@ def try_get_authorized_client_and_token(
   token = get_acces_token_if_present(
       request_params,
       session,
+      redirect_uri,
       registration_info
       )
   if not token:
@@ -133,10 +135,10 @@ def try_get_authorized_client_and_token(
   return None
 
 
-def generate_authorization_url(session, instance_url, registration_info):
+def generate_authorization_url(session, instance_url, redirect_uri, registration_info):
   """Forges the url where the user must grant his/her authorization.
   """
-  url = get_authorization_url_for_instance(instance_url, registration_info, redirect_uri, scope)
+  url = get_authorization_url_for_instance(instance_url, redirect_uri, registration_info)
   session[SESSION_TOKEN_NAME] = instance_url
   return url
 
@@ -144,6 +146,7 @@ def generate_authorization_url(session, instance_url, registration_info):
 def get_acces_token_if_present(
     request_params,
     session,
+    redirect_uri,
     registration_info
     ):
   """From a request (redirected by a mastodon instance) generates the access token and save it."""
@@ -156,5 +159,5 @@ def get_acces_token_if_present(
   if not instance_url:
     raise RuntimeError("Found a 'code' but was not expecting any.")
   del session[SESSION_TOKEN_NAME]
-  return get_access_token_from_instance(instance_url, registration_info, code)
+  return get_access_token_from_instance(instance_url, redirect_uri, registration_info, code)
 
