@@ -86,7 +86,7 @@ def get_authorization_url_for_instance(instance_url, redirect_uri, registration_
 def get_access_token_from_instance(instance_url, redirect_uri, registration_info, code):
   data = {
     "client_id": registration_info.client_id,
-    "cient_secret": registration_info.client_secret,
+    "client_secret": registration_info.client_secret,
     "redirect_uri": redirect_uri,
     "scope": registration_info.scope,
     "grant_type": "authorization_code",
@@ -97,7 +97,7 @@ def get_access_token_from_instance(instance_url, redirect_uri, registration_info
     return token_response.json()["access_token"]
   else:
     logger.error(f"Mastodon get access token error: {token_response.status_code} {token_response.headers} {token_response.text}")
-    raise Exception("Failed to get a token on {instance_url} {token_response.json()}")
+    raise Exception(f"Failed to get a token on {instance_url} {token_response.json()}")
 
 
 
@@ -113,11 +113,12 @@ def try_get_authorized_client_and_token(
     session,
     instance_url,
     redirect_uri,
-    registration_info
+    registration_info,
+    maybe_token
     ):
   """Returns None if authorization is required, 
   and a valid client if it has been granted."""
-  token = get_acces_token_if_present(
+  token = maybe_token or get_acces_token_if_present(
       request_params,
       session,
       redirect_uri,
@@ -130,6 +131,7 @@ def try_get_authorized_client_and_token(
     if client and client.get_actor() is not None:
       return client, token
   except urllib.error.HTTPError as e:
+    logger.warn(f"Error occured while creating the client: {e}")
     if e.code!=401: # HTTP Error 401: Authorization Required
       raise
   return None
@@ -153,7 +155,7 @@ def get_acces_token_if_present(
   if not request_params:
     return None
   code = request_params.get('code')
-  if not verifier:
+  if not code:
     return None
   instance_url = session[SESSION_TOKEN_NAME]
   if not instance_url:

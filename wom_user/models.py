@@ -147,29 +147,3 @@ class ReferenceUserStatus(models.Model):
   def get_tag_names(self):
     """Get the names of the tags related to this reference."""
     return get_item_tag_names(self.owner,self.reference)
-
-
-# class MastodonConnection(models.Model):
-#   """
-#   Information to connect to Mastodon.
-#   """
-  
-#   # # Name of this connection (could be the mastodon username on the
-#   # # targetted mastodon instance), used for disambiguating when several
-#   # # sources are created from different usernames on a same instance.
-#   # name = models.CharField(max_length=GeneratedFeed.TITLE_MAX_LENGTH)
-
-#   # Information to access the Madstodon instance (including auth tokens)
-#   access_info = models.OneToOneField(MastodonUserAccessInfo, on_delete=models.CASCADE)
-
-#   # Associated user profile
-#   owner_profile = models.ForeignKey(UserProfile,
-#                                     on_delete=models.CASCADE,
-#                                     related_name="mastodon_connection_set")
-  
-#   def __str__(self):
-#     return "%s>%s>%s" \
-#       % (self.owner_profile,
-#          self.access_info.application_registration_info.instance_url,
-#          self.title
-#          )

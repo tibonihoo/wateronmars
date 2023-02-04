@@ -20,6 +20,9 @@
 
 import json
 
+import logging
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 from django.utils import timezone
 from django.utils.http import urlquote_plus, urlunquote_plus
@@ -58,7 +61,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout
 
 from wom_river.models import WebFeed
-from wom_tributary.models import GeneratedFeed
+from wom_tributary.models import GeneratedFeed, MastodonTimeline
 
 from wom_tributary.tasks import (
     fetch_twitter_timeline_data,
@@ -915,7 +918,7 @@ def user_auth_landing_mastodon(request):
   del request.session[WOM_USER_MASTODON_TIMELINE_NAME]
   if timelines:
     get_mastodon_auth_status(
-      timelines[0].access_info, request
+      timelines[0].mastodon_user_access_info, request
       )
     return HttpResponseRedirect(reverse('user_tributary_mastodon', args=(request.user.username,)))
   else:
@@ -943,8 +946,10 @@ def user_tributary_mastodon_auth_gateway(request, owner_name, timeline_name):
       .all())
   if not timelines:
     return HttpResponseNotFound(f"Could not find timeline named {timeline_name}.")
+  if len(timelines)>1:
+    logger.warn(f"Found {len(timelines)} with the same name '{timeline_name}'!")
   status = get_mastodon_auth_status(
-    timelines[0].access_info, request
+    timelines[0].mastodon_user_access_info, request
     )
   redirect_url = (
     reverse('user_tributary_mastodon', args=(request.user.username,))

@@ -329,7 +329,7 @@ class MastodonAuthPageTest(TestCase):
       client_mock.get_activities.return_value = [1]
       token_param_name = 'oauth_verifier'
       token_verifier = "MASTO_TKV"
-      def assert_expected_token(request_params, session, instance_url, redirect_uri, user_info):
+      def assert_expected_token(request_params, session, instance_url, redirect_uri, user_info, maybe_token):
         self.assertEqual(token_verifier,
                          request_params.get(token_param_name))
         self.assertEqual(DEFAULT_INSTANCE, instance_url)
@@ -339,3 +339,49 @@ class MastodonAuthPageTest(TestCase):
       profile, info = self._generate_userprofile_with_mastodon_access_info(2)
       resp = self._get({token_param_name: token_verifier})
       self.assertEqual(200, resp.status_code)
+
+
+class MastodonAuthPageTest(TestCase):
+  
+    def setUp(self):
+        self.stub_date = datetime.now(timezone.utc)
+        self.source = Reference.objects.create(
+            url="http://glop",
+            title="glop",
+            pub_date=self.stub_date)
+        self.user = User.objects.create_user(
+            username="uA", password="pA"
+            )
+        self._generate_userprofile_with_mastodon_access_info(1)
+
+    def _generate_userprofile_with_mastodon_access_info(self, num_timelines):
+      app_reg = MastodonApplicationRegistration.objects.create(instance_url=DEFAULT_INSTANCE)
+      app_reg.save()
+      access_info = MastodonUserAccessInfo.objects.create(application_registration_info=app_reg)
+      access_info.save()
+      profile = UserProfile.objects.create(owner = self.user)
+      for i in range(num_timelines):
+        feed = GeneratedFeed.objects.create(
+            provider="M", source=self.source, title=DEFAULT_CONNECTION_NAME,
+            last_update_check=self.stub_date)
+        MastodonTimeline.objects.create(
+            generated_feed=feed,
+            mastodon_user_access_info=access_info)
+        profile.generated_feeds.add(feed)
+      profile.save()
+      return profile, access_info
+  
+    def _get(self, request_params=None):
+        request_params = request_params or {}
+        # login as uA and make sure it succeeds
+        self.assertTrue(
+            self.client.login(username="uA",password="pA"))
+        # send the request
+        return self.client.get(
+            reverse("user_tributary_mastodon_auth_gateway",
+                        kwargs={"owner_name":"uA", "timeline_name": DEFAULT_CONNECTION_NAME}),
+            request_params)
+
+    def test_auth_gateway_renders_without_error(self):
+        resp = self._get()
+        self.assertEqual(200, resp.status_code)
