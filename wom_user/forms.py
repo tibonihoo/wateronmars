@@ -475,7 +475,7 @@ class UserMastodonFeedAdditionForm(forms.Form):
   def _get_or_create_mastodon_registration(self, url):
     website_url = reverse("home")
     parsed_uri = urlparse(website_url)
-    application_name = "mouf" #parsed_uri.netloc,
+    application_name = f"{parsed_uri.netloc}_wom_tributary",
     redirect_uri = reverse("user_auth_landing_mastodon")
     existing_mastodon_registrations = (
       MastodonApplicationRegistration

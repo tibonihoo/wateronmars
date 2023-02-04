@@ -25,6 +25,10 @@ https://docs.joinmastodon.org/methods/oauth/
 """
 
 import urllib.request, urllib.parse, urllib.error
+
+import logging
+logger = logging.getLogger(__name__)
+
 import requests
 from granary.mastodon import Mastodon, source
 
@@ -62,6 +66,7 @@ def register_application_on_instance(instance_url, app_name, redirect_uri, websi
     }
   registration = requests.post(f"{instance_url.rstrip('/')}{CREATE_APP_PATH}", data=data)
   if not registration.ok:
+      logger.error(f"Mastodon registration error: {registration.status_code} {registration.headers} {registration.text}")
       raise Exception(f"Failed to register the application as {app_name} on {instance_url}")
   info = registration.json()
   return RegistrationInfo(info["client_id"], info["client_secret"], info["vapid_key"])
@@ -91,6 +96,7 @@ def get_access_token_from_instance(instance_url, registration_info, code):
   if token_response.ok:
     return token_response.json()["access_token"]
   else:
+    logger.error(f"Mastodon get access token error: {token_response.status_code} {token_response.headers} {token_response.text}")
     raise Exception("Failed to get a token on {instance_url} {token_response.json()}")
 
 
