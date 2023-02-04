@@ -67,11 +67,11 @@ def get_date_from_feedparser_entry(entry):
   """
   Extract the date from the 'parsed date' fields of a feedparser generated entry.
   """
-  if "updated_parsed" in entry:
+  if "updated_parsed" in entry and entry.updated_parsed:
     updated_date_utc = entry.updated_parsed[:6]
-  elif "published_parsed" in entry:
+  elif "published_parsed" in entry and entry.published_parsed:
     updated_date_utc = entry.published_parsed[:6]
-  elif "created_parsed" in entry:
+  elif "created_parsed" in entry and entry.created_parsed:
     updated_date_utc = entry.created_parsed[:6]
   else:
     logger.debug("No date found for entry %s" % entry.link)
