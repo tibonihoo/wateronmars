@@ -83,7 +83,7 @@ logger = logging.getLogger(__name__)
 
 @periodic_task(run_every=crontab(hour="*", minute="*/20", day_of_week="*"))
 def collect_all_new_references_regularly():
-  collect_news_from_feeds()
+  collect_news_from_followed_feeds()
 
 @periodic_task(run_every=crontab(hour="*/1", day_of_week="*"))
 def collect_all_new_twitter_references_regularly():
@@ -96,6 +96,11 @@ def collect_all_new_mastodon_references_regularly():
 @periodic_task(run_every=crontab(hour="*/12", day_of_week="*"))
 def delete_obsolete_unpinned_references_regularly():
   delete_obsolete_unpinned_references_from_feeds()
+
+
+def collect_news_from_followed_feeds():
+  feeds = WebFeed.objects.filter(userprofile=None).iterator()
+  collect_news_from_feeds(feeds)
 
 
 @task()

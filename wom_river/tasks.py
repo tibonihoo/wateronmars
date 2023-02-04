@@ -244,12 +244,19 @@ def collect_new_references_for_feed(feed):
 
 
 
-def collect_news_from_feeds():
+def collect_news_from_feeds(feeds):
+  """Fetch and parse all given feeds to collect new items and fill the db of
+  References with them.
+  """
+  for feed in feeds:
+    collect_new_references_for_feed(feed)
+    
+def collect_news_from_all_feeds():
   """Fetch and parse all feeds to collect new items and fill the db of
   References with them.
   """
-  for feed in WebFeed.objects.iterator():
-    collect_new_references_for_feed(feed)
+  feeds = WebFeed.objects.iterator()
+  collect_news_from_feeds(feeds)
 
 
 def import_feedsources_from_opml(opml_txt):
