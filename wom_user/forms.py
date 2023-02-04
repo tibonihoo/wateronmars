@@ -473,10 +473,18 @@ class UserMastodonFeedAdditionForm(forms.Form):
 
 
   def _get_or_create_mastodon_registration(self, url):
+    website_url = reverse("home")
+    parsed_uri = urlparse(website_url)
+    application_name = "mouf" #parsed_uri.netloc,
+    redirect_uri = reverse("user_auth_landing_mastodon")
     existing_mastodon_registrations = (
       MastodonApplicationRegistration
       .objects
-      .filter(instance_url = url)
+      .filter(
+          instance_url = url,
+          application_name = application_name,
+          redirect_uri = redirect_uri
+          )
       .all()
       )
     mastodon_registration = (
@@ -485,13 +493,14 @@ class UserMastodonFeedAdditionForm(forms.Form):
         else None
         )
     if not mastodon_registration:
-      website_url = reverse("home")
-      parsed_uri = urlparse(website_url)
-      mastodon_registration = MastodonApplicationRegistration(
-        instance_url=url,
-        application_name=parsed_uri.netloc,
-        redirect_uri=reverse("user_auth_landing_mastodon")
-        )
+      mastodon_registration = (
+          MastodonApplicationRegistration
+          .objects
+          .create(
+            instance_url=url,
+            application_name=application_name,
+            redirect_uri=redirect_uri
+            ))
       mastodon_registration.save()
     return mastodon_registration
 

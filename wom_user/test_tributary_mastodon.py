@@ -47,7 +47,6 @@ DEFAULT_INSTANCE = "http://mastodon.example.com"
 MOCK_CLIENT_ID = "mock_client_id"
 MOCK_CLIENT_SECRET = "mock_client_secret"
 MOCK_VAPID_KEY = "mock_vapid_key"
-MOCK_REDIRECT_URI = "mock_redirect_uri"
 MOCK_SCOPE = "mock_scope"
 MOCK_AUTH_URL = "http://mastodon.example/oauth_mock"
 DEFAULT_CONNECTION_NAME = "mouf"
@@ -84,8 +83,7 @@ class UserMastodonSourceAddTest(TestCase):
     mocked_register_application_on_instance.return_value = RegistrationInfo(
         MOCK_CLIENT_ID,
         MOCK_CLIENT_SECRET,
-        MOCK_VAPID_KEY,
-        MOCK_REDIRECT_URI)
+        MOCK_VAPID_KEY)
   
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_new_feed_source_to_owner_with_instance_registration_success(
@@ -108,7 +106,6 @@ class UserMastodonSourceAddTest(TestCase):
         new_timeline_instance,
         mocked_register_application_on_instance.call_args[0][0]
         )
-
     self.assertEqual(1,self.user_profile.sources.count())
     self.assertEqual(0,self.user_profile.web_feeds.count())
     added_source = self.user_profile.sources.get()
@@ -127,7 +124,7 @@ class UserMastodonSourceAddTest(TestCase):
     self.assertEqual(added_registration_info.validation_key,
                      MOCK_VAPID_KEY)
     self.assertEqual(added_registration_info.redirect_uri,
-                     MOCK_REDIRECT_URI)
+                     "/accounts/auth_landing/mastodon/")
     
   @mock.patch('wom_tributary.utils.mastodon_oauth.register_application_on_instance')
   def test_add_new_feed_source_to_owner_with_instance_registration_failing_registration(

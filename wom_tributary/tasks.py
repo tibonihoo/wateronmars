@@ -220,6 +220,7 @@ def register_mastodon_application_info_if_needed(instance_registration_info, web
   app_name = instance_registration_info.application_name
   instance_url = instance_registration_info.instance_url
   redirect_uri = instance_registration_info.redirect_uri
+  logger.info(f"Registering Mastodon application: '{instance_url}' '{app_name}' '{redirect_uri}' '{website_homepage}'")
   registration_feedback = mastodon_oauth.register_application_on_instance(
       instance_url,
       app_name,
@@ -229,7 +230,6 @@ def register_mastodon_application_info_if_needed(instance_registration_info, web
   instance_registration_info.client_id = registration_feedback.client_id
   instance_registration_info.client_secret = registration_feedback.client_secret
   instance_registration_info.validation_key = registration_feedback.vapid_key
-  instance_registration_info.redirect_uri = registration_feedback.redirect_uri
   instance_registration_info.save()
 
 
@@ -246,7 +246,6 @@ def get_mastodon_auth_status(user_info, request = None):
       user_info.application_registration_info.client_id,
       user_info.application_registration_info.client_secret,
       user_info.application_registration_info.validation_key,
-      user_info.application_registration_info.redirect_uri,
       )
   client, token = (mastodon_oauth.try_get_authorized_client_and_token(
       request_params,

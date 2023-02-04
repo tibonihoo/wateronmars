@@ -43,12 +43,14 @@ class RegistrationInfo:
 
     DEFAULT_SCOPE = "read"
 
-    def __init__(self, client_id, client_secret, vapid_key, redirect_uri):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.vapid_key = vapid_key
-        self.redirect_uri = redirect_uri
-        self.scope = RegistrationInfo.DEFAULT_SCOPE
+    def __init__(self, client_id, client_secret, vapid_key):
+      self.client_id = client_id
+      self.client_secret = client_secret
+      self.vapid_key = vapid_key
+      self.scope = RegistrationInfo.DEFAULT_SCOPE
+
+    def __str__(self):
+      return f"RegistrationInfo({self.client_id}, {self.client_secret}, {self.vapid_key}, {self.scope})"
 
 
 def register_application_on_instance(instance_url, app_name, redirect_uri, website):
@@ -62,7 +64,7 @@ def register_application_on_instance(instance_url, app_name, redirect_uri, websi
   if not registration.ok:
       raise Exception(f"Failed to register the application as {app_name} on {instance_url}")
   info = registration.json()
-  return RegistrationInfo(info["client_id"], info["client_secret"], info["vapid_key"], redirect_uri)
+  return RegistrationInfo(info["client_id"], info["client_secret"], info["vapid_key"])
 
 
 def get_authorization_url_for_instance(instance_url, registration_info):
