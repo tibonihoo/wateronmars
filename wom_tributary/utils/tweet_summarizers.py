@@ -104,8 +104,10 @@ def build_reverse_index_cloud(reverse_index, top_only):
   num_quantiles = 10
   quantile_length = int(num_reqs/float(num_quantiles))
   threshold_index = min(num_reqs-1, (num_quantiles-1)*quantile_length)
-  max_quantile = freqs[threshold_index]
   html_entries = []
+  if not freqs:
+    return html_entries
+  max_quantile = freqs[threshold_index]
   for entry, tweets in reverse_index.items():
     if entry == NO_TAG:
       continue
