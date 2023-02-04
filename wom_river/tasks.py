@@ -184,18 +184,20 @@ def add_new_references_from_parsed_feed(feed, entries, default_date):
     if current_ref_date > latest_item_date:
       latest_item_date = current_ref_date
   # save all references at once
+  saved_references = []
   with transaction.atomic():
-    for r,_ in all_references:
+    for r, tags in all_references:
       try:
         r.save()
+        r.sources.add(common_source)
       except Exception as e:
         logger.error("Skipping news item %s because of exception: %s."\
                      % (r.url,e))
         continue
-      r.sources.add(common_source)
+      saved_references.append((r, tags))
   feed.last_update_check = latest_item_date
   feed.save()
-  return dict(all_references)
+  return dict(saved_references)
 
 
 def try_get_feed_title(feed_url):
