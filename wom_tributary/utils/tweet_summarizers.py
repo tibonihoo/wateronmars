@@ -65,7 +65,7 @@ class Tweet:
 
 
 def build_content_excerpt(content_unicode):
-  html.unescape(strip_tags(content_unicode))
+  content_unicode = html.unescape(strip_tags(content_unicode))
   excerpt = content_unicode[:MAX_CONTENT_SIZE_CHARS]
   if len(excerpt) < len(content_unicode):
       excerpt += "(...)"
