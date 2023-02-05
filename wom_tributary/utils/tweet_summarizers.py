@@ -22,6 +22,11 @@ import sys
 import re
 from collections import defaultdict
 
+from django.utils.html import strip_tags
+
+import html
+
+
 MAX_CONTENT_SIZE_CHARS = 140
 HASHTAG_REGEX = re.compile(r"(^|\s)#([\w\-\.]+)", re.UNICODE)
 SUBJECT_REGEX = re.compile(r"(^\s*)([^:]{1,20})(:\s+\S+)", re.UNICODE)
@@ -60,6 +65,7 @@ class Tweet:
 
 
 def build_content_excerpt(content_unicode):
+  html.unescape(strip_tags(content_unicode))
   excerpt = content_unicode[:MAX_CONTENT_SIZE_CHARS]
   if len(excerpt) < len(content_unicode):
       excerpt += "(...)"
