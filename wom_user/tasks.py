@@ -99,7 +99,7 @@ def delete_obsolete_unpinned_references_regularly():
 
 
 def collect_news_from_followed_feeds():
-  feeds = WebFeed.objects.filter(userprofile=None).iterator()
+  feeds = WebFeed.objects.exclude(userprofile=None).iterator()
   collect_news_from_feeds(feeds)
 
 
