@@ -688,7 +688,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
     self.assertEqual(1, len(res))
 
 
-def GenerateCollationsTaskTest(TestCase):
+class GenerateCollationsTaskTest(TestCase):
 
   def setUp(self):
     self.date = datetime.now(timezone.utc)
