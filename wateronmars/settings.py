@@ -182,7 +182,7 @@ STATICFILES_FINDERS = (
 
 # Make this unique, and don't share it with anybody.
 # see also https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-SECRET_KEY
-SECRET_KEY =  WOM_ROOT_URL = os.environ.get("WOM_DJANGO_SECRET_KEY", "")  # Replace this ! 
+SECRET_KEY = os.environ.get("WOM_DJANGO_SECRET_KEY", "")  # Replace this ! 
 if not SECRET_KEY:
     raise Exception("Set 'SECRET_KEY' to a specific unique key !")
 
