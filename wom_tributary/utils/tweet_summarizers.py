@@ -55,7 +55,7 @@ class Tweet:
   @staticmethod
   def from_activity_item(item, link_builder):
     details = item["object"]
-    link = link_builder(link)
+    link = link_builder(item)
     date = parse_date(details["published"])
     author_info = details["author"]
     author = (author_info.get("displayName") or author_info["username"])
