@@ -31,8 +31,11 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from wateronmars import settings
 
-from wom_pebbles.models import URL_MAX_LENGTH
-from wom_pebbles.models import REFERENCE_TITLE_MAX_LENGTH
+from wom_pebbles.models import (
+    URL_MAX_LENGTH,
+    REFERENCE_TITLE_MAX_LENGTH,
+    )
+
 from wom_pebbles.models import Reference
 from wom_pebbles.tasks import (
     try_get_title_from_page,
@@ -205,12 +208,17 @@ class UserSourceAdditionForm(forms.Form):
     self.user = user
 
   def _clean_title(self, title, source_url, feed_url):
-      return (
+      clean_title = (
           title
           or try_get_title_from_page(source_url)
           or try_get_feed_title(feed_url)
           or build_reference_title_from_url(source_url)
         )
+      title_length = len(clean_title)
+      if title_length > REFERENCE_TITLE_MAX_LENGTH:
+        self._errors["title"] = self.error_class([f"Please provide a title shorter than {REFERENCE_TITLE_MAX_LENGTH} characters"])
+        raise forms.ValidationError(f"Title is too long: {title_length} chars > {REFERENCE_TITLE_MAX_LENGTH}")
+      return clean_title
 
   def clean(self):
     """Used to set the right feed_url if it hasn't been given."""
@@ -235,10 +243,14 @@ class UserSourceAdditionForm(forms.Form):
     # The feed is not here or invalid: let's see if we can find some
     # valid feeds automatically.
     feed_error_msg = "Please give the URL of an existing valid feed."
-    candidates = set(str(f) for f in found_feeds)
+    candidates = [str(f) for f in found_feeds]
     if not candidates:
       self._errors["feed_url"] = self.error_class([feed_error_msg])
       raise forms.ValidationError("Impossible to find feeds at the given URL or even to discover one related to the source's URL")
+    candidates = set(c for c in candidates if len(c) <= URL_MAX_LENGTH)
+    if not candidates:
+      self._errors["feed_url"] = self.error_class([feed_error_msg])
+      raise forms.ValidationError(f"Impossible to find feeds with a url shorter than {URL_MAX_LENGTH}")
     # A little sorting will help making a good guess when several
     # candidates are available.
     # For Wordpress blogs at least there is usually several feeds

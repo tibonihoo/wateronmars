@@ -31,6 +31,7 @@ from django.test import TestCase
 from wom_pebbles.models import (
     Reference,
     build_safe_code_from_url,
+    REFERENCE_TITLE_MAX_LENGTH,
     )
 from wom_river.models import (
     WebFeed,
@@ -131,6 +132,33 @@ class UserSourceAddTestMixin:
               "feed_url": new_feed_url,
               "name": "a new"},
              expectedStatusCode=403)
+    
+  def test_add_new_feed_source_with_large_title_fails(self):
+    """
+    WARNING: dependent on an internet access !
+    """
+    # login as uA and make sure it succeeds
+    self.assertTrue(self.client.login(username="uA",
+                      password="pA"))
+    self.assertEqual(2,self.user_profile.sources.count())
+    self.assertEqual(1,self.user_profile.web_feeds.count())
+    new_feed_url = "http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"
+    self.add_request("uA",
+                     {"url": new_feed_url,
+                      "feed_url": new_feed_url,
+                      "title": "a" * (REFERENCE_TITLE_MAX_LENGTH + 1)},
+                      expectedStatusCode=200)
+    self.assertEqual(2,self.user_profile.sources.count())
+    self.assertEqual(1,self.user_profile.web_feeds.count())
+    # new_s_candidates = [
+    #   s for s in self.user_profile.sources.all() \
+    #   if s.url==new_feed_url]
+    # self.assertEqual(1, len(new_s_candidates))
+    # new_s = new_s_candidates[0]
+    # self.assertEqual("a new",new_s.title)
+    # self.assertEqual(new_feed_url,new_s.url)
+    # new_w = WebFeed.objects.get(source=new_s)
+    # self.assertEqual(new_feed_url,new_w.xmlURL)
 
 
 class UserSourceViewTest(TestCase,UserSourceAddTestMixin):
