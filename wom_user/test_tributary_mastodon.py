@@ -38,7 +38,7 @@ from wom_tributary.models import (
     MastodonApplicationRegistration,
     )
 from wom_tributary.utils.mastodon_oauth import RegistrationInfo
-
+from wom_tributary.tasks import MastodonLinkBuilder
 
 from django.contrib.auth.models import User
 
@@ -385,3 +385,66 @@ class MastodonAuthPageTest(TestCase):
     def test_auth_gateway_renders_without_error(self):
         resp = self._get()
         self.assertEqual(200, resp.status_code)
+
+
+class TestMastodonLinkBuilder(TestCase):
+
+  def setUp(self):
+    self.activity = \
+      {'actor': {'description': '<p>blabla.</p>',
+                 'displayName': 'Name Sample',
+                 'id': 'tag:instance.sample:usernamesample',
+                 'image': {'url': 'https://myinstance.sample/system/cache/accounts/avatars/109/380/809/649/758/289/original/acbbec5c2e919cec.jpg'},
+                 'numeric_id': '898989889898989',
+                 'objectType': 'person',
+                 'published': '2022-01-12T00:00:00.000Z',
+                 'url': 'https://instance.sample/@usernamesample',
+                 'urls': [{'value': 'https://instance.sample/@usernamesample'},
+                          {'value': 'https://usernamesample.blog.sample/'}],
+                 'username': 'usernamesample'},
+       'id': 'tag:myinstance.sample:1010101010101010101',
+       'object': {'attachments': [{'id': 'tag:myinstance.sample:636363636363636363',
+                                   'image': {'url': 'https://myinstance.sample/1234.jpeg'},
+                                   'objectType': 'image'}],
+                  'author': {'description': '<p>bliblibli.</p>',
+                             'displayName': 'Another Name',
+                             'id': 'tag:instance.sample:AnotherName',
+                             'image': {'url': 'https://myinstance.sample/avatars/original/missing.png'},
+                             'numeric_id': '29292929292929292',
+                             'objectType': 'person',
+                             'published': '2032-01-04T00:00:00.000Z',
+                             'url': 'https://instance.sample/@OtherUserName',
+                             'urls': [{'value': 'https://instance.sample/@OtherUserName'}],
+                             'username': 'OtherUserName'},
+                  'content': '<p>RT <span class="h-card"><a '
+                  'href="https://instance.sample/@usernamesample" '
+                  'class="u-url mention" rel="nofollow noopener '
+                  'noreferrer" '
+                  'target="_blank">@<span>usernamesample</span></a></span>mouf.</p>',
+                  'id': 'tag:myinstance.sample:2828282828282828282',
+                  'image': {'url': 'https://myinstance.sample/c8e85a.jpeg'},
+                  'objectType': 'note',
+                  'published': '2032-02-04T21:00:07.000Z',
+                  'tags': [{'displayName': 'usernamesample',
+                            'id': 'tag:myinstance.sample:898989889898989',
+                            'objectType': 'person',
+                            'url': 'https://instance.sample/@usernamesample'}],
+                  'to': [{'alias': '@unlisted', 'objectType': 'group'}],
+                  'url': 'https://instance.sample/@OtherUserName/08080808080808080808'},
+       'objectType': 'activity',
+       'published': '2032-01-04T21:01:05.000Z',
+       'verb': 'share'}
+
+  def test_from_activity_item_sample(self):
+    link = MastodonLinkBuilder("http://home_instance.sample")(self.activity)
+    self.assertEqual("http://home_instance.sample/@usernamesample@instance.sample/2828282828282828282", link)
+    
+  def test_from_activity_item_sample_when_actor_id_is_missing_fallsback_on_url(self):
+    del self.activity["actor"]["id"]
+    link = MastodonLinkBuilder("http://home_instance.sample")(self.activity)
+    self.assertEqual("https://instance.sample/@OtherUserName/08080808080808080808", link)
+
+  def test_from_activity_item_sample_when_id_is_missing_fallsback_on_url(self):
+    del self.activity["object"]["id"]
+    link = MastodonLinkBuilder("http://home_instance.sample")(self.activity)
+    self.assertEqual("https://instance.sample/@OtherUserName/08080808080808080808", link)

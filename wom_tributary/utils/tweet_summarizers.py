@@ -35,6 +35,10 @@ NO_TAG = "<NO_TAG>"
 from dateutil.parser import parse as parse_date
 
 
+def default_link_builder(activity_item):
+  return activity_item.get("url") or activity_item.get("object", {}).get("url")
+
+
 class Tweet:
 
   def __init__(self, link, content_summary, author, date, tags):
@@ -49,9 +53,9 @@ class Tweet:
     return " ".join([self.link, self.date])
 
   @staticmethod
-  def from_activity_item(item):
+  def from_activity_item(item, link_builder):
     details = item["object"]
-    link = item.get("url") or details.get("url")
+    link = link_builder(link)
     date = parse_date(details["published"])
     author_info = details["author"]
     author = (author_info.get("displayName") or author_info["username"])
@@ -71,10 +75,10 @@ def build_content_excerpt(content_unicode):
       excerpt += "(...)"
   return excerpt
 
-def build_tweet_index_by_tag(data, keep_only_after_datetime):
+def build_tweet_index_by_tag(data, keep_only_after_datetime, link_builder):
   reverse_index = defaultdict(list)
   num_discarded = 0
-  all_tweets = [Tweet.from_activity_item(item) for item in data]
+  all_tweets = [Tweet.from_activity_item(item, link_builder) for item in data]
   for tweet in sorted(all_tweets, key=lambda t: t.date):
     if tweet.date < keep_only_after_datetime:
       num_discarded += 1
@@ -132,10 +136,12 @@ def get_items_sorted_by_dec_size_and_inc_key(reverse_index):
 
 def generate_basic_html_summary(
     activities,
-    keep_only_after_datetime):
+    keep_only_after_datetime,
+    link_builder):
   ridx = build_tweet_index_by_tag(
     activities,
-    keep_only_after_datetime)
+    keep_only_after_datetime,
+    link_builder)
   groups = group_tweet_by_best_tag(ridx)
   singular_topics_tweets = []
   doc_lines = []
@@ -238,7 +244,7 @@ if __name__=="__main__":
     )
   
   threshold_date = parse_date("2011-01-19 17:21:00")
-  html = generate_basic_html_summary(activities, threshold_date)
+  html = generate_basic_html_summary(activities, threshold_date, default_link_builder)
   html_file = "./tweet_summarizer_demo.html"
   with open(html_file, "w") as f:
       f.write(html)

@@ -173,7 +173,8 @@ def collect_new_references_for_twitter_timeline(
       num_items_to_ask)
     summary = tweet_summarizers.generate_basic_html_summary(
       activities,
-      keep_only_after_datetime)
+      keep_only_after_datetime,
+      tweet_summarizers.default_link_builder)
     date_str = now.strftime("%Y%m%d%H")
     title = f"{timeline.generated_feed.title} /{hours_to_cover}h"
   except Exception as e:
@@ -282,6 +283,29 @@ def fetch_mastodon_timeline_data(timeline, auth_status, max_num_items):
     return tl_data
 
 
+class MastodonLinkBuilder:
+
+  def __init__(self, instance_url):
+    self.instance_url = instance_url
+
+  def __call__(self, activity_item):
+    actor_instance_path = "@".join(
+        activity_item
+        .get("actor", {})
+        .get("id", "")
+        .split(":")[:0:-1]
+        )
+    item_id = (
+        activity_item
+        .get("object", {})
+        .get("id", ":")
+        .split(":")[-1]
+        )
+    if actor_instance_path and item_id:
+      return f"{self.instance_url}/@{actor_instance_path}/{item_id}"
+    return tweet_summarizers.default_link_builder(activity_item)
+
+
 def collect_new_references_for_mastodon_timeline(
     timeline,
     hours_to_cover):
@@ -307,7 +331,8 @@ def collect_new_references_for_mastodon_timeline(
       num_items_to_ask)
     summary = tweet_summarizers.generate_basic_html_summary(
       activities,
-      keep_only_after_datetime)
+      keep_only_after_datetime,
+      MastodonLinkBuilder(timeline.mastodon_user_access_info.application_registration_info.instance_url))
     date_str = now.strftime("%Y%m%d%H")
     title = f"{timeline.generated_feed.title} /{hours_to_cover}h"
   except Exception as e:
