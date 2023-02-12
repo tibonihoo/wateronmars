@@ -333,7 +333,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
 """
     
     f1 = feedparser.parse(self.rss_xml)
-    self.default_date = datetime.now(timezone.utc)
+    self.default_date = date
     self.ref_and_tags = add_new_references_from_parsed_feed(
         self.web_feed,
         f1.entries,
