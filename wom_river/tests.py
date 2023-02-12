@@ -37,7 +37,8 @@ from wom_river.tasks import (
     import_feedsources_from_opml,
     add_new_references_from_parsed_feed,
     generate_collated_content,
-    yield_collated_reference
+    yield_collated_reference,
+    generate_collations,
     )
 
 from django.contrib.auth.models import User
@@ -687,7 +688,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
     self.assertEqual(1, len(res))
 
 
-def GenerateCollationsTaskTest(Testcase):
+def GenerateCollationsTaskTest(TestCase):
 
   def setUp(self):
     self.date = datetime.now(timezone.utc)

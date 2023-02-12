@@ -208,7 +208,7 @@ def try_get_feed_title(feed_url):
     return d.feed.get("title", None)
   except Exception as e:
     logger.error("Could not find title for feed at %s because of a parse problem (%s))."\
-                 % (feed.source.url,e))
+                 % (d.feed.source.url,e))
     return None
 
 
@@ -224,9 +224,9 @@ def try_get_feed_site_url(feed_url):
             )
   except Exception as e:
     logger.error("Could not find the website associated to the feed at %s because of a parse problem (%s))."\
-                 % (feed.source.url,e))
+                 % (d.feed.source.url,e))
     return None
-    
+
 
 def collect_new_references_for_feed(feed):
   """Get the feed data from its URL and collect the new references into the db.
