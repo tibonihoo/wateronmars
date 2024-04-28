@@ -336,7 +336,7 @@ def format_date_extent(delta):
 
 
 def yield_collated_reference(url_parent_path, feed, feed_collation,
-                             min_num_ref_target,
+                             min_num_ref_target, max_num_ref_target,
                              timeout, processing_date):
   references = list(feed_collation.references.order_by('pub_date').all())
   num_refs = len(references)
@@ -344,7 +344,7 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
     return
   age = (processing_date
          - feed_collation.last_completed_collation_date)
-  num_refs_cap = 10*min_num_ref_target
+  num_refs_cap = max_num_ref_target
   num_refs_below_cap = num_refs < num_refs_cap
   if age < timeout and num_refs_below_cap:
     return
@@ -396,9 +396,14 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
 
 def generate_collations(url_parent_path,
                         feed, feed_collation, feed_references,
-                        min_num_ref_target, timeout, processing_date):
+                        min_num_ref_target, max_num_ref_target,
+                        timeout, processing_date):
   for ref in feed_references:
-    yield from yield_collated_reference(url_parent_path, feed, feed_collation, min_num_ref_target, timeout, processing_date)
+    yield from yield_collated_reference(url_parent_path, feed, feed_collation,
+                                        min_num_ref_target, max_num_ref_target,
+                                        timeout, processing_date)
     feed_collation.take(ref)
   else:
-    yield from yield_collated_reference(url_parent_path, feed, feed_collation, min_num_ref_target, timeout, processing_date)
+    yield from yield_collated_reference(url_parent_path, feed, feed_collation,
+                                        min_num_ref_target, max_num_ref_target,
+                                        timeout, processing_date)

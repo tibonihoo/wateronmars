@@ -28,6 +28,7 @@ from django.utils import timezone
 from django.conf import settings
 from wom_user.settings import (
     WEB_FEED_COLLATION_MIN_NUM_REF_TARGET,
+    WEB_FEED_COLLATION_MAX_NUM_REF_TARGET,
     WEB_FEED_COLLATION_TIMEOUT
     )
 
@@ -264,6 +265,7 @@ def check_user_unread_feed_items(user):
                               feed_collations[feed],
                               feed_references,
                               WEB_FEED_COLLATION_MIN_NUM_REF_TARGET,
+                              WEB_FEED_COLLATION_MAX_NUM_REF_TARGET,
                               WEB_FEED_COLLATION_TIMEOUT,
                               datetime.now(timezone.utc)))
     # filter out rust that have the same reference

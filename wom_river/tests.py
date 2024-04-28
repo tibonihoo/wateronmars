@@ -491,6 +491,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
         feed=self.feed,
         last_completed_collation_date=datetime.min.replace(tzinfo=timezone.utc))
     self.min_num_ref_target = 2
+    self.max_num_ref_target = 20
     self.timeout = timedelta(days=2)
 
   def _add_reference_1(self):
@@ -532,6 +533,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                         self.feed,
                                         self.collation,
                                         self.min_num_ref_target,
+                                        self.max_num_ref_target,
                                         self.timeout,
                                         datetime.utcnow()))
     self.assertEqual(0, len(res))
@@ -541,6 +543,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                         self.feed,
                                         self.collation,
                                         0,
+                                        self.max_num_ref_target,
                                         self.timeout,
                                         datetime.utcnow()))
     self.assertEqual(0, len(res))
@@ -552,11 +555,12 @@ class YieldCollatedReferencesTaskTest(TestCase):
     self._add_reference_1()
     processing_date = last_completion_date + timeout - timedelta(days=1)
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(0, len(res))
 
   def test_given_2refs_added_and_processing_after_timeout_returns_collation(self):
@@ -567,11 +571,12 @@ class YieldCollatedReferencesTaskTest(TestCase):
     self._add_reference_2()
     processing_date = last_completion_date + timeout + timedelta(days=1)
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(1, len(res))
     expected_res_ref_desc = f"""\
 {self.collated_content_r1}
@@ -586,11 +591,12 @@ class YieldCollatedReferencesTaskTest(TestCase):
     self._add_reference_1()
     processing_date = last_completion_date + timeout + timedelta(days=1)
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(0, len(res))
       
   def test_given_too_few_ref_processing_long_enough_after_timeout_returns_collation(self):
@@ -600,11 +606,12 @@ class YieldCollatedReferencesTaskTest(TestCase):
     self._add_reference_1()
     processing_date = last_completion_date + 2 * timeout
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(1, len(res))
     self.assertEqual(remove_whitespaces(self.collated_content_r1),
                      remove_whitespaces(res[0].description))
@@ -617,21 +624,23 @@ class YieldCollatedReferencesTaskTest(TestCase):
     processing_date = last_completion_date + timeout + timedelta(days=1)
     r1 = self._add_reference_1()
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(1, len(res))
     # Cheating a bit to force processing of the collation with a same processing_date.
     self.collation.last_completed_collation_date = last_completion_date
     self.collation.references.add(r1)
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(0, len(res))
     
   def test_given_some_ref_and_new_processing_date_create_second_collation(self):
@@ -641,34 +650,38 @@ class YieldCollatedReferencesTaskTest(TestCase):
     processing_date = last_completion_date + timeout + timedelta(days=1)
     r1 = self._add_reference_1()
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(1, len(res))
     self.collation.references.add(r1)
     processing_date = processing_date + timeout + timedelta(days=1)
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(1, len(res))
 
-  def test_avoid_num_refs_inifinite_accumulation(self):
+  def test_given_more_refs_than_max_accumulate_collations_happens(self):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
     min_num_ref_target = 1
+    max_num_ref_target = 10
     self._add_reference_1()
     processing_date = last_completion_date
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(0, len(res))
     for i in range(100):
         title = f"Too {i}"
@@ -680,11 +693,12 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                     pub_date=date)
         self.collation.references.add(r)
     res = list(yield_collated_reference(self.parent_path,
-                                         self.feed,
-                                         self.collation,
-                                         min_num_ref_target,
-                                         timeout,
-                                         processing_date))
+                                        self.feed,
+                                        self.collation,
+                                        min_num_ref_target,
+                                        self.max_num_ref_target,
+                                        timeout,
+                                        processing_date))
     self.assertEqual(1, len(res))
 
 
@@ -744,12 +758,14 @@ class GenerateCollationsTaskTest(TestCase):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
     min_num_ref_target = 1
+    max_num_ref_target = 10
     processing_date = last_completion_date + timeout - timedelta(days=1)
     res = list(generate_collations(self.parent_path,
                                    self.feed,
                                    self.collation,
                                    [self.r1],
                                    min_num_ref_target,
+                                   max_num_ref_target,
                                    timeout,
                                    processing_date))
     self.assertEqual(0, len(res))
@@ -758,12 +774,14 @@ class GenerateCollationsTaskTest(TestCase):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
     min_num_ref_target = 1
+    max_num_ref_target = 10
     processing_date = last_completion_date + timeout + timedelta(days=1)
     res = list(generate_collations(self.parent_path,
                                    self.feed,
                                    self.collation,
                                    [self.r1],
                                    min_num_ref_target,
+                                   max_num_ref_target,
                                    timeout,
                                    processing_date))
     self.assertEqual(1, len(res))
@@ -772,12 +790,14 @@ class GenerateCollationsTaskTest(TestCase):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
     min_num_ref_target = 2
+    max_num_ref_target = 20
     processing_date = last_completion_date + timeout + timedelta(days=1)
     res = list(generate_collations(self.parent_path,
                                    self.feed,
                                    self.collation,
                                    [self.r1],
                                    min_num_ref_target,
+                                   max_num_ref_target,
                                    timeout,
                                    processing_date))
     self.assertEqual(0, len(res))
@@ -786,12 +806,14 @@ class GenerateCollationsTaskTest(TestCase):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
     min_num_ref_target = 2
+    max_num_ref_target = 20
     processing_date = last_completion_date + timeout + timedelta(days=1)
     res = list(generate_collations(self.parent_path,
                                    self.feed,
                                    self.collation,
                                    [self.r1, self.r2],
                                    min_num_ref_target,
+                                   max_num_ref_target,
                                    timeout,
                                    processing_date))
     self.assertEqual(1, len(res))
