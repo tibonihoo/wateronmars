@@ -30,8 +30,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 import requests
-from granary.mastodon import Mastodon, source
 
+try:
+    from granary.mastodon import Mastodon, source
+    GRANARY_IMPORT_OK = True
+except ImportError as e:
+    # Allowing to continue on failure, will help with some weird
+    # install/import issue on the CI where the actual auth is mocked
+    # anyway. But the app won't work for real if that happens in
+    # production.
+    logging.warn(f"Failed to import granary.mastodo: {e} at module import time.")
+    GRANARY_IMPORT_OK = False
 
 CREATE_APP_PATH = '/api/v1/apps'
 AUTHORIZE_PATH = '/oauth/authorize'
@@ -40,7 +49,7 @@ TOKEN_PATH = '/oauth/token'
 
 SESSION_TOKEN_NAME = "wom_tributary_mastodon_rtk"
 
-TIMELINE_GROUP_ID = source.FRIENDS
+TIMELINE_GROUP_ID = source.FRIENDS if GRANARY_IMPORT_OK else None
 
 
 class RegistrationInfo:
@@ -103,6 +112,8 @@ def get_access_token_from_instance(instance_url, redirect_uri, registration_info
 
 def build_mastodon_client(instance_url, access_token):
   """Return a Granary client for Twitter."""
+  if not GRANARY_IMPORT_OK:
+      from granary.mastodon import Mastodon
   return Mastodon(
     instance_url,
     access_token)
