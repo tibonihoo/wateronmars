@@ -1,8 +1,8 @@
 Django>=2.2,<2.3
 feedparser
 beautifulsoup4
+oauth-dropins==6.3
 granary==5
-oauth-dropins
 tweepy
 python-dateutil
 six # for feedfinder2
