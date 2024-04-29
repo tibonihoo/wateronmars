@@ -21,7 +21,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade pytest
           pip install --upgrade -r requirements-tests.txt
-          pip install webapp2 # workaround a weird install cache issue
+          pip install --upgrade git+https://github.com/snarfed/oauth-dropins.git#egg=oauth_dropins
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
