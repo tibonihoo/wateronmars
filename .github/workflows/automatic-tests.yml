@@ -19,6 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade --force-reinstall pip
+          pip uninstall -y oauth-dropins
           pip install --upgrade --force-reinstall  pytest
           pip install --upgrade --force-reinstall -r requirements-tests.txt
       - name: Lint with flake8
