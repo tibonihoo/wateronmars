@@ -22,6 +22,22 @@
 import os
 import sys
 
+
+
+def quickloaddata(dumpfile):
+    """Shortcut to init the django apps even when not everything is
+    working yet and load data from a json dump.
+    """
+    import django
+    django.setup()
+    print(f"Starting loaddata from {dumpfile}")
+    from django.db import transaction
+    from django.core.management import call_command
+
+    with transaction.atomic():
+        call_command('loaddata', dumpfile, exclude=["contenttypes", "auth.permission"])
+
+
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wateronmars.settings")
 
@@ -29,6 +45,8 @@ if __name__ == "__main__":
         # Make sure we're not in demo mode for the tests
         from django.conf import settings
         settings.DEMO=False
-        
+    elif "quickloaddata" in sys.argv[1:]:
+        quickloaddata(sys.argv[2])
+
     from django.core.management import execute_from_command_line    
     execute_from_command_line(sys.argv)
