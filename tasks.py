@@ -62,19 +62,21 @@ def deploy_on_remote(c, target_config):
         run_cmd = lambda cmd: conn.run(cmd)
         shell_invocation = target_config.get("shell_invocation")
         if shell_invocation:
-            run_cmd = lambda cmd: run_cmd(f"{shell_invocation} \"{cmd}\"")
-        run_cmd = lambda cmd: run_cmd("cd '{0}' && {1}".format(site_dir, cmd))
+            run_in_shell = lambda cmd: run_cmd(f"{shell_invocation} \"{cmd}\"")
+        else:
+            run_in_shell = run_cmd
+        run_in_dir = lambda cmd: run_in_shell("cd '{0}' && {1}".format(site_dir, cmd))
         venv_dir = target_config["virtual_env_dir"]
-        run_cmd("git pull --rebase origin master")
+        run_in_dir("git pull --rebase origin master")
         requirements = target_config["requirements"]
-        run_cmd("source {0}/bin/activate && pip3 install -r {1}".format(venv_dir, requirements))
+        run_in_dir("source {0}/bin/activate && pip3 install -r {1}".format(venv_dir, requirements))
         # NOTE: for existing apps running with Django1.4, the first upgrade to
         # Django1.11 should fail here and be replaced by a manual:
         # "python3 manage.py migrate --fake" !
-        run_cmd("source {0}/bin/activate && python3 manage.py migrate".format(venv_dir))
-        run_cmd("source {0}/bin/activate && python3 manage.py collectstatic --noinput".format(venv_dir))
+        run_in_dir("source {0}/bin/activate && python3 manage.py migrate".format(venv_dir))
+        run_in_dir("source {0}/bin/activate && python3 manage.py collectstatic --noinput".format(venv_dir))
         try:
-            run_cmd(target_config["final_deploy_action"])
+            run_in_dir(target_config["final_deploy_action"])
         except configparser.NoOptionError:
             pass
 
