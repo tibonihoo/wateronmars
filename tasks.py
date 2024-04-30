@@ -77,10 +77,13 @@ def deploy_on_remote(c, target_config):
         # "python3 manage.py migrate --fake" !
         run_in_dir("source {0}/bin/activate && python3 manage.py migrate".format(venv_dir))
         run_in_dir("source {0}/bin/activate && python3 manage.py collectstatic --noinput".format(venv_dir))
-        try:
-            run_in_dir(target_config["final_deploy_action"])
-        except configparser.NoOptionError:
-            pass
+        final_deploy_action = target_config.get("final_deploy_action")
+        if final_deploy_action:
+            run_in_dir(final_deploy_action)
+        final_deploy_whole_command = target_config.get("final_deploy_whole_command")
+        if final_deploy_whole_command:
+            run_cmd(final_deploy_whole_command)
+
 
 @task
 def fix_contenttype_integrity_on_remote(c, to = None):
