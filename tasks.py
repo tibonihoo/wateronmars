@@ -67,7 +67,9 @@ def deploy_on_remote(c, target_config):
             run_in_shell = run_cmd
         run_in_dir = lambda cmd: run_in_shell("cd '{0}' && {1}".format(site_dir, cmd))
         venv_dir = target_config["virtual_env_dir"]
+        run_in_dir("git stash")
         run_in_dir("git pull --rebase origin master")
+        run_in_dir("git stash pop")
         requirements = target_config["requirements"]
         run_in_dir("source {0}/bin/activate && pip3 install -r {1}".format(venv_dir, requirements))
         # NOTE: for existing apps running with Django1.4, the first upgrade to
