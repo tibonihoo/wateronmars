@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 
 from datetime import datetime
 from django.utils import timezone
-from django.utils.http import urlquote_plus, urlunquote_plus
+from django.utils.http import urlquote_plus
+from urllib.parse import unquote_plus as urlunquote_plus
 
 from django.conf import settings
 from django.urls import reverse

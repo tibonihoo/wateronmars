@@ -36,7 +36,10 @@ from urllib import request
 from urllib.parse import urlparse
 from collections import namedtuple
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+
+import warnings
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 import logging
 logger = logging.getLogger(__name__)

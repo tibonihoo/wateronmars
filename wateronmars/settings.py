@@ -105,7 +105,7 @@ else:
   # use a local sqlite
   DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': './db.sql3',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
@@ -308,7 +308,7 @@ LOGGING = {
 # Translation support.
 # Note: translation set-up thanks to the following tutorial:
 # http://www.marinamele.com/taskbuster-django-tutorial/internationalization-localization-languages-time-zones
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 LANGUAGES = (
   ("en", _("English")),
