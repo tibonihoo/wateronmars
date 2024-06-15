@@ -74,17 +74,20 @@ class AuthStatus:
 
 
 def get_twitter_auth_status(user_info, request = None):
-  force_single_user_token_if_any(user_info)
-  request_params, session = \
-    (request.GET, request.session) if request \
-    else ({},{})
-  client = twitter_oauth.try_get_authorized_client(
-    request_params, session, user_info)
-  is_auth = client is not None
-  auth_url = None if is_auth \
-    else twitter_oauth.generate_authorization_url(
-        session, user_info)
-  return AuthStatus(is_auth, client, auth_url)
+  try:
+    force_single_user_token_if_any(user_info)
+    request_params, session = \
+      (request.GET, request.session) if request \
+      else ({},{})
+    client = twitter_oauth.try_get_authorized_client(
+        request_params, session, user_info)
+    is_auth = client is not None
+    auth_url = None if is_auth \
+      else twitter_oauth.generate_authorization_url(
+          session, user_info)
+    return AuthStatus(is_auth, client, auth_url)
+  except Exception as e:
+    logging.error(f"Failed to get a proper Twitter AuthStatus because of '{e}'")
 
 
 def create_reference_from_timeline_summary(
