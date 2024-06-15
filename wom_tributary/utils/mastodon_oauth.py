@@ -39,7 +39,7 @@ except ImportError as e:
     # install/import issue on the CI where the actual auth is mocked
     # anyway. But the app won't work for real if that happens in
     # production.
-    logging.warn(f"Failed to import granary.mastodo: {e} at module import time.")
+    logging.warn(f"Failed to import granary.mastodon: {e} at module import time.")
     GRANARY_IMPORT_OK = False
 
 CREATE_APP_PATH = '/api/v1/apps'
@@ -112,9 +112,11 @@ def get_access_token_from_instance(instance_url, redirect_uri, registration_info
 
 def build_mastodon_client(instance_url, access_token):
   """Return a Granary client for Twitter."""
-  if not GRANARY_IMPORT_OK:
-      from granary.mastodon import Mastodon
-  return Mastodon(
+  if GRANARY_IMPORT_OK:
+    from granary.mastodon import Mastodon as MastodonGranary
+  else:
+      MastodonGranary = Mastodon
+  return MastodonGranary(
     instance_url,
     access_token)
 
