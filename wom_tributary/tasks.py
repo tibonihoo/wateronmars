@@ -88,6 +88,7 @@ def get_twitter_auth_status(user_info, request = None):
     return AuthStatus(is_auth, client, auth_url)
   except Exception as e:
     logging.error(f"Failed to get a proper Twitter AuthStatus because of '{e}'")
+    return AuthStatus(False, None, None)
 
 
 def create_reference_from_timeline_summary(
