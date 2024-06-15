@@ -24,6 +24,11 @@ https://developer.twitter.com/en/docs/basics/authentication/overview/3-legged-oa
 """
 
 import urllib.request, urllib.parse, urllib.error
+
+import logging
+logger = logging.getLogger(__name__)
+
+
 import tweepy
 from granary.twitter import Twitter
 from oauth_dropins import twitter_auth
@@ -54,9 +59,8 @@ def try_get_authorized_client(
   except urllib.error.HTTPError as e:
     if e.code!=401: # HTTP Error 401: Authorization Required
       raise
-  except urllib.error.HTTPError as e:
-    if e.code!=401: # HTTP Error 401: Authorization Required
-      raise
+  except Exception as e:
+    logging.error(f"Failed to set-up the Twitter client due to '{e}'")
   return None
 
 
