@@ -175,6 +175,8 @@ def collect_new_references_for_twitter_timeline(
       timeline,
       auth,
       num_items_to_ask)
+    if not activities:
+      return None
     summary = tweet_summarizers.generate_basic_html_summary(
       activities,
       keep_only_after_datetime,
@@ -333,6 +335,8 @@ def collect_new_references_for_mastodon_timeline(
       timeline,
       auth,
       num_items_to_ask)
+    if not activities:
+      return None
     summary = tweet_summarizers.generate_basic_html_summary(
       activities,
       keep_only_after_datetime,
