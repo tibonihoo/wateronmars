@@ -124,6 +124,26 @@ when importing references from feed." % (len(url),URL_MAX_LENGTH))
   return (ref,tags)
 
 
+def get_and_patch_link(entry):
+    """Return the link.
+    If no direct link found, try to find a best effort replacement.
+    """
+    entry_link = entry.get("link", None)
+    if entry_link:
+      return entry_link
+    other_links = (
+        [ link for link in entry.get("links", [])
+          if link.rel == "enclosure" and link.href]
+        +
+        [ link for link in entry.get("links", [])
+          if link.rel != "enclosure" and link.href]
+        )
+    if not other_links:
+      return None
+    patched_link = other_links[0].href
+    entry.link = patched_link
+    return patched_link
+    
 def add_new_references_from_parsed_feed(feed, entries, default_date):
   """Create and save references from the entries found in a feedparser
   generated list.
@@ -139,7 +159,7 @@ def add_new_references_from_parsed_feed(feed, entries, default_date):
   entries_with_link = []
   # reject entries that have no link tag
   for e in entries:
-    entry_link = e.get("link",None)
+    entry_link = get_and_patch_link(e)
     if not entry_link:
       logger.warning("Skipping a feed entry without 'link' : %s." % e)
       continue

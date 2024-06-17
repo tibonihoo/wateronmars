@@ -2,18 +2,18 @@
 #
 # Copyright (C) 2013-2019 Thibauld Nion
 #
-# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
+# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars)
 #
 # WaterOnMars is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # WaterOnMars is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -60,7 +60,7 @@ class WebFeedModelTest(TestCase):
                                source=r)
     self.assertEqual(s.xmlURL,"http://mouf/bla.xml")
     self.assertEqual(s.last_update_check,self.date)
-    
+
   def test_construction_with_max_length_xmlURL(self):
     """
     Test that the max length constant guarantees that a string of
@@ -75,9 +75,9 @@ class WebFeedModelTest(TestCase):
     # Check also that url wasn't truncated
     self.assertEqual(max_length_xmlURL,s.xmlURL)
 
-    
+
 class ImportFeedSourcesFromOPMLTaskTest(TestCase):
-  
+
   def setUp(self):
     # Create 2 users but only create sources for one of them.
     self.user1 = User.objects.create_user(username="uA",password="pA")
@@ -119,7 +119,7 @@ class ImportFeedSourcesFromOPMLTaskTest(TestCase):
 </opml>
 """
     self.feeds_and_tags = import_feedsources_from_opml(opml_txt)
-    
+
   def test_check_sources_correctly_added(self):
     self.assertEqual(5,WebFeed.objects.count())
     self.assertIn("http://stallman.org/rss/rss.xml",
@@ -137,15 +137,15 @@ class ImportFeedSourcesFromOPMLTaskTest(TestCase):
     self.assertEqual("Open Culture",
                      WebFeed.objects.get(
                        xmlURL="http://www.openculture.com/feed").source.title)
-    
+
   def test_check_sources_correctly_returned(self):
     self.assertEqual(4,len(list(self.feeds_and_tags.keys())))
     returned_xmlURLs = [s.xmlURL for s in self.feeds_and_tags.keys()]
     self.assertIn("http://stallman.org/rss/rss.xml",returned_xmlURLs)
     self.assertIn("http://www.scripting.com/rss.xml",returned_xmlURLs)
     self.assertIn("http://www.openculture.com/feed",returned_xmlURLs)
-        
-    
+
+
   def test_check_tags_correctly_associated_to_sources(self):
     # Check that tags were correctly associated with the sources
     f = WebFeed.objects.get(xmlURL="http://www.scripting.com/rss.xml")
@@ -215,10 +215,10 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
   </channel>
 </rss>
 """ % ("u"*(URL_MAX_LENGTH),"u"*(URL_MAX_LENGTH))
-    
+
     f1 = feedparser.parse(rss_xml)
     self.ref_and_tags = add_new_references_from_parsed_feed(web_feed, f1.entries, None)
-    
+
   def test_references_are_added_with_correct_urls(self):
     references_in_db = list(Reference.objects.all())
     self.assertEqual(4,len(references_in_db))
@@ -228,26 +228,26 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
     max_length_urls = [u for u in ref_urls if len(u)==URL_MAX_LENGTH]
     self.assertEqual(1,len(max_length_urls))
     self.assertTrue(max_length_urls[0].startswith("http://uuu"))
-    
+
   def test_references_are_added_with_correct_title(self):
     ref_title = Reference.objects.get(url="http://www.example.com").title
     self.assertEqual("An example bookmark.",ref_title)
     ref_title = Reference.objects.get(url="http://mouf/a").title
     self.assertEqual("The mouf",ref_title)
-    ref_title = Reference.objects.get(url__contains="uuu").title 
+    ref_title = Reference.objects.get(url__contains="uuu").title
     self.assertEqual("Long",ref_title)
     # Additional check here to see if we managed to use the
     # description field to 'save' url info from oblivion.
     self.assertIn("http://uuu",
                   Reference.objects.get(url__contains="uuu").description)
-    
+
   def test_references_are_added_with_correct_sources(self):
     references_in_db = list(Reference.objects.all())
     self.assertEqual(4,len(references_in_db))
     for ref in references_in_db:
       if ref!=self.source:
         self.assertIn(self.source,ref.sources.all(),ref)
-    
+
   def test_check_metadata_correctly_associated_to_refs(self):
     self.assertEqual(3,len(self.ref_and_tags))
     urls = [r.url for r in self.ref_and_tags]
@@ -311,7 +311,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
       <!-- No guid -->
     </item>
     <item>
-      <title>The mouf</title>
+      <title>The mouf date</title>
       <!-- No link -->
       <category>test</category>
       <description>&lt;p>This is just a test&lt;/p>
@@ -326,49 +326,79 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
       <description>&lt;p>This is just a test&lt;/p>
       </description>
       <!-- No pubDate -->
-      <guid>http://mouf/a#guid</guid>
+      <guid>http://mouf/b#guid</guid>
+    </item>
+    <item>
+      <title>The helpless</title>
+      <!-- No link -->
+      <category>test</category>
+      <description>&lt;p>This is just a test&lt;/p>
+      </description>
+      <!-- No pubDate -->
+      <guid isPermaLink="false">12</guid>
+    </item>
+    <item>
+      <title>The art</title>
+      <!-- No link but an enclosure -->
+      <enclosure url="https://imgs.mouf/2023/11/17/amused.png" type="image/png" size="42"/>
+      <category>test</category>
+      <description>&lt;p>This is just a test&lt;/p>
+      </description>
+      <!-- No pubDate -->
+      <guid isPermaLink="false">123</guid>
     </item>
   </channel>
 </rss>
 """
-    
+
     f1 = feedparser.parse(self.rss_xml)
     self.default_date = date
+    print(f1.entries)
     self.ref_and_tags = add_new_references_from_parsed_feed(
         self.web_feed,
         f1.entries,
         self.default_date)
-    
+
   def test_references_are_added_with_correct_urls(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(3,len(references_in_db))
+    self.assertEqual(5, len(references_in_db))
     ref_urls = [r.url for r in references_in_db]
-    self.assertIn("http://www.example.com",ref_urls)
-    self.assertIn("http://mouf/a#guid",ref_urls)
-    
+    self.assertIn("http://www.example.com", ref_urls)
+    self.assertIn("http://mouf/a#guid", ref_urls)
+    self.assertIn("http://mouf/b#guid", ref_urls)
+    self.assertIn("https://imgs.mouf/2023/11/17/amused.png", ref_urls)
+
   def test_references_are_added_with_correct_title(self):
     ref_title = Reference.objects.get(url="http://www.example.com").title
     self.assertEqual("An example bookmark.",ref_title)
     ref_title = Reference.objects.get(url="http://mouf/a#guid").title
+    self.assertEqual("The mouf date",ref_title)
+    ref_title = Reference.objects.get(url="http://mouf/b#guid").title
     self.assertEqual("The mouf",ref_title)
-  
+    ref_title = Reference.objects.get(url="https://imgs.mouf/2023/11/17/amused.png").title
+    self.assertEqual("The art",ref_title)
+
   def test_references_are_added_with_correct_sources(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(3,len(references_in_db))
+    self.assertEqual(5,len(references_in_db))
     for ref in references_in_db:
       if ref!=self.source:
         self.assertIn(self.source,ref.sources.all(),ref)
 
   def test_references_are_added_with_default_date(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(3,len(references_in_db))
+    print(references_in_db)
+    self.assertEqual(5,len(references_in_db))
     for r in references_in_db:
+      if r.title == "The mouf date":
+        continue
       self.assertEqual(self.default_date.utctimetuple()[:6],
-                       r.pub_date.utctimetuple()[:6])
-      
+                       r.pub_date.utctimetuple()[:6],
+                       r.title)
+
   def test_dates_not_updated_even_for_dateless_items(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(3,len(references_in_db))
+    self.assertEqual(5,len(references_in_db))
     first_dates = set(r.pub_date for r in references_in_db)
     f2 = feedparser.parse(self.rss_xml)
     new_default_date = self.default_date + timedelta(days=1)
@@ -377,7 +407,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
         f2.entries,
         new_default_date)
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(3,len(references_in_db))
+    self.assertEqual(5,len(references_in_db))
     new_dates = set(r.pub_date for r in references_in_db)
     self.assertEqual(first_dates, new_dates)
 
@@ -404,7 +434,7 @@ class WebFeedCollationModelTest(TestCase):
     """
     self.assertEqual(self.feed, self.collation.feed)
     self.assertEqual(0, len(self.collation.references.all()))
-        
+
   def test_take(self):
     date = self.date + timedelta(days=1)
     r = Reference.objects.create(url="http://mouf/1",
@@ -439,11 +469,11 @@ class WebFeedCollationModelTest(TestCase):
     self.assertEqual(0, len(self.collation.references.all()))
     self.assertEqual(completion_date, self.collation.last_completed_collation_date)
     self.assertEqual(date, self.collation.latest_reference_flushed)
-    
+
 
 def remove_whitespaces(s):
   return "".join(s.split())
-    
+
 class GenerateCollatedContentTaskTest(TestCase):
 
   def test_given_2_references_sequentially_paste_their_titles_and_descriptions(self):
@@ -525,7 +555,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
 <h2><a href='{url2}'>{title2}</a></h2>
 {desc2}
 <br/>"""
-    self.collation.references.add(r2)  
+    self.collation.references.add(r2)
     return r2
 
   def test_given_empty_collation_yields_empty_results(self):
@@ -598,7 +628,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                         timeout,
                                         processing_date))
     self.assertEqual(0, len(res))
-      
+
   def test_given_too_few_ref_processing_long_enough_after_timeout_returns_collation(self):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
@@ -642,7 +672,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                         timeout,
                                         processing_date))
     self.assertEqual(0, len(res))
-    
+
   def test_given_some_ref_and_new_processing_date_create_second_collation(self):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
@@ -769,7 +799,7 @@ class GenerateCollationsTaskTest(TestCase):
                                    timeout,
                                    processing_date))
     self.assertEqual(0, len(res))
-    
+
   def test_collation_after_timeout(self):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
@@ -801,7 +831,7 @@ class GenerateCollationsTaskTest(TestCase):
                                    timeout,
                                    processing_date))
     self.assertEqual(0, len(res))
-    
+
   def test_collation_on_last_ref(self):
     last_completion_date = self.collation.last_completed_collation_date
     timeout = timedelta(days=15)
