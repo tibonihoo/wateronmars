@@ -22,6 +22,9 @@ import sys
 import re
 from collections import defaultdict
 
+import logging
+logger = logging.getLogger(__name__)
+
 from django.utils.html import strip_tags
 
 import html
@@ -30,6 +33,7 @@ import html
 MAX_CONTENT_SIZE_CHARS = 140
 HASHTAG_REGEX = re.compile(r"(^|\s)#([\w\-\.]+)", re.UNICODE)
 SUBJECT_REGEX = re.compile(r"(^\s*)([^:]{1,20})(:\s+\S+)", re.UNICODE)
+LINE_BREAK_REGEX = re.compile(r"<\s*(br\s*/?|/p)\s*>", re.UNICODE)
 NO_TAG = "<NO_TAG>"
 
 from dateutil.parser import parse as parse_date
@@ -64,16 +68,18 @@ class Tweet:
     if not matches:
       matches = SUBJECT_REGEX.findall(content)
     tags = [m[1].strip() for m in matches if len(m)>1]
+    logger.debug(f"{link}\n{content}")
     content_summary = build_content_excerpt(content)
     return Tweet(link, content_summary, author, date, tags)
 
 
 def build_content_excerpt(content_unicode):
-  content_unicode = html.unescape(strip_tags(content_unicode))
-  excerpt = content_unicode[:MAX_CONTENT_SIZE_CHARS]
+  content_unicode = LINE_BREAK_REGEX.sub("\n\n", content_unicode)
+  content_unicode = html.unescape(strip_tags(content_unicode)).strip()
+  excerpt = content_unicode[:MAX_CONTENT_SIZE_CHARS].strip()
   if len(excerpt) < len(content_unicode):
       excerpt += "(...)"
-  return excerpt
+  return excerpt.replace("\n\n", "<br>")
 
 def build_tweet_index_by_tag(data, keep_only_after_datetime, link_builder):
   reverse_index = defaultdict(list)
@@ -242,7 +248,19 @@ if __name__=="__main__":
         },
     }
     )
-  
+  activities.append(
+    {
+     "url": f"http://m/u0/0",
+     "object": {
+        "published": f"2024-01-19 19:{i:02}:00",
+        "author": {
+            "displayName": f"UserM0",
+            "username": f"u.0"
+            },
+        "content": """<p>🥳 Lorem ipsum blablabla <br />🥳</p><p>Bilbilbil ipsum ipsum 🤬<br>Lorem ipsum, lorem lorem ipsum.</p><p>➡️ <a href="https://example.com" rel="nofollow noopener noreferrer" translate="no" target="_blank"><span class="invisible">https://</span><span class="ellipsis">example</span><span class="invisible">.com</span></a></p>"""
+        },
+    }
+)
   threshold_date = parse_date("2011-01-19 17:21:00")
   html = generate_basic_html_summary(activities, threshold_date, default_link_builder)
   html_file = "./tweet_summarizer_demo.html"
