@@ -74,12 +74,14 @@ class Tweet:
 
 
 def build_content_excerpt(content_unicode):
-  content_unicode = LINE_BREAK_REGEX.sub("\n\n", content_unicode)
+  unicode_paragraph = "\u2029"
+  content_unicode = LINE_BREAK_REGEX.sub(unicode_paragraph, content_unicode)
   content_unicode = html.unescape(strip_tags(content_unicode)).strip()
   excerpt = content_unicode[:MAX_CONTENT_SIZE_CHARS].strip()
   if len(excerpt) < len(content_unicode):
       excerpt += "(...)"
-  return excerpt.replace("\n\n", "<br>")
+  return excerpt.replace(unicode_paragraph, "<br>")
+
 
 def build_tweet_index_by_tag(data, keep_only_after_datetime, link_builder):
   reverse_index = defaultdict(list)
