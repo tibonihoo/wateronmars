@@ -1,4 +1,4 @@
-Django>=4.0,<4.1
+Django>=4.1,<4.2
 feedparser
 beautifulsoup4
 oauth-dropins==6.3
@@ -9,3 +9,4 @@ six # for feedfinder2
 requests # for feedfinder2 and wom_tributary
 django-cryptography # for wom_tributary
 mox3 # from wom_tributary -> granary -> oauth_dropins..testutil !
+
