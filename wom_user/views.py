@@ -25,8 +25,7 @@ logger = logging.getLogger(__name__)
 
 from datetime import datetime
 from django.utils import timezone
-from django.utils.http import urlquote_plus
-from urllib.parse import unquote_plus as urlunquote_plus
+from urllib.parse import quote_plus, unquote_plus
 
 from django.conf import settings
 from django.urls import reverse
@@ -388,7 +387,7 @@ def user_river_source_add(request,owner_name):
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
-    src_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
+    src_info = dict( (k,unquote_plus(v)) for k,v in request.GET.items())
   else:
     src_info = None
   form = UserSourceAdditionForm(request.user, src_info,
@@ -482,7 +481,7 @@ def user_tributary_twitter_add(request,owner_name):
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
-    src_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
+    src_info = dict( (k,unquote_plus(v)) for k,v in request.GET.items())
   else:
     src_info = None
   form = UserTwitterSourceAdditionForm(
@@ -595,7 +594,7 @@ def user_collection_add(request,owner_name):
   if request.method == 'POST':
     bmk_info = request.POST
   elif request.GET: # GET
-    bmk_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
+    bmk_info = dict( (k,unquote_plus(v)) for k,v in request.GET.items())
   else:
     bmk_info = None
   form = UserBookmarkAdditionForm(request.user, bmk_info, error_class=CustomErrorList)
@@ -940,7 +939,7 @@ def user_tributary_mastodon_auth_gateway(request, owner_name, timeline_name):
     return HttpResponseForbidden()
   if not timeline_name:
     return HttpResponseBadRequest("Request should indicate the timeline name.")
-  timeline_name = urlunquote_plus(timeline_name)
+  timeline_name = unquote_plus(timeline_name)
   timelines = (
       MastodonTimeline
       .objects
@@ -999,7 +998,7 @@ def user_tributary_mastodon(request, owner_name):
       timeline.mastodon_user_access_info, request
       )
     auth_gateway_url = reverse('user_tributary_mastodon_auth_gateway',
-                               args=(request.user.username, urlquote_plus(feed.title)))
+                               args=(request.user.username, quote_plus(feed.title)))
     timeline_info = MastodonTimelineInfo.from_feed(feed, auth_status)
     connection_status_list.append(
         MastodonTimelineStatus(
@@ -1026,7 +1025,7 @@ def user_tributary_mastodon_add(request,owner_name):
   if request.method == 'POST':
     src_info = request.POST
   elif request.GET: # GET
-    src_info = dict( (k,urlunquote_plus(v)) for k,v in request.GET.items())
+    src_info = dict( (k,unquote_plus(v)) for k,v in request.GET.items())
   else:
     src_info = None
   form = UserMastodonFeedAdditionForm(
