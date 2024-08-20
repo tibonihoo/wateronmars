@@ -347,6 +347,16 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
       <!-- No pubDate -->
       <guid isPermaLink="false">123</guid>
     </item>
+    <item>
+      <title>The art</title>
+      <!-- No link but an enclosure without any url -->
+      <enclosure type="image/png" size="42"/>
+      <category>test</category>
+      <description>&lt;p>This is just a test&lt;/p>
+      </description>
+      <!-- No pubDate -->
+      <guid isPermaLink="false">123</guid>
+    </item>
   </channel>
 </rss>
 """

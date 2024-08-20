@@ -133,10 +133,10 @@ def get_and_patch_link(entry):
       return entry_link
     other_links = (
         [ link for link in entry.get("links", [])
-          if link.rel == "enclosure" and link.href]
+          if link.get("rel", None) == "enclosure" and link.get("href", None)]
         +
         [ link for link in entry.get("links", [])
-          if link.rel != "enclosure" and link.href]
+          if link.get("rel", None) != "enclosure" and link.get("href", None)]
         )
     if not other_links:
       return None
