@@ -167,7 +167,7 @@ def add_new_references_from_parsed_feed(feed, entries, default_date):
   for e in entries:
     entry_link = get_and_patch_link(e)
     if not entry_link:
-      logger.warning("Skipping a feed entry without 'link' : %s." % e)
+      logger.debug("Skipping a feed entry without 'link' : %s." % e)
       continue
     entries_with_link.append((e, entry_link))
   entries_url = [link for e, link in entries_with_link]
