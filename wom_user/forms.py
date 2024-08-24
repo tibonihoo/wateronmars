@@ -29,7 +29,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
-from wateronmars import settings
+from django.conf import settings
 
 from wom_pebbles.models import (
     URL_MAX_LENGTH,
