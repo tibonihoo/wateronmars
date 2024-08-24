@@ -29,6 +29,8 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import MultipleObjectsReturned
 
+from django.conf import settings
+
 from wom_pebbles.models import Reference, build_safe_code_from_url
 
 from wom_river.models import WebFeed
@@ -224,7 +226,7 @@ def try_get_feed_title(feed_url):
   """Try to parse and extract a feed url, returns None if anything fails.
   """
   try:
-    d = feedparser.parse(feed_url)
+    d = feedparser.parse(feed_url, agent=settings.USER_AGENT)
     return d.feed.get("title", None)
   except Exception as e:
     logger.error("Could not find title for feed at %s because of a parse problem (%s))."\
@@ -237,7 +239,7 @@ def try_get_feed_site_url(feed_url):
   Returns None if anything fails.
   """
   try:
-    d = feedparser.parse(feed_url)
+    d = feedparser.parse(feed_url, agent=settings.USER_AGENT)
     return (d.feed.get("link", None)
             or d.feed.get("publisher_detail", {}).get("href", None)
             or d.feed.get("author_detail", {}).get("href", None)
@@ -253,7 +255,8 @@ def collect_new_references_for_feed(feed):
   Return a dictionary mapping the new references to a corresponding set of tags.
   """
   try:
-    d = feedparser.parse(feed.xmlURL)
+    logger.debug(f"Parsing feed {feed.xmlURL}")
+    d = feedparser.parse(feed.xmlURL, agent=settings.USER_AGENT)
   except Exception as e:
     logger.error("Skipping feed at %s because of a parse problem (%s))."\
                  % (feed.source.url,e))
