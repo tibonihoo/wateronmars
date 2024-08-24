@@ -59,6 +59,10 @@ def get_date_from_feedparser_feed(feed):
     updated_date_utc = feed.updated_parsed[:6]
   elif "published_parsed" in feed:
     updated_date_utc = feed.published_parsed[:6]
+  elif "feed" in feed and "updated_parsed" in feed.feed:
+    updated_date_utc = feed.feed.updated_parsed[:6]
+  elif "feed" in feed and "published_parsed" in feed.feed:
+    updated_date_utc = feed.feed.published_parsed[:6]
   else:
     logger.debug("No date found for feed %s" % feed)
     return None
