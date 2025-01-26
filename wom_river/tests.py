@@ -244,7 +244,7 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
     ref_description = Reference.objects.get(url="http://mouf/a").description
     self.assertEqual("<p>This is just a test</p>",ref_description)
     ref_description = Reference.objects.get(url__contains="uuu").description
-    self.assertEqual(f"<p><i>URL: <a href='{self.too_long_url}'>{self.too_long_url}</a></i></p><p>Too long</p>",
+    self.assertEqual(f"<p><i><a href='{self.too_long_url}'>URL</a></i></p><p>Too long</p>",
                      ref_description)
 
   def test_references_are_added_with_correct_sources(self):

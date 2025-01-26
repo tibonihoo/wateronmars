@@ -47,7 +47,17 @@ logger = logging.getLogger(__name__)
 
 import html
 
-def HTMLUnescape(s):
+def UnescapedHTMLFromXMLContent(s):
+  """Ensure that the returned string is "unescaped" HTML: either the
+  consent of s itself if it's already unescaped or the result of
+  unescaping it.
+  """
+  # Tag content in RSS feeds can be found in essentially two formats:
+  # - escaped HTML-> feedparser extracts the escaped string as is
+  # - CDATA enclosed HTML -> feedparser extracts the HTML as is
+  # The following test aims at ensuring we are not "unescaping" HTML from CDATA.
+  if ("<" in s or ">" in s):
+      return s
   return html.unescape(s)
 
 
@@ -108,25 +118,19 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   tags = set()
   if entry.get("tags",None):
     tags = set([t.term for t in entry.tags])
-  description = entry.get("description", "")
-  # RSS Feed description is found in essentially two format:
-  # - escaped HTML-> feedparser extracts the escaped string as is
-  # - CDATA enclosed HTML -> feedparser extracts the HTML as is
-  # The following test aims at ensuring we are not "unescaping" HTML from CDATA.
-  if not ("<" in description or ">" in description):
-    description = HTMLUnescape(description)
+  description = UnescapedHTMLFromXMLContent(entry.get("description", ""))
   if previous_ref is None:
     url_truncated,did_truncate = sanitize_url(url)
     if did_truncate:
       # Save the full url in info to limit the loss of information
-      info = f"<p><i>URL: <a href='{url}'>{url}</a></i></p>"
+      info = f"<p><i><a href='{url}'>URL</a></i></p>"
       logger.warning("Found an url of length %d (>%d) \
 when importing references from feed." % (len(url),URL_MAX_LENGTH))
     url = url_truncated
     # set the title only for new ref (should avoid weird behaviour
     # from the user point of view)
     title = truncate_reference_title(
-       HTMLUnescape(entry.get("title") \
+       strip_tags(UnescapedHTMLFromXMLContent(entry.get("title", "")) \
                    or strip_tags(description) \
                    or url))
     ref = Reference(url=url,title=title)
@@ -313,7 +317,7 @@ def import_feedsources_from_opml(opml_txt):
       try:
         ref = Reference.objects.get(url=url_id)
       except ObjectDoesNotExist:
-        ref = Reference(url=url_id,title=HTMLUnescape(current_feed.title),
+        ref = Reference(url=url_id,title=strip_tags(UnescapedHTMLFromXMLContent(current_feed.title or "")),
                         pub_date=datetime.now(timezone.utc))
         ref.save()
       feed_source = WebFeed(source=ref,xmlURL=current_feed.xmlUrl)
