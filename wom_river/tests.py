@@ -172,8 +172,9 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
                                        last_update_check=\
                                        datetime.utcfromtimestamp(0)\
                                        .replace(tzinfo=timezone.utc))
+    self.too_long_url = f"http://{'u'*URL_MAX_LENGTH}"
     # RSS from a source that already has a mapping
-    rss_xml = """\
+    rss_xml = f"""\
 <?xml version="1.0"?>
 <rss version="2.0">
   <channel>
@@ -196,25 +197,25 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
     </item>
     <item>
       <title>Long</title>
-      <link>http://%s</link>
+      <link>{self.too_long_url}</link>
       <description>&lt;p>Too long&lt;/p>
       </description>
       <category>test</category>
       <pubDate>Sun, 17 Nov 2013 16:56:06 GMT</pubDate>
-      <guid>http://%s</guid>
+      <guid>{self.too_long_url}</guid>
     </item>
     <item>
       <title>The mouf</title>
       <link>http://mouf/a</link>
       <category>test</category>
-      <description>&lt;p>This is just a test&lt;/p>
+      <description><![CDATA[<p>This is just a test</p>]]>
       </description>
       <pubDate>Sun, 17 Nov 2013 16:56:06 GMT</pubDate>
       <guid>http://mouf/a</guid>
     </item>
   </channel>
 </rss>
-""" % ("u"*(URL_MAX_LENGTH),"u"*(URL_MAX_LENGTH))
+"""
 
     f1 = feedparser.parse(rss_xml)
     self.ref_and_tags = add_new_references_from_parsed_feed(web_feed, f1.entries, None)
@@ -236,10 +237,15 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
     self.assertEqual("The mouf",ref_title)
     ref_title = Reference.objects.get(url__contains="uuu").title
     self.assertEqual("Long",ref_title)
-    # Additional check here to see if we managed to use the
-    # description field to 'save' url info from oblivion.
-    self.assertIn("http://uuu",
-                  Reference.objects.get(url__contains="uuu").description)
+
+  def test_references_are_added_with_correct_description(self):
+    ref_description = Reference.objects.get(url="http://www.example.com").description
+    self.assertEqual("<p>An example bookmark.</p>",ref_description)
+    ref_description = Reference.objects.get(url="http://mouf/a").description
+    self.assertEqual("<p>This is just a test</p>",ref_description)
+    ref_description = Reference.objects.get(url__contains="uuu").description
+    self.assertEqual(f"<p><i>URL: <a href='{self.too_long_url}'>{self.too_long_url}</a></i></p><p>Too long</p>",
+                     ref_description)
 
   def test_references_are_added_with_correct_sources(self):
     references_in_db = list(Reference.objects.all())

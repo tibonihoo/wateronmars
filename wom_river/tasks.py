@@ -108,24 +108,31 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   tags = set()
   if entry.get("tags",None):
     tags = set([t.term for t in entry.tags])
+  description = entry.get("description", "")
+  # RSS Feed description is found in essentially two format:
+  # - escaped HTML-> feedparser extracts the escaped string as is
+  # - CDATA enclosed HTML -> feedparser extracts the HTML as is
+  # The following test aims at ensuring we are not "unescaping" HTML from CDATA.
+  if not ("<" in description or ">" in description):
+    description = HTMLUnescape(description)
   if previous_ref is None:
     url_truncated,did_truncate = sanitize_url(url)
     if did_truncate:
       # Save the full url in info to limit the loss of information
-      info = "<WOM had to truncate the following URL: %s>" % url
+      info = f"<p><i>URL: <a href='{url}'>{url}</a></i></p>"
       logger.warning("Found an url of length %d (>%d) \
 when importing references from feed." % (len(url),URL_MAX_LENGTH))
     url = url_truncated
     # set the title only for new ref (should avoid weird behaviour
     # from the user point of view)
     title = truncate_reference_title(
-      HTMLUnescape(entry.get("title") \
-                   or strip_tags(entry.get("description")) \
+       HTMLUnescape(entry.get("title") \
+                   or strip_tags(description) \
                    or url))
     ref = Reference(url=url,title=title)
   else:
     ref = previous_ref
-  ref.description = " ".join((info,entry.get("description","")))
+  ref.description = info + description
   ref.pub_date = date
   return (ref,tags)
 
