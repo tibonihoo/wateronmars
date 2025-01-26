@@ -3,36 +3,54 @@
 
 import re
 
-from bs4 import BeautifulSoup
+from html_sanitizer.sanitizer import (
+    Sanitizer,
+    sanitize_href,
+    bold_span_to_strong,
+    italic_span_to_em,
+    tag_replacer,
+    target_blank_noopener
+    )
 
 from django import template
-from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 
 register = template.Library()
 
-DANGEROUS_TAGS_NAMES = "(span|div|script)"
-DANGEROUS_TAGS_RE = re.compile("(<{0}\s*/?>|<{0}\s+[^>]+>|</{0}>)"\
-                               .format(DANGEROUS_TAGS_NAMES))
+SANITIZATION_SETTINGS = {
+    "tags": {
+        "a", "h1", "h2", "h3", "strong", "em", "p", "ul", "ol",
+        "li", "br", "sub", "sup", "hr", "img", "b", "i"
+    },
+    "attributes": {"a": ("href", "name", "target", "title", "id", "rel"),
+                   "img": ("src", "title")
+                   },
+    "empty": {"hr", "a", "br", "img"},
+    "separate": {"a", "p", "li"},
+    "whitespace": {"br"},
+    "keep_typographic_whitespace": False,
+    "add_nofollow": False,
+    "autolink": False,
+    "sanitize_href": sanitize_href,
+    "element_preprocessors": [
+        # convert span elements into em/strong if a matching style rule
+        # has been found. strong has precedence, strong & em at the same
+        # time is not supported
+        bold_span_to_strong,
+        italic_span_to_em,
+        tag_replacer("form", "p"),
+        target_blank_noopener,
+    ],
+    "element_postprocessors": [],
+    "is_mergeable": lambda e1, e2: True,
+}
 
-def auto_esc(text,autoescape):
-  """
-  Escape or not (just to factorize a little bit of code).
-  """
-  if autoescape:
-    return conditional_escape(text)
-  else:
-    return text
-
-@register.filter(needs_autoescape=True)
-def defang_html(text, autoescape=None):
+@register.filter(needs_autoescape=False)
+def defang_html(text):
   """
   Remove tags mentionned in the space separated list 'tags' given as input.
   """
-  soup = BeautifulSoup(auto_esc(text,autoescape), "html.parser")
-  for tag in soup.find_all("script"):
-    tag.replace_with('')
-  html = str(soup)
-  text = DANGEROUS_TAGS_RE.sub(" ",html)
-  return mark_safe(text)
+  sanitizer = Sanitizer(settings=SANITIZATION_SETTINGS)
+  text_sanitized = sanitizer.sanitize(text)
+  return mark_safe(text_sanitized)
 

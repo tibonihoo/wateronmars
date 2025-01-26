@@ -293,8 +293,7 @@ class HTMLSanitizersTemplateTagsTest(TestCase):
     html = """\
 <div class="mouf"><p><span><img/>Hello</span><b>World!</b><script>...
     </script></p></div>"""
-    safer_html = """\
- <p> <img/>Hello <b>World!</b></p> """
+    safer_html = "<p><img>Hello<b>World!</b></p>"
     output = defang_html(html)
     self.assertEqual(safer_html,output)
 
@@ -302,8 +301,7 @@ class HTMLSanitizersTemplateTagsTest(TestCase):
     html = """\
 <div class="mouf"><p><span><img/>Hello <b>World!</b><script>...
     </script></p></div>"""
-    safer_html = """\
- <p> <img/>Hello <b>World!</b> </p> """
+    safer_html = "<p><img>Hello <b>World!</b></p>"
     output = defang_html(html)
     self.assertEqual(safer_html,output)
 
@@ -311,8 +309,7 @@ class HTMLSanitizersTemplateTagsTest(TestCase):
     html = """\
 <div class="mouf"><p><span><img/>Hello <b>World!</b><script>...
     </script></div>"""
-    safer_html = """\
- <p> <img/>Hello <b>World!</b> </p> """
+    safer_html = "<p><img>Hello <b>World!</b></p>"
     output = defang_html(html)
     self.assertEqual(safer_html,output)
 
@@ -320,7 +317,6 @@ class HTMLSanitizersTemplateTagsTest(TestCase):
     html = """\
 <div class="mouf"><p><span><img/>Hello <b>World!<script>...
     </script></p></div>"""
-    safer_html = """\
- <p> <img/>Hello <b>World!</b> </p> """
+    safer_html = "<p><img>Hello <b>World!</b></p>"
     output = defang_html(html)
     self.assertEqual(safer_html,output)

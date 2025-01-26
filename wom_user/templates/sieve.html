@@ -58,7 +58,7 @@ prepareKeyBindings();
     </div>
     <div id="wom-ref{{forloop.counter0}}-content" class="wom-reference-content panel-body carousel-fig" role="article">
       <h1 id="wom-ref{{forloop.counter0}}-title">{{ rust.reference.title }}</h1>
-      {{ rust.reference.description|safe|defang_html }}
+      {{ rust.reference.description|defang_html }}
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 

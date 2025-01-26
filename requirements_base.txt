@@ -9,4 +9,4 @@ six # for feedfinder2
 requests # for feedfinder2 and wom_tributary
 django-cryptography # for wom_tributary
 mox3 # from wom_tributary -> granary -> oauth_dropins..testutil !
-
+html-sanitizer
