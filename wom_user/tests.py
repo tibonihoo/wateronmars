@@ -25,6 +25,7 @@ from .test_view_decorators import *
 from .test_userprofile import *
 from .test_collection import *
 from .test_river import *
+from .test_sieve import *
 from .test_tributary import *
 from .test_tributary_mastodon import *
 
