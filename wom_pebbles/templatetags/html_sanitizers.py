@@ -23,10 +23,10 @@ SANITIZATION_SETTINGS = {
         "li", "br", "sub", "sup", "hr", "img", "b", "i"
     },
     "attributes": {"a": ("href", "name", "target", "title", "id", "rel"),
-                   "img": ("src", "title")
+                   "img": ("src", "alt")
                    },
     "empty": {"hr", "a", "br", "img"},
-    "separate": {"a", "p", "li"},
+    "separate": {"a", "p", "li", "img"},
     "whitespace": {"br"},
     "keep_typographic_whitespace": False,
     "add_nofollow": False,
