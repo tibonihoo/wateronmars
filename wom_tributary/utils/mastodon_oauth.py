@@ -32,6 +32,9 @@ logger = logging.getLogger(__name__)
 import requests
 
 try:
+    # fake the import made (but unused!) by one of the dependecies of granary (oauth_dropins)
+    import sys
+    sys.modules['webapp2'] = {"fake": "fake"}
     from granary.mastodon import Mastodon, source
     GRANARY_IMPORT_OK = True
 except ImportError as e:
