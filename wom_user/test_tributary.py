@@ -20,8 +20,7 @@
 
 import mock
 
-from datetime import datetime
-from django.utils import timezone
+from datetime import datetime, timezone
 
 from django.urls import reverse
 

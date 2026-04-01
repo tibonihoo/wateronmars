@@ -19,8 +19,7 @@
 #
 
 
-import datetime
-from django.utils import timezone
+from datetime import datetime, timezone
 
 from django.test import TestCase
 from django.db import IntegrityError
@@ -49,7 +48,7 @@ if URL_MAX_LENGTH>255:
 class ReferenceModelTest(TestCase):
 
   def setUp(self):
-    self.test_date = datetime.datetime.now(timezone.utc)
+    self.test_date = datetime.now(timezone.utc)
 
   def test_construction_defaults(self):
     """
@@ -101,7 +100,7 @@ class ReferenceModelTest(TestCase):
 
 
   def test_get_productions(self):
-    date = datetime.datetime.now(timezone.utc)
+    date = datetime.now(timezone.utc)
     source = Reference.objects.create(
       url="http://mouf",
       title="mouf",
@@ -211,7 +210,7 @@ class UtilityFunctionsTests(TestCase):
 class ImportReferencesFromNSBookmarkListTaskTest(TestCase):
 
   def setUp(self):
-    date = datetime.datetime.now(timezone.utc)
+    date = datetime.now(timezone.utc)
     self.source = Reference.objects.create(
       url="http://mouf",
       title="mouf",

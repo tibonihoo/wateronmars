@@ -20,9 +20,7 @@
 
 import json
 
-from datetime import datetime
-from datetime import timedelta
-from django.utils import timezone
+from datetime import datetime, timedelta, timezone
 
 from django.urls import reverse
 

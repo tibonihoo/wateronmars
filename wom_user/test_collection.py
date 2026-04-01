@@ -18,10 +18,8 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
-
-from django.utils import timezone
 
 from django.urls import reverse
 

@@ -19,8 +19,7 @@
 #
 
 from urllib.parse import urlparse
-from datetime import datetime
-from django.utils import timezone
+from datetime import datetime, timezone
 from django.urls import reverse
 
 from django import forms

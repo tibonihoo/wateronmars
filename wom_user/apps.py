@@ -74,8 +74,7 @@ NS_BOOKMARKS_TXT_MORE_TEMPLATE = """\
 """
 
 def setup_demo():
-  from datetime import datetime
-  from django.utils import timezone  
+  from datetime import datetime, timezone  
   from django.contrib.auth.models import User
   
   from wom_user.tasks import (

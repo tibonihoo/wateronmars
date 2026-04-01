@@ -22,8 +22,7 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import MultipleObjectsReturned
 
-from datetime import datetime
-from django.utils import timezone
+from datetime import datetime, timezone
 
 from django.conf import settings
 from wom_user.settings import (

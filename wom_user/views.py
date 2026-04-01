@@ -24,7 +24,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
-from django.utils import timezone
 from urllib.parse import quote_plus, unquote_plus
 
 from django.conf import settings

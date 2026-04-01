@@ -2,7 +2,7 @@
 
 import datetime
 from django.db import migrations, models
-from django.utils.timezone import utc
+from datetime import timezone
 
 
 class Migration(migrations.Migration):
@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='webfeedcollation',
             name='latest_reference_flushed',
-            field=models.DateTimeField(default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc), verbose_name='latest reference flushed'),
+            field=models.DateTimeField(default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc), verbose_name='latest reference flushed'),
         ),
     ]

@@ -27,11 +27,10 @@ from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.models import Reference
 
 
-from django.utils import timezone
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
-import datetime
+from datetime import datetime, timezone
 from urllib import request
 from urllib.parse import urlparse
 from collections import namedtuple
@@ -129,7 +128,7 @@ def import_references_from_ns_bookmark_list(nsbmk_txt):
   Return a dictionary mapping each reference with the BookmarkMetadata
   associated to it according to the input content.
   """
-  date_now = datetime.datetime.now(timezone.utc)
+  date_now = datetime.now(timezone.utc)
   # Parse the file
   collected_bmks = parse_netscape_bookmarks(nsbmk_txt)
   if not collected_bmks:
@@ -162,7 +161,7 @@ when importing Netscape-style bookmark list." % (len(u),URL_MAX_LENGTH))
     u = u_truncated
     t = bmk_info.get("title") or build_reference_title_from_url(u)
     if "posix_timestamp" in bmk_info:
-      d = datetime.datetime\
+      d = datetime\
                   .utcfromtimestamp(float(bmk_info["posix_timestamp"]))\
                   .replace(tzinfo=timezone.utc)
     else:

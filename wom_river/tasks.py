@@ -21,8 +21,8 @@
 import feedparser
 from bs4 import BeautifulSoup
 
-from datetime import datetime
-from django.utils import timezone
+from datetime import datetime, timezone
+
 from django.utils.html import strip_tags
 
 from django.db import transaction

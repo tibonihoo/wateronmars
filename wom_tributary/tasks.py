@@ -18,9 +18,8 @@
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from datetime import timedelta
-from datetime import datetime
-from django.utils import timezone
+from datetime import datetime, timedelta, timezone
+
 from django.db import transaction
 
 from wom_pebbles.models import Reference
