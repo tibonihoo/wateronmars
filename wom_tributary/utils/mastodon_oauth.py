@@ -34,7 +34,9 @@ import requests
 try:
     # fake the import made (but unused!) by one of the dependecies of granary (oauth_dropins)
     import sys
-    sys.modules['webapp2'] = {"fake": "fake"}
+    class Fake(object):
+        pass
+    sys.modules['webapp2'] = Fake()
     from granary.mastodon import Mastodon, source
     GRANARY_IMPORT_OK = True
 except ImportError as e:

@@ -1,4 +1,4 @@
-Django>=5.1,<5.2
+Django>=5.2.12,<6
 feedparser
 beautifulsoup4
 oauth-dropins==6.3
