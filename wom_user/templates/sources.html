@@ -39,12 +39,13 @@ jQuery.ias({
   <li><h5>{% trans "Syndicated sources" %}</h5>
     <ul class="list-unstyled">
       {% for feed in tagged_web_feeds %}
-      <li><img src="{{ feed.source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" height="14" alt="🌎" style="padding-right:.5em;"/>
+      <li>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
 {% if visitor_name == owner_name  %}
           <a href="{% url 'user_river_source_item' visitor_name feed.source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
 {% endif  %}
           <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
+          <img src="{{ feed.source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" height="14" alt="" style="padding-right:.5em;"/>
       </li>
       {% endfor %}
     </ul>
@@ -61,16 +62,17 @@ jQuery.ias({
   <ul id="sources_list" class="list-unstyled">
    {% for source in other_sources %}
    {% if source.url != "#internal-bookmark-import" %}
-   <li class="source_def"><img src="{{ source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" height="14" alt="🌎" style="padding-right:.5em;"/>
+   <li class="source_def">
     {% if visitor_name == owner_name  %}
      <a href="{% url 'user_river_source_item' visitor_name source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
     {% endif %}
      <a href="{{ source.url }}">{{ source.title }}</a>
-    {% endif %}
+     <img src="{{ source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" height="14" alt="" style="padding-right:.5em;"/>
    </li>
+   {% endif %}
    {% endfor %}
-  </li>
-</ul>
+  </ul>
+</li>  
 {% else %}
   {% if tagged_web_feeds or generated_sources %}
   <div class="alert alert-info alert-dismissable fade in" style="margin-top:1em;">
