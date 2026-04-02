@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load adapt_http_to_https %}
 
 {% block title %}
 {% trans "Sources" %}
@@ -37,7 +38,7 @@ jQuery.ias({
   <li><h5>{% trans "Syndicated sources" %}</h5>
     <ul class="list-unstyled">
       {% for feed in tagged_web_feeds %}
-      <li><img src="{{ feed.source.url }}/favicon.ico" alt="🌎" style="padding-right:.5em;"/>
+      <li><img src="{% adapt_http_to_https feed.source.url %}/favicon.ico" alt="🌎" style="padding-right:.5em;"/>
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
 {% if visitor_name == owner_name  %}
           <a href="{% url 'user_river_source_item' visitor_name feed.source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
