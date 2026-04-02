@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load adapt_http_to_https %}
+{% load join_with_path %}
 
 {% block title %}
 {% trans "Source:" %} {{ ref_title }}
@@ -7,7 +9,7 @@
 
 {% block content %}
 
-<h4><img src="https://plus.google.com/_/favicon?domain={{ ref_url }}" style="padding-right:.5em;"/>{{ ref_title }}</h4>
+<h4><img src="{{ ref_url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}"  width="14" height="14" alt="🌎" style="padding-right:.5em;"/>{{ ref_title }}</h4>
 
 <p><a href="{{ ref_url }}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-globe"></i>{% trans "View on site." %}</a></p>
 
