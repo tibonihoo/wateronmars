@@ -40,6 +40,8 @@ from wom_pebbles.tasks import (
     )
 
 from wom_pebbles.templatetags.html_sanitizers  import defang_html
+from wom_pebbles.templatetags.adapt_http_to_https import adapt_http_to_https
+from wom_pebbles.templatetags.join_with_path import join_with_path
 
 
 if URL_MAX_LENGTH>255:
@@ -319,3 +321,64 @@ class HTMLSanitizersTemplateTagsTest(TestCase):
     safer_html = "<p><img>Hello <b>World!</b></p>"
     output = defang_html(html)
     self.assertEqual(safer_html,output)
+
+
+class AdaptHttpToHttpsTemplateTagsTest(TestCase):
+
+  def _create_request(self, *, secure: bool):
+      class FakeRequest:
+          def is_secure(self):
+              return secure
+      r = FakeRequest()
+      return r
+
+  def test_given_https_on_secure_request_keep_same(self):
+    url_string = "https://example.com"
+    request = self._create_request(secure=True)
+    expected_adapted_url = url_string
+    output = adapt_http_to_https(url_string, request)
+    self.assertEqual(expected_adapted_url, output)
+
+  def test_given_https_on_un_secure_request_keep_same(self):
+    url_string = "https://example.com"
+    request = self._create_request(secure=False)
+    expected_adapted_url = url_string
+    output = adapt_http_to_https(url_string, request)
+    self.assertEqual(expected_adapted_url, output)
+    
+  def test_given_http_on_secure_request_change_to_https(self):
+    url_string = "http://example.com"
+    request = self._create_request(secure=True)
+    expected_adapted_url = "https://example.com"
+    output = adapt_http_to_https(url_string, request)
+    self.assertEqual(expected_adapted_url, output)
+    
+  def test_given_http_on_un_secure_request_keep_same(self):
+    url_string = "http://example.com"
+    request = self._create_request(secure=False)
+    expected_adapted_url = url_string
+    output = adapt_http_to_https(url_string, request)
+    self.assertEqual(expected_adapted_url, output)
+
+  def test_given_http_on_incorrect_request_keep_same(self):
+    url_string = "http://example.com"
+    request = None
+    expected_adapted_url = url_string
+    output = adapt_http_to_https(url_string, request)
+    self.assertEqual(expected_adapted_url, output)
+
+
+class JoinWithPathTemplateTagsTest(TestCase):
+
+  CASES = [
+      ("https://example.com", "sub/path/"),
+      ("https://example.com/", "sub/path/"),
+      ("https://example.com", "/sub/path/"),
+      ("https://example.com/", "/sub/path/"),
+      ]
+  
+  def test_joined_path_is_correct_in_all_cases(self):
+      expected_joined = "https://example.com/sub/path/"
+      for top, sub in self.CASES:
+          joined = join_with_path(top, sub)
+          self.assertEqual(expected_joined, joined, f"'{top}' and '{sub}' failed to join as '{expected_joined}'.")
