@@ -45,7 +45,7 @@ jQuery.ias({
           <a href="{% url 'user_river_source_item' visitor_name feed.source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
 {% endif  %}
           <a href="{{ feed.source.url }}">{{ feed.source.title }}</a>
-          <img src="{{ feed.source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" height="14" alt="" style="padding-right:.5em;"/>
+          <img src="{{ feed.source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" alt="🔗" style="padding-right:.5em;"/>
       </li>
       {% endfor %}
     </ul>
@@ -67,7 +67,7 @@ jQuery.ias({
      <a href="{% url 'user_river_source_item' visitor_name source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
     {% endif %}
      <a href="{{ source.url }}">{{ source.title }}</a>
-     <img src="{{ source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" height="14" alt="" style="padding-right:.5em;"/>
+     <img src="{{ source.url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" alt="🔗" style="padding-right:.5em;"/>
    </li>
    {% endif %}
    {% endfor %}
