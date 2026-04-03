@@ -35,6 +35,7 @@ from wom_pebbles.models import Reference, build_safe_code_from_url
 
 from wom_river.models import WebFeed
 from wom_river.utils.read_opml import parse_opml
+from wom_river.utils.feed_status import FeedStatus
 
 from wom_pebbles.models import URL_MAX_LENGTH
 
@@ -264,6 +265,7 @@ def try_get_feed_site_url(feed_url):
                  % (d.feed.source.url,e))
     return None
 
+    
 
 def collect_new_references_for_feed(feed):
   """Get the feed data from its URL and collect the new references into the db.
@@ -272,14 +274,20 @@ def collect_new_references_for_feed(feed):
   try:
     logger.debug(f"Parsing feed {feed.xmlURL}")
     d = feedparser.parse(feed.xmlURL, agent=settings.USER_AGENT)
+    status = d.status
+    actual_href = d.get("href", feed.xmlURL)
   except Exception as e:
     logger.error("Skipping feed at %s because of a parse problem (%s))."\
                  % (feed.source.url,e))
-    return []
+    status = FEED_STATUS_EXCEPTION
+    actual_href = None
   now = datetime.now(timezone.utc)
+  feed_status = FeedStatus.check_and_record(feed, status, actual_href, now)
+  if feed_status.is_broken:
+      logger.warning(f"Feed at {feed.xmlURL} currently appears broken ({feed_status.diagnostic}).")
+      return []
   default_date = get_date_from_feedparser_feed(d) or now
   return add_new_references_from_parsed_feed(feed, d.entries, default_date)
-
 
 
 def collect_news_from_feeds(feeds):
@@ -293,7 +301,7 @@ def collect_news_from_all_feeds():
   """Fetch and parse all feeds to collect new items and fill the db of
   References with them.
   """
-  feeds = WebFeed.objects.iterator()
+  feeds = WebFeed.objects.exclude(permanent_failure_detected=True).iterator()
   collect_news_from_feeds(feeds)
 
 

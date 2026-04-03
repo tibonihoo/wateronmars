@@ -36,9 +36,28 @@ class WebFeed(models.Model):
   xmlURL = models.CharField(max_length=URL_MAX_LENGTH)
   # Date marking the last time the source was checked for an update
   last_update_check = models.DateTimeField('last update')
-  # Time before considering an item obsolete
+  # Time before considering an item obsolete
   item_relevance_duration = models.DurationField(
       default=DEFAULT_RELEVANCE_DURATION)
+  # Wether the field's last update failed
+  last_update_failed = models.BooleanField(default=False)
+  # Whether the field is considered as permanently broken
+  permanent_failure_detected = models.BooleanField(default=False)
+  # When was the field last detected as permanently broken
+  permanent_failure_last_detection_date = models.DateTimeField(
+      default=datetime.utcfromtimestamp(0).replace(tzinfo=timezone.utc)
+      )
+  # Indication of why the field was detected as permanently broken
+  permanent_failure_diagnotic = models.CharField(max_length=URL_MAX_LENGTH, default="")
+  
+  def set_permanent_failure(self, diagnostic, diagnostic_date):
+    """Mark feed as permanently broken and add some information.
+
+    Note: calling save() is the caller's responsibility.
+    """
+    self.permanent_failure_detected = True
+    self.permanent_failure_last_detection_date = diagnostic_date
+    self.permanent_failure_diagnostic = diagnostic
 
 
 DEFAULT_FLUSHED_PUB_DATE = datetime.fromtimestamp(0, tz=timezone.utc)

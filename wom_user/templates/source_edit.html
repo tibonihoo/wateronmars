@@ -44,7 +44,7 @@
   {% if form.errors %}
   <div class="alert alert-danger">
     <p>{% trans "Please check the information below." %}</p>
-    {{ feedForms.non_field_errors|safe }}
+    {{ form.non_field_errors|safe }}
   </div>
   {% endif %}
   {% if form.follow.errors %}
@@ -53,7 +53,12 @@
   <div class="form-group">
   {% endif %}
     <span class="col-sm-2 control-label">
-      <label><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.2em"/></label><br/>
+      <label>
+        {% if form.feed.permanent_failure_detected  %}
+        <i class="text-danger glyphicon glyphicon-ban-circle" title="{% trans "Feed broken and permanently skipped" %} ({{ form.feed.permanent_failure_diagnostic }} since {{ form.feed.permanent_failure_last_detection_date }}) "></i>
+        {% endif  %}
+        <img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.2em"/>
+      </label><br/>
       <i class="glyphicon glyphicon-filter" style="padding-top:.5em"></i>
     </span>
   <p class="form-control-static"><a href="{{ feed_url }}">{{ feed_url }}</a></p>
