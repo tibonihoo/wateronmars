@@ -45,7 +45,7 @@ class WebFeed(models.Model):
   permanent_failure_detected = models.BooleanField(default=False)
   # When was the field last detected as permanently broken
   permanent_failure_last_detection_date = models.DateTimeField(
-      default=datetime.utcfromtimestamp(0).replace(tzinfo=timezone.utc)
+      default=datetime.fromtimestamp(0, timezone.utc)
       )
   # Indication of why the field was detected as permanently broken
   permanent_failure_diagnotic = models.CharField(max_length=URL_MAX_LENGTH, default="")

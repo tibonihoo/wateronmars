@@ -119,9 +119,8 @@ def add_new_reference_from_platform_timeline_summary(
   summary_url = "wom-tributary:/{}/timeline/{}/{}".format(
     platform,
     timeline.username if hasattr(timeline, "username") else hash(timeline),
-    (date - datetime.utcfromtimestamp(0)
-      .replace(tzinfo=timezone.utc)).total_seconds()
-    )
+    (date - datetime.fromtimestamp(0, timezone.utc)).total_seconds()
+      )
   same_refs = Reference.objects.filter(url=summary_url).all()
   previous_ref = same_refs[0] if same_refs else None
   r = create_reference_from_timeline_summary(

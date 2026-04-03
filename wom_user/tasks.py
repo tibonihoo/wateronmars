@@ -172,8 +172,7 @@ def get_unknown_reference():
   except ObjectDoesNotExist:
     s = Reference(url="<unknown>",title="<unknown>",
                   pin_count=1,
-                  pub_date=datetime.utcfromtimestamp(0)\
-                  .replace(tzinfo=timezone.utc))        
+                  pub_date=datetime.fromtimestamp(0, timezone.utc))        
     s.save()
     return s
 

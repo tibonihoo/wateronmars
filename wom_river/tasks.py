@@ -329,8 +329,7 @@ def import_feedsources_from_opml(opml_txt):
                         pub_date=datetime.now(timezone.utc))
         ref.save()
       feed_source = WebFeed(source=ref,xmlURL=current_feed.xmlUrl)
-      feed_source.last_update_check = datetime.utcfromtimestamp(0)\
-                                              .replace(tzinfo=timezone.utc)
+      feed_source.last_update_check = datetime.fromtimestamp(0, timezone.utc)
       newly_referenced_source.append(ref)
       db_new_feedsources.append(feed_source)
     feeds_and_tags.append((feed_source,current_feed.tags))
@@ -413,12 +412,10 @@ def yield_collated_reference(url_parent_path, feed, feed_collation,
       source_url_code.rstrip("/"),
       feed_url_code,
       int((pub_date
-           - datetime.utcfromtimestamp(0)
-           .replace(tzinfo=timezone.utc))
+           - datetime.fromtimestamp(0, timezone.utc))
           .total_seconds()),
       int((earliest_pub_date
-           - datetime.utcfromtimestamp(0)
-           .replace(tzinfo=timezone.utc))
+           - datetime.fromtimestamp(0, timezone.utc))
           .total_seconds())
           )
   same_refs = Reference.objects.filter(url=url).all()

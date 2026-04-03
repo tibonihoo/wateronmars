@@ -170,9 +170,7 @@ class AddReferencesFromFeedParserEntriesTaskTest(TestCase):
       pub_date=date)
     web_feed  = WebFeed.objects.create(xmlURL="http://mouf/rss.xml",
                                        source=self.source,
-                                       last_update_check=\
-                                       datetime.utcfromtimestamp(0)\
-                                       .replace(tzinfo=timezone.utc))
+                                       last_update_check=datetime.fromtimestamp(0, timezone.utc))
     self.too_long_url = f"http://{'u'*URL_MAX_LENGTH}"
     # RSS from a source that already has a mapping
     rss_xml = f"""\
@@ -284,8 +282,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
         xmlURL="http://mouf/rss.xml",
         source=self.source,
         last_update_check=\
-        datetime.utcfromtimestamp(0)\
-        .replace(tzinfo=timezone.utc))
+        datetime.fromtimestamp(0, timezone.utc))
     # RSS from a source that already has a mapping
     self.rss_xml = """\
 <?xml version="1.0"?>
@@ -442,7 +439,7 @@ class WebFeedCollationModelTest(TestCase):
         source=self.source)
     self.collation = WebFeedCollation.objects.create(
         feed=self.feed,
-        last_completed_collation_date=datetime.min.replace(tzinfo=timezone.utc))
+        last_completed_collation_date=datetime.fromtimestamp(0, timezone.utc))
 
   def test_construction_defaults(self):
     """
@@ -536,7 +533,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
         source=self.source)
     self.collation = WebFeedCollation.objects.create(
         feed=self.feed,
-        last_completed_collation_date=datetime.min.replace(tzinfo=timezone.utc))
+        last_completed_collation_date=datetime.fromtimestamp(0, timezone.utc))
     self.min_num_ref_target = 2
     self.max_num_ref_target = 20
     self.timeout = timedelta(days=2)
@@ -545,7 +542,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
     title1 = "Hop 1"
     url1 = "http://mouf/1"
     desc1 = "<b>glop</b> bop."
-    date1 = datetime.utcfromtimestamp(10).replace(tzinfo=timezone.utc)
+    date1 = datetime.fromtimestamp(10, timezone.utc)
     r1 = Reference.objects.create(url=url1,
                                   title=title1,
                                   description=desc1,
@@ -562,7 +559,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
     title2 = "Arf 2"
     url2 = "http://mouf/2"
     desc2 = "bip <i>bli</i>"
-    date2 = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
+    date2 = datetime.fromtimestamp(20, timezone.utc)
     r2 = Reference.objects.create(url=url2,
                                   title=title2,
                                   description=desc2,
@@ -582,7 +579,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                         self.min_num_ref_target,
                                         self.max_num_ref_target,
                                         self.timeout,
-                                        datetime.utcnow()))
+                                        datetime.now(timezone.utc)))
     self.assertEqual(0, len(res))
 
   def test_given_0_ref_target_does_not_output_empty_content_ref(self):
@@ -592,7 +589,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
                                         0,
                                         self.max_num_ref_target,
                                         self.timeout,
-                                        datetime.utcnow()))
+                                        datetime.now(timezone.utc)))
     self.assertEqual(0, len(res))
 
   def test_given_ref_added_and_processing_before_timeout_no_collation_returned(self):
@@ -733,7 +730,7 @@ class YieldCollatedReferencesTaskTest(TestCase):
     for i in range(100):
         title = f"Too {i}"
         desc = "much"
-        date = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
+        date = datetime.fromtimestamp(20, timezone.utc)
         r = Reference.objects.create(url=f"http://more/{i}",
                                     title=title,
                                     description=desc,
@@ -763,7 +760,7 @@ class GenerateCollationsTaskTest(TestCase):
         source=self.source)
     self.collation = WebFeedCollation.objects.create(
         feed=self.feed,
-        last_completed_collation_date=datetime.min.replace(tzinfo=timezone.utc))
+        last_completed_collation_date=datetime.fromtimestamp(0, timezone.utc))
     self.min_num_ref_target = 2
     self.timeout = timedelta(days=2)
     self.r1 = self._add_reference_1()
@@ -773,7 +770,7 @@ class GenerateCollationsTaskTest(TestCase):
     title1 = "Hop 1"
     url1 = "http://mouf/1"
     desc1 = "<b>glop</b> bop."
-    date1 = datetime.utcfromtimestamp(10).replace(tzinfo=timezone.utc)
+    date1 = datetime.fromtimestamp(10, timezone.utc)
     r1 = Reference.objects.create(url=url1,
                                   title=title1,
                                   description=desc1,
@@ -789,7 +786,7 @@ class GenerateCollationsTaskTest(TestCase):
     title2 = "Arf 2"
     url2 = "http://mouf/2"
     desc2 = "bip <i>bli</i>"
-    date2 = datetime.utcfromtimestamp(20).replace(tzinfo=timezone.utc)
+    date2 = datetime.fromtimestamp(20, timezone.utc)
     r2 = Reference.objects.create(url=url2,
                                   title=title2,
                                   description=desc2,

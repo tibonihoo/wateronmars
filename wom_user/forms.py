@@ -314,8 +314,7 @@ class UserSourceAdditionForm(forms.Form):
       # assume that either form_feed_url or form_url have been
       # validated as a valid feed url
       new_feed.xmlURL = form_feed_url or form_url
-      new_feed.last_update_check = datetime.utcfromtimestamp(0)\
-                                           .replace(tzinfo=timezone.utc)
+      new_feed.last_update_check = datetime.fromtimestamp(0, timezone.utc)
       new_feed.save()
     with transaction.atomic():
       source_ref.add_pin()
@@ -451,8 +450,7 @@ class UserTwitterSourceAdditionForm(forms.Form):
         source=twitter_source, title=form_title)
       new_feed.last_update_check = (
         datetime
-        .utcfromtimestamp(0)
-        .replace(tzinfo=timezone.utc)
+        .fromtimestamp(0, timezone.utc)
         )
       new_feed.save()
     with transaction.atomic():
@@ -574,8 +572,7 @@ class UserMastodonFeedAdditionForm(forms.Form):
         title=form_title)
       new_feed.last_update_check = (
         datetime
-        .utcfromtimestamp(0)
-        .replace(tzinfo=timezone.utc)
+        .fromtimestamp(0, timezone.utc)
         )
       new_feed.save()
     with transaction.atomic():
