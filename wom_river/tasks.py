@@ -42,11 +42,12 @@ from wom_pebbles.models import URL_MAX_LENGTH
 from wom_pebbles.tasks import truncate_reference_title
 from wom_pebbles.tasks import sanitize_url
 
+import html
 
 import logging
 logger = logging.getLogger(__name__)
 
-import html
+WOM_UNSANITIZED_LINK_ENTRY_KEY = "wom_unsanitized_link"
 
 def UnescapedHTMLFromXMLContent(s):
   """Ensure that the returned string is "unescaped" HTML: either the
@@ -121,15 +122,10 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
     tags = set([t.term for t in entry.tags])
   description = UnescapedHTMLFromXMLContent(entry.get("description", ""))
   if previous_ref is None:
-    url_truncated,did_truncate = sanitize_url(url)
-    if did_truncate:
-      # Save the full url in info to limit the loss of information
-      info = f"<p><i><a href='{url}'>URL</a></i></p>"
-      logger.warning("Found an url of length %d (>%d) \
-when importing references from feed." % (len(url),URL_MAX_LENGTH))
-    url = url_truncated
     # set the title only for new ref (should avoid weird behaviour
     # from the user point of view)
+    if WOM_UNSANITIZED_LINK_ENTRY_KEY in entry:
+       info = f"<p><i><a href='{entry[WOM_UNSANITIZED_LINK_ENTRY_KEY]}'>URL</a></i></p>"
     title = truncate_reference_title(
        strip_tags(UnescapedHTMLFromXMLContent(entry.get("title", "")) \
                    or strip_tags(description) \
@@ -181,6 +177,14 @@ def add_new_references_from_parsed_feed(feed, entries, default_date):
     if not entry_link:
       logger.debug("Skipping a feed entry without 'link' : %s." % e)
       continue
+    entry_link_sanitized, did_truncate = sanitize_url(entry_link)
+    if did_truncate:
+      logger.warning("Found an url of length %d (>%d) \
+when importing references from feed." % (len(entry_link), URL_MAX_LENGTH))
+      # Save the full url in info to limit the loss of information
+      e[WOM_UNSANITIZED_LINK_ENTRY_KEY] =  entry_link
+      entry_link = entry_link_sanitized
+      e.link = entry_link
     entries_with_link.append((e, entry_link))
   entries_url = [link for e, link in entries_with_link]
   existing_references = list(Reference.objects.filter(url__in=entries_url).all())
