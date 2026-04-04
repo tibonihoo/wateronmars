@@ -43,7 +43,7 @@ jQuery.ias({
           <a href="{{ feed.xmlURL}}"><img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.5em;"/></a>
 {% if visitor_name == owner_name  %}
           {% if feed.permanent_failure_detected  %}
-          <i class="glyphicon glyphicon-ban-circle" title="{% trans "Feed broken and permanently skipped" %} ({{ feed.permanent_failure_diagnotic }} since {{ feed.permanent_failure_last_detection_date }})"></i>
+          <i class="glyphicon glyphicon-ban-circle" title="{% trans "Feed broken and permanently skipped" %} ({{ feed.permanent_failure_diagnostic }} since {{ feed.permanent_failure_last_detection_date }})"></i>
           {% endif  %}
           <a href="{% url 'user_river_source_item' visitor_name feed.source.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
 {% endif  %}

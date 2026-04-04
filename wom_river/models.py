@@ -48,7 +48,7 @@ class WebFeed(models.Model):
       default=datetime.fromtimestamp(0, timezone.utc)
       )
   # Indication of why the field was detected as permanently broken
-  permanent_failure_diagnotic = models.CharField(max_length=URL_MAX_LENGTH, default="")
+  permanent_failure_diagnostic = models.CharField(max_length=URL_MAX_LENGTH, default="")
   
   def set_permanent_failure(self, diagnostic, diagnostic_date):
     """Mark feed as permanently broken and add some information.
