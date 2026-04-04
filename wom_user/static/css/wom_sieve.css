@@ -244,8 +244,9 @@ body {
      font-size: 10px;
   }
   .wom-reference-content {
-      padding-left: 2px;
-      padding-right: 2px;
+      font-size: 150%;
+      padding-left: 0.3em;
+      padding-right: 0.3em;
       padding-top: 6px;
       overflow: auto;
   }
