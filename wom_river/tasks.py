@@ -274,8 +274,8 @@ def get_feedparser_status(feedparser_result):
   """
   if "status" in feedparser_result:
       return feedparser_result.status
-  elif feedparser.bozo and not feedparser_result.entries and not feedparser_result.feed:
-      raise feedparser.bozo_exception
+  elif feedparser_result.bozo and not feedparser_result.entries and not feedparser_result.feed:
+      raise feedparser_result.bozo_exception
   return 200
 
 
