@@ -52,16 +52,16 @@ import re
 # The following prefix is not enough to identify a bookmark line (may
 # be a folder with '<H3 FOLDED' for instance), so that the line has to
 # be checked against the RE_BOOKMARK_URL too.
-RE_BOOKMARK_LINE = re.compile("<DT>.*", re.IGNORECASE)
-RE_BOOKMARK_NOTE = re.compile("<DD>.*", re.IGNORECASE)
-RE_DOCTYPE_LINE = re.compile("^<!DOCTYPE NETSCAPE-Bookmark-file-1>.*", re.IGNORECASE)
+RE_BOOKMARK_LINE = re.compile(r"<DT>.*", re.IGNORECASE)
+RE_BOOKMARK_NOTE = re.compile(r"<DD>.*", re.IGNORECASE)
+RE_DOCTYPE_LINE = re.compile(r"^<!DOCTYPE NETSCAPE-Bookmark-file-1>.*", re.IGNORECASE)
 # Regular expression to extract info about the bookmark
-RE_BOOKMARK_URL = re.compile('HREF="(?P<url>[^"]+)"', re.IGNORECASE)
+RE_BOOKMARK_URL = re.compile(r'HREF="(?P<url>[^"]+)"', re.IGNORECASE)
 RE_BOOKMARK_COMPONENTS = {
-  "posix_timestamp" : re.compile('[^\w]ADD_DATE="(?P<posix_timestamp>\d+)"', re.IGNORECASE),
-  "tags"   : re.compile('[^\w]TAGS="(?P<tags>[\w,]+)"', re.IGNORECASE),
-  "private": re.compile('[^\w]PRIVATE="(?P<private>\d)"', re.IGNORECASE),
-  "title"  : re.compile('<A[^>]*>(?P<title>[^<]*)<', re.IGNORECASE),
+  "posix_timestamp" : re.compile(r'[^\w]ADD_DATE="(?P<posix_timestamp>\d+)"', re.IGNORECASE),
+  "tags"   : re.compile(r'[^\w]TAGS="(?P<tags>[\w,]+)"', re.IGNORECASE),
+  "private": re.compile(r'[^\w]PRIVATE="(?P<private>\d)"', re.IGNORECASE),
+  "title"  : re.compile(r'<A[^>]*>(?P<title>[^<]*)<', re.IGNORECASE),
   }
 
 

@@ -52,18 +52,22 @@
   {%  else %}
   <div class="form-group">
   {% endif %}
-    <span class="col-sm-2 control-label">
+    <span class="control-label">
       <label>
-        {% if form.feed.permanent_failure_detected  %}
-        <i class="text-danger glyphicon glyphicon-ban-circle" title="{% trans "Feed broken and permanently skipped" %} ({{ form.feed.permanent_failure_diagnostic }} since {{ form.feed.permanent_failure_last_detection_date }}) "></i>
-        {% endif  %}
         <img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.2em"/>
-      </label><br/>
-      <i class="glyphicon glyphicon-filter" style="padding-top:.5em"></i>
+      </label>
+      {% if form.feed.permanent_failure_detected  %}
+      <div class="alert alert-danger">
+        <p><i class="glyphicon glyphicon-ban-circle"</i>
+        {% trans "Feed broken and permanently skipped" %}
+        ({{ form.feed.permanent_failure_diagnostic }} [{{ form.feed.permanent_failure_last_detection_date }}])
+        </p>
+      </div>
+      {% endif  %}
     </span>
   <p class="form-control-static"><a href="{{ feed_url }}">{{ feed_url }}</a></p>
     <span class="input-group checkbox">
-         {{ form.follow }} <label>{% trans "Following" %}</label>
+         {{ form.follow }} <label><i class="glyphicon glyphicon-filter" style="padding-top:.5em"></i>{% trans "Following" %}</label>
         {{ form.follow.errors|safe }}
     </span>
   </div>
@@ -72,11 +76,8 @@
   {%  else %}
   <div class="form-group">
   {% endif %}
-    <span class="col-sm-2 control-label">
-      <i class="glyphicon glyphicon-compressed" style="padding-top:.2em"></i>
-    </span>
     <span class="input-group checkbox">
-      {{ form.collate }} <label>{% trans "Collating" %}</label>
+      {{ form.collate }} <label><i class="glyphicon glyphicon-compressed" style="padding-top:.2em"></i>{% trans "Collating" %}</label>
       {{ form.collate.errors|safe }}
     </span>
   </div>

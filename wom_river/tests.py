@@ -888,12 +888,14 @@ class FeedStatusTest(TestCase):
   def test_given_404_returns_broken_but_not_permanent(self):
     feed_status = FeedStatus.check_and_record(self.feed, 404, None, self.test_date)
     self.assertEqual(True, feed_status.is_broken)
+    self.assertIn("404", feed_status.diagnostic)
     self.assertEqual(True, self.feed.last_update_failed)
     self.assertEqual(False, self.feed.permanent_failure_detected)
 
   def test_given_410_returns_broken_and_permanent(self):
     feed_status = FeedStatus.check_and_record(self.feed, 410, None, self.test_date)
     self.assertEqual(True, feed_status.is_broken)
+    self.assertIn("410", feed_status.diagnostic)
     self.assertEqual(True, self.feed.last_update_failed)
     self.assertEqual(True, self.feed.permanent_failure_detected)
     self.assertEqual(self.test_date, self.feed.permanent_failure_last_detection_date)
@@ -904,6 +906,7 @@ class FeedStatusTest(TestCase):
     self.feed.last_update_check = self.test_date
     feed_status = FeedStatus.check_and_record(self.feed, 404, None, self.test_date + FeedStatus.GRACE_PERIOD)
     self.assertEqual(True, feed_status.is_broken)
+    self.assertIn("404", feed_status.diagnostic)
     self.assertEqual(True, self.feed.last_update_failed)
     self.assertEqual(True, self.feed.permanent_failure_detected)
     self.assertIn("404", self.feed.permanent_failure_diagnostic)

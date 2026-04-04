@@ -265,23 +265,35 @@ def try_get_feed_site_url(feed_url):
                  % (d.feed.source.url,e))
     return None
 
-    
+
+def get_feedparser_status(feedparser_result):
+  """Extract or generate a meaningful status from feedparser result.
+
+  Note: raises an expection in case feedparser flipped the bozo flag
+  and did not return any entry nor feed info.
+  """
+  if "status" in feedparser_result:
+      return feedparser_result.status
+  elif feedparser.bozo and not feedparser_result.entries and not feedparser_result.feed:
+      raise feedparser.bozo_exception
+  return 200
+
 
 def collect_new_references_for_feed(feed):
   """Get the feed data from its URL and collect the new references into the db.
   Return a dictionary mapping the new references to a corresponding set of tags.
   """
+  logger.debug(f"Parsing feed {feed.xmlURL}")
+  now = datetime.now(timezone.utc)
   try:
-    logger.debug(f"Parsing feed {feed.xmlURL}")
     d = feedparser.parse(feed.xmlURL, agent=settings.USER_AGENT)
-    status = d.status
+    status = get_feedparser_status(d)
     actual_href = d.get("href", feed.xmlURL)
   except Exception as e:
     logger.error("Skipping feed at %s because of a parse problem (%s))."\
                  % (feed.source.url,e))
-    status = FEED_STATUS_EXCEPTION
+    status = FeedStatus.STATUS_PARSING_EXCEPTION
     actual_href = None
-  now = datetime.now(timezone.utc)
   feed_status = FeedStatus.check_and_record(feed, status, actual_href, now)
   if feed_status.is_broken:
       logger.warning(f"Feed at {feed.xmlURL} currently appears broken ({feed_status.diagnostic}).")

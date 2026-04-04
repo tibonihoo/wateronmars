@@ -8,7 +8,8 @@ class FeedStatus:
 
     def __init__(self, *, is_broken, diagnostic = None):
         self.is_broken = is_broken
-
+        self.diagnostic = diagnostic
+    
     @staticmethod
     def check_and_record(feed, status, actual_href, status_date):
 
@@ -22,7 +23,7 @@ class FeedStatus:
             return FeedStatus(is_broken=False)
 
         if status == 410: # Gone
-            diagnostic = "Feed declared as Gone (Status 401)"
+            diagnostic = f"Feed declared as Gone (Status {status})"
             feed.set_permanent_failure(diagnostic, status_date)
         else:
             diagnostic = "Parse Error" if status == FeedStatus.STATUS_PARSING_EXCEPTION else f"Status {status}"
