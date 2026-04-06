@@ -294,14 +294,17 @@ class UserSourceAdditionForm(forms.Form):
     form_url,_ = sanitize_url(self.cleaned_data["url"])
     form_title = self.cleaned_data["title"]
     form_feed_url,_ = sanitize_url(self.cleaned_data["feed_url"])
-    if self.user.userprofile.web_feeds.filter(source__url=form_url).exists():
+    if self.user.userprofile\
+      .web_feeds\
+      .filter(source__url=form_url, xmlURL=form_feed_url)\
+      .exists():
       # nothing to do
       return
     # try a bigger look-up anyway
     same_sources = WebFeed.objects.filter(source__url=form_url).all()
     # url are unique for sources
     if same_sources:
-      new_feed = same_sources[0]
+      source_ref = same_sources[0].source
     else:
       source_title = form_title
       try:
@@ -310,17 +313,23 @@ class UserSourceAdditionForm(forms.Form):
         source_ref = Reference(url=form_url,title=source_title,
                                pub_date=datetime.now(timezone.utc))
         source_ref.save()
-      new_feed = WebFeed(source=source_ref)
-      # assume that either form_feed_url or form_url have been
-      # validated as a valid feed url
-      new_feed.xmlURL = form_feed_url or form_url
-      new_feed.last_update_check = datetime.fromtimestamp(0, timezone.utc)
-      new_feed.save()
+    new_feed = WebFeed(source=source_ref)
+    new_feed.xmlURL = form_feed_url
+    new_feed.last_update_check = datetime.fromtimestamp(0, timezone.utc)
+    new_feed.save()
     with transaction.atomic():
       source_ref.add_pin()
       source_ref.save()
-      self.user.userprofile.sources.add(source_ref)
-      self.user.userprofile.public_sources.add(source_ref)
+      if not self.user.userprofile\
+      .sources\
+      .filter(url=source_ref.url)\
+      .exists():
+        self.user.userprofile.sources.add(source_ref)
+      if not self.user.userprofile\
+      .public_sources\
+      .filter(url=source_ref.url)\
+      .exists():
+        self.user.userprofile.public_sources.add(source_ref)
       self.user.userprofile.web_feeds.add(new_feed)
       self.user.userprofile.save()
     return new_feed
