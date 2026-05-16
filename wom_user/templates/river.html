@@ -30,6 +30,12 @@ jQuery.ias({
  </style>
 {% endblock %}
 
+{% block head_notification %}{# Error messages #}
+{% if some_feeds_in_permanent_failure %}
+<li><a id="wom-server-disabled-feeds" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% endif  %}
+{% endblock %}
+
 {% block content %}
 <h4><i class="glyphicon glyphicon-align-left"></i>
   {% if visitor_name == owner_name  %}

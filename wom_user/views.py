@@ -741,6 +741,8 @@ def user_river_view(request,owner_name):
                                    .select_related("reference")
   paginator = Paginator(river_items, MAX_ITEMS_PER_PAGE)
   page = request.GET.get('page')
+  some_feeds_in_permanent_failure = request.owner_user.userprofile.web_feeds\
+    .filter(permanent_failure_detected=True).exists()
   try:
     news_items = paginator.page(page)
   except (PageNotAnInteger,EmptyPage):
@@ -749,6 +751,7 @@ def user_river_view(request,owner_name):
   d = add_base_template_context_data({
     'news_items': news_items,
     'source_add_bookmarklet': generate_source_add_bookmarklet(request.build_absolute_uri("/"),request.user.username),
+    'some_feeds_in_permanent_failure': some_feeds_in_permanent_failure,
   }, request.user.username, owner_name)
   return render(request, 'river.html', d)
 
@@ -765,6 +768,8 @@ def generate_user_sieve(request,owner_name):
   oldest_unread_references = unread_references.order_by('reference_pub_date')\
                              [:MAX_ITEMS_PER_PAGE]\
                                .select_related("reference","main_source")
+  some_feeds_in_permanent_failure = request.owner_user.userprofile.web_feeds\
+    .filter(permanent_failure_detected=True).exists()
   d = add_base_template_context_data({
       'oldest_unread_references': oldest_unread_references,
       'num_unread_references': num_unread,
@@ -772,6 +777,7 @@ def generate_user_sieve(request,owner_name):
                                      args=(request.user.username,)),
       'source_add_bookmarklet': generate_source_add_bookmarklet(
         request.build_absolute_uri("/"),request.user.username),
+      'some_feeds_in_permanent_failure': some_feeds_in_permanent_failure,
       }, request.user.username, request.user.username)
   return render(request, 'sieve.html', d)
 
@@ -851,6 +857,7 @@ def user_river_sources(request,owner_name):
       return feed
     web_feeds = [add_tag_to_feed(f) for f in web_feeds.iterator()]
     web_feeds.sort(key=lambda f:f.main_tag_name)
+    some_feeds_in_permanent_failure = any(f.permanent_failure_detected for f in web_feeds)
     d = add_base_template_context_data({
         'tagged_web_feeds': web_feeds,
         'user_tags': get_user_tags(request.owner_user),
@@ -858,6 +865,7 @@ def user_river_sources(request,owner_name):
         'num_sources' : len(web_feeds)+other_sources.count(),
         'source_add_bookmarklet': generate_source_add_bookmarklet(
           request.build_absolute_uri("/"),request.user.username),
+        'some_feeds_in_permanent_failure': some_feeds_in_permanent_failure,
         }, request.user.username, owner_name)
     expectedFormat = request.GET.get("format","html")
     if expectedFormat.lower()=="opml":

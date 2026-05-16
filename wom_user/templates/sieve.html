@@ -18,6 +18,7 @@ Sieve
 prepareKeyBindings();
 </script>
 {% endblock %}
+
 {% block head_notification %}{# Error messages #}
 <li><a id="wom-sieve-news-loading" data-content="{% trans "Fresh news are being downloaded from server." %}" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="{% trans "News refresh !" %}"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
 {% if read_only %}
@@ -26,6 +27,9 @@ prepareKeyBindings();
 <li><a id="wom-server-sync-problem" data-content="{% trans "A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" %}" title="{% trans "Server synchronization problem" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 <li><a id="wom-server-save-failed" data-content="{% trans "A problem occured while saving a bookmark, please retry bookmarking !" %}" title="{% trans "Bookmarking failed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
 {% endif %}
+{% if some_feeds_in_permanent_failure %}
+<li><a id="wom-server-disabled-feeds" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% endif  %}
 {% endblock %}
 
 {% block content %}

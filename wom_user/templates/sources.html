@@ -20,6 +20,12 @@ jQuery.ias({
 </script>
 {% endblock %}
 
+{% block head_notification %}{# Error messages #}
+{% if some_feeds_in_permanent_failure %}
+<li><a id="wom-server-disabled-feeds" href="#" title="{% trans "Some feeds have been automatically disabled, please check sources marked as disabled !" %}"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+{% endif  %}
+{% endblock %}
+
 
 {% block content %}
 <h4><i class="glyphicon glyphicon-book"></i>
