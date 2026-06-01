@@ -5,46 +5,42 @@ Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYI
 Site: https://github.com/tibonihoo/wateronmars
 */
 
+/* Bootstrap 5.3 compatible styles */
 
-@media (max-width: 768px) {
-    .container > .navbar-header,
-    .container-fluid > .navbar-header,
-    .container > .navbar-collapse,
-    .container-fluid > .navbar-collapse {
-      margin-right: -15px;
-      margin-left: -13px;
-    }
+.navbar-brand {
+  font-weight: bold;
+  font-size: 17px;
+  padding-left: 3px;
 }
 
-.navbar-nav {
-    margin-top: 0px;
-    margin-bottom: 0px;
-    margin-right: 0px;
+.navbar-brand:hover {
+  text-decoration: none;
 }
 
-.navbar-right  {
-    padding-right: 12px;
+a { 
+  color: #3465a4; 
 }
 
-.glyphicon {
-   margin-left: 3px;
-   margin-right: 3px;
+.footer { 
+  text-align: center; 
+  font-size: 11px; 
+  line-height: 1; 
+  margin-top: 5px; 
 }
 
-.navbar-brand.navbar-nav a i { color: #ffffff; border-right: none; border-left: none; padding-left: 3px; font-size: 15px;}
-.navbar-brand.navbar-nav a:hover i { color: #ffffff; border-right: none; border-left: none; padding-left: 3px; font-size: 15px;}
-#wom-brand-name {font-weight: bold; color: #ffffff; font-size: 17px; padding-left: 3px; }
-a#wom-brand-name:hover {text-decoration:none;}
-a { color: #3465a4; }
-.footer { text-align: center; font-size: 11px; line-height: 1; margin-top: 5px; }
-.footer p { margin-bottom: 3px; }
-.footer ul li { display: inline; }
+.footer p { 
+  margin-bottom: 3px; 
+}
+
+.footer ul li { 
+  display: inline; 
+}
+
 .jumbotron {
   margin-top: 10px;
   margin-bottom: 0px;
   padding-bottom: 5px;
 }
-
 
 .form-control {
     height: 30px;
@@ -81,8 +77,19 @@ a { color: #3465a4; }
   opacity: 1;
 }
 
-#edit-toggle.edit-on {
-  opacity: 1;
+/* Bootstrap 5.3 adjustments for custom spacing */
+.navbar-nav {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 0px;
 }
 
+.nav-item {
+  margin-right: 0px;
+}
 
+/* Icon spacing for Bootstrap Icons */
+.bi {
+   margin-left: 3px;
+   margin-right: 3px;
+}
