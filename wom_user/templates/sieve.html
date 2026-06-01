@@ -20,15 +20,15 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block head_notification %}{# Error messages #}
-<li><a id="wom-sieve-news-loading" data-content="{% trans "Fresh news are being downloaded from server." %}" title="" data-toggle="popover" data-placement="bottom" data-container="body" href="#" data-original-title="{% trans "News refresh !" %}"><img src="{{ STATIC_URL }}/img/loader.gif" class="well-small"></img></a></li>
+<li class="nav-item"><a class="nav-link" id="wom-sieve-news-loading" data-bs-content="{% trans "Fresh news are being downloaded from server." %}" title="" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-trigger="manual" href="#"></a></li>
 {% if read_only %}
-<li><a id="wom-sieve-readonly-warning" data-content="{% trans "Please note some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "READ_ONLY: no change allowed !" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
+<li class="nav-item"><a class="nav-link" id="wom-sieve-readonly-warning" data-bs-content="{% trans "Please note some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "Read only mode" %}" data-bs-toggle="popover" data-bs-placement="bottom" href="#"></a></li>
 {% else %}
-<li><a id="wom-server-sync-problem" data-content="{% trans "A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" %}" title="{% trans "Server synchronization problem" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
-<li><a id="wom-server-save-failed" data-content="{% trans "A problem occured while saving a bookmark, please retry bookmarking !" %}" title="{% trans "Bookmarking failed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li class="nav-item"><a class="nav-link" id="wom-server-sync-problem" data-bs-content="{% trans "A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" %}" title="{% trans "Synchronization problem" %}" data-bs-toggle="popover" data-bs-placement="bottom" href="#"></a></li>
+<li class="nav-item"><a class="nav-link" id="wom-server-save-failed" data-bs-content="{% trans "A problem occured while saving a bookmark, please retry bookmarking !" %}" title="{% trans "Bookmarking failed" %}" data-bs-toggle="popover" data-bs-placement="bottom" href="#"></a></li>
 {% endif %}
 {% if some_feeds_in_permanent_failure %}
-<li><a id="wom-server-disabled-feeds" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li class="nav-item"><a class="nav-link" id="wom-server-disabled-feeds" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}"><i class="bi bi-exclamation-triangle"></i></a></li>
 {% endif  %}
 {% endblock %}
 
@@ -38,47 +38,48 @@ prepareKeyBindings();
 <div class="col-md-2" id="wom-title-list">
   <div id="wom-title-list-header">
     <span id="wom-title-list-header-name">{% trans "Headlines" %}</span>
-    <a class="close" href="javascript:hideTitleList()"><span aria-hidden="true">&times;</span><span class="sr-only">{% trans "Hide title list" %}</span></a>
+    <a class="btn-close" href="javascript:hideTitleList()" aria-label="{% trans "Hide title list" %}"></a>
   </div>
   <ul class="list-unstyled">
 {% for rust in oldest_unread_references %}
-    <li id="wom-ref-nav-{{forloop.counter0}}" ><small><a class="wom-reference-title" href="#wom-ref{{forloop.counter0}}-content" data-target="#wom-sieve-frame" data-slide-to="{{forloop.counter0}}" title="{{ rust.reference_pub_date }}">{{ rust.reference.title }}</a></small></li>
+    <li id="wom-ref-nav-{{forloop.counter0}}" ><small><a class="wom-reference-title" href="#wom-ref{{forloop.counter0}}-content" data-bs-target="#wom-sieve-frame" data-bs-slide-to="{{forloop.counter0}}">{{ rust.reference.title }}</a></small></li>
 {% endfor %}
   </ul>
 </div>
 <div class="carousel slide col-md-10" id="wom-sieve-frame">
   <div class="progress" id="wom-sieve-reading-progress" >
-    <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+    <div class="progress-bar bg-primary" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
     </div>
   </div>
 <div class="carousel-inner">
 {% for rust in oldest_unread_references %}
-  <div class="wom-reference panel panel-default item {% if rust.has_been_saved %}saved{% endif %}" id="wom-ref{{forloop.counter0}}">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <small><a class="wom-title-list-switch btn btn-default btn-xs"
-        href="javascript:switchTitleListDisplay()" title="{% trans "Switch headlines display" %}">H</a><a id="wom-ref{{forloop.counter0}}-url" href="{{ rust.reference.url }}" title="{{ rust.reference_pub_date }}">{{ rust.reference_pub_date|date:'SHORT_DATE_FORMAT' }}</a>  <em>@<a class="wom-source-url" id="wom-ref{{forloop.counter0}}-source-url" href="{{ rust.main_source.url }}" title="{{ rust.main_source.title }}">{{ rust.main_source.title }}</a></em></small>
+  <div class="wom-reference card item {% if rust.has_been_saved %}saved{% endif %}" id="wom-ref{{forloop.counter0}}">
+    <div class="card-header">
+      <h4 class="card-title">
+        <small><a class="wom-title-list-switch btn btn-secondary btn-sm"
+        href="javascript:switchTitleListDisplay()" title="{% trans "Switch headlines display" %}">H</a><a id="wom-ref{{forloop.counter0}}-url" href="{{ rust.reference.url }}" title="{{ rust.reference.title }}">{{ rust.reference.title }}</a></small>
       </h4>
     </div>
-    <div id="wom-ref{{forloop.counter0}}-content" class="wom-reference-content panel-body carousel-fig" role="article">
+    <div id="wom-ref{{forloop.counter0}}-content" class="wom-reference-content card-body carousel-figure" role="article">
       <h1 id="wom-ref{{forloop.counter0}}-title">{{ rust.reference.title }}</h1>
       {{ rust.reference.description|defang_html }}
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 
-      <a class="wom-save btn btn-default" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
-        <i class="glyphicon glyphicon-hand-up"></i>{% trans "Bookmark" %}</a>
-      <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked glyphicon glyphicon-bookmark"></i> 
-      <a class="btn btn-default" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
-        <i class="glyphicon glyphicon-globe"></i>{% trans "Visit" %}</a>
+      <a class="wom-save btn btn-secondary" href="javascript:saveCurrentItem()" title="(b) {% trans "Save it as a bookmark." %}">
+        <i class="bi bi-hand-thumbs-up"></i>{% trans "Bookmark" %}</a>
+      <i title="{% trans "Bookmarked !" %}" class="wom-bookmarked bi bi-bookmark"></i> 
+      <a class="btn btn-secondary" title="(v) {% trans "View on site:" %} {{ rust.reference.title }}" href="{{ rust.reference.url|normalize_wom_protocol_url}}">
+        <i class="bi bi-globe"></i>{% trans "Visit" %}</a>
     </div>
     {% endspaceless %}
   </div>
 {% empty %}
-  <div class="wom-reference panel panel-default item">
-    <div class="panel-heading">
-      <h4 class="panel-title">{% trans "No news is good news ?" %}</h4></div>
-    <div class="wom-reference-content panel-body carousel-fig"
+  <div class="wom-reference card item">
+    <div class="card-header">
+      <h4 class="card-title">{% trans "No news is good news ?" %}</h4>
+    </div>
+    <div class="wom-reference-content card-body carousel-figure"
          role="article">
       <div class="alert alert-info">
         <p>{% trans "No new items were found since your last visit !" %}</p> 
@@ -90,27 +91,29 @@ prepareKeyBindings();
     </div>
     {% spaceless %}
     <div class="wom-metadata"> 
-      <a class="btn btn-default" title="(r) {% trans "Reload the sieve." %}" href="{% url 'user_river_sieve' visitor_name %}">
-        <i class="glyphicon glyphicon-refresh"></i>{% trans "Reload" %}</a>
+      <a class="btn btn-secondary" title="(r) {% trans "Reload the sieve." %}" href="{% url 'user_river_sieve' visitor_name %}">
+        <i class="bi bi-arrow-clockwise"></i>{% trans "Reload" %}</a>
     </div>
     {% endspaceless %}
   </div>
 {% endfor %}
 </div>
-<a class="left carousel-control" title="{% trans "Previous article" %} (p)" href="#wom-sieve-frame">
-  <span class="glyphicon glyphicon-chevron-left"></span>
-</a>
-<a class="right carousel-control" title="{% trans "Next article" %} (n)" href="#wom-sieve-frame">
-  <span class="glyphicon glyphicon-chevron-right"></span>
-</a>
+<button class="carousel-control-prev" type="button" data-bs-target="#wom-sieve-frame" data-bs-slide="prev" title="{% trans "Previous article" %} (p)">
+  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+  <span class="visually-hidden">{% trans "Previous" %}</span>
+</button>
+<button class="carousel-control-next" type="button" data-bs-target="#wom-sieve-frame" data-bs-slide="next" title="{% trans "Next article" %} (n)">
+  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+  <span class="visually-hidden">{% trans "Next" %}</span>
+</button>
 </div>
 
 <div class="modal fade" role="dialog" id="wom-sieve-reload-message" aria-labelledby="wom-sieve-reload-message-title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 cloass="modal-title" id="wom-sieve-reload-message-title">{% trans "No more news in sieve !" %}</h3>
+        <h5 class="modal-title" id="wom-sieve-reload-message-title">{% trans "No more news in sieve !" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
       </div>
       <div class="modal-body">
         <p>{% trans "You've emptied the sieve, press the button below to reload with more news (if any)." %}</p>
