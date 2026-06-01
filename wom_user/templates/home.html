@@ -14,18 +14,18 @@
   <p>
 {% if visitor_name %}
 <p>
-  <a class="btn btn-primary btn-lg" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Your Sources" %}"><i class="glyphicon glyphicon-book" style="margin-right: 1em"></i>{% trans "Check your sources." %}</a>
+  <a class="btn btn-primary btn-lg" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Your Sources" %}"><i class="bi bi-book" style="margin-right: 1em"></i>{% trans "Check your sources." %}</a>
 </p>
 <p>
-<a class="btn btn-primary btn-lg" href="{% url 'user_river_view' visitor_name %}" title="{% trans "Your River" %}"><i class="glyphicon glyphicon-align-left" style="margin-right: 1em"></i>{% trans "Watch your river of news." %}</a>
+<a class="btn btn-primary btn-lg" href="{% url 'user_river_view' visitor_name %}" title="{% trans "Your River" %}"><i class="bi bi-justify-left" style="margin-right: 1em"></i>{% trans "Watch your river of news." %}</a>
 </p>
-<a class="btn btn-primary btn-lg" href="{% url 'user_river_sieve' visitor_name %}" title="{% trans "Your Sieve" %}"><i class="glyphicon glyphicon-filter" style="margin-right: 1em"></i>{% trans "Sift the best pieces out." %}</a>
+<a class="btn btn-primary btn-lg" href="{% url 'user_river_sieve' visitor_name %}" title="{% trans "Your Sieve" %}"><i class="bi bi-funnel" style="margin-right: 1em"></i>{% trans "Sift the best pieces out." %}</a>
 </p>
 <p>
-  <a class="btn btn-primary btn-lg" href="{% url 'user_collection' visitor_name %}" title="{% trans "Your Collection" %}"><i class="glyphicon glyphicon-bookmark" style="margin-right: 1em"></i>{% trans "Browse your bookmarks." %}</a>
+  <a class="btn btn-primary btn-lg" href="{% url 'user_collection' visitor_name %}" title="{% trans "Your Collection" %}"><i class="bi bi-bookmark" style="margin-right: 1em"></i>{% trans "Browse your bookmarks." %}</a>
 </p>
 {% else %}
-<a class="btn btn-primary btn-lg" href="{% url 'user_login' %}" title="{% trans "Login" %}"><i class="glyphicon glyphicon-user" style="margin-right: 1em"></i>{% trans "Login" %}</a>
+<a class="btn btn-primary btn-lg" href="{% url 'user_login' %}" title="{% trans "Login" %}"><i class="bi bi-person" style="margin-right: 1em"></i>{% trans "Login" %}</a>
 {% demo_info %}
 {% endif %}
 </div>
@@ -36,7 +36,7 @@
 <div class="footer">
   <div class="container">
     <p>{% blocktrans %}Code licensed under <a href="http://www.gnu.org/licenses/agpl-3.0.html" target="_blank">GNU Affero GPL v3.0</a> and available on <a href="https://github.com/tibonihoo/wateronmars">GitHub</a>.{% endblocktrans %}</p>
-    <p>{% blocktrans %}Icons by <a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Icons by <a href="https://icons.getbootstrap.com/">Bootstrap Icons</a> licensed under <a href="https://opensource.org/licenses/MIT">MIT</a>.{% endblocktrans %}</p>
     <p>{% blocktrans %}Built on <a href="http://getbootstrap.com">Bootstrap</a>, <a href="http://bootswatch.com/united/">United theme</a>, and <a href="http://djangoproject.com/">Django</a>.{% endblocktrans %}</p>
     <p>{% blocktrans %}WaterOnMars is a project initiated by <a href="http://tibonihoo.net">Thibauld Nion</a>.{% endblocktrans %}</p>
   </div>
