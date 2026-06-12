@@ -40,7 +40,6 @@ from wom_classification.models import get_user_tags
 
 from wom_user.tasks import collect_news_from_followed_feeds
 from wom_tributary.tasks import (
-    collect_news_from_tweeter_feeds,
     collect_news_from_mastodon_feeds,
     )
 
@@ -65,10 +64,6 @@ from django.contrib.auth import logout
 from wom_river.models import WebFeed
 from wom_tributary.models import GeneratedFeed, MastodonTimeline
 
-from wom_tributary.tasks import (
-    fetch_twitter_timeline_data,
-    get_twitter_auth_status,
-    )
 
 from wom_tributary.tasks import (
     fetch_mastodon_timeline_data,
@@ -83,7 +78,6 @@ from wom_user.forms import NSBookmarkFileUploadForm
 from wom_user.forms import UserProfileCreationForm
 from wom_user.forms import UserBookmarkAdditionForm
 from wom_user.forms import UserSourceAdditionForm
-from wom_user.forms import UserTwitterSourceAdditionForm
 from wom_user.forms import ReferenceEditForm
 from wom_user.forms import UserBookmarkEditForm
 from wom_user.forms import WebFeedOptInOutForm
@@ -207,7 +201,6 @@ def request_for_update(request):
   """
   delete_obsolete_unpinned_references_regularly()
   collect_news_from_followed_feeds()
-  collect_news_from_tweeter_feeds(1)
   collect_news_from_mastodon_feeds(1)
   if settings.DEMO:
     # keep only a short number of refs (the most recent)
@@ -251,7 +244,7 @@ def get_humans_txt(request):
   Platform: WaterOnMars
   Sources: https://github.com/tibonihoo/wateronmars
   License: Affero GPLv3
-  Components: Twitter Bootstrap, mousetrap.js, jQuery, Infinite Ajax Scroll, TouchSwipe-Jquery-Plugin.
+  Components: Bootstrap, mousetrap.js, Infinite Ajax Scroll.
   Software: Django, Emacs, Firefox, Firebug, Inkscape
 """ % (HUMANS_TEAM, HUMANS_THANKS), content_type='text/plain')
 
@@ -407,94 +400,6 @@ def user_river_source_add(request,owner_name):
 def user_tributary(request, owner_name):
   d = add_base_template_context_data({}, request.user, owner_name)
   return render(request, 'tributary.html', d)
-
-
-class TwitterTimelineInfo:
-  def __init__(self, feed, timeline, fetchable):
-    self.feed = feed
-    self.timeline = timeline
-    self.fetchable = fetchable
-
-  @staticmethod
-  def from_feed(f, twitter_status):
-    d = fetch_twitter_timeline_data(
-      f.twittertimeline, twitter_status, 1)
-    t = TwitterTimelineInfo(f, f.twittertimeline, len(d)>0)
-    return t
-
-@login_required(login_url=settings.LOGIN_URL)
-def user_auth_landing_twitter(request):
-  if settings.READ_ONLY:
-    return HttpResponseForbidden("Forbidden in READ_ONLY mode.")
-  twitter_info = request.user.userprofile.twitter_info
-  if twitter_info:
-    get_twitter_auth_status(
-      twitter_info, request
-      )
-    return HttpResponseRedirect(reverse('user_tributary_twitter', args=(request.user.username,)))
-  else:
-    return HttpResponseNotFound("Couldn't find twitter info to update.")
-
-
-@loggedin_and_owner_required
-@require_http_methods(["GET"])
-def user_tributary_twitter(request, owner_name):
-  if request.user != request.owner_user:
-    return HttpResponseForbidden()
-  owner_profile = request.owner_user.userprofile
-  twitter_info = owner_profile.twitter_info
-  if twitter_info:
-    twitter_status = get_twitter_auth_status(
-      twitter_info, request
-      )
-    twitter_feeds = (GeneratedFeed.objects
-      .filter(userprofile=owner_profile,
-              twittertimeline__isnull=False)
-      .select_related("twittertimeline")
-      .order_by('-last_update_check', 'title')
-    ).all()
-    twitter_timelines_recap = [
-      TwitterTimelineInfo
-      .from_feed(f, twitter_status)
-      for f in twitter_feeds
-      ]
-  else:
-    twitter_status = None
-    twitter_timelines_recap = None
-  d = add_base_template_context_data({
-    'twitter_oauth_status': twitter_status,
-    'twitter_timelines_recap': twitter_timelines_recap,
-  }, request.user.username, owner_name)
-  return render(request, 'tributary_twitter.html', d)
-
-@loggedin_and_owner_required
-@csrf_protect
-@require_http_methods(["GET","POST"])
-def user_tributary_twitter_add(request,owner_name):
-  """Handle bookmarlet and form-based addition of a twitter feed as a source.
-  The bookmarlet is formatted in the following way:
-  .../add?{0}
-  """.format('="..."&'.join(UserTwitterSourceAdditionForm.base_fields.keys()))
-  if settings.READ_ONLY:
-    return HttpResponseForbidden("Source addition is not possible in READ_ONLY mode.")
-  if request.method == 'POST':
-    src_info = request.POST
-  elif request.GET: # GET
-    src_info = dict( (k,unquote_plus(v)) for k,v in request.GET.items())
-  else:
-    src_info = None
-  form = UserTwitterSourceAdditionForm(
-    request.user, src_info,
-    initial={"title": "Home timeline", "username": owner_name},
-    error_class=CustomErrorList)
-  if src_info and form.is_valid():
-    form.save()
-    return HttpResponseRedirect(reverse('user_tributary_twitter', args=(request.user.username,)))
-  d = add_base_template_context_data(
-    {'form': form,
-     'REST_PARAMS': ','.join(UserTwitterSourceAdditionForm.base_fields.keys())},
-    request.user.username,request.user.username)
-  return render(request, 'tributary_twitter_source_addition.html', d)
 
 
 def prepare_reference_form(request, reference_url, reference_query_set):
@@ -1026,7 +931,7 @@ def user_tributary_mastodon_add(request,owner_name):
   """Handle bookmarlet and form-based addition of a mastodon feed as a source.
   The bookmarlet is formatted in the following way:
   .../add?{0}
-  """.format('="..."&'.join(UserTwitterSourceAdditionForm.base_fields.keys()))
+  """.format('="..."&'.join(UserMastodonFeedAdditionForm.base_fields.keys()))
   if settings.READ_ONLY:
     return HttpResponseForbidden("Source addition is not possible in READ_ONLY mode.")
   if request.method == 'POST':

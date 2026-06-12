@@ -40,8 +40,6 @@ from wom_user.views import (
     user_river_sources,
     user_river_source_add,
     user_tributary,
-    user_tributary_twitter,
-    user_tributary_twitter_add,
     user_tributary_mastodon,
     user_tributary_mastodon_add,
     user_tributary_mastodon_auth_gateway,
@@ -53,7 +51,6 @@ from wom_user.views import (
     request_for_update,
     request_for_cleanup,
     user_creation,
-    user_auth_landing_twitter,
     user_auth_landing_mastodon,
     )
 
@@ -75,8 +72,6 @@ urlpatterns = [
     re_path(r'^u/(?P<owner_name>[^/]*)/sources/$', user_river_sources, name='user_river_sources'),
     re_path(r'^u/(?P<owner_name>[^/]*)/sources/add/$', user_river_source_add, name='user_river_source_add'),
     re_path(r'^u/(?P<owner_name>[^/]*)/sources/tributary/$', user_tributary, name='user_tributary'),
-    re_path(r'^u/(?P<owner_name>[^/]*)/sources/tributary/twitter/$', user_tributary_twitter, name='user_tributary_twitter'),
-    re_path(r'^u/(?P<owner_name>[^/]*)/sources/tributary/twitter/add/$', user_tributary_twitter_add, name='user_tributary_twitter_add'),
     re_path(r'^u/(?P<owner_name>[^/]*)/sources/tributary/mastodon/$', user_tributary_mastodon, name='user_tributary_mastodon'),
     re_path(r'^u/(?P<owner_name>[^/]*)/sources/tributary/mastodon/add/$', user_tributary_mastodon_add, name='user_tributary_mastodon_add'),
     re_path(r'^u/(?P<owner_name>[^/]*)/sources/tributary/mastodon/auth_gateway/(?P<timeline_name>.+)$', user_tributary_mastodon_auth_gateway, name='user_tributary_mastodon_auth_gateway'),
@@ -85,7 +80,6 @@ urlpatterns = [
     re_path(r'^u/(?P<owner_name>[^/]*)/sieve/$', user_river_sieve, name='user_river_sieve'),
     re_path(r'^u/(?P<owner_name>[^/]*)/collection/add/$', user_collection_add, name='user_collection_add'),
     re_path(r'^u/(?P<owner_name>[^/]*)/collection/item/(?P<reference_url_code>.*)$',user_collection_item, name='user_collection_item'),
-    re_path(r'^accounts/auth_landing/twitter/$', user_auth_landing_twitter, name='user_auth_landing_twitter'),
     re_path(r'^accounts/auth_landing/mastodon/$', user_auth_landing_mastodon, name='user_auth_landing_mastodon'),
     # access to static files
     re_path(r'^static/(?P<path>.*)$', static_serve, {'document_root': settings.STATIC_ROOT}),

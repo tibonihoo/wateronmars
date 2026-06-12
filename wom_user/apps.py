@@ -62,7 +62,7 @@ Do Not Edit! -->
 <DL><p>
 <DT><A HREF="https://www.djangoproject.com/" PRIVATE="0" TAGS="technology,web">Django Project</A>
 <DD>The Web framework for perfectionists with deadlines.
-<DT><A HREF="http://getbootstrap.com/" PRIVATE="0" TAGS="technology,web">Twitter Bootstrap</A>
+<DT><A HREF="http://getbootstrap.com/" PRIVATE="0" TAGS="technology,web">Bootstrap</A>
 <DD>Sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development.
 <DT><A HREF="http://wikipedia.org" PRIVATE="0" TAGS="culture">Wikipedia</A>
 <DD>The free encyclopedia that anyone can edit.

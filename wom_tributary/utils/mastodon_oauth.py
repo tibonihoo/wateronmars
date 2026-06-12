@@ -116,7 +116,7 @@ def get_access_token_from_instance(instance_url, redirect_uri, registration_info
 
 
 def build_mastodon_client(instance_url, access_token):
-  """Return a Granary client for Twitter."""
+  """Return a Granary client for Mastodon."""
   if GRANARY_IMPORT_OK:
     from granary.mastodon import Mastodon as MastodonGranary
   else:

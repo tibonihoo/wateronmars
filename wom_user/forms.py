@@ -387,92 +387,12 @@ class WebFeedOptInOutForm(forms.Form):
 
 
 from wom_tributary.models import (
-    TwitterTimeline,
-    TwitterUserInfo,
     MastodonApplicationRegistration,
     MastodonUserAccessInfo,
     MastodonTimeline,
     GeneratedFeed
     )
 from wom_tributary.tasks import register_mastodon_application_info_if_needed
-
-
-class UserTwitterSourceAdditionForm(forms.Form):
-  """Collect all necessary data to subscribe to a new twitter source."""
-
-  title = forms.CharField(
-    max_length=GeneratedFeed.TITLE_MAX_LENGTH,
-    required=True,
-    widget=forms.TextInput(attrs={"class":"form-control"}))
-
-  username = forms.CharField(
-    max_length=TwitterUserInfo.USERNAME_MAX_LENGTH,
-    required=True,
-    widget=forms.TextInput(attrs={"class":"form-control"}))
-
-  def __init__(self, user, *args, **kwargs):
-    forms.Form.__init__(self,*args,**kwargs)
-    self.user = user
-
-  def save(self):
-    """Warning: the source will be saved as well as the related objects
-    (no commit options).
-    Returns the source.
-    """
-    form_title = self.cleaned_data['title']
-    form_username = self.cleaned_data['username']
-    source_url = TwitterTimeline.SOURCE_URL
-    source_name = TwitterTimeline.SOURCE_NAME
-    source_pub_date = datetime.now(timezone.utc)
-    provider = GeneratedFeed.TWITTER
-    # Make sure that this specific user profile has a
-    # corresponding user info to be sure it doesn't share
-    # credentials with another's user profile just
-    # by writting down this other's user's twitter username !
-    same_twitter_info = self.user.userprofile.twitter_info
-    same_twitter = TwitterTimeline.objects.filter(
-      username=form_username).all()
-    # url are unique for sources
-    if same_twitter_info and same_twitter:
-      return same_twitter[0].generated_feed.source
-    if not same_twitter_info:
-      new_twitter_user = TwitterUserInfo(username=form_username)
-      new_twitter_user.save()
-      self.user.userprofile.twitter_info = new_twitter_user
-      self.user.userprofile.save()
-      same_twitter_info = new_twitter_user
-    any_twitter_sources = Reference.objects.filter(
-      url = source_url,
-      ).all()
-    with transaction.atomic():
-      if any_twitter_sources:
-        twitter_source = any_twitter_sources[0]
-      else:
-        twitter_source = Reference(
-          url=source_url, title=source_name,
-          pub_date=source_pub_date)
-      twitter_source.add_pin()
-      twitter_source.save()
-    with transaction.atomic():
-      new_feed = GeneratedFeed(
-        provider=provider,
-        source=twitter_source, title=form_title)
-      new_feed.last_update_check = (
-        datetime
-        .fromtimestamp(0, timezone.utc)
-        )
-      new_feed.save()
-    with transaction.atomic():
-      new_twitter = TwitterTimeline(
-        username=form_username,
-        generated_feed=new_feed,
-        twitter_user_access_info = same_twitter_info)
-      new_twitter.save()
-      if twitter_source not in self.user.userprofile.sources.all():
-        self.user.userprofile.sources.add(twitter_source)
-      self.user.userprofile.generated_feeds.add(new_feed)
-      self.user.userprofile.save()
-    return twitter_source
 
 
 class UserMastodonFeedAdditionForm(forms.Form):

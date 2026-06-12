@@ -69,7 +69,6 @@ from wom_classification.models import set_item_tag_names
 from wom_river.models import WebFeed
 
 from wom_tributary.tasks import (
-    collect_news_from_tweeter_feeds,
     collect_news_from_mastodon_feeds
     )
 from wom_tributary.models import GeneratedFeed
@@ -84,10 +83,6 @@ logger = logging.getLogger(__name__)
 @periodic_task(run_every=crontab(hour="*", minute="*/20", day_of_week="*"))
 def collect_all_new_references_regularly():
   collect_news_from_followed_feeds()
-
-@periodic_task(run_every=crontab(hour="*/1", day_of_week="*"))
-def collect_all_new_twitter_references_regularly():
-  collect_news_from_tweeter_feeds(1)
 
 @periodic_task(run_every=crontab(hour="*/1", day_of_week="*"))
 def collect_all_new_mastodon_references_regularly():

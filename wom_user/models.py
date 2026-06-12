@@ -29,8 +29,7 @@ from wom_river.models import WebFeed, WebFeedCollation
 from wom_classification.models import get_item_tag_names
 
 from wom_tributary.models import GeneratedFeed
-from wom_tributary.models import TwitterUserInfo
-from wom_tributary.models import MastodonUserAccessInfo
+
 
 class UserProfile(models.Model):
   """
@@ -48,8 +47,6 @@ class UserProfile(models.Model):
   public_sources = models.ManyToManyField(Reference,related_name="publicly_related_userprofile")
   # Feeds providing anything else than the plain content of "simple" web feed
   generated_feeds = models.ManyToManyField(GeneratedFeed,related_name="userprofile")
-  # Info related to the user's twitter account
-  twitter_info = models.OneToOneField(TwitterUserInfo, related_name="userprofile", null=True, on_delete=models.CASCADE)
   
   def __str__(self):
     return "%s>Profile" % self.owner
