@@ -316,7 +316,7 @@ def handle_uploaded_opml(opmlUploadedFile,user):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_upload_opml(request,owner_name):
-  if settings.READ_ONLY:
+  if settings.READ_ONLY and request.method != 'GET':
     return HttpResponseForbidden("Uploading sources from OPML is disabled in READ_ONLY mode.")
   if request.method == 'POST':
     form = OPMLFileUploadForm(request.POST, request.FILES,
@@ -349,7 +349,7 @@ def handle_uploaded_nsbmk(nsbmkUploadedFile,user):
 @csrf_protect
 @require_http_methods(["GET","POST"])
 def user_upload_nsbmk(request,owner_name):
-  if settings.READ_ONLY:
+  if settings.READ_ONLY and request.method != 'GET':
     return HttpResponseForbidden("Uploading bookmarks from NS bookmark list is disabled in READ_ONLY mode.")
   if request.method == 'POST':
     form = NSBookmarkFileUploadForm(request.POST, request.FILES,
@@ -374,7 +374,7 @@ def user_river_source_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../source/add/?{0}
   """.format('="..."&'.join(UserSourceAdditionForm.base_fields.keys()))
-  if settings.READ_ONLY:
+  if settings.READ_ONLY and request.method != 'GET':
     return HttpResponseForbidden("Source addition is not possible in READ_ONLY mode.")
   if request.method == 'POST':
     src_info = request.POST
@@ -493,7 +493,7 @@ def user_collection_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../collection/add/?{0}
   """.format('="..."&'.join(UserBookmarkAdditionForm.base_fields.keys()))
-  if settings.READ_ONLY:
+  if settings.READ_ONLY and request.method != 'GET':
     return HttpResponseForbidden("Bookmark addition is not possible in READ_ONLY mode.")
   if request.method == 'POST':
     bmk_info = request.POST
@@ -932,7 +932,7 @@ def user_tributary_mastodon_add(request,owner_name):
   The bookmarlet is formatted in the following way:
   .../add?{0}
   """.format('="..."&'.join(UserMastodonFeedAdditionForm.base_fields.keys()))
-  if settings.READ_ONLY:
+  if settings.READ_ONLY and request.method != 'GET':
     return HttpResponseForbidden("Source addition is not possible in READ_ONLY mode.")
   if request.method == 'POST':
     src_info = request.POST
