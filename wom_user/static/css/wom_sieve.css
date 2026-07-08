@@ -82,8 +82,7 @@ body {
 }
 
 .card-body {
-  /* Update at each window resize with the comapnion JS code*/
-  height: calc(100vh - 160px);
+  height: calc(100vh - 200px);
 }
 
 .wom-reference-content {
@@ -100,6 +99,8 @@ body {
 .wom-metadata {
   padding-left: 2.5em;
   padding-top: 5px;
+  position: fixed;
+  bottom: 3px;
 }
 
 .wom-metadata a {
@@ -119,9 +120,10 @@ body {
   opacity: 1;
   -moz-border-radius: 22px;
   border-radius: 22px;
-  top: auto;
-  bottom: 0px;
   transition: opacity 0.5s, display 0.5s allow-discrete;
+  position: fixed;
+  top: auto;
+  bottom: 3px;
 }
 
 .carousel-control-next {
