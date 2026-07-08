@@ -1,76 +1,118 @@
-/* 
-WaterOnMars's sieve styling.
-Author: Thibauld Nion
-Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYING)
-Site: https://github.com/tibonihoo/wateronmars
+/*
+* WaterOnMars's sieve styling.
+* Author: Thibauld Nion
+* Copyright (C) 2013-2026 Thibauld Nion
+* Licence: Affero GPLv3 (https://raw.github.com/tibonihoo/wateronmars/master/COPYING)
+* Site: https://github.com/tibonihoo/wateronmars
 */
-
-body {
-   height: auto;
-   overflow: hidden;
-}
-
-#below-nav .container-fluid {
-    padding: 0px;
-}
 
 .alert {
   margin-bottom: 0px;
 }
 
 
-.panel-heading {
- white-space: nowrap;
+/* Notifications */
+#wom-server-sync-problem {display : none;}
+#wom-server-save-failed  {display : none;}
+#wom-sieve-news-loading  { display : none;}
+#wom-sieve-news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
+
+
+/* Specific adaptation of the main WOM layout for the sieve */
+
+body {
+  overflow: clip;
 }
 
-.panel-title {
-  padding-left: 15px;
-  padding-right: 15px;
+#below-nav {
+  padding-top: 0;
 }
 
+
+/* Container for news items */
+
+#wom-sieve-frame {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+#wom-sieve-reading-progress {
+  height:3px;
+  margin:0px;
+}
+
+
+.carouse-inner {
+  margin-right: 0;
+}
+
+
+.wom-reference.carousel-item {
+    border: none;
+}
+
+
+.wom-reference.card {
+  -webkit-box-shadow: 5px 5px 5px 5px #ddd;
+  -moz-box-shadow: 5px 5px 5px 5px #ddd;
+  box-shadow: 5px 5px 5px 5px #ddd;
+}
+
+/* Header of a news item */
+
+.wom-title-list-switch {
+  font-variant: small-caps;
+  margin-right: 5px;
+}
+
+.card-header {
+  white-space: nowrap;
+}
+
+.card-header .wom-source-url { color: black; decoration: None; }
+
+.wom-reference.read .card-title {color: gray; border: none}
+.wom-reference.read .card-title a {color: gray; border: none}
+.wom-reference.read .card-title a.wom-title-list-switch {color: #333; border: none}
+
+/* News content */
 
 .wom-reference-content h1 {
   margin-top: -.2em;
 }
 
-.wom-reference .panel-heading:first-child {
-  background-color:#eeeeec;
-  padding:3px;
-  padding-top: 1px;
-  padding-bottom: 1px;
+.card-body {
+  /* Update at each window resize with the comapnion JS code*/
+  height: calc(100vh - 160px);
 }
+
+.wom-reference-content {
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 4px;
+  margin-bottom: -3px;
+  border-top: 1px solid rgb(229, 229, 229);
+  overflow: auto;
+}
+
+/* News metadata and status */
 
 .wom-metadata {
   padding-left: 2.5em;
   padding-top: 5px;
-  padding-bottom: 2px;
 }
 
 .wom-metadata a {
   margin-left: 1em;
 }
 
-.wom-reference.read .panel-heading:first-child {color: gray; border: none}
-.wom-reference.read .panel-heading:first-child a {color: gray; border: none}
 .wom-reference .wom-bookmarked {display: none;}
 .wom-reference.saved .wom-save {display: none;}
 .wom-reference.saved .wom-bookmarked {display: inline-block;}
 
-#wom-server-sync-problem {display : none;}
-#wom-server-save-failed  {display : none;}
-#wom-sieve-news-loading  { display : none;}
-#wom-sieve-news-loading  img { background-color: white; padding: 1px; margin-top: -3px; }
-.wom-source-url { color: black; decoration: None; }
 
-#wom-sieve-frame {
-    padding:  0px;
-}
-
-#wom-sieve-frame .carousel-inner {
-    padding:  0px;
-}
-
-.carousel-control, .carousel-control span {
+.carousel-control-next,
+.carousel-control-prev {
   width: 44px;
   height: 44px;
   border: none;
@@ -79,170 +121,38 @@ body {
   border-radius: 22px;
   top: auto;
   bottom: 0px;
+  transition: opacity 0.5s, display 0.5s allow-discrete;
 }
 
-
-.carousel-control span {
+.carousel-control-next {
+  left: auto;
+  right: 5px;
+  margin-bottom: 0px;
+  background-image: linear-gradient(to left, rgba(212, 68, 19,1) 0px, rgba(212, 68, 19,0) 60%);
   opacity: .5;
 }
 
-.carousel-control.left span {
-    display: none;
-    padding-left: 3px;
-}
-
-.carousel-control.right span {
-    padding-left: 12px;
-    display: none;
-}
-
-
-.carousel-control.right {
-   left: auto;
-   right: 5px;
-   background-image: linear-gradient(to left, rgba(212, 68, 19,1) 0px, rgba(212, 68, 19,0) 60%);
-   opacity: .5;
-}
-
-.carousel-control.left {
-   left: 5px;
-   right: auto;
-   background-image: linear-gradient(to right, rgba(212, 68, 19,1) 0px, rgba(212, 68, 19,0) 60%);
-   opacity: .5;
-}
-
-
-.carousel-control:hover {
-  opacity: .8;
-}
-
-.carousel-control:active {
-  opacity: 1;
-}
-
-.carousel-control:focus {
-  background-color: rgb(230, 230, 230);
-  opacity: 1;
-}
-
-.wom-reference.panel {
-  border-radius: 0px;
+.carousel-control-prev {
+  left: auto;
+  right: auto;
   margin-bottom: 0px;
+  background-image: linear-gradient(to right, rgba(212, 68, 19,1) 0px, rgba(212, 68, 19,0) 60%);
+  opacity: .5;
 }
 
-.panel-group {
-    margin-bottom: 0px;
+.carousel-control-prev span {
+  opacity: .5;
+  padding-left: 3px;
+  display: none;
 }
 
-.panel-group .panel + .panel {
-    margin-top: 0px;
+.carousel-control-next span {
+  opacity: .5;
+  padding-left: 12px;
+  display: none;
 }
 
-.panel-group .panel, .panel-heading {
-  border-radius: 0px;
-  border: none;
-}
-
-.panel-group .panel-heading + .panel-body {
-  border-top: none;
-}
-
-.panel-body {
-  padding: 0;
-  padding-top: 15px;
-}
-
-.panel {
-  border-bottom: 0px;
-}
-
-.wom-reference-content { 
-  padding-left: 20px; 
-  padding-right: 20px;
-  padding-bottom: 4px;
-  margin-bottom: -3px;
-  border-top: 1px solid rgb(229, 229, 229);
-  overflow: auto;
-}
-
-
-.wom-reference.panel {
-  -webkit-box-shadow: 5px 5px 5px 5px #ddd;
-  -moz-box-shadow: 5px 5px 5px 5px #ddd;
-  box-shadow: 5px 5px 5px 5px #ddd;
-}
-
-#wom-title-list { 
-  padding-top: 10px; 
-  padding-left: 0;
-  padding-right: 0;
-  overflow: scroll;
-}
-
-#wom-title-list-header-name {
-  background-color: white;
-  padding-left: 2px;
-  padding-right: 2px;
-  border-bottom: 1px solid rgb(225, 232, 237);
-  font-weight: bold;
-  font-variant: small-caps;
-}
-
-#wom-title-list-header .close{
-  margin-right: 3px;
-}
-
-#wom-title-list li { 
-  background-color: white;
-  padding-left: 2px;
-  padding-right: 2px;
-  border-bottom: 1px solid rgb(225, 232, 237);
-  font-weight: bold;
-  font-variant: small-caps;
-}
-
-#wom-title-list li.shown a { 
-  color: #BF3E11;
-}
-
-#wom-title-list li.read { 
-  font-weight: normal;
-  background-color: rgb(245,248,250);
-}
-
-.wom-title-list-switch {
-  font-variant: small-caps;
-  margin-right: 5px;
-  margin-left: -10px;
-}
-
-#wom-sieve-reading-progress {
-  height:3px;
-  margin:0px;
-}
-
-#wom-sieve-reading-progress .progress-bar {
-  height: 3px;
-}
-
-.wom-reference-content img {
-  max-width: 100%;
-  height: auto;
-  max-height: 100%;
-  display: block;
-}
-
-
-@media screen and (max-width: 699px) {
-  .carousel-control.right { right: 2px; }
-  .carousel-control.left { left: 2px; }   
-  .carousel-control.right span {
-     font-size: 10px;
-  }
-  .carousel-control.left span {
-     left: -8px;
-     font-size: 10px;
-  }
+@media screen and (max-width: 767px) {
   .wom-reference-content {
       font-size: 150%;
       padding-left: 0.3em;
@@ -251,12 +161,63 @@ body {
       overflow: auto;
   }
 }
-@media screen and (min-width: 700px) {
-  .wom-reference .panel-heading:first-child { font-size: 150%; }
-  .wom-reference-content { font-size: 150%; overflow: auto; }
+
+
+.carousel-control-next:hover,
+.carousel-control-prev:hover {
+  opacity: 0.8;
 }
 
-@media screen and (max-width: 400px) {
-  .wom-metadata a { padding-left: 3px;}
+
+
+/* Title List sidebar */
+
+#wom-title-list-header-name {
+  padding-left: 0.5em;
+  border-bottom: 1px solid rgb(225, 232, 237);
+  font-weight: bold;
+  font-variant: small-caps;
 }
 
+
+#wom-title-list {
+  /* The height is udpated at each window resize by the companion JS code */
+  height: calc(100vh - 80px);
+  overflow: scroll;
+  padding-top: 10px;
+  padding-left: 3px;
+  padding-right: calc(var(--bs-gutter-x) * .3);
+}
+
+@media screen and (max-width: 767px) {
+  #wom-title-list {
+    margin-bottom: 5em;
+  }
+}
+
+
+#wom-title-list li {
+  padding-right: 2px;
+  border-bottom: 1px solid rgb(225, 232, 237);
+  font-weight: bold;
+  font-variant: small-caps;
+}
+
+#wom-title-list li.shown a {
+  color: #BF3E11;
+}
+
+#wom-title-list li.read {
+  font-weight: normal;
+  background-color: rgb(245,248,250);
+}
+
+
+
+.wom-reference-content img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-height: 100%;
+  display: block;
+}

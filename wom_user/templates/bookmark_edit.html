@@ -7,124 +7,145 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
 
-<h4><i class="glyphicon glyphicon-bookmark"></i>{{ ref_title }}</h4>
+  <div class="row">
+    <h4><i class="bi bi-bookmark"></i>{{ ref_title }}</h4>
+    <p>
+      <a href="{{ ref_url|normalize_wom_protocol_url }}" class="btn btn-secondary btn-sm"><i class="bi bi-globe"></i>{% trans "View on site." %}</a>
+      <a href="javascript:toggleEditMode();" id="edit-toggle"
+         class="btn btn-secondary btn-sm"><i class="bi bi-pencil"></i>{% trans "Edit !" %}</a>
+    </p>
+  </div>
 
-<p>
-  <a href="{{ ref_url|normalize_wom_protocol_url }}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-globe"></i>{% trans "View on site." %}</a>
-  <a href="javascript:toggleEditMode();" id="edit-toggle"
-  class="btn btn-default btn-xs"><i class="glyphicon glyphicon-edit"></i>{% trans "Edit !" %}</a>
-</p>
-<br/>
-
-<div id="summary">
-  {% if not ref_description and not bmk_comment %}
+  <div class="row read-only" id="summary">
+    {% if not ref_description and not bmk_comment %}
     <p class="text-warning">{% trans "No description ! Please consider adding a personal comment or general description in the edit form below." %}</p>
-  {% else %}
-    {% if bmk_comment %}
-      <h5>{% trans "Personal Notes" %}</h5>
-      <p>{{bmk_comment}}</p>
-    {% endif %}
+    {% else %}
     {% if ref_description %}
-      <h5>{% trans "General Description" %}</h5>
-      {{ ref_description|safe }}
+    <h5>{% trans "Public Description" %}</h5>
+    {{ ref_description|safe }}
     {% endif %}
-  {% endif %}
-</div>
 
-<div class="edit-only">
-  <br/>
-  <h4>{% trans "Edit" %}</h4>
-  <form class="form-horizontal" role="form" action="" method="post">
-    {% csrf_token %}
-    {% if bmk_form.errors %}
-    <div class="alert alert-danger">
-      <p>{% trans "Please check the information below." %}</p>
-      {{ bmk_form.non_field_errors|safe }}
-    </div>
+    {% if bmk_comment %}
+    <h5>{% trans "Personal Comment" %}</h5>
+    <p>{{bmk_comment}}</p>
     {% endif %}
-    {% for field in bmk_form %}
-    {% if field.errors %}
-    <div class="form-group has-error">
-      {%  else %}
-      <div class="form-group">
-        {% endif %}
-        {% if field.label == "Is public" %}
-        <span class="col-sm-10 col-sm-offset-2"><div class="checkbox"><label>{{ field }} {% trans "Share publicly" %}</label></div> {{ field.errors|safe }}</span>
-        {% else %}  
-        <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
-        <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
-        {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="row edit-only">
+    <form role="form" action="" method="post">
+      {% csrf_token %}
+      {% if bmk_form.errors %}
+      <div class="alert alert-danger">
+        <p>{% trans "Please check the information below." %}</p>
+        {{ bmk_form.non_field_errors|safe }}
       </div>
-      {% endfor %}
-      <div class="form-group">
-        <span class="col-sm-offset-2">
-          <input type="submit" value="Save changes" class="btn btn-default" />
-          <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
-        </span>
+      {% endif %}
+
+
+      <h5>{% trans "Public" %}</h5>
+
+      <div class="row">
+        <div class="alert alert-info">
+          <i class="bi bi-eye"></i>{% trans "Please note that all users sharing this reference will see your edits." %}
+        </div>
       </div>
 
+      <div class="row">
+        {% if ref_form.errors %}
+        <div class="alert alert-danger">
+          <p>{% trans "Please check the information below." %}</p>
+          {{ ref_form.non_field_errors|safe }}
+        </div>
+        {% endif %}
+        {% for field in ref_form %}
+        {% if field.errors %}
+        <div class="col-12 is-invalid">
+        {%  else %}
+        <div class="col-12">
+        {% endif %}
+          <span class="col-12 form-label">{{ field.label_tag }}</span>
+          <span class="col-12">{{ field }}</span>
+          <div class="invalid-feedback">{{ field.errors|safe }}</div>
+        </div>
+        {% endfor %}
+      </div>
 
-      <div class="form-group">
-        <span class="col-sm-2 control-label"><label>{% trans "Tags" %}</label></span>
-        <span class="col-sm-10">
-          <ul class="form-control-static list-inline">
-            {% for tag in ref_tags %}
-            <li>{{ tag }}</li>
-            {% endfor %}
-          </ul>
+      <div class="row">
+        <span class="col-12 form-label"><label><i class="bi bi-tags" title="{% trans "Tags" %}"></i>{% trans "Tags" %}</label></span>
+        <span class="col-12">
+          {% for tag in ref_tags %}
+          {{ tag }}
+          {% if not forloop.last %}
+          ,
+          {% endif %}
+          {% endfor %}
           {% if not ref_tags %}
           &#x2205;
           {% endif %}
         </span>
       </div>
 
-      <div class="form-group">
-        <span class="col-sm-2 control-label"><label>{% trans "Sources" %}</label></span>
-        <span class="col-sm-10">
-          <ul class="form-control-static list-unstyled">
+      <div class="row">
+        <span class="col-12 form-label"><label>{% trans "Sources" %}</label></span>
+        <span class="col-12">
+          <ul class="list-unstyled">
             {% for source in ref_sources %}
             {% if source.url == "#internal-bookmark-import" %}
-            <li><i class="glyphicon glyphicon-floppy-save"></i>{{ source.title }}</li>
+            <li><i class="bi bi-archive"></i>{{ source.title }}</li>
             {% else %}
-            <li><i class="glyphicon glyphicon-book"></i><a href="{{ source.url }}" title="{% trans "View on site" %}">{{ source.title }}</a> <a href="{% url 'user_river_source_item' visitor_name source.url_safe_code %}" title="{% trans "Edit source information or subscription." %}" class="edit-only tool"><i class="glyphicon glyphicon-edit"></i></a></li>
+            <li><i class="bi bi-book"></i><a href="{{ source.url }}" title="{% trans "View on site" %}">{{ source.title }}</a> <a href="{% url 'user_river_source_item' visitor_name source.url_safe_code %}" title="{% trans "Edit source information or subscription." %}" class="edit-only tool"><i class="bi bi-pencil"></i></a></li>
             {% endif %}
             {% endfor %}
+            {% if not ref_sources %}
+            <li>&#x2205;</li>
+            {% endif %}
           </ul>
-          {% if not ref_sources %}
-          &#x2205;
-          {% endif %}
         </span>
       </div>
 
-      <h5 class="help-block">{% trans "Community edits" %}</h5>
       <div class="row">
-        <span class="col-sm-4 col-sm-offset-2">
-          <p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>{% trans "Please note that all users sharing this reference will see your edits." %}</p></span>
+        <span class="col-6">
+          <input type="submit" value="{% trans "Save changes" %}" class="btn btn-secondary" />
+          <input type="hidden" name="next" value="{{ next }}" class="d-none" />
+        </span>
       </div>
-      {% if ref_form.errors %}
-      <div class="alert alert-danger">
-        <p>{% trans "Please check the information below." %}</p>
-        {{ ref_form.non_field_errors|safe }}
-      </div>
-      {% endif %}
-      {% for field in ref_form %}
-      {% if field.errors %}
-      <div class="form-group has-error">
+
+      <hr/>
+
+      <div class="row">
+        <h5>{% trans "Personal" %}</h5>
+        {% for field in bmk_form %}
+        {% if field.errors %}
+        <div class="col-12 row is-invalid">
         {%  else %}
-        <div class="form-group">
-          {% endif %}
-          <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
-          <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
+        <div class="col-12 row">
+        {% endif %}
+        {% if field.label == "Is public" %}
+        <div class="col-12 form-check">
+          <label class="form-check-label">{{ field }} {% trans "Share publicly" %}</label>
+          <div class="invalid-feedback">{{ field.errors|safe }}</div>
         </div>
-        {% endfor %}
-
-
-        <div class="form-group">
-          <span class="col-sm-offset-2">
-            <input type="submit" value="{% trans "Save changes" %}" class="btn btn-default" />
-            <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
-          </span>
+        {% else %}
+        <span class="col-12 form-label">{{ field.label_tag }}</span>
+        <span class="col-12">{{ field }}</span>
+        <div class="invalid-feedback">{{ field.errors|safe }}</div>
+        {% endif %}
         </div>
-  </form>
+      </div>
+      {% endfor %}
+
+      <div class="row">
+        <span class="col-6">
+          <input type="submit" value="{% trans "Save changes" %}" class="btn btn-secondary" />
+          <input type="hidden" name="next" value="{{ next }}" class="btn" />
+        </span>
+      </div>
+
+    </form>
+  </div>
+
+</div>
 {% endblock %}

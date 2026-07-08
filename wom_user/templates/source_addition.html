@@ -6,37 +6,43 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
 
-<h4>{% trans "Subsribe to a news source" %}</h4>
+  <h4>{% trans "Subscribe to a news source" %}</h4>
 
-<p class="help-block">{% trans "Enter below the information about a new source of news." %}</p>
+  <p class="form-text">{% trans "Enter below the information about a new source of news." %}</p>
 
-{% if form.errors %}
-<div class="alert alert-danger">
-  <p>{% trans "Please check the information below." %}</p>
-  {{ form.non_field_errors|safe }}
-</div>
-{% endif %}
-<form class="form-horizontal" role="form" action="{% url 'user_river_source_add' visitor_name %}" method="post">
-  {% csrf_token %}
-  {% for field in form %}
-  {% if field.errors %}
-  <div class="form-group has-error">
-  {%  else %}
-  <div class="form-group">
-  {% endif %}
-    <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
-    <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
-  </div>
-  {% endfor %}
-  <div class="form-group">
-    <span class="col-sm-offset-2">
-      <input type="submit" value="{% trans "Subscribe to this source" %}" class="btn btn-default" />
-      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
-    </span>
-  </div>
-</form>
+  <form class="row" role="form" action="{% url 'user_river_source_add' visitor_name %}" method="post">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      <p>{% trans "Please check the information below." %}</p>
+      {{ form.non_field_errors|safe }}
+    </div>
+    {% endif %}
+    {% for field in form %}
+    {% if field.errors %}
+    <div class="col-12 row is-invalid">
+    {%  else %}
+    <div class="col-12 row">
+    {% endif %}
+      <span class="col-12 form-label">{{ field.label_tag }}</span>
+      <span class="col-12">{{ field }}</span>
+      <div class="invalid-feedback">{{ field.errors|safe }}</div>
+    </div>
+    {% endfor %}
+    <div class="row">
+      <span class="col-6">
+        <input type="submit" value="{% trans "Subscribe to this source" %}" class="btn btn-secondary" />
+        <input type="hidden" name="next" value="{{ next }}" class="d-none" />
+      </span>
+    </div>
+  </form>
 
+<span class="row col-6">
 {% url 'user_river_sources' visitor_name as river_url %}
-<p class="help-block">{% blocktrans %}If you want to subscribe to a source using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{{ river_url }}">the sources URL</a>:{% endblocktrans %} <code>{{ REST_PARAMS }}</code></p>
+<p class="form-text"œ>{% blocktrans %}If you want to subscribe to a source using the REST-ish API you should use the following parameters either in a query string for this page's URL or in a JSON payload posted at <a href="{{ river_url }}">the sources URL</a>:{% endblocktrans %} <code>{{ REST_PARAMS }}</code></p>
+</span>
+
+</div>
 {% endblock %}

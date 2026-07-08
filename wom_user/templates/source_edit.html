@@ -8,38 +8,39 @@
 {% endblock %}
 
 {% block content %}
-
-<h4><img src="{{ ref_url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}"  width="14" alt="🌎"/>{{ ref_title }}</h4>
-
-<p><a href="{{ ref_url }}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-globe"></i>{% trans "View on site." %}</a></p>
-
-<p class="help-block">{% trans "Improve this source's description:" %}</p>
-<div class="row">
-  <span class="col-sm-4 col-sm-offset-2">
-    <p class="alert alert-info"><i class="glyphicon glyphicon-eye-open"></i>{% trans "Please note that all users sharing this source will see your edits." %}</p>
-  </span>
-</div>
-<form class="form-horizontal" role="form" action="" method="post">
-  {% csrf_token %}
-  {% if ref_form.errors %}
-  <div class="alert alert-danger">
-    <p>{% trans "Please check the information below." %}</p>
-    {{ ref_form.non_field_errors|safe }}
+<div class="container">
+  <div class="row">
+    <h4><img class="inline-icon" src="{{ ref_url|adapt_http_to_https:request|join_with_path:"favicon.ico" }}" width="14" alt="📖"/>{{ ref_title }}</h4>
+    <p><a href="{{ ref_url }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-globe"></i>{% trans "View on site." %}</a></p>
+    <p class="lead">{% trans "Improve this source's description:" %}</p>
+    <div class="alert alert-info">
+      <i class="bi bi-eye"></i>{% trans "Please note that all users sharing this source will see your edits." %}
+    </div>
   </div>
-  {% endif %}
-  {% for field in ref_form %}
-  {% if field.errors %}
-  <div class="form-group has-error">
-  {%  else %}
-  <div class="form-group">
-  {% endif %}
-    <span class="col-sm-2 control-label">{{ field.label_tag }}</span>
-    <span class="col-sm-10">{{ field }} {{ field.errors|safe }}</span>
-  </div>
-  {% endfor %}
+  <form role="form" action="" method="post">
+    {% csrf_token %}
+    {% if ref_form.errors %}
+    <div class="alert alert-danger">
+      <p>{% trans "Please check the information below." %}</p>
+      {{ ref_form.non_field_errors|safe }}
+    </div>
+    {% endif %}
+    <div class="row">
+    {% for field in ref_form %}
+    {% if field.errors %}
+      <div class="col-12 row is-invalid">
+    {%  else %}
+      <div class="col-12 row">
+    {% endif %}
+        <span class="col-12 form-label">{{ field.label_tag }}</span>
+        <span class="col-12">{{ field }}</span>
+        <div class="invalid-feedback">{{ field.errors|safe }}</div>
+      </div>
+    {% endfor %}
+    </div>
   {% for feed_url, form in feed_forms.items %}
   {% if forloop.first %}
-  <p class="help-block">{% trans "Check the feeds you want to follow (uncheck others):" %}</p>
+    <p class="text-body-secondary">{% trans "Check the feeds you want to follow (uncheck others):" %}</p>
   {% endif %}
   {% if form.errors %}
   <div class="alert alert-danger">
@@ -48,43 +49,45 @@
   </div>
   {% endif %}
   {% if form.follow.errors %}
-  <div class="form-group has-error">
+  <div class="row is-invalid">
   {%  else %}
-  <div class="form-group">
+  <div class="row">
   {% endif %}
-    <span class="control-label">
+    <span class="col-12 form-label">
       <label>
-        <img src="{{ STATIC_URL }}img/feed-icon-14x14.png" style="padding-right:.2em"/><a href="{{ feed_url }}">{{ feed_url }}</a>
+        <img class="inline-icon" src="{{ STATIC_URL }}img/feed-icon-14x14.png"/><a href="{{ feed_url }}">{{ feed_url }}</a>
       </label>
     </span>
     {% if form.feed.permanent_failure_detected  %}
     <div class="alert alert-danger">
-      <p><i class="glyphicon glyphicon-ban-circle"></i>
+      <p><i class="bi bi-x-circle"></i>
         {% trans "Feed broken and permanently skipped" %}
         ({{ form.feed.permanent_failure_diagnostic }} [{{ form.feed.permanent_failure_last_detection_date }}])
       </p>
     </div>
     {% endif  %}
-    <span class="input-group checkbox">
-         {{ form.follow }} <label><i class="glyphicon glyphicon-filter" style="padding-top:.5em"></i> {% trans "Following" %}</label>
-        {{ form.follow.errors|safe }}
-    </span>
+    <div class="col-12 form-check">
+      {{ form.follow }}
+      <label class="form-check-label"><i class="bi bi-funnel"></i> {% trans "Following" %}</label>
+      <div class="invalid-feedback">{{ form.follow.errors|safe }}</div>
+    </div>
   </div>
   {% if form.collate.errors %}
-  <div class="form-group has-error">
+  <div class="row is-invalid">
   {%  else %}
-  <div class="form-group">
+  <div class="row">
   {% endif %}
-    <span class="input-group checkbox">
-      {{ form.collate }} <label><i class="glyphicon glyphicon-compressed" style="padding-top:.2em"></i> {% trans "Collating" %}</label>
-      {{ form.collate.errors|safe }}
+    <span class="col-12 form-check">
+      {{ form.collate }}
+      <label class="form-check-label"><i class="bi bi-stack"></i> {% trans "Collating" %}</label>
+      <div class="invalid-feedback">{{ form.collate.errors|safe }}</div>
     </span>
   </div>
   {% endfor %}
-  <div class="form-group">
-    <span class="col-sm-offset-2">
-      <input type="submit" value="{% trans "Save changes" %}" class="btn btn-default" />
-      <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
+  <div class="row">
+    <span class="col-6">
+      <input type="submit" value="{% trans "Save changes" %}" class="btn btn-secondary" />
+      <input type="hidden" name="next" value="{{ next }}" class="d-none" />
     </span>
   </div>
 </form>

@@ -1,18 +1,20 @@
 {% load i18n %}
-{% if is_in_demo %}
+{% if is_in_demo or is_read_only %}
 <div class="alert alert-warning">
-  <p><strong>{% trans "It's just a demo !" %}</strong>
-  <p>{% blocktrans %}You can log in and try it with the username '{{demo_u_name}}' and the password '{{demo_u_password}}'.{% endblocktrans %}</p>  
-  <p class="help-block"><small>{% blocktrans %}WaterOnMars is
+  {% if is_in_demo %}
+  <h4 class="alert-heading">{% trans "It's just a demo !" %}</h4>
+  <p>{% blocktrans %}You can log in and try it with the username '{{demo_u_name}}' and the password '{{demo_u_password}}'.{% endblocktrans %}</p>
+  <hr>
+  <p class="text-secondary">{% blocktrans %}WaterOnMars is
       currently running in demo mode, to use it for real feel free
       to <a href="https://github.com/tibonihoo/wateronmars"> fork it
-      on github</a> and install your own!{% endblocktrans %}</small>
+      on github</a> and install your own!{% endblocktrans %}
+   </p>
+  {% endif %}
+
+  {% if is_read_only %}
+  <p class="form-text text-primary">{% blocktrans %}Currently running in READ ONLY mode, no change will be allowed nor saved.{% endblocktrans %}
   </p>
-</div>
 {% endif %}
-{% if is_read_only %}
-  <p class="help-block"><small>{% blocktrans %}WaterOnMars is
-      currently running in READ ONLY mode, no change will be allowed
-      nor saved anyway.{% endblocktrans %}</small>
-  </p>
+</div>
 {% endif %}

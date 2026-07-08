@@ -18,46 +18,47 @@
 {% endblock %}
 
 
-{% block body_below_nav %}  
+{% block body_below_nav %}
 
 {% demo_info %}
 
-{% if form.errors %}
-<div class="alert alert-danger">
-  <p>{% trans "Your username and password didn't match. Please try again." %}</p>
-</div>
-{% endif %}
-<div class="container-fluid">
-  <h4>{% trans "User authentication" %}</h4>
-<form role="form" class="form-horizontal" 
-      method="post" action="{% url 'user_login' %}">
-  {% csrf_token %}
-  {% if form.username.errors %}
-  <div class="form-group has-error">
-  {%  else %}
-  <div class="form-group">
-  {% endif %}
-    <div class="col-sm-offset-1">
-      <span class="col-sm-2 control-label">{{ form.username.label_tag }}</span>
-      <span class="col-sm-10">{{ form.username }} {{ form.username.errors|safe }}</span>
-    </div>
+<div class="container">
+
+  <div class="row">
+    <h4>{% trans "User authentication" %}</h4>
   </div>
-  {% if form.password.errors %}
-  <div class="form-group has-error">
-  {%  else %}
-  <div class="form-group">
-  {% endif %}
-    <div class="col-sm-offset-1">
-      <span class="col-sm-2  control-label">{{ form.password.label_tag }}</span>
-      <span class="col-sm-10">{{ form.password }} {{ form.password.errors|safe }}</span>
+
+  <form class="row" role="form" method="post" action="{% url 'user_login' %}">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      {% trans "Your username and password didn't match. Please try again." %}
     </div>
-  </div>
-  <div class="form-group">
-    <div class="col-sm-offset-1">
-      <span class="col-sm-2"><input type="hidden" name="next" value="{{ next }}" class="btn btn-default" /></span>
-      <span class="col-sm-10"><input type="submit" value="{% trans "Login" %}" class="btn btn-default" /></span>
+    {% endif %}
+    {% if form.password.errors %}
+    <div class="row is-invalid">
+    {%  else %}
+    <div class="row">
+    {% endif %}
+      <span class="col-sm-2 col-form-label">{{ form.username.label_tag }}</span>
+      <span class="col-sm-10">{{ form.username }}</span>
+      <div class="invalid-feedback">{{ form.username.errors|safe }}</div>
     </div>
-  </div>
-</form>
+    {% if form.password.errors %}
+    <div class="row is-invalid">
+    {%  else %}
+    <div class="row">
+    {% endif %}
+      <span class="col-sm-2  col-form-label">{{ form.password.label_tag }}</span>
+      <span class="col-sm-10">{{ form.password }}</span>
+      <div class="invalid-feedback">{{ form.password.errors|safe }}</div>
+    </div>
+    <div class="row">
+      <button type="submit" class="col-2 btn btn-primary">{% trans "Login" %}</button>
+      <!-- The hidden text field is adapted from Django's default login form. -->
+      <input type="hidden" name="next" value="{{ next }}" class="d-none" />
+    </div>
+  </form>
+
 </div>
 {% endblock %}

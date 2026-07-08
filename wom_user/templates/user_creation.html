@@ -28,16 +28,16 @@
   {% csrf_token %}  
   {% for field in form %}
   {% if field.errors %}
-  <div class="form-group has-error">
+  <div class="mb-3 form-group is-invalid">
   {%  else %}
-  <div class="form-group">
+  <div class="mb-3 form-group">
   {% endif %}  
-    <span class="control-label">{{ field.label_tag }}</span>
+    <label class="form-label">{{ field.label_tag }}</label>
     {{ field }} {{ field.errors|safe }}
   </div>
   {% endfor %}
-  <div class="control-groups">
-    <input type="submit" value="{% trans "Register new user" %}" class="btn btn-default" />
-  </div>
+<div class="control-groups">
+    <input type="submit" value="{% trans "Register new user" %}" class="btn btn-primary" />
+</div>
 </form>
 {% endblock %}

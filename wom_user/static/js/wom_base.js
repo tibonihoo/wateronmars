@@ -16,19 +16,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 //
-//
-// Requirements:
-// - jquery v1.8.2
 
 
-// using jQuery to get a cookie 
-// (from https://docs.djangoproject.com/en/dev/ref/contrib/csrf/)
+function $(...args)
+{
+    return document.querySelector(...args);
+}
+
+// Get a cookie
+// (adapted from https://docs.djangoproject.com/en/dev/ref/contrib/csrf/)
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
+            var cookie = cookies[i].trim();
             // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) == (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
@@ -51,16 +53,14 @@ function csrfSafeMethod(method) {
 // WARNING: if there are several warnings, they may overlap (TODO: in
 // such case use a warning counter + a shift computed accordingly)
 function showWarning(warningId) {
-  var warningElt = $("#"+warningId);
-  warningElt.popover();
-  warningElt.css({ 
-    "display": "block",
-  });
+  const warningElt = document.querySelector("#"+warningId);
+  if (warningElt)
+      warningElt.style.display = "block";
 }
 
 // Hide a specific warning.
 function hideWarning(warningId) {
-  $("#"+warningId).css("display", "none");
+  $("#"+warningId).style.display = "none";
 }
 
 
@@ -68,18 +68,17 @@ function hideWarning(warningId) {
 function womRequest(verb, url, dataType, data)
 {
   var csrftoken = getCookie('csrftoken');
-  return $.ajax({
-    crossDomain: false, // obviates need for sameOrigin test
-    beforeSend: function(xhr, settings) {
-      if (!csrfSafeMethod(settings.type)) {
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      }
-    },
-    type: verb,
-    url: url,
-    data: data,
-    dataType: dataType,
-  })
+  const headers = new Headers();
+  headers.append("Content-Type", dataType);
+  if (!csrfSafeMethod(verb)) {
+      headers.append("X-CSRFToken", csrftoken);
+  }
+  return fetch(url, {
+    mode: "same-origin", // obviates need for sameOrigin test
+    method: verb,
+    body: data,
+    headers: headers
+  });
 }
 
 
@@ -87,9 +86,9 @@ function womRequest(verb, url, dataType, data)
 function dropSieveContent(sieveURL)
 {
   womRequest("POST", sieveURL,
-             "json", JSON.stringify({"action": "drop"}))
-    .done(function () {window.location.href = sieveURL})
-    .fail(function () {showWarning("wom-drop-sieve-content-failed")});
+             "application/json", JSON.stringify({"action": "drop"}))
+    .then(function () {window.location.href = sieveURL})
+    .catch(function () {showWarning("wom-drop-sieve-content-failed")});
 }
 
 // For pages that have an "edit-mode"
@@ -101,14 +100,16 @@ function dropSieveContent(sieveURL)
 // provided by wom_base.css)
 function toggleEditMode()
 {
-  if ($("#edit-toggle").hasClass("edit-on"))
+  if ($("#edit-toggle").classList.contains("edit-on"))
   {
-      $(".edit-only").removeClass("edit-on")
-      $("#edit-toggle").removeClass("edit-on")
+      $(".read-only").classList.remove("edit-on");
+      $(".edit-only").classList.remove("edit-on");
+      $("#edit-toggle").classList.remove("edit-on");
   }
   else
   {
-    $(".edit-only").addClass("edit-on")
-    $("#edit-toggle").addClass("edit-on")
+      $(".read-only").classList.add("edit-on");
+      $(".edit-only").classList.add("edit-on");
+      $("#edit-toggle").classList.add("edit-on");
   }
 }

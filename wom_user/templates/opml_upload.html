@@ -6,31 +6,36 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
+  <h4>{% trans "Import your subscriptions" %}</h4>
 
-<h4>{% trans "Import your subscriptions" %}</h4>
+  <p class="form-text">{% blocktrans %}This page will help you import several feeds at once by uploading an <a href="http://opml.org">OPML</a> file.{% endblocktrans %}</p>
 
-<p class="help-block">{% blocktrans %}This page will help you import several feeds at once by uploading an <a href="http://opml.org">OPML</a> file.{% endblocktrans %}</p>
+  <form class="row" role="form" action="{% url 'user_upload_opml' visitor_name %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      <p>{% trans "There was an error uploading your file. Please try again." %}</p>
+      {{ form.non_field_errors|safe }}
+    </div>
+    {% endif %}
+    {% if form.opml_file.errors %}
+    <div class="row col-12 is-invalid">
+    {%  else %}
+    <div class="row col-12">
+    {% endif %}
+      <span class="col-12 form-label">{{ form.opml_file.label_tag }}</span>
+      <div class="col-12">
+        {{ form.opml_file }}
+      </div>
+      <div class="invalid-feedback">{{ form.opml_file.errors|safe }}</div>
+      <p class="form-text">{% trans "Select the OPML file to upload" %}</p>
+    </div>
+    <div class="row col-6">
+      <input type="submit" value="{% trans "Import these subscriptions" %}" class="btn btn-secondary" />
+      <input type="hidden" name="next" value="{{ next }}" class="d-none" />
+    </div>
+  </form>
 
-{% if form.errors %}
-<div class="alert alert-danger">
-  <p>{% trans "There was an error uploading your file. Please try again." %}</p>
-  {{ form.non_field_errors|safe }}
 </div>
-{% endif %}
-<form role="form" action="{% url 'user_upload_opml' visitor_name %}" method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {% if form.opml_file.errors %}
-  <div class="form-group has-error">
-  {%  else %}
-  <div class="form-group">
-  {% endif %}  
-    {{ form.opml_file.label_tag }}
-    {{ form.opml_file }} {{ form.opml_file.errors|safe }}
-  <p class="help-block">{% trans "Select the OPML file to upload" %}</p>
-  </div>
-  <div class="form-group">
-    <input type="submit" value="{% trans "Import these subscriptions" %}" class="btn btn-default" />
-    <input type="hidden" name="next" value="{{ next }}" class="btn btn-default" />
-  </div>
-</form>
 {% endblock %}

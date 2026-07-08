@@ -3,12 +3,28 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Water on Mars | {% block title %}{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="{% trans "Your base camp to explore the web." %}">
-    <link href="{{ STATIC_URL }}bootstrap/css/bootswatch.min.css" rel="stylesheet">
-    <link href="{{ STATIC_URL }}bootstrap/css/bootswatch_united_bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+      @font-face {
+          font-family: 'Ubuntu';
+          font-style: normal;
+          font-weight: 400;
+          font-display: swap;
+          src: url('{{ STATIC_URL }}bootstrap/fonts/UbuntuSans-Regular.woff2') format('woff2');
+      }
+
+      @font-face {
+          font-family: 'Ubuntu';
+          font-style: normal;
+          font-weight: 700;
+          font-display: swap;
+          src: url('{{ STATIC_URL }}bootstrap/fonts/UbuntuSans-Bold.woff2') format('woff2');
+      }
+    </style>
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}bootstrap/fonts/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="icon" sizes="16x16" type="image/png" href="{{ STATIC_URL }}img/wom-logo-16.png">
     <link rel="icon" sizes="152x152" type="image/png" href="{{ STATIC_URL }}img/wom-logo-152.png">
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/wom-logo-76.png">
@@ -21,47 +37,45 @@
     {% endblock %}
   </head>
   <body>
-    <div class="navbar navbar-default navbar-fixed-top" role="banner">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
       <div class="container-fluid">
-        <div class="navbar-header">
-          <span class="navbar-brand navbar-nav" role="navigation">
-            <a href="{% url 'home' %}" title="{% trans "Water On Mars landing zone" %} [H]" accesskey="H" id="wom-brand-name">WoM</a>
+        <a class="navbar-brand" href="{% url 'home' %}" title="{% trans "Water On Mars landing zone" %} [H]" accesskey="H" id="wom-brand-name">WoM</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#wom-navbar-navigation" aria-controls="wom-navbar-navigation" aria-expanded="false" aria-label="{% trans "Toggle navigation" %}">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse container-fluid" id="wom-navbar-navigation">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person"></i>
+              </a>
+              <ul class="dropdown-menu">
+                {% if visitor_name %}
+                <li><a class="dropdown-item" href="{% url 'user_profile' %}" title="{% trans "Want to check your profile ?" %} [P]" accesskey="P">{% blocktrans %}Welcome {{ visitor_name }} !{% endblocktrans %}</a></li>
+                <li><a class="dropdown-item" href="{% url 'user_logout' %}" title="{% trans "Blast off !" %} [Q]" accesskey="Q">{% trans "Log out" %}</a></li>
+                {% else %}
+                <li><a class="dropdown-item" href="{% url 'user_login' %}"><i class="bi bi-person"></i>{% trans "Log in" %}</a></li>
+                {% endif %}
+              </ul>
+            </li>
             {% if visitor_name %}
-            <a href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Your Sources" %} [S]" accesskey="S"><i class="glyphicon glyphicon-book"></i></a>
-            <a href="{% url 'user_river_view' visitor_name %}" title="{% trans "Your River" %} [R]" accesskey="R"><i class="glyphicon glyphicon-align-left"></i></a>
-            <a href="{% url 'user_river_sieve' visitor_name %}" title="{% trans "Your Sieve" %} [F]" accesskey="F"><i class="glyphicon glyphicon-filter"></i></a>
-            <a href="{% url 'user_collection' visitor_name %}" title="{% trans "Your Collection" %} [C]" accesskey="C"><i class="glyphicon glyphicon-bookmark"></i></a>
+            <li class="nav-item"><a class="nav-link" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Your Sources" %} [S]" accesskey="S"><i class="bi bi-book"></i></a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'user_river_view' visitor_name %}" title="{% trans "Your River" %} [R]" accesskey="R"><i class="bi bi-justify-left"></i></a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'user_river_sieve' visitor_name %}" title="{% trans "Your Sieve" %} [F]" accesskey="F"><i class="bi bi-funnel"></i></a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'user_collection' visitor_name %}" title="{% trans "Your Collection" %} [C]" accesskey="C"><i class="bi bi-bookmark"></i></a></li>
             {% endif %}
-          </span>
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#wom-navbar-collapse">
-            <span class="sr-only">{% trans "Toggle navigation" %}</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
-        <div id="wom-navbar-collapse" class="collapse navbar-collapse" style="height: 0px;" >
-          <ul class="nav navbar-nav navbar-left">
-            {% block head_notification %}  
+            {% block head_notification %}
             {% endblock %}
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            {% if visitor_name %}
-            <li><a href="{% url 'user_profile' %}" title="{% trans "Want to check your profile ?" %} [P]" accesskey="P">{% blocktrans %}Welcome {{ visitor_name }} !{% endblocktrans %}</a></li>
-            <li><a href="{% url 'user_logout' %}" title="{% trans "Blast off !" %} [Q]" accesskey="Q">{% trans "Log out" %}</a></li>
-            {% else %}
-            <li><a href="{% url 'user_login' %}"><i class="glyphicon glyphicon-user"></i>{% trans "Log in" %}</a></li>
-            {% endif %}
           </ul>
         </div>
       </div>
-    </div>
+    </nav>
     <div id="below-nav">
     {% block body_below_nav %}
     {% endblock %}
     </div>
-      {% block footer %}
-      {% endblock %}
+    {% block footer %}
+    {% endblock %}
   </body>
   {% block after_body %}
   {% endblock %}

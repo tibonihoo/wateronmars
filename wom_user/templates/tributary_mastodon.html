@@ -12,7 +12,7 @@
 {% for mastodon_connection_status in mastodon_connection_status_list %}
 
 <h5>{{mastodon_connection_status.name}}</h5>
-<!-- <p><e>{{mastodon_connection_status.}}</e></p> -->
+
 {% if mastodon_connection_status.auth_status.is_auth %}
 <p>{% trans "The connection to mastodon is ok" %}</p>
 {% else %}
@@ -37,12 +37,12 @@
 {% endfor %}
 {% else %}
 
-<div class="alert alert-info alert-dismissable">
-  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-  <h4>{% trans "You are not subscribed to any mastodon timeline !" %}</h4>
-  {% url 'user_tributary_mastodon_add' owner_name as add_url %}
-  <p><a class="alert-link" href="{{ add_url }}">{% blocktrans %}Subscribe to one now!{% endblocktrans %}</a></p>
-
+<div class="alert alert-info" role="alert">
+  <p class="lead">
+    {% trans "You are not subscribed to any mastodon timeline !" %}
+    {% url 'user_tributary_mastodon_add' owner_name as add_url %}
+  </p>
+  <a class="alert-link" href="{{ add_url }}">{% blocktrans %}Subscribe to one now!{% endblocktrans %}</a>
 </div>
 {% endif %}
 {% endblock %}

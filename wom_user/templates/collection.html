@@ -8,30 +8,26 @@
 
 
 {% block extrahead %}
-<script src="{{ STATIC_URL }}/js/jquery-ias.min.js" type="text/javascript"></script>
-<script type="text/javascript">
-jQuery.ias({
-    container : '#bookmark_list',
-    item: '.in_bookmark_def',
-    pagination: '#pagination',
-    next: '.next a',
-    loader: '<img src="{{ STATIC_URL }}img/loader.gif"/>'
-});
-</script>
-<script src="{{ STATIC_URL }}js/mousetrap.min.js"></script>
 <style type="text/css">
-  #bookmark_list dt { margin-bottom: 3px; }
+  #bookmark_list dt { margin-bottom: 3px; font-weight: 400; }
   #bookmark_list dd { margin-top: 3px; }
   #server-sync-problem {display : none;}
   #server-save-failed  {display : none;}
   .sourceURL { color: black; text-decoration: None; }
   .sourceFeedURL { color: black; text-decoration: None; }
- </style>
+  </style>
+<script>
+  // Bootstrap 5 tooltips initialization
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+</script>
 {% endblock %}
 
 {% block content %}
 <h4>
-  <i class="glyphicon glyphicon-bookmark"></i>
+  <i class="bi bi-bookmark"></i>
   {% if visitor_name == owner_name  %}
   {% blocktrans with num_items=user_bookmarks.paginator.count %}Your collection of {{ num_items }} bookmarks.{% endblocktrans %}
   {% else %}
@@ -39,16 +35,16 @@ jQuery.ias({
   {% endif %}
 </h4>
 {% if visitor_name == owner_name  %}
-<p><a href="{% url 'user_collection_add' owner_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Add a bookmark." %}</a></p>
+<p><a href="{% url 'user_collection_add' owner_name %}" class="btn btn-secondary btn-sm"><i class="bi bi-plus"></i>{% trans "Add a bookmark." %}</a></p>
 {% endif  %}
 
 {% if user_bookmarks %}
 <dl id="bookmark_list" class="unstyled">
   {% for bookmark in user_bookmarks %}
-  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url|normalize_wom_protocol_url}}" data-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ {% trans "Bookmarked since" %} {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a> 
+  <dt class="in_bookmark_def"><a id="page{{user_bookmarks.number}}-bmk{{forloop.counter0}}-title" class="bookmark-title" href="{{bookmark.reference.url|normalize_wom_protocol_url}}" data-bs-toggle="tooltip" data-html="true" title="{{ bookmark.reference.pub_date }} -- {{ bookmark.comment|striptags|truncatewords:30 }} -- {{ bookmark.reference.description|striptags|truncatewords:30 }} [ {% trans "Bookmarked since" %} {{ bookmark.saved_date }}]">{{ bookmark.reference.title }}</a>
   </dt>
   <dd class="in_bookmark_def">
-    <a href="{% url 'user_collection_item' visitor_name bookmark.reference.url_safe_code %}" class="tool"><i class="glyphicon glyphicon-zoom-in" title="{% trans "Details" %}"></i></a>
+    <a href="{% url 'user_collection_item' visitor_name bookmark.reference.url_safe_code %}" class="tool"><i class="bi bi-zoom-in" title="{% trans "Details" %}"></i></a>
       <small><em>{% spaceless %}
           {% if bookmark.get_sources %}@
           {% for source in bookmark.get_sources %}
@@ -60,7 +56,7 @@ jQuery.ias({
           {% endif %}
       </em></small>
       {% if bookmark.get_tag_names %}
-      <i class="glyphicon glyphicon-tags" title="{% trans "Tags" %}"></i>
+      <i class="bi bi-tags" title="{% trans "Tags" %}"></i>
       {% for tag in bookmark.get_tag_names %}
       {{ tag }}
       {% if not forloop.last %}
@@ -94,7 +90,7 @@ jQuery.ias({
         {% trans "Previous" %}
         </a>
     </li>
-    
+
     <li class="disabled">
         <a>{% blocktrans with page_idx=user_bookmarks.number page_total=user_bookmarks.paginator.num_pages %}Page {{ page_idx }} of {{ page_total }}.{% endblocktrans %}</a>
     </li>
@@ -110,5 +106,20 @@ jQuery.ias({
     </li>
     </ul>
 </div>
+{% endif %}
+{% endblock %}
+
+
+{% block after_body %}
+{% if user_bookmarks.paginator.num_pages > 1 %}
+<script src="{{ STATIC_URL }}js/infinite-ajax-scroll.min.js"></script>
+<script type="text/javascript">
+let ias = new InfiniteAjaxScroll('#bookmark_list', {
+  item: '.in_bookmark_def',
+  next: '.next a',
+  pagination: '#pagination',
+  loader: '<img src="{{ STATIC_URL }}img/loader.gif"/>'
+});
+</script>
 {% endif %}
 {% endblock %}

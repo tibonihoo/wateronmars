@@ -1,0 +1,7 @@
+Infinite Ajax Scroll LICENSE
+
+Infinite Ajax Scroll is used with the Affero General Public License
+(AGPL) license as indicated at
+https://infiniteajaxscroll.com/docs/license.html.
+
+AGPL: Affero General Public License (AGPL)

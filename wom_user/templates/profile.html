@@ -16,9 +16,9 @@
 
 {% block head_notification %}{# Error messages #}
 {% if read_only %}
-<li><a id="wom-sieve-readonly-warning" data-content="{% trans "Please note that some features are disabled, like adding or removing bookmarks and feeds or dropping the sieve content." %}" title="{% trans "READ_ONLY: no change allowed" %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-eye-close"></i></a></li>
+<li class="nav-item"><a class="nav-link" id="wom-sieve-readonly-warning" data-bs-content="{% trans "Please note some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "READ_ONLY: no change allowed !" %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><i class="bi bi-eye-slash"></i></a></li>
 {% else %}
-<li><a id="wom-drop-sieve-content-failed" data-content="{% trans "The content of sieve couldn't be dropped, which may be due to a server communication problem." %}" title="{% trans "Failed to drop sieve content." %}" data-toggle="popover" data-placement="bottom" data-container="body" href="#"><i class="glyphicon glyphicon-warning-sign"></i></a></li>
+<li class="nav-item"><a class="nav-link" id="wom-drop-sieve-content-failed" data-bs-content="{% trans "The content of sieve couldn't be dropped, which may be due to a server communication problem." %}" title="{% trans "Failed to drop sieve content." %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><i class="bi bi-exclamation-triangle"></i></a></li>
 {% endif %}
 {% endblock %}
 
@@ -29,14 +29,14 @@
 <p>{% trans "Feel free to browse through the following pages:" %}</p>
 
 
-<dl class="dl-horizontal">
+<dl class="dl-horizontal row">
   {% url 'user_river_source_add' visitor_name as source_add_url %}
   {% url 'user_upload_opml' visitor_name as upload_opml_url %}
   {% url 'user_river_sources' owner_name as sources_url %}
-  <dt>
+  <dt class="col-2 text-end">
       <abbr title="{% trans "Subscriptions and sites referenced by bookmarks." %}">{% trans "Sources" %}</abbr>
-      &nbsp;<i class="glyphicon glyphicon-book"></i></dt>
-  <dd>
+      &nbsp;<i class="bi bi-book"></i></dt>
+  <dd class="col-10 text-start">
     {% if visitor_name == owner_name %}
     {% blocktrans %}<a href="{{ sources_url }}" title="Look or change your current sources.">Check</a>,
     <a href="{{ source_add_url }}" title="Subscribe to a new source.">add</a>,
@@ -47,18 +47,18 @@
     {% endif %}
   </dd>
   {% url 'user_river_view' owner_name as river_view_url %}
-  <dt>
+  <dt class="col-2 text-end">
     <abbr title="{% trans "A stream of fresh news with latest headlines first." %}">River</abbr>
-    &nbsp;<i class="glyphicon glyphicon-align-left"></i></dt>
-  <dd>
+    &nbsp;<i class="bi bi-justify-left"></i></dt>
+  <dd class="col-10 text-start">
     {% blocktrans %}<a href="{{ river_view_url }}" title="Read the headlines.">Browse</a>
     and <abbr title="The river page refreshes itself regularly.">contemplate ...</abbr>{% endblocktrans %}
   </dd>
   {% url 'user_river_sieve' owner_name as sieve_url %}
-  <dt>
-      <abbr title="{% trans "An inbox-like view of news to make sure you don't miss anything." %}">{% trans "Sieve" %}</abbr>
-      &nbsp;<i class="glyphicon glyphicon-filter"></i></dt>
-  <dd>
+  <dt class="col-2 text-end">
+    <abbr title="{% trans "An inbox-like view of news to make sure you don't miss anything." %}">{% trans "Sieve" %}</abbr>
+    &nbsp;<i class="bi bi-funnel"></i></dt>
+  <dd class="col-10 text-start">
     {% if visitor_name == owner_name %}
     {% blocktrans %}<a href="{{ sieve_url }}" title="Sift through news summaries and get a chance to bookmark them.">Read</a>
     or <a href="javascript:dropSieveContent('{{ sieve_url }}')" title="Drop all unread items.">empty your sieve</a>.{% endblocktrans %}
@@ -69,10 +69,10 @@
   {% url 'user_collection_add' owner_name as collection_add_url %}
   {% url 'user_upload_nsbmk' visitor_name as upload_nsbmk_url %}
   {% url 'user_collection' owner_name as collection_url %}
-  <dt>
-      <abbr title="{% trans "The gems you picked up from your sieve and the web." %}">{% trans "Collection" %}</abbr>
-      &nbsp;<i class="glyphicon glyphicon-bookmark"></i></dt>
-  <dd>
+  <dt class="col-2 text-end">
+    <abbr title="{% trans "The gems you picked up from your sieve and the web." %}">{% trans "Collection" %}</abbr>
+    &nbsp;<i class="bi bi-bookmark"></i></dt>
+  <dd class="col-10 text-start">
     {% if visitor_name == owner_name %}
     {% blocktrans %}<a href="{{ collection_url }}" title="Read the list of all your bookmarks.">Scan the bookmarks</a>,
     <a href="{{ collection_add_url }}" title="Add an URL to your collection.">add one</a>,
@@ -88,19 +88,19 @@
 {% if visitor_name == owner_name %}
 <div class="bs-docs-grid">
 {% if is_superuser %}
-<div class="row show-grid">
-  <div class="col-md-6">
-  <p><a href="{% url 'user_creation' %}" class="btn btn-default">{% trans "Create a new user" %}</a></p>
+<div class="row">
+  <div class="col-6">
+  <p><a href="{% url 'user_creation' %}" class="btn btn-secondary">{% trans "Create a new user" %}</a></p>
   </div>
 </div>
 {% endif %}
-<div class="row show-grid">
-<div class="col-md-6">
+<div class="row">
+<div class="col-6">
 <h4>{% trans "Bookmarklets" %}</h4>
 <p>{% blocktrans %}Another thing of the past, bookmarklets let you interact with <abbr title="wateronmars">WoM</abbr> when you're browsing the web.{% endblocktrans %}</p>
 <p>{% trans "Drag'n'drop them on your browser's toolbar:" %}</p>
-<p><a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-primary" title="{% trans "Add current page to your bookmarks." %}">{% trans "Bookmark!" %}</a>
-<a href="{{ source_add_bookmarklet|safe }}" class="btn btn-primary" title="{% trans "Follow this site through your river." %}">{% trans "Subscribe!" %}</a></p>
+<p><a href="{{ collection_add_bookmarklet|safe }}" class="btn btn-primary" title="{% trans "Add current page to your bookmarks." %}"><i class="bi bi-bookmark-plus"></i>{% trans "Bookmark!" %}</a>
+<a href="{{ source_add_bookmarklet|safe }}" class="btn btn-primary" title="{% trans "Follow this site through your river." %}"><i class="bi bi-journal-plus"></i>{% trans "Subscribe!" %}</a></p>
 </div>
 </div>
 </div>

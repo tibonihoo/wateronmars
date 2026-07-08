@@ -1,5 +1,5 @@
-// sieve_ux.js 
-// Copyright (C) 2013-2019 Thibauld Nion
+// sieve_ux.js
+// Copyright (C) 2013-2026 Thibauld Nion
 //
 // This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars).
 //
@@ -18,7 +18,6 @@
 //
 //
 // Requirements:
-// - jquery v1.8.2
 // - mousetrap.js v1.1.3
 // - wom_base.js
 //
@@ -40,99 +39,123 @@ function prepareKeyBindings()
   gUserCollectionURL = "";
   gNumUnread = 0;
   gInitialNumUnread = 0;
+  gCarousel = null;
+  gSmallWindowWidthThreshold = 800;
+}
+
+function getFirstVisible(selector)
+{
+  const allMatches = document.querySelectorAll(selector);
+  for (var i = 0; i < allMatches.length; i++)
+  {
+    let currentElement = allMatches[i];
+    let computedStyle = window.getComputedStyle(currentElement);
+    let isHidden = ((computedStyle.display === 'none') || (computedStyle.visibility === 'hidden'))
+    if (!isHidden)
+      return currentElement;
+  }
 }
 
 // Make sure that the item being slid out is marked as read and that
 // the next item and its title are displayed correctly.
-function onCarouselSlid() {  
-  $(".carousel").carousel("pause");
+function onCarouselSlid(event)
+{
   // get the index by slicing the "wom-refXXX" id after a len(wom-ref) offset
-  newlyShownItemId = $(".item:visible").attr("id");
-  if (newlyShownItemId === undefined)
-      return;
-  var newlyShownItemIdx = parseInt(newlyShownItemId.slice(7));
-  var previouslyShownItemIdx = gCurrentlyFocusedItem;
-  gCurrentlyFocusedItem  = newlyShownItemIdx;
-  if (previouslyShownItemIdx>=0) {
-    var referenceId = '#wom-ref'+previouslyShownItemIdx.toString();
-    var prevNavItem = "#wom-ref-nav-"+previouslyShownItemIdx.toString();
-    $(prevNavItem).removeClass("shown");
-    if (newlyShownItemIdx>previouslyShownItemIdx) {
-      markAsRead($(referenceId),previouslyShownItemIdx);      
-    }
+  newlyShownItemIndex = event.to;
+  previouslyShownItemIndex = event.from;
+
+  if (previouslyShownItemIndex >= 0 && previouslyShownItemIndex <= gNumReferences - 1)
+  {
+    var referenceId = '#wom-ref'+previouslyShownItemIndex.toString();
+    var prevNavItem = "#wom-ref-nav-"+previouslyShownItemIndex.toString();
+    $(prevNavItem).classList.remove("shown");
+    markAsRead($(referenceId), previouslyShownItemIndex);
   }
-  var navItem = "#wom-ref-nav-"+newlyShownItemIdx.toString();
-  $(navItem).addClass("shown");
-  ensureCorrectVisibility(navItem,"#wom-title-list");
-  $("#"+newlyShownItemId+"-content").focus();
+
+  if (newlyShownItemIndex >= 0 && newlyShownItemIndex <= gNumReferences - 1)
+  {
+    var navItem = "#wom-ref-nav-" + newlyShownItemIndex.toString();
+    $(navItem).classList.add("shown");
+    ensureCorrectVisibility(navItem,"#wom-title-list");
+  }
+
+  gCurrentlyFocusedItem  = newlyShownItemIndex;
+  adaptControlsDisplay();
+
+  if (window.innerWidth < gSmallWindowWidthThreshold)
+      hideTitleList();
+
 }
 
+// Ensure controls are visible only when they make sense
+function adaptControlsDisplay() {
+  if (gNumReferences==0)
+  {
+    $(".carousel-control-prev").style.display = 'none';
+    $(".carousel-control-next").style.display= 'none';
+    return;
+  }
 
-// Make sure the carousel correctly fills the height of the window
-function adjustCarouselHeight() 
-{
-  $(".wom-reference-content").css("height",window.innerHeight-120);
-  $("#wom-title-list").css("height",window.innerHeight-40);
+  if(gCurrentlyFocusedItem > 0) {
+    $(".carousel-control-prev").style.display = 'block';
+  }
+  else {
+    $(".carousel-control-prev").style.display = 'none';
+  }
+
+  if(gCurrentlyFocusedItem < gNumReferences) {
+    $(".carousel-control-next").style.display = 'block';
+  }
+  else {
+    $(".carousel-control-next").style.display = 'none';
+  }
+
+  let newlyShownItemId = getFirstVisible(".carousel-item").getAttribute("id");
+  $("#"+newlyShownItemId).focus();
+
 }
 
 // Initialize the carousel, activate its controls and plug the right callbacks.
 function initializeCarousel()
 {
-  if (gNumReferences==0)
-  {
-    $(".carousel-control").hide(); 
-    return;
-  }
-  // first adjustment of the carousel height and make sure that at the
-  // next resize the adjusted size is updated
-  adjustCarouselHeight();
-  window.onresize = function  (event) {adjustCarouselHeight();}
-  $(".carousel-control").show(); 
-  // show the right "switch" text taking into account that accordion
-  // is the default view for non-touch devices
-  // add event
-  $(".carousel").on('slid.bs.carousel',  function () { onCarouselSlid()});
-  $(".carousel").carousel("next");
-  gCurrentlyFocusedItem = 0;
-  $(".carousel-control.left").on('click',function (){carouselSlideToPrevious()});
-  $(".carousel-control.right").on('click',function (){carouselSlideToNext()});
-  $(".carousel").swipe({
-    swipeLeft:function(event, direction, distance, duration, fingerCount) {
-        carouselSlideToNext();
-    },
-    swipeRight:function(event, direction, distance, duration, fingerCount) {
-      carouselSlideToPrevious();
-    }
+  const myCarouselElement = document.querySelector('#wom-sieve-frame');
+  gCarousel = new bootstrap.Carousel(myCarouselElement, {
+      keyboard: true,
+      touch: true,
+      wrap: false
   });
+  gCurrentlyFocusedItem = 0;
+  adaptControlsDisplay();
+  // add event
+  $(".carousel").addEventListener('slid.bs.carousel',  function (event) { onCarouselSlid(event); });
   showWarning("wom-sieve-demo-warning");
 }
 
-function switchTitleListDisplay() 
+function switchTitleListDisplay()
 {
-  if ($(".wom-title-list-switch.active").length) 
+  if ($(".wom-title-list-switch.active"))
     hideTitleList();
-  else 
+  else
     showTitleList();
 }
 
 
-
-function hideTitleList() 
+function hideTitleList()
 {
-  $("#wom-title-list").removeClass("col-md-2");
-  $(".carousel").removeClass("col-md-10");
-  $("#wom-title-list").addClass("hidden");
-  $(".carousel").addClass("col-md-12");  
-  $(".wom-title-list-switch").removeClass("active");  
+  $("#wom-title-list-container").classList.remove("col-md-2");
+  $(".carousel").classList.remove("col-md-10");
+  $("#wom-title-list-container").hidden = true;
+  $(".carousel").classList.add("col-md-12");
+  $(".wom-title-list-switch").classList.remove("active");
 }
 
-function showTitleList() 
+function showTitleList()
 {
-  $("#wom-title-list").removeClass("hidden");
-  $(".carousel").removeClass("col-md-12");
-  $("#wom-title-list").addClass("col-md-2");
-  $(".carousel").addClass("col-md-10");
-  $(".wom-title-list-switch").addClass("active");  
+  $("#wom-title-list-container").hidden = false;
+  $(".carousel").classList.remove("col-md-12");
+  $("#wom-title-list-container").classList.add("col-md-2");
+  $(".carousel").classList.add("col-md-10");
+  $(".wom-title-list-switch").classList.add("active");
 }
 
 
@@ -145,20 +168,20 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 {
   // keybindings globals
   gCurrentlyFocusedItem = -1;
-  gMouseTrapDisabled = false;   
-  gNumReferences = $(".wom-reference").length;
+  gMouseTrapDisabled = false;
+  gNumReferences = document.querySelectorAll(".wom-reference").length;
   gSyncWithServer = syncWithServer;
   gUserCollectionURL = userCollectionURL;
   // only count the numbe of unread items directly accessible by the
   // user (anything else feels weirder)
   gNumUnread = gNumReferences;
   gInitialNumUnread = gNumUnread;
-  $("#wom-sieve-reload").on('click',function (){reloadSieve();});
+  $("#wom-sieve-reload").addEventListener('click',function (){reloadSieve();});
   initializeCarousel();
-  // check if viewed in a touch device (and if so activate the
-  // carousel by default) with code taken from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
-  var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-  if (isTouch || gInitialNumUnread<=1)
+  // Move the title list away in two cases:
+  // - when the screen space is scarse
+  // - when there are no news at all
+  if (window.innerWidth < gSmallWindowWidthThreshold || gInitialNumUnread<=1)
     hideTitleList();
   else
     showTitleList();
@@ -168,18 +191,28 @@ function activateKeyBindings(syncWithServer,userCollectionURL,numUnread)
 
 // Make sure that an element (in the title list) is visible by scrolling
 // the page if necessary to make it appear at a comfortable place on the page.
-// Note: adapted from http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling 
-function ensureCorrectVisibility(elem,view)
+// Note: adapted from http://stackoverflow.com/questions/487073/check-if-element-is-visible-after-scrolling
+function ensureCorrectVisibility(elem, container)
 {
-  var viewHeight = $(view).height();
-  var viewTop = $(view).offset().top;
-  var visibilityTopThreshold = viewHeight/4;
-  var visibilityBottomThreshold = viewHeight/2;
-  var elemTop = $(elem).offset().top - viewTop;
-  if ( (elemTop <= visibilityTopThreshold) || (elemTop >= visibilityBottomThreshold) )
-  {
-    var scrollNewTop = elemTop-(viewHeight/4)+$(view).scrollTop();
-    $(view).animate({scrollTop: scrollNewTop}, 400); 
+  let containerElement = $(container)
+  let containerComputedStyle = window.getComputedStyle(containerElement);
+  let isHidden = ((containerComputedStyle.display === 'none') || (containerComputedStyle.visibility === 'hidden'))
+  if (! isHidden) {
+    let containerBoundingRect = containerElement.getBoundingClientRect();
+    let containerHeight = containerBoundingRect.height;
+    let containerTop = containerBoundingRect.top;
+    let visibilityTopThreshold = containerHeight/4;
+    let visibilityBottomThreshold = containerHeight/2;
+    let elementBoundingRect = $(elem).getBoundingClientRect();
+    let elementRelativeTop = elementBoundingRect.top - containerTop;
+    if ( (elementRelativeTop <= visibilityTopThreshold) || (elementRelativeTop >= visibilityBottomThreshold) )
+    {
+      let scrollNewTop = elementRelativeTop-visibilityTopThreshold; //+containerTop;
+      containerElement.scrollBy({
+          top: scrollNewTop,
+          behaviour: "smooth"
+      });
+    }
   }
 }
 
@@ -189,14 +222,12 @@ function ensureCorrectVisibility(elem,view)
 // @param read_items_urls a list of urls identifying the references
 // that must be considered as read.
 // @param callback function to be called when the server's answer is received
-function updateReadStatusOnServer(read_items_urls, callback) 
+function updateReadStatusOnServer(read_items_urls)
 {
   if (!gSyncWithServer) return;
   var jsonStr = JSON.stringify({"action": "read","references":read_items_urls})
   var currentURL = window.location.href;
-  womRequest("POST", currentURL, "json", jsonStr)
-    .done(callback)
-    .fail(function () {showWarning("wom-server-sync-problem");});
+  return womRequest("POST", currentURL, "application/json", jsonStr);
 }
 
 
@@ -206,21 +237,21 @@ function updateReadStatusOnServer(read_items_urls, callback)
 // @param sourceURL URL of the reference's source
 // @param sourceTitle name of the reference's source
 // @param callback function to be called when the server's answer is received
-function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback) 
+function saveBookmarkOnServer (url,title,sourceURL,sourceTitle,callback)
 {
   if (gUserCollectionURL=="") return;
   var jsonStr = JSON.stringify({"url": url, "title" : title, "source_url" : sourceURL, "source_title" : sourceTitle });
-  womRequest("POST", gUserCollectionURL, "json", jsonStr)
-    .done(callback)
-    .fail(function () {showWarning("wom-server-save-failed");});
+  womRequest("POST", gUserCollectionURL, "application/json", jsonStr)
+    .then(callback)
+    .catch(function () {showWarning("wom-server-save-failed");});
 }
 
-function updateReadingProgress() 
+function updateReadingProgress()
 {
   progress = Math.round(100*(gInitialNumUnread-gNumUnread)/gInitialNumUnread);
   elt = $("#wom-sieve-reading-progress .progress-bar")
-  elt.attr("aria-valuenow",progress.toString());
-  elt.attr("style","width: "+progress.toString()+"%;");
+  elt.setAttribute("aria-valuenow",progress.toString());
+  elt.style.width = ""+progress.toString()+"%";
 }
 
 
@@ -232,11 +263,11 @@ function updateReadingProgress()
 // @param refIdx the index of this reference (typically as indicated
 // in #wom-ref{refIdx}
 function markAsRead(refElement,refIdx) {
-  if ( gNumReferences>0 && !refElement.hasClass('read') ) { 
-    refElement.addClass("read");
-    $("#wom-ref-nav-"+refIdx.toString()).addClass('read');
+  if ( gNumReferences>0 && !refElement.classList.contains('read') ) {
+    refElement.classList.add("read");
+    $("#wom-ref-nav-"+refIdx.toString()).classList.add('read');
     url_elt = document.getElementById('wom-ref'+refIdx.toString()+"-url");
-    // NOTE: calling .href on the element provded to applied a silent encoding (at least on firefox)
+    // NOTE: calling .href on the element proved to apply a silent encoding (at least on firefox)
     // whereas getAttributes provided an untouched value
     raw_url = url_elt.getAttribute("href")
     gReadURLs.push(raw_url);
@@ -257,10 +288,17 @@ function rollingUpdateReadStatusOnServer(check_lock) {
     // we still upload the full *current* list of read items (if
     // there's more than one it probably means that something went
     // wrong with the latest update)
-    updateReadStatusOnServer(syncedReadURLS,function (data) {         
+    updateReadStatusOnServer(syncedReadURLS)
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       hideWarning("wom-server-sync-problem");
-      if (gReadURLs.length>0) {rollingUpdateReadStatusOnServer(false)} 
-      else {gWaitingForServerAnswer=false;} });
+      if (gReadURLs.length>0) {rollingUpdateReadStatusOnServer(false)}
+      else {gWaitingForServerAnswer=false;} })
+    .catch(function () {
+      showWarning("wom-server-sync-problem");
+      gWaitingForServerAnswer=false;});
   }
 }
 
@@ -271,96 +309,61 @@ function rollingUpdateReadStatusOnServer(check_lock) {
 function markAsSaved(refIdx) {
   var refIdxStr = refIdx.toString();
   var refElement = $('#wom-ref'+refIdxStr);
-  if ( !refElement.hasClass('saved') ) { 
+  if ( !refElement.classList.contains('saved') ) {
     var url = document.getElementById('wom-ref'+refIdxStr+'-url').href;
     var title = document.getElementById('wom-ref'+refIdxStr+'-url').title;
     var sourceURL = document.getElementById('wom-ref'+refIdxStr+'-source-url').href;
     var sourceTitle = document.getElementById('wom-ref'+refIdxStr+'-source-url').title;
-    saveBookmarkOnServer(url,title,sourceURL,sourceTitle, function(data) {refElement.addClass("saved");});
+    saveBookmarkOnServer(url,title,sourceURL,sourceTitle, function(data) {refElement.classList.add("saved");});
   };
 }
 
 
 // Keybinding activation
 
-function carouselSlideToPrevious() 
-{
-  if (gCurrentlyFocusedItem>0) 
-  {
-    $(".carousel").carousel("prev");
-  }
-  return true;
-}
-
 // Show previous item
-Mousetrap.bind('p', function() { 
-  carouselSlideToPrevious();
+Mousetrap.bind('p', function() {
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
-  var unfocusedItemIdx = gCurrentlyFocusedItem;
-  if (unfocusedItemIdx <= 0)
+  if (gCurrentlyFocusedItem > 0)
   {
-    // special case: we're at the begining of the list, and we want to
-    // make sure that the browsing will restart with the first item.
-    gCurrentlyFocusedItem = -1;
-    gMouseTrapDisabled = false;
+    gCarousel.prev();
   }
+  gMouseTrapDisabled = false;
 });
 
-function carouselSlideToNext() 
-{
-  if (gCurrentlyFocusedItem>=gNumReferences-1) 
-  {
-    var idx = (gNumReferences-1);
-    var referenceId = '#wom-ref' + idx.toString();
-    markAsRead($(referenceId),idx);
-    $('#wom-sieve-reload-message').modal('show')
-  }
-  else 
-  {
-    $(".carousel").carousel("next");
-  }
-  return true;
-}
 
 // Show next item
-Mousetrap.bind('n', function() { 
-  carouselSlideToNext();
+Mousetrap.bind('n', function() {
   if(gMouseTrapDisabled) {return false;}
   gMouseTrapDisabled = true;
-  var unfocusedItemIdx = gCurrentlyFocusedItem;
-  if (unfocusedItemIdx >= gNumReferences - 1)
+  if (gCurrentlyFocusedItem < gNumReferences)
   {
-    // special case: we're at the end of the list, and we have to set
-    // gCurrentlyFocusedItem in such a way that looking at the
-    // "previous" item will start by expanding the last one.
-    gCurrentlyFocusedItem = gNumReferences;
-    gMouseTrapDisabled = false;
-    $('#wom-sieve-reload-message').modal('show')
+    gCarousel.next();
   }
+  gMouseTrapDisabled = false;
 });
 
 // open the currently expanded items' linked page in the browser
-Mousetrap.bind('v', function() { 
+Mousetrap.bind('v', function() {
   var itemToShow = 'wom-ref'+gCurrentlyFocusedItem.toString()+"-url";
   window.open(document.getElementById(itemToShow).href);
 });
 
 // Reload the sieve but also makes sure to sync the read state of news
 // items on the server before quitting page.
-function reloadSieve() 
+function reloadSieve()
 {
-  $('#wom-sieve-reload-message').modal('hide');
   var window_location = window.location;
   if (gReadURLs.length>0) {
     showWarning("wom-sieve-news-loading");
-    updateReadStatusOnServer(gReadURLs,function (data) {gReadURLs = []; window_location.reload();});
+    updateReadStatusOnServer(gReadURLs)
+    .then(function (data) {gReadURLs = []; window_location.reload();});
   }
   else {
     window_location.reload();
   }
 }
-
 Mousetrap.bind('r', reloadSieve);
 
 
