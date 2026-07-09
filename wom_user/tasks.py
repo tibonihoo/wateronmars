@@ -68,9 +68,7 @@ from wom_classification.models import set_item_tag_names
 
 from wom_river.models import WebFeed
 
-from wom_tributary.tasks import (
-    collect_news_from_mastodon_feeds
-    )
+from wom_tributary.tasks import collect_news_from_mastodon_feeds
 from wom_tributary.models import GeneratedFeed
 
 import logging

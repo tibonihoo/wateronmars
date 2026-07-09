@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('wom_tributary', '0004_auto_20230128_1649'),
+        ('wom_user', '0004_remove_userprofile_twitter_info'),
     ]
 
     operations = [

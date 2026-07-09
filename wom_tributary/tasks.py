@@ -48,16 +48,6 @@ def HTMLUnescape(s):
   return HTMLParser().unescape(s)
 
 
-def force_single_user_token_if_any(user_info):
-  if not user_info:
-    None
-  if None in (su_tk, su_st):
-    return
-  user_info.oauth_access_token = su_tk
-  user_info.oauth_access_token_secret = su_st
-  user_info.save()
-
-
 class AuthStatus:
 
     def __init__(self, is_auth, client, auth_url):
