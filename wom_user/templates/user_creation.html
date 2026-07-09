@@ -15,29 +15,34 @@
   </style>
 {% endblock %}
 
-{% block body_below_nav %}  
-<h4>{% trans "New User Registration" %}</h4>
-{% if form.errors %}
-<div class="alert alert-danger">
-  <p>{% trans "Errors were detected. Please try again to fill in the form." %}</p>
-  {{ form.non_field_errors|safe }}
+{% block body_below_nav %}
+<div class="container">
+  <h4>{% trans "New User Registration" %}</h4>
+  <form class="row" role="form"
+        method="post" action="{% url 'user_creation' %}">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      <p>{% trans "Errors were detected. Please try again to fill in the form." %}</p>
+      {{ form.non_field_errors|safe }}
+    </div>
+    {% endif %}
+    {% for field in form %}
+    {% if field.errors %}
+    <div class="col-12 row is-invalid">
+    {%  else %}
+    <div class="col-12 row">
+    {% endif %}
+      <span class="col-12 form-label">{{ field.label_tag }}</span>
+      <span class="col-12">{{ field }}</span>
+      <div class="invalid-feedback">{{ field.errors|safe }}</div>
+    </div>
+    {% endfor %}
+    <div class="row col-6">
+      <input type="submit" value="{% trans "Register new user" %}" class="btn btn-secondary" />
+      <input type="hidden" name="next" value="{{ next }}" class="d-none" />
+    </div>
+  </form>
+
 </div>
-{% endif %}
-<form role="form" class="form-horizontal" 
-      method="post" action="{% url 'user_creation' %}">
-  {% csrf_token %}  
-  {% for field in form %}
-  {% if field.errors %}
-  <div class="mb-3 form-group is-invalid">
-  {%  else %}
-  <div class="mb-3 form-group">
-  {% endif %}  
-    <label class="form-label">{{ field.label_tag }}</label>
-    {{ field }} {{ field.errors|safe }}
-  </div>
-  {% endfor %}
-<div class="control-groups">
-    <input type="submit" value="{% trans "Register new user" %}" class="btn btn-primary" />
-</div>
-</form>
 {% endblock %}
