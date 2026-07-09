@@ -47,7 +47,7 @@ body {
 }
 
 
-.wom-reference.carousel-item {
+.carousel-item {
     border: none;
 }
 
@@ -87,7 +87,7 @@ body {
   border-top: 1px solid rgb(229, 229, 229);
   overflow: auto;
   height: 70vh;
-  box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);
+  box-shadow: inset 0px -5px 5px 0px rgba(0,0,0,0.3);
   font-size: 120%;
 }
 
