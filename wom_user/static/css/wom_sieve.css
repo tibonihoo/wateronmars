@@ -86,7 +86,7 @@ body {
   margin-bottom: -3px;
   border-top: 1px solid rgb(229, 229, 229);
   overflow: auto;
-  height: 70vh;
+  height: 85vh;
   box-shadow: inset 0px -5px 5px 0px rgba(0,0,0,0.3);
   font-size: 120%;
 }
@@ -96,6 +96,7 @@ body {
       padding-left: 0.3em;
       padding-right: 0.3em;
       padding-top: 6px;
+      height: 75vh;
   }
 }
 
@@ -151,6 +152,7 @@ body {
   margin-bottom: 0px;
   background-image: linear-gradient(to right, rgba(212, 68, 19,1) 0px, rgba(212, 68, 19,0) 60%);
   opacity: .5;
+  margin-left: 5px;
 }
 
 .carousel-control-prev span {
@@ -173,6 +175,12 @@ body {
 
 
 /* Title List sidebar */
+
+#wom-title-list-container {
+  z-index: 2;
+  background: white;
+  box-shadow: 0px 3px 3px;
+}
 
 #wom-title-list-header-name {
   padding-left: 0.5em;
