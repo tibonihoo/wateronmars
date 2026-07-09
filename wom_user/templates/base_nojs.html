@@ -64,8 +64,15 @@
             <li class="nav-item"><a class="nav-link" href="{% url 'user_river_sieve' visitor_name %}" title="{% trans "Your Sieve" %} [F]" accesskey="F"><i class="bi bi-funnel"></i></a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'user_collection' visitor_name %}" title="{% trans "Your Collection" %} [C]" accesskey="C"><i class="bi bi-bookmark"></i></a></li>
             {% endif %}
-            {% block head_notification %}
-            {% endblock %}
+            <li class="nav-item dropdown" id="notifications" onclick="notificationsOpened()">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell" id="notifications-icon"></i>
+              </a>
+              <ul class="dropdown-menu">
+                {% block head_notification %}
+                {% endblock %}
+              </ul>
+            </li>
           </ul>
         </div>
       </div>

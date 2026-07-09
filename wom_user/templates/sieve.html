@@ -19,14 +19,14 @@ prepareKeyBindings();
 {% endblock %}
 
 {% block head_notification %}{# Error messages #}
-<li class="nav-item"><a class="nav-link" id="wom-sieve-news-loading" data-bs-content="{% trans "Fresh news are being downloaded from server." %}" title="{% trans "News refresh !" %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><img src="{{ STATIC_URL }}/img/loader.gif" class="card"></img></a></li>
+<li><a class="dropdown-item" id="wom-sieve-news-loading" title="{% trans "Fresh news are being downloaded." %}" href="#"><img src="{{ STATIC_URL }}/img/loader.gif" class="card"></img>{% trans "News refresh !" %}</a></li>
 {% if read_only %}
-<li class="nav-item"><a class="nav-link" id="wom-sieve-readonly-warning" data-bs-content="{% trans "Please note some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "READ_ONLY: no change allowed !" %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><i class="bi bi-eye-slash"></i></a></li>
+<li><a class="dropdown-item" id="wom-sieve-readonly-warning" title="{% trans "Some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" href="#"><i class="bi bi-eye-slash"></i>{% trans "READ ONLY: no change allowed !" %}</a></li>
 {% endif %}
-<li class="nav-item"><a class="nav-link" id="wom-server-sync-problem" data-bs-content="{% trans "A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" %}" title="{% trans "Server synchronization problem" %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><i class="bi bi-exclamation-triangle"></i></a></li>
-<li class="nav-item"><a class="nav-link" id="wom-server-save-failed" data-bs-content="{% trans "A problem occured while saving a bookmark, please retry bookmarking !" %}" title="{% trans "Bookmarking failed" %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><i class="bi bi-exclamation-triangle"></i></a></li>
+<li><a class="dropdown-item" id="wom-server-sync-problem" title="{% trans "A problem occured while synchronizing with the server, some read items may appear as unread at your next visit !" %}" href="#"><i class="bi bi-exclamation-triangle"></i>{% trans "Server synchronization problem" %}</a></li>
+<li><a class="dropdown-item" id="wom-server-save-failed" title="{% trans "A problem occured while saving a bookmark, please retry bookmarking !" %}" href="#"><i class="bi bi-exclamation-triangle"></i>{% trans "Bookmarking failed" %}</a></li>
 {% if some_feeds_in_permanent_failure %}
-<li class="nav-item"><a class="nav-link" id="wom-server-disabled-feeds" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}"><i class="bi bi-exclamation-triangle"></i></a></li>
+<li><a class="dropdown-item" id="wom-server-disabled-feeds" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}" href="{% url 'user_river_sources' visitor_name %}"><i class="bi bi-exclamation-triangle"></i>{% trans "Some feeds are disabled" %}</a></li>
 {% endif  %}
 {% endblock %}
 

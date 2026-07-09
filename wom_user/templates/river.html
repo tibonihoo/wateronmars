@@ -23,7 +23,7 @@
 
 {% block head_notification %}{# Error messages #}
 {% if some_feeds_in_permanent_failure %}
-<li><a id="wom-server-disabled-feeds" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}"><i class="bi bi-exclamation-triangle"></i></a></li>
+<li><a class="dropdown-item" id="wom-server-disabled-feeds" href="{% url 'user_river_sources' visitor_name %}" title="{% trans "Some feeds have been automatically disabled, please check your sources !" %}"><i class="bi bi-exclamation-triangle"></i>{% trans "Some feeds are disabled" %}</a></li>
 {% endif  %}
 {% endblock %}
 

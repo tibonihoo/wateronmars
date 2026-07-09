@@ -48,19 +48,60 @@ function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
+function countVisible(selector)
+{
+  let allMatches = document.querySelectorAll(selector);
+  var count = 0;
+  for (var i = 0; i < allMatches.length; i++)
+  {
+    let currentElement = allMatches[i];
+    let computedStyle = window.getComputedStyle(currentElement);
+    let isHidden = ((computedStyle.display === 'none') || (computedStyle.visibility === 'hidden'))
+    if (isHidden)
+      count++;
+  }
+  return count;
+}
+
+function updateNotificationMenuVisibility() {
+  let numActiveNotifications = countVisible("#notifications .dropdown-item");
+  let notificationDropdownElt = document.querySelector("#notifications");
+  if (numActiveNotifications > 0)
+    notificationDropdownElt.style.display = "block";
+  else
+    notificationDropdownElt.style.display = "none";
+}
+
+function notificationsOpened() {
+  let notificationIconElt = document.querySelector("#notifications-icon");
+  notificationIconElt.classList.remove("bi-bell-fill");
+  notificationIconElt.classList.add("bi-bell");
+}
+
 // Show one of the warning that are written but hidden by default on
 // the page, and that are identified via their HTML id.
 // WARNING: if there are several warnings, they may overlap (TODO: in
 // such case use a warning counter + a shift computed accordingly)
 function showWarning(warningId) {
-  const warningElt = document.querySelector("#"+warningId);
+  let warningElt = document.querySelector("#"+warningId);
   if (warningElt)
-      warningElt.style.display = "block";
+  {
+    warningElt.style.display = "block";
+    let notificationIconElt = document.querySelector("#notifications-icon");
+    notificationIconElt.classList.remove("bi-bell");
+    notificationIconElt.classList.add("bi-bell-fill");
+  }
+  updateNotificationMenuVisibility();
 }
 
 // Hide a specific warning.
 function hideWarning(warningId) {
-  $("#"+warningId).style.display = "none";
+  let warningElt = document.querySelector("#"+warningId);
+  if (warningElt)
+  {
+    warningElt.style.display = "none";
+  }
+  updateNotificationMenuVisibility();
 }
 
 

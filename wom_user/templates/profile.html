@@ -16,9 +16,9 @@
 
 {% block head_notification %}{# Error messages #}
 {% if read_only %}
-<li class="nav-item"><a class="nav-link" id="wom-sieve-readonly-warning" data-bs-content="{% trans "Please note some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" title="{% trans "READ_ONLY: no change allowed !" %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><i class="bi bi-eye-slash"></i></a></li>
+<li><a class="dropdown-item" id="wom-sieve-readonly-warning" title="{% trans "Please note some features are disabled, like marking news as read and modifying feed subscriptions or bookmarks." %}" href="#"><i class="bi bi-eye-slash"></i>{% trans "READ_ONLY: no change allowed !" %}</a></li>
 {% else %}
-<li class="nav-item"><a class="nav-link" id="wom-drop-sieve-content-failed" data-bs-content="{% trans "The content of sieve couldn't be dropped, which may be due to a server communication problem." %}" title="{% trans "Failed to drop sieve content." %}" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-container="body" href="#"><i class="bi bi-exclamation-triangle"></i></a></li>
+<li><a class="dropdown-item" id="wom-drop-sieve-content-failed" title="{% trans "The content of sieve could not be dropped, which may be due to a server communication problem." %}" href="#"><i class="bi bi-exclamation-triangle"></i>{% trans "Failed to drop sieve content." %}</a></li>
 {% endif %}
 {% endblock %}
 
