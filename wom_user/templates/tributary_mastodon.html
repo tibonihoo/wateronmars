@@ -32,7 +32,7 @@
   {{mastodon_connection_status.timeline_info.feed.title}}
 </p>
 
-<p><a href="{% url 'user_tributary_mastodon_add' visitor_name %}" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>{% trans "Follow another mastodon timeline." %}</a></p>
+<p><a href="{% url 'user_tributary_mastodon_add' visitor_name %}" class="btn btn-secondary"><i class="bi bi-plus-square"></i>{% trans "Follow another mastodon timeline." %}</a></p>
 
 {% endfor %}
 {% else %}
