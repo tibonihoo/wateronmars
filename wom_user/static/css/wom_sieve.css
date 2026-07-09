@@ -81,10 +81,6 @@ body {
   margin-top: -.2em;
 }
 
-.card-body {
-  height: calc(100vh - 200px);
-}
-
 .wom-reference-content {
   padding-left: 20px;
   padding-right: 20px;
@@ -92,7 +88,21 @@ body {
   margin-bottom: -3px;
   border-top: 1px solid rgb(229, 229, 229);
   overflow: auto;
+  height: 70vh;
 }
+
+@media screen and (max-width: 767px) {
+  .wom-reference-content {
+      font-size: 120%;
+      padding-left: 0.3em;
+      padding-right: 0.3em;
+      padding-top: 6px;
+      overflow: auto;
+      height: 60vh;
+  }
+}
+
+
 
 /* News metadata and status */
 
@@ -101,6 +111,12 @@ body {
   padding-top: 5px;
   position: fixed;
   bottom: 3px;
+}
+
+.carousel-item-start .wom-metadata,
+.carousel-item-end .wom-metadata
+{
+    display: none;
 }
 
 .wom-metadata a {
@@ -153,17 +169,6 @@ body {
   padding-left: 12px;
   display: none;
 }
-
-@media screen and (max-width: 767px) {
-  .wom-reference-content {
-      font-size: 150%;
-      padding-left: 0.3em;
-      padding-right: 0.3em;
-      padding-top: 6px;
-      overflow: auto;
-  }
-}
-
 
 .carousel-control-next:hover,
 .carousel-control-prev:hover {
