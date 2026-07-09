@@ -81,6 +81,10 @@ body {
   margin-top: -.2em;
 }
 
+.wom-reference-content h2 {
+  font-weight: 700;
+}
+
 .wom-reference-content {
   padding-left: 20px;
   padding-right: 20px;
@@ -89,19 +93,16 @@ body {
   border-top: 1px solid rgb(229, 229, 229);
   overflow: auto;
   height: 70vh;
+  font-size: 120%;
 }
 
 @media screen and (max-width: 767px) {
   .wom-reference-content {
-      font-size: 120%;
       padding-left: 0.3em;
       padding-right: 0.3em;
       padding-top: 6px;
-      overflow: auto;
   }
 }
-
-
 
 /* News metadata and status */
 
