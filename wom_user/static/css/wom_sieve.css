@@ -52,12 +52,6 @@ body {
 }
 
 
-.wom-reference.card {
-  -webkit-box-shadow: 5px 5px 5px 5px #ddd;
-  -moz-box-shadow: 5px 5px 5px 5px #ddd;
-  box-shadow: 5px 5px 5px 5px #ddd;
-}
-
 /* Header of a news item */
 
 .wom-title-list-switch {
@@ -93,6 +87,7 @@ body {
   border-top: 1px solid rgb(229, 229, 229);
   overflow: auto;
   height: 70vh;
+  box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);
   font-size: 120%;
 }
 
