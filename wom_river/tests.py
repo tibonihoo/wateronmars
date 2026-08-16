@@ -874,8 +874,9 @@ class FeedStatusTest(TestCase):
     self.feed = WebFeed.objects.create(
         xmlURL="http://mouf/bla.xml",
         last_update_check=self.date,
+        latest_update_failure_start_date=self.date,
         source=self.source)
-    self.test_date = self.date + timedelta(days=1)
+    self.test_date = self.date + FeedStatus.GRACE_PERIOD - timedelta(days=1)
 
   def test_given_status_301_update_xmlURL(self):
     new_url = "https://new.example.com/rss.xml"
@@ -890,6 +891,7 @@ class FeedStatusTest(TestCase):
     self.assertEqual(True, feed_status.is_broken)
     self.assertIn("404", feed_status.diagnostic)
     self.assertEqual(True, self.feed.last_update_failed)
+    self.assertEqual(self.test_date, self.feed.latest_update_failure_start_date)
     self.assertEqual(False, self.feed.permanent_failure_detected)
 
   def test_given_410_returns_broken_and_permanent(self):
@@ -897,24 +899,27 @@ class FeedStatusTest(TestCase):
     self.assertEqual(True, feed_status.is_broken)
     self.assertIn("410", feed_status.diagnostic)
     self.assertEqual(True, self.feed.last_update_failed)
+    self.assertEqual(self.test_date, self.feed.latest_update_failure_start_date)
     self.assertEqual(True, self.feed.permanent_failure_detected)
     self.assertEqual(self.test_date, self.feed.permanent_failure_last_detection_date)
     self.assertIn("Gone", self.feed.permanent_failure_diagnostic)
     
-  def test_given_404_with_previous_failure_over_the_grace_perdio_returns_broken_and_permanent(self):
+  def test_given_404_with_previous_failure_over_the_grace_period_returns_broken_and_permanent(self):
     self.feed.last_update_failed = True
-    self.feed.last_update_check = self.test_date
-    feed_status = FeedStatus.check_and_record(self.feed, 404, None, self.test_date + FeedStatus.GRACE_PERIOD)
+    self.test_date = self.date + FeedStatus.GRACE_PERIOD + timedelta(days=1)
+    feed_status = FeedStatus.check_and_record(self.feed, 404, None, self.test_date)
     self.assertEqual(True, feed_status.is_broken)
     self.assertIn("404", feed_status.diagnostic)
     self.assertEqual(True, self.feed.last_update_failed)
+    self.assertEqual(self.date, self.feed.latest_update_failure_start_date)
     self.assertEqual(True, self.feed.permanent_failure_detected)
     self.assertIn("404", self.feed.permanent_failure_diagnostic)
 
   def test_given_200_after_previous_failure_returns_not_broken_and_resets_last_update_failed(self):
     self.feed.last_update_failed = True
-    self.feed.last_update_check = self.test_date
-    feed_status = FeedStatus.check_and_record(self.feed, 200, None, self.test_date + FeedStatus.GRACE_PERIOD)
+    self.test_date = self.date + FeedStatus.GRACE_PERIOD + timedelta(days=1)
+    feed_status = FeedStatus.check_and_record(self.feed, 200, None, self.test_date)
     self.assertEqual(False, feed_status.is_broken)
     self.assertEqual(False, self.feed.last_update_failed)
+    self.assertEqual(self.date, self.feed.latest_update_failure_start_date)
     self.assertEqual(False, self.feed.permanent_failure_detected)

@@ -39,15 +39,19 @@ class WebFeed(models.Model):
   # Time before considering an item obsolete
   item_relevance_duration = models.DurationField(
       default=DEFAULT_RELEVANCE_DURATION)
-  # Wether the field's last update failed
+  # Wether the feed's last update failed
   last_update_failed = models.BooleanField(default=False)
-  # Whether the field is considered as permanently broken
+  # When did the feed started to fail "just" after at least one successful update.
+  latest_update_failure_start_date = models.DateTimeField(
+      default=datetime.fromtimestamp(0, timezone.utc)
+      )
+  # Whether the feed is considered as permanently broken
   permanent_failure_detected = models.BooleanField(default=False)
-  # When was the field last detected as permanently broken
+  # When was the feed last detected as permanently broken
   permanent_failure_last_detection_date = models.DateTimeField(
       default=datetime.fromtimestamp(0, timezone.utc)
       )
-  # Indication of why the field was detected as permanently broken
+  # Indication of why the feed was detected as permanently broken
   permanent_failure_diagnostic = models.CharField(max_length=URL_MAX_LENGTH, default="")
   
   def set_permanent_failure(self, diagnostic, diagnostic_date):
