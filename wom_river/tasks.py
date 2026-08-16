@@ -2,18 +2,18 @@
 #
 # Copyright (C) 2013-2019 Thibauld Nion
 #
-# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars) 
+# This file is part of WaterOnMars (https://github.com/tibonihoo/wateronmars)
 #
 # WaterOnMars is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # WaterOnMars is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with WaterOnMars.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -22,6 +22,7 @@ import feedparser
 from bs4 import BeautifulSoup
 
 from datetime import datetime, timezone
+from urllib.parse import urlsplit
 
 from django.utils.html import strip_tags
 
@@ -48,6 +49,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 WOM_UNSANITIZED_LINK_ENTRY_KEY = "wom_unsanitized_link"
+WOM_NOLINK_ENTRY_SCHEME = "wom-river-nolink"
 
 def UnescapedHTMLFromXMLContent(s):
   """Ensure that the returned string is "unescaped" HTML: either the
@@ -112,7 +114,7 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   description the link will be used. In any case the description of a
   reference is set even if this description is also used for the
   title.
-  
+
   Return a tuple with the unsaved reference and a list of tag names.
   """
   url = entry.link
@@ -138,7 +140,7 @@ def create_reference_from_feedparser_entry(entry,date,previous_ref):
   return (ref,tags)
 
 
-def get_and_patch_link(entry):
+def get_and_patch_link(feed, entry):
     """Return the link.
     If no direct link found, try to find a best effort replacement.
     """
@@ -152,16 +154,31 @@ def get_and_patch_link(entry):
         [ link for link in entry.get("links", [])
           if link.get("rel", None) != "enclosure" and link.get("href", None)]
         )
-    if not other_links:
+    if other_links:
+      patched_link = other_links[0].href
+      entry.link = patched_link
+      return patched_link
+    # entries should have at least one of (title, description, link)
+    # if they don't then, no point in crafting any URL.
+    content_piece = (entry.get("title", "").strip() or entry.get("description", "").strip())[:32]
+    if not content_piece:
+      logger.debug(f"Skipping a feed entry that has none of ('title', 'description', 'link'), from {feed.xmlURL}")
       return None
-    patched_link = other_links[0].href
-    entry.link = patched_link
-    return patched_link
-    
+    try:
+      feed_url_split = urlsplit(feed.xmlURL)
+      feed_url_split = feed_url_split._replace(scheme=WOM_NOLINK_ENTRY_SCHEME)
+      fake_url = f"{feed_url_split.geturl()}#{content_piece}"
+      entry.link = fake_url
+      return fake_url
+    except Exception as e:
+      logger.error(f"Failed to craft a link for entry {entry} from feed {feed.xmlURL} because of exception: {e}")
+    return None
+
+
 def add_new_references_from_parsed_feed(feed, entries, default_date):
   """Create and save references from the entries found in a feedparser
   generated list.
-  
+
   Returns a dictionary mapping the saved references to the tags that are
   associated to them in the feed.
   """
@@ -171,11 +188,10 @@ def add_new_references_from_parsed_feed(feed, entries, default_date):
   all_references = []
   ref_by_url = {}
   entries_with_link = []
-  # reject entries that have no link tag
   for e in entries:
-    entry_link = get_and_patch_link(e)
+    entry_link = get_and_patch_link(feed, e)
     if not entry_link:
-      logger.debug("Skipping a feed entry without 'link' : %s." % e)
+      logger.debug(f"Skipping a feed entry where no link could be crafted: {e}")
       continue
     entry_link_sanitized, did_truncate = sanitize_url(entry_link)
     if did_truncate:
@@ -312,7 +328,7 @@ def collect_news_from_feeds(feeds):
   """
   for feed in feeds:
     collect_new_references_for_feed(feed)
-    
+
 def collect_news_from_all_feeds():
   """Fetch and parse all feeds to collect new items and fill the db of
   References with them.

@@ -297,7 +297,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
     <generator>Testor</generator>
     <docs>http://cyber.law.harvard.edu/rss/rss.html</docs>
     <item>
-      <link>http://www.example.com</link>
+      <link>http://www.example.com/1</link>
       <description>&lt;p>An example bookmark.&lt;/p>
       </description>
       <!-- No pubDate -->
@@ -311,7 +311,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
       <description>&lt;p>Too long&lt;/p>
       </description>
       <category>test</category>
-      <pubDate>Sun, 17 Nov 2013 16:56:06 GMT</pubDate>
+      <!-- No pubDate -->
       <!-- No guid -->
     </item>
     <item>
@@ -325,7 +325,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
     </item>
     <item>
       <title>The mouf</title>
-      <!-- No link -->
+      <!-- No link but a permaLink guid -->
       <category>test</category>
       <description>&lt;p>This is just a test&lt;/p>
       </description>
@@ -333,31 +333,35 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
       <guid>http://mouf/b#guid</guid>
     </item>
     <item>
-      <title>The helpless</title>
+      <!-- No title -->
       <!-- No link -->
       <category>test</category>
-      <description>&lt;p>This is just a test&lt;/p>
-      </description>
+      <!-- No description -->
+      <!-- No pubDate -->
+    </item>
+    <item>
+      <!-- No title -->
+      <!-- No link -->
+      <category>test</category>
+      <!-- No description -->
       <!-- No pubDate -->
       <guid isPermaLink="false">12</guid>
     </item>
     <item>
-      <title>The art</title>
+      <!-- No title -->
       <!-- No link but an enclosure -->
       <enclosure url="https://imgs.mouf/2023/11/17/amused.png" type="image/png" size="42"/>
       <category>test</category>
-      <description>&lt;p>This is just a test&lt;/p>
-      </description>
+      <!-- No description -->
       <!-- No pubDate -->
       <guid isPermaLink="false">123</guid>
     </item>
     <item>
-      <title>The art</title>
+      <!-- No title -->
       <!-- No link but an enclosure without any url -->
       <enclosure type="image/png" size="42"/>
       <category>test</category>
-      <description>&lt;p>This is just a test&lt;/p>
-      </description>
+      <!-- No description -->
       <!-- No pubDate -->
       <guid isPermaLink="false">123</guid>
     </item>
@@ -367,7 +371,6 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
 
     f1 = feedparser.parse(self.rss_xml)
     self.default_date = date
-    print(f1.entries)
     self.ref_and_tags = add_new_references_from_parsed_feed(
         self.web_feed,
         f1.entries,
@@ -375,34 +378,36 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
 
   def test_references_are_added_with_correct_urls(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(5, len(references_in_db))
+    self.assertEqual(6, len(references_in_db)) # includes the source reference
     ref_urls = [r.url for r in references_in_db]
-    self.assertIn("http://www.example.com", ref_urls)
+    self.assertIn("http://www.example.com/1", ref_urls)
     self.assertIn("http://mouf/a#guid", ref_urls)
     self.assertIn("http://mouf/b#guid", ref_urls)
     self.assertIn("https://imgs.mouf/2023/11/17/amused.png", ref_urls)
+    self.assertIn("wom-river-nolink://mouf/rss.xml#Long", ref_urls)
 
   def test_references_are_added_with_correct_title(self):
-    ref_title = Reference.objects.get(url="http://www.example.com").title
+    ref_title = Reference.objects.get(url="http://www.example.com/1").title
     self.assertEqual("An example bookmark.",ref_title)
     ref_title = Reference.objects.get(url="http://mouf/a#guid").title
     self.assertEqual("The mouf date",ref_title)
     ref_title = Reference.objects.get(url="http://mouf/b#guid").title
     self.assertEqual("The mouf",ref_title)
     ref_title = Reference.objects.get(url="https://imgs.mouf/2023/11/17/amused.png").title
-    self.assertEqual("The art",ref_title)
+    self.assertEqual("https://imgs.mouf/2023/11/17/amused.png",ref_title)
+    ref_title = Reference.objects.get(url="wom-river-nolink://mouf/rss.xml#Long").title
+    self.assertEqual("Long", ref_title)
 
   def test_references_are_added_with_correct_sources(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(5,len(references_in_db))
+    self.assertEqual(6,len(references_in_db)) # includes the source reference
     for ref in references_in_db:
       if ref!=self.source:
         self.assertIn(self.source,ref.sources.all(),ref)
 
   def test_references_are_added_with_default_date(self):
     references_in_db = list(Reference.objects.all())
-    print(references_in_db)
-    self.assertEqual(5,len(references_in_db))
+    self.assertEqual(6,len(references_in_db)) # includes the source reference
     for r in references_in_db:
       if r.title == "The mouf date":
         continue
@@ -412,7 +417,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
 
   def test_dates_not_updated_even_for_dateless_items(self):
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(5,len(references_in_db))
+    self.assertEqual(6,len(references_in_db)) # includes the source reference
     first_dates = set(r.pub_date for r in references_in_db)
     f2 = feedparser.parse(self.rss_xml)
     new_default_date = self.default_date + timedelta(days=1)
@@ -421,7 +426,7 @@ class AddReferencesFromFeedParserTaskOnBrokenFeedTest(TestCase):
         f2.entries,
         new_default_date)
     references_in_db = list(Reference.objects.all())
-    self.assertEqual(5,len(references_in_db))
+    self.assertEqual(6,len(references_in_db))
     new_dates = set(r.pub_date for r in references_in_db)
     self.assertEqual(first_dates, new_dates)
 
@@ -903,7 +908,7 @@ class FeedStatusTest(TestCase):
     self.assertEqual(True, self.feed.permanent_failure_detected)
     self.assertEqual(self.test_date, self.feed.permanent_failure_last_detection_date)
     self.assertIn("Gone", self.feed.permanent_failure_diagnostic)
-    
+
   def test_given_404_with_previous_failure_over_the_grace_period_returns_broken_and_permanent(self):
     self.feed.last_update_failed = True
     self.test_date = self.date + FeedStatus.GRACE_PERIOD + timedelta(days=1)
