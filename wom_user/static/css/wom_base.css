@@ -17,6 +17,43 @@ Site: https://github.com/tibonihoo/wateronmars
   text-decoration: none;
 }
 
+/* Expand the navbar for smaller screens than the default theme allows */
+@media (min-width: 400px) {
+  .navbar-expand-sm .navbar-nav {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 400px) {
+  .navbar-expand-sm .navbar-nav .nav-link {
+    padding-right: var(--bs-navbar-nav-link-padding-x);
+    padding-left: var(--bs-navbar-nav-link-padding-x);
+  }
+}
+
+@media (min-width: 400px) {
+  .navbar-expand-sm .navbar-nav {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 400px) {
+  .navbar-expand-sm .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
+    padding-right: 0px;
+    padding-left: 0px;
+    width: auto;
+  }
+}
+
+@media (min-width: 400px) {
+  .navbar-expand-sm .navbar-toggler {
+    display: none;
+  }
+}
+
+
 #below-nav {
   padding-top: 8px;
 }
