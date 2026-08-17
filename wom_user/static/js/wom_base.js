@@ -57,7 +57,7 @@ function countVisible(selector)
     let currentElement = allMatches[i];
     let computedStyle = window.getComputedStyle(currentElement);
     let isHidden = ((computedStyle.display === 'none') || (computedStyle.visibility === 'hidden'))
-    if (isHidden)
+    if (!isHidden)
       count++;
   }
   return count;

@@ -19,8 +19,9 @@
    * Bootstrap: initialize popovers for all pages, as they are typically used for notifications.
    *
    */
-  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+  updateNotificationMenuVisibility();
 </script>
 {% block extrascript %}
 {% endblock %}
